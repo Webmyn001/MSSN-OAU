@@ -1,5 +1,6 @@
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
+const preline = require('preline/plugin');
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -32,5 +33,5 @@ export default {
         }
     },
 
-    plugins: [typography, forms, require('preline/plugin')]
+    plugins: [typography, forms, preline]
 };
