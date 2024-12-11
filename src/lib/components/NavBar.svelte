@@ -23,7 +23,7 @@
                     <a class="sm:p-2 font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400" href="#">Blog</a>
 
                     <a class="sm:p-2 font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400" href="#">Donate</a>
-                    <a class="sm:p-2 font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400" href="#">Prayer Times</a>
+                    <a class="sm:p-2 font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400" href="#prayer-times">Prayer Times</a>
 
                     <div class="hs-dropdown [--strategy:static] sm:[--strategy:absolute] [--adaptive:none]   [--is-collapse:true] sm:[--is-collapse:false] ">
                         <button id="hs-mega-menu" type="button" class="hs-dropdown-toggle sm:p-2 flex items-center w-full text-gray-600 font-medium hover:text-gray-400 focus:outline-none focus:text-gray-400 " aria-haspopup="menu" aria-expanded="false" aria-label="Mega Menu">
