@@ -15,7 +15,7 @@
 
             <div id="hs-navbar-basic-usage" class="hidden hs-collapse overflow-hidden transition-all duration-300 basis-full grow sm:block" aria-labelledby="hs-navbar-basic-usage-collapse">
                 <div class="flex flex-col gap-y-3 sm:gap-y-0 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5">
-                    <a class="sm:p-2 font-medium text-primary-600 focus:outline-none" href="#" aria-current="page">Home</a>
+                    <a class="sm:p-2 font-medium text-primary-800 focus:outline-none" href="#" aria-current="page">Home</a>
                     <a class="sm:p-2 font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400" href="#">About Us</a>
 
 
