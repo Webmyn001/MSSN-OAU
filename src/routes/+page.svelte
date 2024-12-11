@@ -45,8 +45,8 @@
 
     $: selectedImage = events.find(event => event.title === selectedEvent)?.image
 </script>
-<section class="py-32">
-    <div class="container flex flex-col items-center text-center">
+<section class="py-32 mx-auto">
+    <div class="container flex flex-col items-center text-center w-full">
         <h1 class="text-primary-900 my-6 text-pretty text-4xl font-bold lg:text-6xl" id="hero-text">We are Great <span
                 class="relative inline ml-2 mr-12 sm:ml-2 sm:mr-2 lg:ml-4"><span
                 class="yoruba top-[8px] sm:top-[10px] lg:top-[12px] absolute text-[#28145B] scale-105">Ife's</span><span class="scale-105 yoruba absolute -z-10 text-[#EBB957]">Ìfẹ́'s</span></span>
