@@ -253,7 +253,7 @@
 
 <!-- Prayer Times -->
 <div id="prayer-times" class="mx-[20dvw]">
-    <h1 class="mx-auto font-primary text-primary-800 text-2xl sm:text-3xl my-8">Prayer Times</h1>
+    <h1 class="mx-auto font-primary bold text-2xl sm:text-3xl my-8">Prayer Times</h1>
     <!-- Item -->
     <div class="group relative flex gap-x-5">
         <!-- Icon -->
@@ -285,7 +285,8 @@
                 </span>
                 </li>
                 <li class="ps-1 text-sm text-gray-600">
-                    Iqamah<span
+                    Iqamah
+                    <span
                         class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
@@ -294,7 +295,7 @@
                 </span>
                 </li>
             </ul>
-            
+
         </div>
         <!-- End Right Content -->
     </div>
@@ -320,7 +321,7 @@
             </h3>
 
             <ul class="list-disc ms-6 mt-3 space-y-1.5">
-                <li class="ps-1 text-sm text-gray-600">
+                <li class="ps-1 font-secondary text-sm text-gray-600">
                     Adhan
                     <span
                             class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
@@ -331,7 +332,8 @@
                 </span>
                 </li>
                 <li class="ps-1 text-sm text-gray-600">
-                    Iqamah<span
+                    Iqamah
+                    <span
                         class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
@@ -377,7 +379,8 @@
                 </span>
                 </li>
                 <li class="ps-1 text-sm text-gray-600">
-                    Iqamah<span
+                    Iqamah
+                    <span
                         class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
@@ -424,7 +427,8 @@
                 </span>
                 </li>
                 <li class="ps-1 text-sm text-gray-600">
-                    Iqamah<span
+                    Iqamah
+                    <span
                         class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
@@ -454,7 +458,7 @@
 
         <!-- Right Content -->
         <div class="grow pb-8 group-last:pb-0">
-            <h3 class="mb-1 text-xs text-primary-700 font-bold font-secondary">
+            <h3 class="mb-1 text-xstext-primary-700 font-bold font-secondary">
                 Isha
             </h3>
 
@@ -470,7 +474,8 @@
                 </span>
                 </li>
                 <li class="ps-1 text-sm text-gray-600">
-                    Iqamah<span
+                    Iqamah
+                    <span
                         class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
@@ -492,20 +497,20 @@
 <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
     <!-- Title -->
     <div class="max-w-2xl mx-auto text-left mb-10 lg:mb-14">
-        <h2 class="text-2xl font-bold md:text-4xl md:leading-tight">From the Press</h2>
-        <p class="mt-1 text-gray-600">Value Packed Insights and Publications from An-Nur Press</p>
+        <h2 class="text-2xl font-bold md:text-4xl md:leading-tight font-primary">From the Press</h2>
+        <p class="mt-1 text-gray-600 font-secondary text-primary-700">Value Packed Insights and Publications from An-Nur Press</p>
     </div>
     <!-- End Title -->
 
     <!-- Grid -->
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Card -->
-        <a class="group flex flex-col h-full border border-gray-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/ink-and-ashes/">
+        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/ink-and-ashes/">
                 <div class="aspect-w-16 aspect-h-11">
                     <img class="w-full object-cover rounded-xl h-[210px]" src="https://annuurpress.org.ng/wp-content/uploads/2024/12/41507-e1733481937229.jpg" alt="Inks and Ashes">
             </div>
             <div class="my-6">
-                <h3 class="text-xl font-semibold text-gray-800">
+                <h3 class="text-xl font-semibold text-primary-900">
                     Ink and Ashes
                 </h3>
                 <p class="mt-5 text-gray-600">
@@ -522,12 +527,12 @@
         <!-- End Card -->
 
         <!-- Card -->
-        <a class="group flex flex-col h-full border border-gray-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/hardship-is-temporary/">
+        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/hardship-is-temporary/">
             <div class="aspect-w-16 aspect-h-11">
                 <img class="w-full object-cover rounded-xl h-[210px]" src="https://annuurpress.org.ng/wp-content/uploads/2024/12/alone-4672965_1920-e1733482581401-1536x866.jpg" alt="Hardship is Temporary">
             </div>
             <div class="my-6">
-                <h3 class="text-xl font-semibold text-gray-800">
+                <h3 class="text-xl font-semibold text-primary-900">
                     Hardship is Temporary
                 </h3>
                 <p class="mt-5 text-gray-600">
@@ -544,12 +549,12 @@
         <!-- End Card -->
 
         <!-- Card -->
-        <a class="group flex flex-col h-full border border-gray-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/cheers-to-better-days/">
+        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/cheers-to-better-days/">
             <div class="aspect-w-16 aspect-h-11">
                 <img class="w-full object-cover rounded-xl h-[210px]" src="https://annuurpress.org.ng/wp-content/uploads/2024/11/tree-164915_1280.jpg" alt="Cheers to Better Days">
             </div>
             <div class="my-6">
-                <h3 class="text-xl font-semibold text-gray-800">
+                <h3 class="text-xl font-semibold text-primary-900">
                     Cheers to Better Days
                 </h3>
                 <p class="mt-5 text-gray-600">
@@ -569,7 +574,7 @@
 
     <!-- Card -->
     <div class="mt-12 text-center">
-        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-gray-200 bg-white text-primary-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none" href="https://annuurpress.org.ng/">
+        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-primary-200 bg-white text-primary-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none" href="https://annuurpress.org.ng/">
             Read more
             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </a>
