@@ -253,7 +253,7 @@
 
 <!-- Prayer Times -->
 <div id="prayer-times" class="mx-[20dvw]">
-    <h1 class="mx-auto font-primary bold text-2xl sm:text-3xl my-8">Prayer Times</h1>
+    <h1 class="mx-auto font-primary bold text-2xl sm:text-3xl md:text-4xl my-8">Prayer Times</h1>
     <!-- Item -->
     <div class="group relative flex gap-x-5">
         <!-- Icon -->
@@ -498,7 +498,7 @@
     <!-- Title -->
     <div class="max-w-2xl mx-auto text-left mb-10 lg:mb-14">
         <h2 class="text-2xl font-bold md:text-4xl md:leading-tight font-primary">From the Press</h2>
-        <p class="mt-1 text-gray-600 font-secondary text-primary-700">Value Packed Insights and Publications from An-Nur Press</p>
+        <p class="mt-1 font-secondary text-primary-900">Value Packed Insights and Publications from An-Nur Press</p>
     </div>
     <!-- End Title -->
 
