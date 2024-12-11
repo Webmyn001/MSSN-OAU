@@ -1,40 +1,42 @@
 <script>
     import Sparkles from "$lib/components/Sparkles/Sparkles.svelte";
+    import { slide } from 'svelte/transition'
+    
 
     const events = [
         {
             title: "Tutorials",
-            text: "Tutorials",
+            text: "Academic tutorials organised by the Academic Committee.",
             image: "/images/chalkboard.jpg"
         },
         {
             title: "Madrasah",
-            text: "Tutorials",
+            text: "Classes on Islamic Education organised by the Islamic Affairs Board.",
             image: "/images/madrasah.jpg"
         },
         {
             title: "Al-Usrah",
-            text: "Tutorials",
+            text: "A weekly meetup centering on Islamic perspective of certain issues.",
             image: "/images/al-usrah.jpg"
         }, {
             title: "Freshers' Orientation",
-            text: "Tutorials",
+            text: "An programme to welcome and offer guidance to freshmen.",
             image: "/images/freshers.jpg"
         }, {
             title: "Sisters' Circle",
-            text: "Tutorials",
+            text: "A weekly sisters-only meetup that aims to strengthen the bonds between sisters, and discuss issues pertaining to them.",
             image: "/images/sisters-circle.jpg"
         }, {
             title: "Bro Code",
-            text: "Tutorials",
+            text: "A one-of-a-kind brother-only meetup session for letting off some steam and engaging in fun activities.",
             image: "/images/brocode.jpg"
         }, {
             title: "Eid Fest",
-            text: "Tutorials",
+            text: "Once in a year, a special day to celebrate another special day, only without the stress.",
             image: "/images/eid-fest.jpg"
         }, {
             title: "Taraweeh",
-            text: "Tutorials",
+            text: "Throughout the holy month of Ramadhan in all the hall mosques and at the Central Mosque of Unity.",
             image: "/images/taraweeh.jpg"
         },
     ]
@@ -181,16 +183,12 @@
                                 class="{selectedEvent === event.title ? 'bg-white shadow-md hover:border-transparent' : ''} text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
                                 id={event.title} aria-selected={selectedEvent === event.title}>
             <span class="flex gap-x-6">
-              <svg class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === event.title ? 'text-primary-700' : ''} text-gray-800"
-                   xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path
-                      d="M5 5.5A3.5 3.5 0 0 1 8.5 2H12v7H8.5A3.5 3.5 0 0 1 5 5.5z"/><path
-                      d="M12 2h3.5a3.5 3.5 0 1 1 0 7H12V2z"/><path d="M12 12.5a3.5 3.5 0 1 1 7 0 3.5 3.5 0 1 1-7 0z"/><path
-                      d="M5 19.5A3.5 3.5 0 0 1 8.5 16H12v3.5a3.5 3.5 0 1 1-7 0z"/><path
-                      d="M5 12.5A3.5 3.5 0 0 1 8.5 9H12v7H8.5A3.5 3.5 0 0 1 5 12.5z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === event.title ? 'text-primary-700' : ''} text-gray-800 cursor-pointer"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/></svg>
               <span class="grow">
                 <span class="block text-lg font-semibold {selectedEvent === event.title ? 'text-primary-700' : ''} text-gray-800">{event.title}</span>
-                <span class="block mt-1 text-gray-800">{event.text}</span>
+                  {#if selectedEvent === event.title}
+                <span in:slide out:slide class="block mt-1 text-gray-800">{event.text}</span>
+                      {/if}
               </span>
             </span>
                         </button>
@@ -217,7 +215,7 @@
 
                     <!-- SVG Element -->
                     <div class="hidden absolute top-0 end-0 translate-x-20 md:block lg:translate-x-20">
-                        <svg class="w-16 h-auto text-orange-500" width="121" height="135" viewBox="0 0 121 135"
+                        <svg class="w-16 h-auto text-primary-800" width="121" height="135" viewBox="0 0 121 135"
                              fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5 16.4754C11.7688 27.4499 21.2452 57.3224 5 89.0164" stroke="currentColor"
                                   stroke-width="10" stroke-linecap="round"/>

@@ -38,6 +38,7 @@
 		"@tailwindcss/forms": "^0.5.9",
 		"@tailwindcss/typography": "^0.5.15",
 		"clsx": "^2.1.1",
+		"lucide-svelte": "^0.468.0",
 		"preline": "^2.6.0",
 		"svelte-motion": "^0.12.2",
 		"tailwind-merge": "^2.5.5"
