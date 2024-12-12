@@ -3,8 +3,8 @@
     import {Clock, Copy} from 'lucide-svelte'
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
+    import {MetaTags} from 'svelte-meta-tags';
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-
 
 
     const events = [
@@ -98,6 +98,28 @@
 
 
 </script>
+<!-- Meta Tags -->
+<MetaTags
+        title="We are OAU Great Ìfẹ́'s Muslim Community"
+        titleTemplate="%s | MSSNOAU"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        canonical="https://mssnoau-frontend.vercel.app/"
+        openGraph={{
+    url: 'https://mssnoau-frontend.vercel.app/',
+    title: 'MSSNOAU',
+    description: 'Open Graph Description',
+    images: [
+      {
+        url: 'https://i.ibb.co/gjDc0Nw/mssnoau-screenshot-compressed.png',
+        width: 1200,
+        height: 640,
+        alt: 'Website screenshot'
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
+/>
+<!-- End Meta Tags -->
 <!-- Hero -->
 <section class="py-32 mx-auto">
     <div class="container flex flex-col items-center text-center w-full">
@@ -664,7 +686,8 @@
         <div class="flex flex-col items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 sm:flex-row md:p-8">
             <div class="gap-6">
                 <h2 class="text-xl font-bold text-neutral-800 font-primary md:text-2xl">Invest in your Ākhirah</h2>
-                <p class="text-primary-900">We are a non-profit student organisation that only exists due to individual and
+                <p class="text-primary-900">We are a non-profit student organisation that only exists due to individual
+                    and
                     collective efforts, both in cash and kind.</p>
             </div>
 
@@ -679,7 +702,8 @@
                 </AlertDialog.Trigger>
                 <AlertDialog.Content>
                     <AlertDialog.Header>
-                        <AlertDialog.Title class="font-primary text-primary-800">Are you absolutely sure?</AlertDialog.Title>
+                        <AlertDialog.Title class="font-primary text-primary-800">Are you absolutely sure?
+                        </AlertDialog.Title>
                         <AlertDialog.Description>
                             This action cannot be undone. This will permanently delete your account
                             and remove your data from our servers.
@@ -731,7 +755,8 @@
                     <!-- End List -->
                     <AlertDialog.Footer>
                         <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-                        <AlertDialog.Action class="bg-primary-800 text-white bg-primary-800/90" onclick={copyAccDetails}>Copy
+                        <AlertDialog.Action class="bg-primary-800 text-white bg-primary-800/90"
+                                            onclick={copyAccDetails}>Copy
                         </AlertDialog.Action>
                     </AlertDialog.Footer>
                 </AlertDialog.Content>
@@ -759,19 +784,25 @@
 
             <!-- content - start -->
             <div class="flex w-full flex-col p-4 sm:w-1/2 sm:p-8 lg:w-3/5">
-                <h2 class="mb-4 text-xl font-bold text-neutral-800 md:text-2xl lg:text-4xl font-primary">Complaints? Suggestions</h2>
+                <h2 class="mb-4 text-xl font-bold text-neutral-800 md:text-2xl lg:text-4xl font-primary">Complaints?
+                    Suggestions</h2>
 
-                <p class="mb-8 max-w-md text-primary-900">We're committed to improving through thoughtful planning and constructive feedback, and we'd love to hear anything you think could make us better. Your perspective matters to us!</p>
+                <p class="mb-8 max-w-md text-primary-900">We're committed to improving through thoughtful planning and
+                    constructive feedback, and we'd love to hear anything you think could make us better. Your
+                    perspective matters to us!</p>
 
                 <div class="mt-auto">
-                    <a href="/contact" class="inline-block rounded-lg bg-primary-800 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800/90 focus-visible:ring active:bg-primary-800/90 md:text-base">Leave us a message</a>
+                    <a href="/contact"
+                       class="inline-block rounded-lg bg-primary-800 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800/90 focus-visible:ring active:bg-primary-800/90 md:text-base">Leave
+                        us a message</a>
                 </div>
             </div>
             <!-- content - end -->
 
             <!-- image - start -->
             <div class="order-first h-48 w-full bg-gray-300 sm:order-none sm:h-auto sm:w-1/2 lg:w-2/5">
-                <img src="/images/suggestions.png" loading="lazy" alt="People conversing" class="h-full w-full object-cover object-center" />
+                <img src="/images/suggestions.png" loading="lazy" alt="People conversing"
+                     class="h-full w-full object-cover object-center"/>
             </div>
             <!-- image - end -->
         </div>
