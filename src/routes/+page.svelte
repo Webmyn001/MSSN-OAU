@@ -3,7 +3,6 @@
     import {Clock, Copy} from 'lucide-svelte'
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
-    import { isDonationModalOpen } from '$lib/stores/donation.js'
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
 
 
@@ -670,7 +669,7 @@
             </div>
 
 
-            <AlertDialog.Root bind:open={$isDonationModalOpen}>
+            <AlertDialog.Root>
                 <AlertDialog.Trigger>
                     <button type="button"
                             class="inline-block font-secondary rounded-lg bg-primary-700 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800 focus-visible:ring active:bg-primary-800 md:text-base">
