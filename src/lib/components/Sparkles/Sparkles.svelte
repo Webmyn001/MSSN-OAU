@@ -5,7 +5,7 @@
 
     export let minSize = 0.6;
     export let maxSize = 1.5;
-    export let speed = 3;
+    export let speed = 5;
     export let particleColor = '#ffffff';
     export let particleDensity = 200;
     export let className = undefined;

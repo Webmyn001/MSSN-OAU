@@ -1,7 +1,11 @@
 <script>
     import Sparkles from "$lib/components/Sparkles/Sparkles.svelte";
-    import {Clock} from 'lucide-svelte'
+    import {Clock, Copy} from 'lucide-svelte'
     import {slide} from 'svelte/transition'
+    import {toast} from 'svelte-sonner'
+    import copy from 'copy-text-to-clipboard';
+    import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+
 
 
     const events = [
@@ -42,9 +46,57 @@
         },
     ]
 
+    const copyAccNumber = () => {
+        const copy = copyTextToClipboard("0217023039")
+        console.log(copy)
+        if (copy) {
+            toast.success("Account Number Copied!")
+        } else {
+            toast.error("Failed to copy Account Number!")
+        }
+    }
+
+    const copyAccDetails = () => {
+        const copy = copyTextToClipboard(`Bank Name: GTBank\nAccount Name: Muslim Students’ Society Of Nigeria, OAU\nAccount Number: 0217023039`)
+        console.log(copy)
+        if (copy) {
+            toast.success("Account Details Copied!")
+        } else {
+            toast.error("Failed to copy Account Details!")
+        }
+    }
+
     let selectedEvent = "Tutorials"
 
     $: selectedImage = events.find(event => event.title === selectedEvent)?.image
+
+    function copyTextToClipboard(text) {
+        if (navigator.clipboard) {
+            // Try using Clipboard API
+            return navigator.clipboard.writeText(text)
+                .then(() => true)
+                .catch(() => fallbackCopyTextToClipboard(text));
+        } else {
+            // Fallback for older browsers
+            return Promise.resolve(fallbackCopyTextToClipboard(text));
+        }
+    }
+
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            return true;
+        } catch (err) {
+            document.body.removeChild(textArea);
+            return false;
+        }
+    }
+
 </script>
 <!-- Hero -->
 <section class="py-32 mx-auto">
@@ -172,7 +224,7 @@
         <!-- Grid -->
         <div class="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
             <div class="mb-10 lg:mb-0 lg:col-span-6 lg:col-start-8 lg:order-2">
-                <h2 class="text-2xl text-gray-800 font-bold sm:text-3xl font-primary">
+                <h2 class="text-2xl text-neutral-800 font-bold sm:text-3xl font-primary">
                     Our Events
                 </h2>
 
@@ -189,15 +241,15 @@
             <span class="flex gap-x-6">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === event.title ? 'text-primary-700' : ''} text-gray-800 cursor-pointer"><path
+                     class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer"><path
                         d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path
                         d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path
                         d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path
                         d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/></svg>
               <span class="grow">
-                <span class="block text-lg font-semibold {selectedEvent === event.title ? 'text-primary-700' : ''} text-gray-800">{event.title}</span>
+                <span class="block text-lg font-semibold {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800">{event.title}</span>
                   {#if selectedEvent === event.title}
-                <span in:slide out:slide class="block mt-1 text-gray-800">{event.text}</span>
+                <span in:slide out:slide class="block mt-1 text-neutral-800">{event.text}</span>
                       {/if}
               </span>
             </span>
@@ -277,7 +329,7 @@
                 <li class="ps-1 text-sm text-gray-600">
                     Adhan
                     <span
-                        class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
+                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         5:30 AM
@@ -287,7 +339,7 @@
                 <li class="ps-1 text-sm text-gray-600">
                     Iqamah
                     <span
-                        class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
+                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         5:45 AM
@@ -334,7 +386,7 @@
                 <li class="ps-1 text-sm text-gray-600">
                     Iqamah
                     <span
-                        class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
+                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         5:45 AM
@@ -381,7 +433,7 @@
                 <li class="ps-1 text-sm text-gray-600">
                     Iqamah
                     <span
-                        class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
+                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         5:45 AM
@@ -429,7 +481,7 @@
                 <li class="ps-1 text-sm text-gray-600">
                     Iqamah
                     <span
-                        class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
+                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         5:45 AM
@@ -476,7 +528,7 @@
                 <li class="ps-1 text-sm text-gray-600">
                     Iqamah
                     <span
-                        class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
+                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         5:45 AM
@@ -493,7 +545,6 @@
 <!-- End Prayer Times -->
 
 <!-- Blog Section -->
-<!-- Card Blog -->
 <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
     <!-- Title -->
     <div class="max-w-2xl mx-auto text-left mb-10 lg:mb-14">
@@ -505,66 +556,78 @@
     <!-- Grid -->
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Card -->
-        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/ink-and-ashes/">
-                <div class="aspect-w-16 aspect-h-11">
-                    <img class="w-full object-cover rounded-xl h-[210px]" src="https://annuurpress.org.ng/wp-content/uploads/2024/12/41507-e1733481937229.jpg" alt="Inks and Ashes">
+        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
+           href="https://annuurpress.org.ng/ink-and-ashes/">
+            <div class="aspect-w-16 aspect-h-11">
+                <img class="w-full object-cover rounded-xl h-[210px]"
+                     src="https://annuurpress.org.ng/wp-content/uploads/2024/12/41507-e1733481937229.jpg"
+                     alt="Inks and Ashes">
             </div>
             <div class="my-6">
                 <h3 class="text-xl font-semibold text-primary-900">
                     Ink and Ashes
                 </h3>
                 <p class="mt-5 text-gray-600">
-                    I still remember how we used to  run around in circles as though we couldn't stop, how we suckle sweets...
+                    I still remember how we used to run around in circles as though we couldn't stop, how we suckle
+                    sweets...
                 </p>
             </div>
             <div class="mt-auto flex items-center gap-x-3">
                 <img class="size-8 rounded-full" src="/images/woman_1.png" alt="Aishat Elusogbon">
                 <div>
-                    <h5 class="text-sm text-gray-800">By Aishat Elusogbon</h5>
+                    <h5 class="text-sm text-neutral-800">By Aishat Elusogbon</h5>
                 </div>
             </div>
         </a>
         <!-- End Card -->
 
         <!-- Card -->
-        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/hardship-is-temporary/">
+        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
+           href="https://annuurpress.org.ng/hardship-is-temporary/">
             <div class="aspect-w-16 aspect-h-11">
-                <img class="w-full object-cover rounded-xl h-[210px]" src="https://annuurpress.org.ng/wp-content/uploads/2024/12/alone-4672965_1920-e1733482581401-1536x866.jpg" alt="Hardship is Temporary">
+                <img class="w-full object-cover rounded-xl h-[210px]"
+                     src="https://annuurpress.org.ng/wp-content/uploads/2024/12/alone-4672965_1920-e1733482581401-1536x866.jpg"
+                     alt="Hardship is Temporary">
             </div>
             <div class="my-6">
                 <h3 class="text-xl font-semibold text-primary-900">
                     Hardship is Temporary
                 </h3>
                 <p class="mt-5 text-gray-600">
-                    Hardship is defined as: Phonologically – /hɑ:dʃɪp/ Dictionary-wise – Difficulty To be in hardship means to be burdened or troubled.Oftentimes, when people...
+                    Hardship is defined as: Phonologically – /hɑ:dʃɪp/ Dictionary-wise – Difficulty To be in hardship
+                    means to be burdened or troubled.Oftentimes, when people...
                 </p>
             </div>
             <div class="mt-auto flex items-center gap-x-3">
                 <img class="size-8 rounded-full" src="/images/woman_2.png" alt="Rōdhiyah Adesina">
                 <div>
-                    <h5 class="text-sm text-gray-800">By Rōdhiyah Adesina</h5>
+                    <h5 class="text-sm text-neutral-800">By Rōdhiyah Adesina</h5>
                 </div>
             </div>
         </a>
         <!-- End Card -->
 
         <!-- Card -->
-        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5" href="https://annuurpress.org.ng/cheers-to-better-days/">
+        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
+           href="https://annuurpress.org.ng/cheers-to-better-days/">
             <div class="aspect-w-16 aspect-h-11">
-                <img class="w-full object-cover rounded-xl h-[210px]" src="https://annuurpress.org.ng/wp-content/uploads/2024/11/tree-164915_1280.jpg" alt="Cheers to Better Days">
+                <img class="w-full object-cover rounded-xl h-[210px]"
+                     src="https://annuurpress.org.ng/wp-content/uploads/2024/11/tree-164915_1280.jpg"
+                     alt="Cheers to Better Days">
             </div>
             <div class="my-6">
                 <h3 class="text-xl font-semibold text-primary-900">
                     Cheers to Better Days
                 </h3>
                 <p class="mt-5 text-gray-600">
-                    Enjoying my busy sleep as I lay,Lay on my weary thatched bed—Oh, I mean a thatched mattress,Or maybe some cartons...
+                    Enjoying my busy sleep as I lay,Lay on my weary thatched bed—Oh, I mean a thatched mattress,Or maybe
+                    some cartons...
                 </p>
             </div>
             <div class="mt-auto flex items-center gap-x-3">
                 <img class="size-8 rounded-full" src="/images/woman_3.png" alt="Ruqoyyah Idris">
                 <div>
-                    <h5 class="text-sm text-gray-800">By Ruqoyyah Idris</h5>
+                    <h5 class="text-sm text-neutral-800">By Ruqoyyah Idris</h5>
                 </div>
             </div>
         </a>
@@ -573,16 +636,148 @@
     <!-- End Grid -->
 
     <!-- Card -->
-    <div class="mt-12 text-center">
-        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-primary-200 bg-white text-primary-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none" href="https://annuurpress.org.ng/">
+    <div class="mt-12 text-center gap-4">
+        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-primary-200 bg-primary-700 text-white shadow-sm hover:bg-primary-700/90 focus:outline-none focus:bg-primary-700/90 disabled:opacity-50 disabled:pointer-events-none"
+           href="https://annuurpress.org.ng/">
             Read more
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+            </svg>
+        </a>
+        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-primary-200 bg-white text-primary-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
+           href="https://annuurpress.org.ng/">
+            Join Newsletter
+            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+            </svg>
         </a>
     </div>
     <!-- End Card -->
 </div>
-<!-- End Card Blog -->
 <!-- End Blog Section -->
+
+<!-- Donation CTA -->
+<div class="bg-white py-6 sm:py-8 lg:py-12">
+    <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
+        <div class="flex flex-col items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 sm:flex-row md:p-8">
+            <div class="gap-6">
+                <h2 class="text-xl font-bold text-neutral-800 font-primary md:text-2xl">Invest in your Ākhirah</h2>
+                <p class="text-primary-900">We are a non-profit student organisation that only exists due to individual and
+                    collective efforts, both in cash and kind.</p>
+            </div>
+
+
+            <AlertDialog.Root>
+                <AlertDialog.Trigger>
+                    <button type="button"
+                            class="inline-block font-secondary rounded-lg bg-primary-700 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800 focus-visible:ring active:bg-primary-800 md:text-base">
+                        Donate
+                    </button>
+
+                </AlertDialog.Trigger>
+                <AlertDialog.Content>
+                    <AlertDialog.Header>
+                        <AlertDialog.Title class="font-primary text-primary-800">Are you absolutely sure?</AlertDialog.Title>
+                        <AlertDialog.Description>
+                            This action cannot be undone. This will permanently delete your account
+                            and remove your data from our servers.
+                        </AlertDialog.Description>
+                    </AlertDialog.Header>
+                    <!-- List -->
+                    <div class="space-y-3">
+                        <dl class="flex flex-col sm:flex-row gap-1">
+                            <dt class="min-w-40">
+                                <span class="block text-sm text-gray-500 dark:text-neutral-500">Account Name:</span>
+                            </dt>
+                            <dd>
+                                <ul>
+                                    <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800 dark:text-neutral-200">
+                                        Muslim Students’ Society Of Nigeria, OAU
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+
+                        <dl class="flex flex-col sm:flex-row gap-1">
+                            <dt class="min-w-40">
+                                <span class="block text-sm text-gray-500 dark:text-neutral-500">Bank Name:</span>
+                            </dt>
+                            <dd>
+                                <ul>
+                                    <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800 dark:text-neutral-200">
+                                        GTBank
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+
+                        <dl class="flex flex-col sm:flex-row gap-1">
+                            <dt class="min-w-40">
+                                <span class="block text-sm text-gray-500 dark:text-neutral-500">Account Number:</span>
+                            </dt>
+                            <dd>
+                                <ul>
+                                    <li class="me-1 inline-flex items-center text-sm text-neutral-800 dark:text-neutral-200">
+                                        0217023039
+                                        <Copy onclick={copyAccNumber}
+                                              class="size-4 text-primary-700 cursor-pointer ml-4"/>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+                    </div>
+                    <!-- End List -->
+                    <AlertDialog.Footer>
+                        <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+                        <AlertDialog.Action class="bg-primary-800 text-white bg-primary-800/90" onclick={copyAccDetails}>Copy
+                        </AlertDialog.Action>
+                    </AlertDialog.Footer>
+                </AlertDialog.Content>
+            </AlertDialog.Root>
+
+            <!--                    <button on:click={() => {-->
+            <!--                        copyTextToClipboard(`Bank: GTBank\nAccount Name: Muslim Students’ Society Of Nigeria, OAU\nAccount Number: 0217023039`)-->
+            <!--                        toast.success("Account details copied to your clipboard")-->
+            <!--                    }} type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">-->
+            <!--                        Copy Details-->
+            <!--                    </button>-->
+            <!--                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">-->
+            <!--                        Copy Number-->
+            <!--                    </button>-->
+        </div>
+    </div>
+</div>
+<!-- End Donation CTA -->
+
+<!-- Suggestions CTA -->
+<div class="bg-white py-6 sm:py-8 lg:py-12">
+    <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
+        <div class="flex flex-col overflow-hidden rounded-lg bg-gray-200 sm:flex-row md:h-80">
+
+
+            <!-- content - start -->
+            <div class="flex w-full flex-col p-4 sm:w-1/2 sm:p-8 lg:w-3/5">
+                <h2 class="mb-4 text-xl font-bold text-neutral-800 md:text-2xl lg:text-4xl font-primary">Complaints? Suggestions</h2>
+
+                <p class="mb-8 max-w-md text-primary-900">We're committed to improving through thoughtful planning and constructive feedback, and we'd love to hear anything you think could make us better. Your perspective matters to us!</p>
+
+                <div class="mt-auto">
+                    <a href="/contact" class="inline-block rounded-lg bg-primary-800 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800/90 focus-visible:ring active:bg-primary-800/90 md:text-base">Leave us a message</a>
+                </div>
+            </div>
+            <!-- content - end -->
+
+            <!-- image - start -->
+            <div class="order-first h-48 w-full bg-gray-300 sm:order-none sm:h-auto sm:w-1/2 lg:w-2/5">
+                <img src="/images/suggestions.png" loading="lazy" alt="People conversing" class="h-full w-full object-cover object-center" />
+            </div>
+            <!-- image - end -->
+        </div>
+    </div>
+</div>
+<!-- End Suggestions CTA -->
 
 <style>
     .yoruba {
