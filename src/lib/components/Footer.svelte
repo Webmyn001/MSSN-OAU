@@ -26,8 +26,9 @@
                 <h4 class="font-semibold text-primary-700 font-primary">Quick Links</h4>
 
                 <div class="mt-3 grid space-y-3 font-secondary">
-                    <p><button class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700">Donate</button></p>
                     <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="/blog">Blog</a></p>
+                    <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="/#donate">Donate</a></p>
+                    <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="/#prayer-times">Prayer Times</a></p>
                     <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="#">Quiz</a></p>
                     <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="#">E-Library</a></p>
                 </div>
@@ -59,7 +60,7 @@
         <div class="mt-5 sm:mt-12 grid gap-y-2 sm:gap-y-0 sm:flex sm:justify-between sm:items-center">
             <div class="flex justify-between items-center">
                 <p class="text-sm text-primary-950 font-secondary font-bold">
-                    © {new Date().getFullYear()} MSSNOAU - The Muslim Student Society of Nigeria, Great Ife.
+                    © {new Date().getFullYear()} MSSNOAU - The Muslim Student Society of Nigeria, Great Ìfẹ́.
                 </p>
             </div>
             <!-- End Col -->

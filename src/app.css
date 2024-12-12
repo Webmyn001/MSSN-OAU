@@ -75,6 +75,10 @@
     }
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 /* merienda-latin-wght-normal */
 @font-face {
     font-family: 'Merienda';
