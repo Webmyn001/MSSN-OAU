@@ -3,7 +3,7 @@
     import {Clock, Copy} from 'lucide-svelte'
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
-    import copy from 'copy-text-to-clipboard';
+    import { isDonationModalOpen } from '$lib/stores/donation.js'
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
 
 
@@ -46,8 +46,8 @@
         },
     ]
 
-    const copyAccNumber = () => {
-        const copy = copyTextToClipboard("0217023039")
+    const copyAccNumber = async () => {
+        const copy = await copyTextToClipboard("0217023039")
         console.log(copy)
         if (copy) {
             toast.success("Account Number Copied!")
@@ -56,8 +56,8 @@
         }
     }
 
-    const copyAccDetails = () => {
-        const copy = copyTextToClipboard(`Bank Name: GTBank\nAccount Name: Muslim Students’ Society Of Nigeria, OAU\nAccount Number: 0217023039`)
+    const copyAccDetails = async () => {
+        const copy = await copyTextToClipboard(`Bank Name: GTBank\nAccount Name: Muslim Students’ Society Of Nigeria, OAU\nAccount Number: 0217023039`)
         console.log(copy)
         if (copy) {
             toast.success("Account Details Copied!")
@@ -70,7 +70,7 @@
 
     $: selectedImage = events.find(event => event.title === selectedEvent)?.image
 
-    function copyTextToClipboard(text) {
+    async function copyTextToClipboard(text) {
         if (navigator.clipboard) {
             // Try using Clipboard API
             return navigator.clipboard.writeText(text)
@@ -96,6 +96,7 @@
             return false;
         }
     }
+
 
 </script>
 <!-- Hero -->
@@ -659,7 +660,7 @@
 <!-- End Blog Section -->
 
 <!-- Donation CTA -->
-<div class="bg-white py-6 sm:py-8 lg:py-12">
+<div id="donate" class="bg-white py-6 sm:py-8 lg:py-12">
     <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
         <div class="flex flex-col items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 sm:flex-row md:p-8">
             <div class="gap-6">
@@ -669,7 +670,7 @@
             </div>
 
 
-            <AlertDialog.Root>
+            <AlertDialog.Root bind:open={$isDonationModalOpen}>
                 <AlertDialog.Trigger>
                     <button type="button"
                             class="inline-block font-secondary rounded-lg bg-primary-700 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800 focus-visible:ring active:bg-primary-800 md:text-base">
