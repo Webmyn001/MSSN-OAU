@@ -106,8 +106,8 @@
         canonical="https://mssnoau-frontend.vercel.app/"
         openGraph={{
     url: 'https://mssnoau-frontend.vercel.app/',
-    title: 'MSSNOAU',
-    description: 'Open Graph Description',
+    title: 'We are OAU Great Ìfẹ́\'s Muslim Community | MSSNOAU',
+    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
     images: [
       {
         url: 'https://i.ibb.co/gjDc0Nw/mssnoau-screenshot-compressed.png',
