@@ -3,7 +3,7 @@
     import {
         BookOpenText,
         Clock,
-        Copy,
+        Copy, MapPinned,
         NotebookPen,
         Presentation,
         SquareArrowOutUpRight,
@@ -14,8 +14,31 @@
     import {MetaTags} from 'svelte-meta-tags';
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
     import {Badge} from "$lib/components/ui/badge/index.js";
+    import * as Sheet from "$lib/components/ui/sheet/index.js";
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
+    import {Button} from "$lib/components/ui/button/index.js";
+    import Autoplay from "embla-carousel-autoplay";
+    import * as Carousel from "$lib/components/ui/carousel/index.js";
+
+
+    let selectedMosque = "awolowo_hall"
+
+    const mosques = [
+        { id: "awolowo_hall", label: "Awolowo Hall", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "Awolowo Hall of Residence, After Awo Cafe, OAU." },
+        { id: "fajuyi_hall", label: "Fajuyi Hall", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
+        { id: "etf_hall", label: "ETF Hall", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
+        { id: "pg_hall", label: "PG Hall", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
+        { id: "geology_grounds", label: "Geology Grounds", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
+        { id: "computer_grounds", label: "Computer Grounds", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
+        { id: "spider_grounds", label: "Spider Grounds", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
+        { id: "chem_eng_grounds", label: "Chem. Eng Grounds", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
+        { id: "central_mosque", label: "Central Mosque", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" }
+    ];
+
+    $: selectedMosqueObject = mosques.find(mosque => mosque.id === selectedMosque)
+
+    let showMosqueModal = false;
 
 
     const programmes = [
@@ -249,7 +272,6 @@
         getHijrahDate()
     })
 
-
 </script>
 <!-- Meta Tags -->
 <MetaTags
@@ -423,7 +445,7 @@
 
                     {#each programmes as programme}
                         <button type="button"
-                                on:click={() => {
+                                onclick={() => {
                                     selectedEvent = programme.title
                                 }}
                                 class="{selectedEvent === programme.title ? 'bg-white shadow-md hover:border-transparent' : ''} text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
@@ -453,7 +475,7 @@
                     {/each}
 
                     <button type="button"
-                            on:click={() => {
+                            onclick={() => {
                                     goto('/programmes')
                                 }}
                             class="text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
@@ -529,13 +551,13 @@
     </div>
     <div class="grid grid-rows-5 grid-cols-none sm:grid-cols-3 sm:grid-rows-none md:grid-cols-5 gap-4 mt-8">
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-lg' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.png')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 0 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 Fajr</h2>
 
             <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 0 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 0 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         5:22 AM • 5:42 AM
@@ -543,13 +565,13 @@
                 </span>
         </div>
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 1 ? 'scale-110 shadow-lg' : ''} justify-center items-center gap-2 bg-[url('/images/noon.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 1 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/noon.png')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 1 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 {upcoming_solat === 1 ? 'text-white text-2xl' : 'text-primary-100 text-xl'} font-primary font-bold">
                 Dhuhr</h2>
 
             <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 1 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 1 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         1:00 PM • 1:15 PM
@@ -557,13 +579,13 @@
                 </span>
         </div>
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-lg' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-xl' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.png')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 2 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 ‘Asr</h2>
 
             <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 2 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 2 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         3:55 PM • 4:10 PM
@@ -571,13 +593,13 @@
                 </span>
         </div>
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 3 ? 'scale-110 shadow-lg' : ''} justify-center items-center gap-2 bg-[url('/images/late-evening.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 3 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/late-evening.png')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 3 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 3 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 Maghrib</h2>
 
             <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 3 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 3 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         6:25 PM • 6:32 PM
@@ -585,13 +607,13 @@
                 </span>
         </div>
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-lg' : ''} justify-center items-center gap-2 bg-[url('/images/night.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/night.png')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 4 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 ‘Isha’</h2>
 
             <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 4 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 4 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
                         8:00 PM • 8:10 PM
@@ -604,16 +626,18 @@
     <div class="flex justify-center items-center w-full mt-8">
         <span class="p-4 bg-primary-800 text-white rounded-md font-tertiary text-xs">Friday Sermon starts at 1:30 PM and Prayer commences at 2:15 PM</span>
     </div>
+
+    <div class="flex gap-2 w-[80dvw] sm:mx-[10dvw] overflow-scroll no-scrollbar">
+    {#each mosques as mosque}
+                <Badge variant="outline" onclick={() => {
+                    selectedMosque = mosque.id
+                    showMosqueModal = !showMosqueModal
+                    console.log(mosque.id)
+                }}>{mosque.label}</Badge>
+        {/each}
+    </div>
+
     <div>
-        <Badge variant="outline">Awolowo Hall</Badge>
-        <Badge variant="outline">Fajuyi Hall</Badge>
-        <Badge variant="outline">ETF Hall</Badge>
-        <Badge variant="outline">PG Hall</Badge>
-        <Badge variant="outline">Geology Grounds</Badge>
-        <Badge variant="outline">Computer Grounds</Badge>
-        <Badge variant="outline">Spider Grounds</Badge>
-        <Badge variant="outline">Chem. Eng Grounds</Badge>
-        <Badge variant="outline">Central Mosque</Badge>
     </div>
 </div>
 <!-- End Prayer Times -->
@@ -628,7 +652,7 @@
         </div>
 
         <div class="mt-12 text-center">
-            <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-primary-200 bg-white text-primary-800 shadow-sm hover:bg-primary-50 focus:outline-none focus:bg-primary-50 disabled:opacity-50 disabled:pointer-events-none" href="/events">
+            <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-white text-primary-800 shadow-sm hover:bg-primary-50 focus:outline-none focus:bg-primary-50 disabled:opacity-50 disabled:pointer-events-none" href="/events">
                 All Events
                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </a>
@@ -797,7 +821,7 @@
 
     <!-- Card -->
     <div class="mt-12 text-center gap-4">
-        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-primary-200 bg-primary-700 text-white shadow-sm hover:bg-primary-700/90 focus:outline-none focus:bg-primary-700/90 disabled:opacity-50 disabled:pointer-events-none"
+        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-primary-700 text-white shadow-sm hover:bg-primary-700/90 focus:outline-none focus:bg-primary-700/90 disabled:opacity-50 disabled:pointer-events-none"
            href="https://annuurpress.org.ng/">
             Read more
             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -805,7 +829,7 @@
                 <path d="m9 18 6-6-6-6"/>
             </svg>
         </a>
-        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-primary-200 bg-white text-primary-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
+        <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-white text-primary-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
            href="https://annuurpress.org.ng/">
             Join Newsletter
             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -896,7 +920,7 @@
                 </AlertDialog.Content>
             </AlertDialog.Root>
 
-            <!--                    <button on:click={() => {-->
+            <!--                    <button onclick={() => {-->
             <!--                        copyTextToClipboard(`Bank: GTBank\nAccount Name: Muslim Students’ Society Of Nigeria, OAU\nAccount Number: 0217023039`)-->
             <!--                        toast.success("Account details copied to your clipboard")-->
             <!--                    }} type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">-->
@@ -944,6 +968,48 @@
 </div>
 <!-- End Suggestions CTA -->
 
+{#if selectedMosqueObject}
+<Sheet.Root bind:open={showMosqueModal}>
+    <Sheet.Trigger>
+    </Sheet.Trigger>
+    <Sheet.Content onCloseAutoFocus={event => event.preventDefault()} side="bottom">
+        <Sheet.Header>
+            <Sheet.Title class="font-primary">{selectedMosqueObject?.label}</Sheet.Title>
+            <Sheet.Description class="font-tertiary text-xs">
+                At {selectedMosqueObject?.address}
+            </Sheet.Description>
+        </Sheet.Header>
+        <Carousel.Root
+                plugins={[
+    Autoplay({
+      delay: 5000,
+    }),
+  ]}
+                class="w-full"
+                opts={{ align: "center", loop: true }}
+        >
+            <Carousel.Content class="aspect-square">
+                {#each selectedMosqueObject?.images as image, i}
+                <Carousel.Item>
+                    <img class="aspect-square w-[60dvw] rounded-xl mx-auto mt-6" src={image} alt={`${selectedMosqueObject.label} ${i + 1}`} />
+                </Carousel.Item>
+                    {/each}
+            </Carousel.Content>
+            <Carousel.Previous />
+            <Carousel.Next />
+        </Carousel.Root>
+
+        <Sheet.Footer class="gap-3">
+            <Button onclick={() => (showMosqueModal = !showMosqueModal)} variant="outline">Close</Button>
+            <Button class="bg-primary-800 hover:bg-primary-800/90 text-white" onclick={() => (window.open(selectedMosqueObject?.url, '_blank'))}>
+                <MapPinned class="size-6 mx-2" />
+                View on Maps
+            </Button>
+        </Sheet.Footer>
+    </Sheet.Content>
+</Sheet.Root>
+    {/if}
+
 <style>
     .yoruba {
         font-family: "Charis SIL", sans-serif;
@@ -960,4 +1026,14 @@
         src: url(https://cdn.jsdelivr.net/fontsource/fonts/charis-sil@latest/latin-400-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/charis-sil@latest/latin-400-normal.woff) format('woff');
         unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
     }
+
+    .no-scrollbar {
+        scrollbar-width: none; /* For Firefox */
+        -ms-overflow-style: none; /* For Internet Explorer and Edge */
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none; /* For Chrome, Safari, and Opera */
+    }
+
 </style>
