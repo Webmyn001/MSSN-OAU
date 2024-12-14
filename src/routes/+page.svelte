@@ -298,8 +298,8 @@
 <!-- Hero -->
 <section class="py-32 mx-auto">
     <div class="container flex flex-col items-center text-center w-full">
-        <h1 class="text-primary-900 my-6 text-pretty text-4xl font-bold lg:text-6xl" id="hero-text">We are Great <span
-                class="relative inline ml-2 mr-12 sm:ml-2 sm:mr-2 lg:ml-4"><span
+        <h1 class="text-primary-900 -translate-x-3 my-6 text-pretty text-4xl font-bold lg:text-6xl" id="hero-text">We are Great <span
+                class="relative inline ml-2 mr-12 sm:ml-2 sm:mr-2 lg:ml-4 top-[-6px]"><span
                 class="yoruba top-[8px] sm:top-[10px] lg:top-[12px] absolute text-[#28145B] scale-105">Ife's</span><span
                 class="scale-105 yoruba absolute -z-10 text-[#EBB957]">Ìfẹ́'s</span></span>
         </h1>
@@ -311,7 +311,7 @@
                 minSize={0.8}
                 maxSize={5}
                 particleDensity={400}
-                className="w-full h-[20dvh]"
+                className="w-[80dvw] mx-[10dvw] h-[20dvh]"
                 particleColor="#026d3b"
         />
         <div class="flex w-full flex-col justify-center gap-2 sm:flex-row">
@@ -549,7 +549,7 @@
             <p class="text-[#333333] font-semibold sm:hidden block">{shortHijrahDate}</p>
         </div>
     </div>
-    <div class="grid grid-rows-5 grid-cols-none sm:grid-cols-3 sm:grid-rows-none md:grid-cols-5 gap-4 mt-8">
+    <div class="grid grid-rows-5 grid-cols-none sm:grid-cols-2 sm:grid-rows-none lg:grid-cols-5 gap-4 mt-8">
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.png')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
@@ -1013,8 +1013,7 @@
 <style>
     .yoruba {
         font-family: "Charis SIL", sans-serif;
-        top: 8px;
-        left: 0;
+        top: 12px;
     }
 
     /* charis-sil-latin-400-normal */
