@@ -1,48 +1,47 @@
 <script>
     import Sparkles from "$lib/components/Sparkles/Sparkles.svelte";
-    import {Clock, Copy} from 'lucide-svelte'
+    import {
+        BookOpenText,
+        Clock,
+        Copy,
+        NotebookPen,
+        Presentation,
+        SquareArrowOutUpRight,
+        UsersRound
+    } from 'lucide-svelte'
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
     import {MetaTags} from 'svelte-meta-tags';
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+    import {Badge} from "$lib/components/ui/badge/index.js";
+    import {onMount} from "svelte";
+    import {goto} from "$app/navigation";
 
 
-    const events = [
+    const programmes = [
         {
             title: "Tutorials",
             text: "Academic tutorials organised by the Academic Committee.",
-            image: "/images/chalkboard.png"
+            image: "/images/chalkboard.png",
+            icon: BookOpenText
         },
         {
             title: "Madrasah",
             text: "Classes on Islamic Education organised by the Islamic Affairs Board.",
-            image: "/images/madrasah.png"
+            image: "/images/madrasah.png",
+            icon: NotebookPen
         },
         {
             title: "Al-Usrah",
             text: "A weekly meetup centering on Islamic perspective of certain issues.",
-            image: "/images/al-usrah.png"
-        }, {
-            title: "Freshers' Orientation",
-            text: "An programme to welcome and offer guidance to freshmen.",
-            image: "/images/freshers.png"
+            image: "/images/al-usrah.png",
+            icon: Presentation
         }, {
             title: "Sisters' Circle",
             text: "A weekly sisters-only meetup that aims to strengthen the bonds between sisters, and discuss issues pertaining to them.",
-            image: "/images/sisters-circle.png"
-        }, {
-            title: "Bro Code",
-            text: "A one-of-a-kind brother-only meetup session for letting off some steam and engaging in fun activities.",
-            image: "/images/brocode.png"
-        }, {
-            title: "Eid Fest",
-            text: "Once in a year, a special day to celebrate another special day, only without the stress.",
-            image: "/images/eid-fest.png"
-        }, {
-            title: "Taraweeh",
-            text: "Throughout the holy month of Ramadhan in all the hall mosques and at the Central Mosque of Unity.",
-            image: "/images/taraweeh.png"
-        },
+            image: "/images/sisters-circle.png",
+            icon: UsersRound
+        }
     ]
 
     const copyAccNumber = async () => {
@@ -67,7 +66,7 @@
 
     let selectedEvent = "Tutorials"
 
-    $: selectedImage = events.find(event => event.title === selectedEvent)?.image
+    $: selectedImage = programmes.find(event => event.title === selectedEvent)?.image
 
     async function copyTextToClipboard(text) {
         if (navigator.clipboard) {
@@ -95,6 +94,160 @@
             return false;
         }
     }
+
+    let hijrahDate = ""
+    let shortHijrahDate = ""
+
+    function getFormattedDateVerbose() {
+        const now = new Date();
+
+        // Get day, month, and year
+        const day = now.getDate();
+        const month = now.toLocaleString('default', {month: 'long'}); // Full month name
+        const year = now.getFullYear();
+
+        // Determine the appropriate suffix for the day
+        const suffix =
+            day % 10 === 1 && day !== 11 ? 'st' :
+                day % 10 === 2 && day !== 12 ? 'nd' :
+                    day % 10 === 3 && day !== 13 ? 'rd' :
+                        'th';
+
+        // Format the date
+        return `${day}${suffix} ${month}, ${year}`;
+    }
+
+    /**
+     * Returns the current date in a shortened format: "12 Dec, 2024".
+     * @returns {string} The formatted date.
+     */
+    function getFormattedDateVerboseShort() {
+        const now = new Date();
+
+        // Get day, month (short format), and year
+        const day = now.getDate();
+        const month = now.toLocaleString('default', {month: 'short'}); // Short month name (e.g., "Dec")
+        const year = now.getFullYear();
+
+        // Format the date in the "DD MMM, YYYY" format
+        return `${day} ${month}, ${year}`;
+    }
+
+
+    function getFormattedDate() {
+        const now = new Date();
+
+        // Get the day, month, and year
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        const year = now.getFullYear();
+
+        // Format the date as DD-MM-YYYY
+        return `${day}-${month}-${year}`;
+    }
+
+    function getSolahPeriod() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+
+        // Helper to convert hours and minutes into a comparable "minutes since midnight"
+        const toMinutes = (h, m) => h * 60 + m;
+
+        // Define time thresholds in "minutes since midnight"
+        const times = {
+            morning: toMinutes(6, 20),
+            afternoon: toMinutes(14, 0),
+            evening: toMinutes(16, 50),
+            night: toMinutes(19, 10),
+            lateNight: toMinutes(22, 0),
+        };
+
+        const currentTime = toMinutes(hours, minutes);
+
+        // Determine the period based on the time
+        if (currentTime >= times.lateNight || currentTime < times.morning) return 0;
+        if (currentTime >= times.morning && currentTime < times.afternoon) return 1;
+        if (currentTime >= times.afternoon && currentTime < times.evening) return 2;
+        if (currentTime >= times.evening && currentTime < times.night) return 3;
+        if (currentTime >= times.night && currentTime < times.lateNight) return 4;
+
+        return -1; // Fallback (shouldn't be reached)
+    }
+
+    async function getHijrahDate() {
+        try {
+            const req = await fetch(`http://api.aladhan.com/v1/gToH/${getFormattedDate()}`)
+
+            if (!req.ok) throw new Error("Bad Response")
+
+            /**
+             * @typedef {Object} Weekday
+             * @property {string} en - Weekday name in English.
+             * @property {string} [ar] - Weekday name in Arabic (optional).
+
+             * @typedef {Object} Month
+             * @property {number} number - Month number.
+             * @property {string} en - Month name in English.
+             * @property {string} [ar] - Month name in Arabic (optional).
+
+             * @typedef {Object} Designation
+             * @property {string} abbreviated - Abbreviated form of the designation (e.g., "AH" or "AD").
+             * @property {string} expanded - Full form of the designation (e.g., "Anno Hegirae" or "Anno Domini").
+
+             * @typedef {Object} Hijri
+             * @property {string} date - Hijri date in the specified format.
+             * @property {string} format - Format of the Hijri date (e.g., "DD-MM-YYYY").
+             * @property {string} day - Day of the Hijri date.
+             * @property {Weekday} weekday - Weekday information for the Hijri date.
+             * @property {Month} month - Month information for the Hijri date.
+             * @property {string} year - Year of the Hijri date.
+             * @property {Designation} designation - Designation details for the Hijri date.
+             * @property {string[]} holidays - List of holidays (if any).
+
+             * @typedef {Object} Gregorian
+             * @property {string} date - Gregorian date in the specified format.
+             * @property {string} format - Format of the Gregorian date (e.g., "DD-MM-YYYY").
+             * @property {string} day - Day of the Gregorian date.
+             * @property {Weekday} weekday - Weekday information for the Gregorian date.
+             * @property {Month} month - Month information for the Gregorian date.
+             * @property {string} year - Year of the Gregorian date.
+             * @property {Designation} designation - Designation details for the Gregorian date.
+
+             * @typedef {Object} Data
+             * @property {Hijri} hijri - Hijri date details.
+             * @property {Gregorian} gregorian - Gregorian date details.
+
+             * @typedef {Object} ApiResponse
+             * @property {number} code - HTTP status code of the response.
+             * @property {string} status - Status message of the response (e.g., "OK").
+             * @property {Data} data - Data containing Hijri and Gregorian date details.
+             */
+
+            /**
+             * @type {ApiResponse}
+             */
+            const res = await req.json()
+
+            if (!res || res.code !== 200) throw new Error(res)
+
+            hijrahDate = `${res.data.hijri.day} ${res.data.hijri.month.en}, ${res.data.hijri.year}${res.data.hijri.designation.abbreviated}`
+            shortHijrahDate = res.data.hijri.date.replaceAll("-", "/") + res.data.hijri.designation.abbreviated
+
+
+        } catch (e) {
+            toast.error("Error retrieving Hijrah Date")
+            console.error(e?.message)
+        }
+    }
+
+
+    let upcoming_solat;
+
+    onMount(() => {
+        upcoming_solat = getSolahPeriod()
+        getHijrahDate()
+    })
 
 
 </script>
@@ -155,76 +308,91 @@
             <div
                     class="absolute right-[calc(100%+63px)] top-0 hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/man_1.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+195px)] top-[52px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/woman_1.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+34px)] top-[144px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/man_2.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+268px)] top-[164px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/woman_2.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+156px)] top-[240px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/man_3.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+242px)] top-[340px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/woman_3.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+66px)] top-[366px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/man_4.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+53px)] top-0 hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/woman_4.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+202px)] top-[34px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/man_5.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+97px)] top-[141px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/woman_5.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+282px)] top-[138px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/man_6.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+42px)] top-[262px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/woman_6.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+234px)] top-[282px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/man_7.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+112px)] top-[365px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
                 <img src="/images/woman_7.png" alt="placeholder hero"
+                     loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div class="container mx-auto">
                 <img
                         src="/images/bg-1.png"
+                        loading="eager"
                         style="object-fit: cover; object-position: center"
                         alt="central mosque of unity"
                         class="mt-2 flex aspect-[16/9] min-h-[300px] max-h-[500px] w-full flex-col items-center overflow-clip rounded-md border border-border bg-zinc-100 shadow-sm sm:rounded-xl"/>
@@ -247,36 +415,56 @@
         <div class="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
             <div class="mb-10 lg:mb-0 lg:col-span-6 lg:col-start-8 lg:order-2">
                 <h2 class="text-2xl text-neutral-800 font-bold sm:text-3xl font-primary">
-                    Our Events
+                    Our Programmes
                 </h2>
 
                 <!-- Tab Navs -->
                 <nav class="grid gap-4 mt-5 md:mt-10">
 
-                    {#each events as event}
+                    {#each programmes as programme}
                         <button type="button"
                                 on:click={() => {
-                                    selectedEvent = event.title
+                                    selectedEvent = programme.title
                                 }}
-                                class="{selectedEvent === event.title ? 'bg-white shadow-md hover:border-transparent' : ''} text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
-                                id={event.title} aria-selected={selectedEvent === event.title}>
+                                class="{selectedEvent === programme.title ? 'bg-white shadow-md hover:border-transparent' : ''} text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
+                                id={programme.title} aria-selected={selectedEvent === programme.title}>
             <span class="flex gap-x-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer"><path
-                        d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path
-                        d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path
-                        d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path
-                        d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/></svg>
-              <span class="grow">
-                <span class="block text-lg font-semibold {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800">{event.title}</span>
-                  {#if selectedEvent === event.title}
-                <span in:slide out:slide class="block mt-1 text-neutral-800">{event.text}</span>
+    {#if programme.title === "Tutorials"}
+        <BookOpenText
+                class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === programme.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer"/>
+        {:else if programme.title === "Madrasah"}
+        <NotebookPen
+                class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === programme.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer"/>
+        {:else if programme.title === "Al-Usrah"}
+        <Presentation
+                class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === programme.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer"/>
+        {:else if programme.title === "Sisters' Circle"}
+        <UsersRound
+                class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === programme.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer"/>
+        {/if}
+                <span class="grow">
+                <span class="block text-lg font-semibold {selectedEvent === programme.title ? 'text-primary-700' : ''} text-neutral-800">{programme.title}</span>
+                    {#if selectedEvent === programme.title}
+                <span in:slide out:slide class="block mt-1 text-neutral-800">{programme.text}</span>
                       {/if}
               </span>
             </span>
                         </button>
                     {/each}
+
+                    <button type="button"
+                            on:click={() => {
+                                    goto('/programmes')
+                                }}
+                            class="text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
+                    >
+            <span class="flex gap-x-6">
+                <SquareArrowOutUpRight class="shrink-0 mt-2 size-6 md:size-7    text-neutral-800 cursor-pointer"/>
+              <span class="grow">
+                <span class="block text-lg font-semibold text-neutral-800">See More</span>
+              </span>
+            </span>
+                    </button>
 
                 </nav>
                 <!-- End Tab Navs -->
@@ -289,7 +477,7 @@
                     <div>
                         <div id="tabs-with-card-1" role="tabpanel" aria-labelledby="tabs-with-card-item-1">
                             {#key selectedImage}
-                                <img class="shadow-xl shadow-gray-200 rounded-xl"
+                                <img loading="lazy" class="shadow-xl shadow-gray-200 rounded-xl"
                                      src={selectedImage}
                                      alt={selectedEvent}/>
                             {/key}
@@ -324,247 +512,196 @@
     </div>
 </div>
 
-
 <!-- Prayer Times -->
-<div id="prayer-times" class="mx-[20dvw]">
-    <h1 class="mx-auto font-primary bold text-2xl sm:text-3xl md:text-4xl my-8">Prayer Times</h1>
-    <!-- Item -->
-    <div class="group relative flex gap-x-5">
-        <!-- Icon -->
-        <div class="relative group-last:after:hidden after:absolute after:top-8 after:bottom-2 after:start-3 after:w-px after:-translate-x-[0.5px] after:bg-primary-200">
-            <div class="relative z-10 size-6 flex justify-center items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" class="shrink-0 size-6 text-primary-700">
-                    <path d="M23.925781 3.9257812C22.918781 3.9257812 21.957625 4.2234375 21.140625 4.7734375L28.09375 11.689453C28.63475 10.877453 28.925781 9.9237812 28.925781 8.9257812C28.925781 7.5897812 28.404937 6.335625 27.460938 5.390625C26.516938 4.445625 25.261781 3.9257812 23.925781 3.9257812 z M 20.369141 5.4140625C18.443141 7.3650625 18.448625 10.518937 20.390625 12.460938C21.334625 13.404938 22.589781 13.925781 23.925781 13.925781C25.259781 13.925781 26.511078 13.405844 27.455078 12.464844L20.369141 5.4140625 z M 29.519531 16.083984C27.738531 16.083984 26.264766 16.945969 24.884766 18.792969L21.003906 23.886719L16.144531 19.849609C14.871531 18.791609 12.977922 18.969188 11.919922 20.242188C10.862922 21.514187 11.037547 23.408797 12.310547 24.466797L19.667969 30.572266C19.689969 30.590266 19.730813 30.616859 19.757812 30.630859C21.024812 31.565859 22.799547 31.354109 23.810547 30.162109L28.144531 24.447266C28.312531 24.227266 28.62575 24.185562 28.84375 24.351562C29.06475 24.518563 29.108406 24.831734 28.941406 25.052734L24.146484 31.376953L24.146484 34.515625L17.042969 39.699219C15.961969 40.523219 15.569813 42.079313 16.132812 43.320312C16.244416 43.566503 16.394083 43.794451 16.570312 44L12 44C11.447 44 11 44.448 11 45C11 45.552 11.447 46 12 46L43 46C43.553 46 44 45.552 44 45C44 44.448 43.553 44 43 44L37.476562 44C37.912841 43.478911 38.1875 42.816996 38.1875 42.085938C38.1875 40.431938 36.8425 39.082031 35.1875 39.082031L33.298828 39.082031C33.307828 39.075031 33.313266 39.0685 33.322266 39.0625L29.070312 39.0625C28.794313 39.0625 28.570312 38.8385 28.570312 38.5625C28.570312 38.2865 28.794313 38.0625 29.070312 38.0625L34.267578 38.0625C34.818578 37.2855 35.146484 36.339406 35.146484 35.316406L35.146484 21.457031C35.146484 18.494031 32.736437 16.083984 29.773438 16.083984L29.519531 16.083984 z"
-                          fill="#007C40"/>
-                </svg>
-            </div>
+<div class="w-[75dvw] mx-auto space-y-8 mt-12">
+    <div class="w-full flex flex-row justify-between items-center my-4">
+        <div>
+            <h1 class="mx-auto font-primary font-bold text-2xl sm:text-3xl md:text-4xl">Prayer Times</h1>
+            <p class="text-primary-800 font-secondary hidden sm:block">For all mosques at OAU, Ile-Ife.</p>
         </div>
-        <!-- End Icon -->
 
-        <!-- Right Content -->
-        <div class="grow pb-8 group-last:pb-0">
-            <h3 class="mb-1 text-xs text-primary-700 font-bold font-secondary">
-                Subhi
-            </h3>
-
-            <ul class="list-disc ms-6 mt-3 space-y-1.5">
-                <li class="ps-1 text-sm text-gray-600">
-                    Adhan
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:30 AM
-                    </span>
-                </span>
-                </li>
-                <li class="ps-1 text-sm text-gray-600">
-                    Iqamah
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:45 AM
-                    </span>
-                </span>
-                </li>
-            </ul>
-
+        <div class="font-secondary">
+            <p class="text-primary-800 hidden sm:block">{getFormattedDateVerbose()}</p>
+            <p class="text-primary-800 sm:hidden block">{getFormattedDateVerboseShort()}</p>
+            <p class="text-[#333333] font-semibold hidden sm:block">{hijrahDate}</p>
+            <p class="text-[#333333] font-semibold sm:hidden block">{shortHijrahDate}</p>
         </div>
-        <!-- End Right Content -->
     </div>
-    <!-- End Item -->
+    <div class="grid grid-rows-5 grid-cols-none sm:grid-cols-3 sm:grid-rows-none md:grid-cols-5 gap-4 mt-8">
 
-    <!-- Item -->
-    <div class="group relative flex gap-x-5">
-        <!-- Icon -->
-        <div class="relative group-last:after:hidden after:absolute after:top-8 after:bottom-2 after:start-3 after:w-px after:-translate-x-[0.5px] after:bg-primary-200">
-            <div class="relative z-10 size-6 flex justify-center items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" class="shrink-0 size-6 text-primary-700">
-                    <path d="M23.925781 3.9257812C22.918781 3.9257812 21.957625 4.2234375 21.140625 4.7734375L28.09375 11.689453C28.63475 10.877453 28.925781 9.9237812 28.925781 8.9257812C28.925781 7.5897812 28.404937 6.335625 27.460938 5.390625C26.516938 4.445625 25.261781 3.9257812 23.925781 3.9257812 z M 20.369141 5.4140625C18.443141 7.3650625 18.448625 10.518937 20.390625 12.460938C21.334625 13.404938 22.589781 13.925781 23.925781 13.925781C25.259781 13.925781 26.511078 13.405844 27.455078 12.464844L20.369141 5.4140625 z M 29.519531 16.083984C27.738531 16.083984 26.264766 16.945969 24.884766 18.792969L21.003906 23.886719L16.144531 19.849609C14.871531 18.791609 12.977922 18.969188 11.919922 20.242188C10.862922 21.514187 11.037547 23.408797 12.310547 24.466797L19.667969 30.572266C19.689969 30.590266 19.730813 30.616859 19.757812 30.630859C21.024812 31.565859 22.799547 31.354109 23.810547 30.162109L28.144531 24.447266C28.312531 24.227266 28.62575 24.185562 28.84375 24.351562C29.06475 24.518563 29.108406 24.831734 28.941406 25.052734L24.146484 31.376953L24.146484 34.515625L17.042969 39.699219C15.961969 40.523219 15.569813 42.079313 16.132812 43.320312C16.244416 43.566503 16.394083 43.794451 16.570312 44L12 44C11.447 44 11 44.448 11 45C11 45.552 11.447 46 12 46L43 46C43.553 46 44 45.552 44 45C44 44.448 43.553 44 43 44L37.476562 44C37.912841 43.478911 38.1875 42.816996 38.1875 42.085938C38.1875 40.431938 36.8425 39.082031 35.1875 39.082031L33.298828 39.082031C33.307828 39.075031 33.313266 39.0685 33.322266 39.0625L29.070312 39.0625C28.794313 39.0625 28.570312 38.8385 28.570312 38.5625C28.570312 38.2865 28.794313 38.0625 29.070312 38.0625L34.267578 38.0625C34.818578 37.2855 35.146484 36.339406 35.146484 35.316406L35.146484 21.457031C35.146484 18.494031 32.736437 16.083984 29.773438 16.083984L29.519531 16.083984 z"
-                          fill="#007C40"/>
-                </svg>
-            </div>
-        </div>
-        <!-- End Icon -->
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-lg' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.png')] bg-no-repeat bg-cover bg-center">
+            <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <h2 class="z-10 font-primary font-bold {upcoming_solat === 0 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
+                Fajr</h2>
 
-        <!-- Right Content -->
-        <div class="grow pb-8 group-last:pb-0">
-            <h3 class="mb-1 text-xs text-primary-700 font-bold font-secondary">
-                Dhuhr
-            </h3>
-
-            <ul class="list-disc ms-6 mt-3 space-y-1.5">
-                <li class="ps-1 font-secondary text-sm text-gray-600">
-                    Adhan
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
+            <span
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 0 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:30 AM
+                        5:22 AM • 5:42 AM
                     </span>
                 </span>
-                </li>
-                <li class="ps-1 text-sm text-gray-600">
-                    Iqamah
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
+        </div>
+
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 1 ? 'scale-110 shadow-lg' : ''} justify-center items-center gap-2 bg-[url('/images/noon.png')] bg-no-repeat bg-cover bg-center">
+            <div class="absolute inset-0 {upcoming_solat === 1 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <h2 class="z-10 {upcoming_solat === 1 ? 'text-white text-2xl' : 'text-primary-100 text-xl'} font-primary font-bold">
+                Dhuhr</h2>
+
+            <span
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 1 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:45 AM
+                        1:00 PM • 1:15 PM
                     </span>
                 </span>
-                </li>
-            </ul>
-
         </div>
-        <!-- End Right Content -->
+
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-lg' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.png')] bg-no-repeat bg-cover bg-center">
+            <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <h2 class="z-10 font-primary font-bold {upcoming_solat === 2 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
+                ‘Asr</h2>
+
+            <span
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 2 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
+    <Clock class="shrink-0 size-3 text-green-900"/>
+                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
+                        3:55 PM • 4:10 PM
+                    </span>
+                </span>
+        </div>
+
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 3 ? 'scale-110 shadow-lg' : ''} justify-center items-center gap-2 bg-[url('/images/late-evening.png')] bg-no-repeat bg-cover bg-center">
+            <div class="absolute inset-0 {upcoming_solat === 3 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <h2 class="z-10 font-primary font-bold {upcoming_solat === 3 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
+                Maghrib</h2>
+
+            <span
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 3 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
+    <Clock class="shrink-0 size-3 text-green-900"/>
+                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
+                        6:25 PM • 6:32 PM
+                    </span>
+                </span>
+        </div>
+
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-lg' : ''} justify-center items-center gap-2 bg-[url('/images/night.png')] bg-no-repeat bg-cover bg-center">
+            <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <h2 class="z-10 font-primary font-bold {upcoming_solat === 4 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
+                ‘Isha’</h2>
+
+            <span
+                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 4 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-full p-1 gap-1">
+    <Clock class="shrink-0 size-3 text-green-900"/>
+                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
+                        8:00 PM • 8:10 PM
+                    </span>
+                </span>
+        </div>
+
     </div>
-    <!-- End Item -->
 
-    <!-- Item -->
-    <div class="group relative flex gap-x-5">
-        <!-- Icon -->
-        <div class="relative group-last:after:hidden after:absolute after:top-8 after:bottom-2 after:start-3 after:w-px after:-translate-x-[0.5px] after:bg-primary-200">
-            <div class="relative z-10 size-6 flex justify-center items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" class="shrink-0 size-6 text-primary-700">
-                    <path d="M23.925781 3.9257812C22.918781 3.9257812 21.957625 4.2234375 21.140625 4.7734375L28.09375 11.689453C28.63475 10.877453 28.925781 9.9237812 28.925781 8.9257812C28.925781 7.5897812 28.404937 6.335625 27.460938 5.390625C26.516938 4.445625 25.261781 3.9257812 23.925781 3.9257812 z M 20.369141 5.4140625C18.443141 7.3650625 18.448625 10.518937 20.390625 12.460938C21.334625 13.404938 22.589781 13.925781 23.925781 13.925781C25.259781 13.925781 26.511078 13.405844 27.455078 12.464844L20.369141 5.4140625 z M 29.519531 16.083984C27.738531 16.083984 26.264766 16.945969 24.884766 18.792969L21.003906 23.886719L16.144531 19.849609C14.871531 18.791609 12.977922 18.969188 11.919922 20.242188C10.862922 21.514187 11.037547 23.408797 12.310547 24.466797L19.667969 30.572266C19.689969 30.590266 19.730813 30.616859 19.757812 30.630859C21.024812 31.565859 22.799547 31.354109 23.810547 30.162109L28.144531 24.447266C28.312531 24.227266 28.62575 24.185562 28.84375 24.351562C29.06475 24.518563 29.108406 24.831734 28.941406 25.052734L24.146484 31.376953L24.146484 34.515625L17.042969 39.699219C15.961969 40.523219 15.569813 42.079313 16.132812 43.320312C16.244416 43.566503 16.394083 43.794451 16.570312 44L12 44C11.447 44 11 44.448 11 45C11 45.552 11.447 46 12 46L43 46C43.553 46 44 45.552 44 45C44 44.448 43.553 44 43 44L37.476562 44C37.912841 43.478911 38.1875 42.816996 38.1875 42.085938C38.1875 40.431938 36.8425 39.082031 35.1875 39.082031L33.298828 39.082031C33.307828 39.075031 33.313266 39.0685 33.322266 39.0625L29.070312 39.0625C28.794313 39.0625 28.570312 38.8385 28.570312 38.5625C28.570312 38.2865 28.794313 38.0625 29.070312 38.0625L34.267578 38.0625C34.818578 37.2855 35.146484 36.339406 35.146484 35.316406L35.146484 21.457031C35.146484 18.494031 32.736437 16.083984 29.773438 16.083984L29.519531 16.083984 z"
-                          fill="#007C40"/>
-                </svg>
-            </div>
-        </div>
-        <!-- End Icon -->
-
-        <!-- Right Content -->
-        <div class="grow pb-8 group-last:pb-0">
-            <h3 class="mb-1 text-xs text-primary-700 font-bold font-secondary">
-                Asr
-            </h3>
-
-            <ul class="list-disc ms-6 mt-3 space-y-1.5">
-                <li class="ps-1 text-sm text-gray-600">
-                    Adhan
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:30 AM
-                    </span>
-                </span>
-                </li>
-                <li class="ps-1 text-sm text-gray-600">
-                    Iqamah
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:45 AM
-                    </span>
-                </span>
-                </li>
-            </ul>
-
-        </div>
-        <!-- End Right Content -->
+    <div class="flex justify-center items-center w-full mt-8">
+        <span class="p-4 bg-primary-800 text-white rounded-md font-tertiary text-xs">Friday Sermon starts at 1:30 PM and Prayer commences at 2:15 PM</span>
     </div>
-    <!-- End Item -->
-
-
-    <!-- Item -->
-    <div class="group relative flex gap-x-5">
-        <!-- Icon -->
-        <div class="relative group-last:after:hidden after:absolute after:top-8 after:bottom-2 after:start-3 after:w-px after:-translate-x-[0.5px] after:bg-primary-200">
-            <div class="relative z-10 size-6 flex justify-center items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" class="shrink-0 size-6 text-primary-700">
-                    <path d="M23.925781 3.9257812C22.918781 3.9257812 21.957625 4.2234375 21.140625 4.7734375L28.09375 11.689453C28.63475 10.877453 28.925781 9.9237812 28.925781 8.9257812C28.925781 7.5897812 28.404937 6.335625 27.460938 5.390625C26.516938 4.445625 25.261781 3.9257812 23.925781 3.9257812 z M 20.369141 5.4140625C18.443141 7.3650625 18.448625 10.518937 20.390625 12.460938C21.334625 13.404938 22.589781 13.925781 23.925781 13.925781C25.259781 13.925781 26.511078 13.405844 27.455078 12.464844L20.369141 5.4140625 z M 29.519531 16.083984C27.738531 16.083984 26.264766 16.945969 24.884766 18.792969L21.003906 23.886719L16.144531 19.849609C14.871531 18.791609 12.977922 18.969188 11.919922 20.242188C10.862922 21.514187 11.037547 23.408797 12.310547 24.466797L19.667969 30.572266C19.689969 30.590266 19.730813 30.616859 19.757812 30.630859C21.024812 31.565859 22.799547 31.354109 23.810547 30.162109L28.144531 24.447266C28.312531 24.227266 28.62575 24.185562 28.84375 24.351562C29.06475 24.518563 29.108406 24.831734 28.941406 25.052734L24.146484 31.376953L24.146484 34.515625L17.042969 39.699219C15.961969 40.523219 15.569813 42.079313 16.132812 43.320312C16.244416 43.566503 16.394083 43.794451 16.570312 44L12 44C11.447 44 11 44.448 11 45C11 45.552 11.447 46 12 46L43 46C43.553 46 44 45.552 44 45C44 44.448 43.553 44 43 44L37.476562 44C37.912841 43.478911 38.1875 42.816996 38.1875 42.085938C38.1875 40.431938 36.8425 39.082031 35.1875 39.082031L33.298828 39.082031C33.307828 39.075031 33.313266 39.0685 33.322266 39.0625L29.070312 39.0625C28.794313 39.0625 28.570312 38.8385 28.570312 38.5625C28.570312 38.2865 28.794313 38.0625 29.070312 38.0625L34.267578 38.0625C34.818578 37.2855 35.146484 36.339406 35.146484 35.316406L35.146484 21.457031C35.146484 18.494031 32.736437 16.083984 29.773438 16.083984L29.519531 16.083984 z"
-                          fill="#007C40"/>
-                </svg>
-            </div>
-        </div>
-        <!-- End Icon -->
-
-        <!-- Right Content -->
-        <div class="grow pb-8 group-last:pb-0">
-            <h3 class="mb-1 text-xs text-primary-700 font-bold font-secondary">
-                Maghrib
-            </h3>
-
-            <ul class="list-disc ms-6 mt-3 space-y-1.5">
-                <li class="ps-1 text-sm text-gray-600">
-                    Adhan
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:30 AM
-                    </span>
-                </span>
-                </li>
-                <li class="ps-1 text-sm text-gray-600">
-                    Iqamah
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:45 AM
-                    </span>
-                </span>
-                </li>
-            </ul>
-
-        </div>
-        <!-- End Right Content -->
+    <div>
+        <Badge variant="outline">Awolowo Hall</Badge>
+        <Badge variant="outline">Fajuyi Hall</Badge>
+        <Badge variant="outline">ETF Hall</Badge>
+        <Badge variant="outline">PG Hall</Badge>
+        <Badge variant="outline">Geology Grounds</Badge>
+        <Badge variant="outline">Computer Grounds</Badge>
+        <Badge variant="outline">Spider Grounds</Badge>
+        <Badge variant="outline">Chem. Eng Grounds</Badge>
+        <Badge variant="outline">Central Mosque</Badge>
     </div>
-    <!-- End Item -->
-
-    <!-- Item -->
-    <div class="group relative flex gap-x-5">
-        <!-- Icon -->
-        <div class="relative group-last:after:hidden after:absolute after:top-8 after:bottom-2 after:start-3 after:w-px after:-translate-x-[0.5px] after:bg-primary-200">
-            <div class="relative z-10 size-6 flex justify-center items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" class="shrink-0 size-6 text-primary-700">
-                    <path d="M23.925781 3.9257812C22.918781 3.9257812 21.957625 4.2234375 21.140625 4.7734375L28.09375 11.689453C28.63475 10.877453 28.925781 9.9237812 28.925781 8.9257812C28.925781 7.5897812 28.404937 6.335625 27.460938 5.390625C26.516938 4.445625 25.261781 3.9257812 23.925781 3.9257812 z M 20.369141 5.4140625C18.443141 7.3650625 18.448625 10.518937 20.390625 12.460938C21.334625 13.404938 22.589781 13.925781 23.925781 13.925781C25.259781 13.925781 26.511078 13.405844 27.455078 12.464844L20.369141 5.4140625 z M 29.519531 16.083984C27.738531 16.083984 26.264766 16.945969 24.884766 18.792969L21.003906 23.886719L16.144531 19.849609C14.871531 18.791609 12.977922 18.969188 11.919922 20.242188C10.862922 21.514187 11.037547 23.408797 12.310547 24.466797L19.667969 30.572266C19.689969 30.590266 19.730813 30.616859 19.757812 30.630859C21.024812 31.565859 22.799547 31.354109 23.810547 30.162109L28.144531 24.447266C28.312531 24.227266 28.62575 24.185562 28.84375 24.351562C29.06475 24.518563 29.108406 24.831734 28.941406 25.052734L24.146484 31.376953L24.146484 34.515625L17.042969 39.699219C15.961969 40.523219 15.569813 42.079313 16.132812 43.320312C16.244416 43.566503 16.394083 43.794451 16.570312 44L12 44C11.447 44 11 44.448 11 45C11 45.552 11.447 46 12 46L43 46C43.553 46 44 45.552 44 45C44 44.448 43.553 44 43 44L37.476562 44C37.912841 43.478911 38.1875 42.816996 38.1875 42.085938C38.1875 40.431938 36.8425 39.082031 35.1875 39.082031L33.298828 39.082031C33.307828 39.075031 33.313266 39.0685 33.322266 39.0625L29.070312 39.0625C28.794313 39.0625 28.570312 38.8385 28.570312 38.5625C28.570312 38.2865 28.794313 38.0625 29.070312 38.0625L34.267578 38.0625C34.818578 37.2855 35.146484 36.339406 35.146484 35.316406L35.146484 21.457031C35.146484 18.494031 32.736437 16.083984 29.773438 16.083984L29.519531 16.083984 z"
-                          fill="#007C40"/>
-                </svg>
-            </div>
-        </div>
-        <!-- End Icon -->
-
-        <!-- Right Content -->
-        <div class="grow pb-8 group-last:pb-0">
-            <h3 class="mb-1 text-xstext-primary-700 font-bold font-secondary">
-                Isha
-            </h3>
-
-            <ul class="list-disc ms-6 mt-3 space-y-1.5">
-                <li class="ps-1 text-sm text-gray-600">
-                    Adhan
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:30 AM
-                    </span>
-                </span>
-                </li>
-                <li class="ps-1 text-sm text-gray-600">
-                    Iqamah
-                    <span
-                            class="inline-flex flex-nowrap items-center bg-white border border-gray-200 rounded-full p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:45 AM
-                    </span>
-                </span>
-                </li>
-            </ul>
-
-        </div>
-        <!-- End Right Content -->
-    </div>
-    <!-- End Item -->
 </div>
 <!-- End Prayer Times -->
+
+<!-- Upcoming Events Section -->
+<div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+    <!-- Title -->
+    <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between mb-10 lg:mb-14">
+        <div class="text-right sm:text-center">
+        <h2 class="text-2xl font-bold font-primary md:text-4xl md:leading-tight ">Upcoming Events</h2>
+        <p class="mt-1 text-primary-800 sm:text-center font-secondary">More info and registration for some of our upcoming community events.</p>
+        </div>
+
+        <div class="mt-12 text-center">
+            <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-full border border-primary-200 bg-white text-primary-800 shadow-sm hover:bg-primary-50 focus:outline-none focus:bg-primary-50 disabled:opacity-50 disabled:pointer-events-none" href="/events">
+                All Events
+                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+        </div>
+
+    </div>
+    <!-- End Title -->
+
+    <!-- Grid -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card -->
+        <a class="group flex flex-col focus:outline-none" href="#">
+            <div class="relative pt-[50%] sm:pt-[70%] rounded-xl overflow-hidden">
+                <img loading="lazy" class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-xl" src="https://plus.unsplash.com/premium_photo-1678310600127-b3311b803a49?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGVpZCUyMHBhcnR5fGVufDB8fDB8fHww" alt="Eid Fest">
+                <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-primary-800 text-white py-1.5 px-3">
+          Paid - ₦3000
+        </span>
+            </div>
+
+            <div class="mt-7">
+                <h3 class="text-xl font-semibold text-gray-800 group-hover:text-gray-600">
+                    Eid Fest 2025
+                </h3>
+                <p class="mt-3 text-gray-800">
+                    After all the hectic hustle of Eid, it’s time to finally let off some heat...
+                </p>
+                <p class="mt-5 inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium ">
+                    More Info
+                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </p>
+            </div>
+        </a>
+        <!-- End Card -->
+
+        <!-- Card -->
+        <a class="group flex flex-col focus:outline-none" href="#">
+            <div class="relative pt-[50%] sm:pt-[70%] rounded-xl overflow-hidden">
+                <img loading="lazy" class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-xl" src="https://images.unsplash.com/photo-1651293478838-1f51675131c5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aXNsYW1pYyUyMGxlY3R1cmV8ZW58MHx8MHx8fDA%3D" alt="Al-Usrah">
+            </div>
+
+            <div class="mt-7">
+                <h3 class="text-xl font-semibold text-gray-800 group-hover:text-gray-600">
+                    Al-Usrah
+                </h3>
+                <p class="mt-3 text-gray-800">
+                    It's time for our special weekly programme, where we get together to remind ourselves of...
+                </p>
+                <p class="mt-5 inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium">
+                    More Info
+                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </p>
+            </div>
+        </a>
+        <!-- End Card -->
+
+        <!-- Card -->
+        <a class="group relative flex flex-col w-full min-h-60 bg-[url('https://plus.unsplash.com/premium_photo-1676496046182-356a6a0ed002?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=560&q=80')] bg-center bg-cover rounded-xl hover:shadow-lg focus:outline-none focus:shadow-lg transition" href="#">
+            <div class="absolute inset-0 bg-black/40 blur-sm rounded-xl"></div>
+            <div class="flex-auto p-4 md:p-6 z-10">
+                <h3 class="text-xl text-white/90 group-hover:text-white"><span class="font-bold text-primary-100">How To</span> register for Paid MSSN Events online via the website.</h3>
+            </div>
+            <div class="pt-0 p-4 md:p-6">
+                <div class="inline-flex items-center gap-2 text-sm font-medium text-white group-hover:text-white/70 group-focus:text-white/70">
+                    Read Article
+                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+            </div>
+        </a>
+        <!-- End Card -->
+    </div>
+    <!-- End Grid -->
+</div>
+<!-- End Upcoming Events -->
 
 <!-- Blog Section -->
 <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
@@ -581,7 +718,7 @@
         <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
            href="https://annuurpress.org.ng/ink-and-ashes/">
             <div class="aspect-w-16 aspect-h-11">
-                <img class="w-full object-cover rounded-xl h-[210px]"
+                <img class="w-full object-cover rounded-xl h-[210px]" loading="lazy"
                      src="https://annuurpress.org.ng/wp-content/uploads/2024/12/41507-e1733481937229.jpg"
                      alt="Inks and Ashes">
             </div>
@@ -595,7 +732,7 @@
                 </p>
             </div>
             <div class="mt-auto flex items-center gap-x-3">
-                <img class="size-8 rounded-full" src="/images/woman_1.png" alt="Aishat Elusogbon">
+                <img class="size-8 rounded-full" loading="lazy" src="/images/woman_1.png" alt="Aishat Elusogbon">
                 <div>
                     <h5 class="text-sm text-neutral-800">By Aishat Elusogbon</h5>
                 </div>
@@ -607,7 +744,7 @@
         <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
            href="https://annuurpress.org.ng/hardship-is-temporary/">
             <div class="aspect-w-16 aspect-h-11">
-                <img class="w-full object-cover rounded-xl h-[210px]"
+                <img class="w-full object-cover rounded-xl h-[210px]" loading="lazy"
                      src="https://annuurpress.org.ng/wp-content/uploads/2024/12/alone-4672965_1920-e1733482581401-1536x866.jpg"
                      alt="Hardship is Temporary">
             </div>
@@ -621,7 +758,7 @@
                 </p>
             </div>
             <div class="mt-auto flex items-center gap-x-3">
-                <img class="size-8 rounded-full" src="/images/woman_2.png" alt="Rōdhiyah Adesina">
+                <img  loading="lazy" class="size-8 rounded-full" src="/images/woman_2.png" alt="Rōdhiyah Adesina">
                 <div>
                     <h5 class="text-sm text-neutral-800">By Rōdhiyah Adesina</h5>
                 </div>
@@ -634,6 +771,7 @@
            href="https://annuurpress.org.ng/cheers-to-better-days/">
             <div class="aspect-w-16 aspect-h-11">
                 <img class="w-full object-cover rounded-xl h-[210px]"
+                     loading="lazy"
                      src="https://annuurpress.org.ng/wp-content/uploads/2024/11/tree-164915_1280.jpg"
                      alt="Cheers to Better Days">
             </div>
@@ -647,7 +785,7 @@
                 </p>
             </div>
             <div class="mt-auto flex items-center gap-x-3">
-                <img class="size-8 rounded-full" src="/images/woman_3.png" alt="Ruqoyyah Idris">
+                <img class="size-8 rounded-full" src="/images/woman_3.png" loading="lazy" alt="Ruqoyyah Idris">
                 <div>
                     <h5 class="text-sm text-neutral-800">By Ruqoyyah Idris</h5>
                 </div>
@@ -702,22 +840,18 @@
                 </AlertDialog.Trigger>
                 <AlertDialog.Content>
                     <AlertDialog.Header>
-                        <AlertDialog.Title class="font-primary text-primary-800">Are you absolutely sure?
+                        <AlertDialog.Title class="font-primary text-primary-800">Donate
                         </AlertDialog.Title>
-                        <AlertDialog.Description>
-                            This action cannot be undone. This will permanently delete your account
-                            and remove your data from our servers.
-                        </AlertDialog.Description>
                     </AlertDialog.Header>
                     <!-- List -->
                     <div class="space-y-3">
                         <dl class="flex flex-col sm:flex-row gap-1">
                             <dt class="min-w-40">
-                                <span class="block text-sm text-gray-500 dark:text-neutral-500">Account Name:</span>
+                                <span class="block text-sm text-gray-500 ">Account Name:</span>
                             </dt>
                             <dd>
                                 <ul>
-                                    <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800 dark:text-neutral-200">
+                                    <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800">
                                         Muslim Students’ Society Of Nigeria, OAU
                                     </li>
                                 </ul>
@@ -726,11 +860,11 @@
 
                         <dl class="flex flex-col sm:flex-row gap-1">
                             <dt class="min-w-40">
-                                <span class="block text-sm text-gray-500 dark:text-neutral-500">Bank Name:</span>
+                                <span class="block text-sm text-gray-500 ">Bank Name:</span>
                             </dt>
                             <dd>
                                 <ul>
-                                    <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800 dark:text-neutral-200">
+                                    <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800">
                                         GTBank
                                     </li>
                                 </ul>
@@ -739,11 +873,11 @@
 
                         <dl class="flex flex-col sm:flex-row gap-1">
                             <dt class="min-w-40">
-                                <span class="block text-sm text-gray-500 dark:text-neutral-500">Account Number:</span>
+                                <span class="block text-sm text-gray-500">Account Number:</span>
                             </dt>
                             <dd>
                                 <ul>
-                                    <li class="me-1 inline-flex items-center text-sm text-neutral-800 dark:text-neutral-200">
+                                    <li class="me-1 inline-flex items-center text-sm text-neutral-800">
                                         0217023039
                                         <Copy onclick={copyAccNumber}
                                               class="size-4 text-primary-700 cursor-pointer ml-4"/>
@@ -801,7 +935,7 @@
 
             <!-- image - start -->
             <div class="order-first h-48 w-full bg-gray-300 sm:order-none sm:h-auto sm:w-1/2 lg:w-2/5">
-                <img src="/images/suggestions.png" loading="lazy" alt="People conversing"
+                <img src="https://images.unsplash.com/photo-1612955625275-08aebd897b3a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHN1Z2dlc3Rpb24lMjBib3h8ZW58MHx8MHx8fDA%3D" loading="lazy" alt="Suggestion Box"
                      class="h-full w-full object-cover object-center"/>
             </div>
             <!-- image - end -->
