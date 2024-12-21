@@ -184,7 +184,7 @@
                                 <MessageCircle class="mr-2 size-4"/>
                                 Send SMS
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item onclick={() => window.open(`https://wa.me/234${advisor.phone.replace(/^0/, "").replace(/^234/, "").replace(/^\+234/, "")}`)}>
+                            <DropdownMenu.Item onclick={() => window.open(`https://wa.me/234${advisor.phone.replace(/^0/, "").replace(/^234/, "").replace(/^\+234/, "").replaceAll(" ", "")}`)}>
                                 <svg class=
                                              "mr-2 size-4" fill="#25D366" role="img" viewBox="0 0 24 24"
                                      xmlns="http://www.w3.org/2000/svg"><title>WhatsApp</title>
