@@ -529,7 +529,7 @@
     <div class="grid grid-rows-5 grid-cols-none sm:grid-cols-2 sm:grid-rows-none lg:grid-cols-5 gap-4 mt-8">
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 0 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 Fajr</h2>
 
@@ -543,7 +543,7 @@
         </div>
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 1 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/noon.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 1 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 1 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 {upcoming_solat === 1 ? 'text-white text-2xl' : 'text-primary-100 text-xl'} font-primary font-bold">
                 Dhuhr</h2>
 
@@ -557,7 +557,7 @@
         </div>
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-xl' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 2 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 ‘Asr</h2>
 
@@ -571,7 +571,7 @@
         </div>
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 3 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/late-evening.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 3 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 3 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 3 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 Maghrib</h2>
 
@@ -585,7 +585,7 @@
         </div>
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/night.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 4 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 ‘Isha’</h2>
 
