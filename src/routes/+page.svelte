@@ -20,6 +20,7 @@
     import {Button} from "$lib/components/ui/button/index.js";
     import Autoplay from "embla-carousel-autoplay";
     import * as Carousel from "$lib/components/ui/carousel/index.js";
+    import copyTextToClipboard from '$lib/utils/copy.js'
 
 
     let selectedMosque = "awolowo_hall"
@@ -91,32 +92,6 @@
 
     $: selectedImage = programmes.find(event => event.title === selectedEvent)?.image
 
-    async function copyTextToClipboard(text) {
-        if (navigator.clipboard) {
-            // Try using Clipboard API
-            return navigator.clipboard.writeText(text)
-                .then(() => true)
-                .catch(() => fallbackCopyTextToClipboard(text));
-        } else {
-            // Fallback for older browsers
-            return Promise.resolve(fallbackCopyTextToClipboard(text));
-        }
-    }
-
-    function fallbackCopyTextToClipboard(text) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            return true;
-        } catch (err) {
-            document.body.removeChild(textArea);
-            return false;
-        }
-    }
 
     let hijrahDate = ""
     let shortHijrahDate = ""
@@ -265,7 +240,7 @@
     }
 
 
-    let upcoming_solat;
+    let upcoming_solat = 0;
 
     onMount(() => {
         upcoming_solat = getSolahPeriod()
@@ -465,9 +440,9 @@
                 class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === programme.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer"/>
         {/if}
                 <span class="grow">
-                <span class="block text-lg font-semibold {selectedEvent === programme.title ? 'text-primary-700' : ''} text-neutral-800">{programme.title}</span>
+                <span class="block text-lg font-semibold font-secondary {selectedEvent === programme.title ? 'text-primary-700' : ''} text-neutral-800">{programme.title}</span>
                     {#if selectedEvent === programme.title}
-                <span in:slide out:slide class="block mt-1 text-neutral-800">{programme.text}</span>
+                <span in:slide out:slide class="block mt-1 text-neutral-800 font-tertiary">{programme.text}</span>
                       {/if}
               </span>
             </span>
@@ -543,16 +518,16 @@
         </div>
 
         <div class="font-secondary">
-            <p class="text-primary-800 hidden sm:block">{getFormattedDateVerbose()}</p>
-            <p class="text-primary-800 sm:hidden block">{getFormattedDateVerboseShort()}</p>
-            <p class="text-[#333333] font-semibold hidden sm:block">{hijrahDate}</p>
-            <p class="text-[#333333] font-semibold sm:hidden block">{shortHijrahDate}</p>
+            <p class="text-primary-800 font-tertiary hidden sm:block">{getFormattedDateVerbose()}</p>
+            <p class="text-primary-800 font-tertiary sm:hidden block">{getFormattedDateVerboseShort()}</p>
+            <p class="text-[#333333] font-tertiary font-semibold hidden sm:block">{hijrahDate}</p>
+            <p class="text-[#333333] font-tertiary font-semibold sm:hidden block">{shortHijrahDate}</p>
         </div>
     </div>
     <div class="grid grid-rows-5 grid-cols-none sm:grid-cols-2 sm:grid-rows-none lg:grid-cols-5 gap-4 mt-8">
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 0 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 Fajr</h2>
 
@@ -566,7 +541,7 @@
         </div>
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 1 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/noon.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 1 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 1 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 {upcoming_solat === 1 ? 'text-white text-2xl' : 'text-primary-100 text-xl'} font-primary font-bold">
                 Dhuhr</h2>
 
@@ -580,7 +555,7 @@
         </div>
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-xl' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 2 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 ‘Asr</h2>
 
@@ -594,7 +569,7 @@
         </div>
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 3 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/late-evening.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 3 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 3 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 3 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 Maghrib</h2>
 
@@ -608,7 +583,7 @@
         </div>
 
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/night.png')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-black-20' : 'bg-black/70'} blur-sm rounded-xl"></div>
+            <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-black/20' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 4 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 ‘Isha’</h2>
 
@@ -652,7 +627,7 @@
         </div>
 
         <div class="mt-12 text-center">
-            <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-white text-primary-800 shadow-sm hover:bg-primary-50 focus:outline-none focus:bg-primary-50 disabled:opacity-50 disabled:pointer-events-none" href="/events">
+            <a class="py-3 text-nowrap px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-white text-primary-800 shadow-sm hover:bg-primary-50 focus:outline-none focus:bg-primary-50 disabled:opacity-50 disabled:pointer-events-none" href="/events">
                 All Events
                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </a>
@@ -667,19 +642,19 @@
         <a class="group flex flex-col focus:outline-none" href="#">
             <div class="relative pt-[50%] sm:pt-[70%] rounded-xl overflow-hidden">
                 <img loading="lazy" class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-xl" src="https://plus.unsplash.com/premium_photo-1678310600127-b3311b803a49?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGVpZCUyMHBhcnR5fGVufDB8fDB8fHww" alt="Eid Fest">
-                <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-primary-800 text-white py-1.5 px-3">
+                <span class="font-tertiary absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-primary-800 text-white py-1.5 px-3">
           Paid - ₦3000
         </span>
             </div>
 
             <div class="mt-7">
-                <h3 class="text-xl font-semibold text-gray-800 group-hover:text-gray-600">
+                <h3 class="text-xl font-secondary font-semibold text-gray-800 group-hover:text-gray-600">
                     Eid Fest 2025
                 </h3>
-                <p class="mt-3 text-gray-800">
+                <p class="mt-3 font-tertiary text-gray-800">
                     After all the hectic hustle of Eid, it’s time to finally let off some heat...
                 </p>
-                <p class="mt-5 inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium ">
+                <p class="mt-5 inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium font-secondary">
                     More Info
                     <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 </p>
@@ -694,13 +669,13 @@
             </div>
 
             <div class="mt-7">
-                <h3 class="text-xl font-semibold text-gray-800 group-hover:text-gray-600">
+                <h3 class="text-xl font-secondary font-semibold text-gray-800 group-hover:text-gray-600">
                     Al-Usrah
                 </h3>
-                <p class="mt-3 text-gray-800">
+                <p class="mt-3 font-tertiary text-gray-800">
                     It's time for our special weekly programme, where we get together to remind ourselves of...
                 </p>
-                <p class="mt-5 inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium">
+                <p class="mt-5 font-secondary inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium">
                     More Info
                     <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 </p>
@@ -712,7 +687,7 @@
         <a class="group relative flex flex-col w-full min-h-60 bg-[url('https://plus.unsplash.com/premium_photo-1676496046182-356a6a0ed002?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=560&q=80')] bg-center bg-cover rounded-xl hover:shadow-lg focus:outline-none focus:shadow-lg transition" href="#">
             <div class="absolute inset-0 bg-black/40 blur-sm rounded-xl"></div>
             <div class="flex-auto p-4 md:p-6 z-10">
-                <h3 class="text-xl text-white/90 group-hover:text-white"><span class="font-bold text-primary-100">How To</span> register for Paid MSSN Events online via the website.</h3>
+                <h3 class="text-xl text-white/90 group-hover:text-white font-tertiary"><span class="font-bold text-primary-100 font-secondary">How To</span> register for Paid MSSN Events online via the website.</h3>
             </div>
             <div class="pt-0 p-4 md:p-6">
                 <div class="inline-flex items-center gap-2 text-sm font-medium text-white group-hover:text-white/70 group-focus:text-white/70">
@@ -747,10 +722,10 @@
                      alt="Inks and Ashes">
             </div>
             <div class="my-6">
-                <h3 class="text-xl font-semibold text-primary-900">
+                <h3 class="text-xl font-secondary font-semibold text-primary-900">
                     Ink and Ashes
                 </h3>
-                <p class="mt-5 text-gray-600">
+                <p class="mt-5 text-gray-600 font-tertiary">
                     I still remember how we used to run around in circles as though we couldn't stop, how we suckle
                     sweets...
                 </p>
@@ -758,7 +733,7 @@
             <div class="mt-auto flex items-center gap-x-3">
                 <img class="size-8 rounded-full" loading="lazy" src="/images/woman_1.png" alt="Aishat Elusogbon">
                 <div>
-                    <h5 class="text-sm text-neutral-800">By Aishat Elusogbon</h5>
+                    <h5 class="text-sm text-neutral-800 font-secondary">By Aishat Elusogbon</h5>
                 </div>
             </div>
         </a>
@@ -773,10 +748,10 @@
                      alt="Hardship is Temporary">
             </div>
             <div class="my-6">
-                <h3 class="text-xl font-semibold text-primary-900">
+                <h3 class="text-xl font-semibold font-secondary text-primary-900">
                     Hardship is Temporary
                 </h3>
-                <p class="mt-5 text-gray-600">
+                <p class="mt-5 text-gray-600 font-tertiary">
                     Hardship is defined as: Phonologically – /hɑ:dʃɪp/ Dictionary-wise – Difficulty To be in hardship
                     means to be burdened or troubled.Oftentimes, when people...
                 </p>
@@ -784,7 +759,7 @@
             <div class="mt-auto flex items-center gap-x-3">
                 <img  loading="lazy" class="size-8 rounded-full" src="/images/woman_2.png" alt="Rōdhiyah Adesina">
                 <div>
-                    <h5 class="text-sm text-neutral-800">By Rōdhiyah Adesina</h5>
+                    <h5 class="text-sm text-neutral-800 font-secondary">By Rōdhiyah Adesina</h5>
                 </div>
             </div>
         </a>
@@ -800,10 +775,10 @@
                      alt="Cheers to Better Days">
             </div>
             <div class="my-6">
-                <h3 class="text-xl font-semibold text-primary-900">
+                <h3 class="text-xl font-secondary font-semibold text-primary-900">
                     Cheers to Better Days
                 </h3>
-                <p class="mt-5 text-gray-600">
+                <p class="mt-5 text-gray-600 font-tertiary">
                     Enjoying my busy sleep as I lay,Lay on my weary thatched bed—Oh, I mean a thatched mattress,Or maybe
                     some cartons...
                 </p>
@@ -811,7 +786,7 @@
             <div class="mt-auto flex items-center gap-x-3">
                 <img class="size-8 rounded-full" src="/images/woman_3.png" loading="lazy" alt="Ruqoyyah Idris">
                 <div>
-                    <h5 class="text-sm text-neutral-800">By Ruqoyyah Idris</h5>
+                    <h5 class="text-sm text-neutral-800 font-secondary">By Ruqoyyah Idris</h5>
                 </div>
             </div>
         </a>
@@ -852,8 +827,6 @@
                     and
                     collective efforts, both in cash and kind.</p>
             </div>
-
-
             <AlertDialog.Root>
                 <AlertDialog.Trigger>
                     <button type="button"
@@ -919,16 +892,6 @@
                     </AlertDialog.Footer>
                 </AlertDialog.Content>
             </AlertDialog.Root>
-
-            <!--                    <button onclick={() => {-->
-            <!--                        copyTextToClipboard(`Bank: GTBank\nAccount Name: Muslim Students’ Society Of Nigeria, OAU\nAccount Number: 0217023039`)-->
-            <!--                        toast.success("Account details copied to your clipboard")-->
-            <!--                    }} type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">-->
-            <!--                        Copy Details-->
-            <!--                    </button>-->
-            <!--                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">-->
-            <!--                        Copy Number-->
-            <!--                    </button>-->
         </div>
     </div>
 </div>
