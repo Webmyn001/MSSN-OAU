@@ -248,6 +248,7 @@
     })
 
 </script>
+
 <!-- Meta Tags -->
 <MetaTags
         title="We are OAU Great Ìfẹ́'s Muslim Community"
@@ -272,7 +273,7 @@
 <!-- End Meta Tags -->
 
 <!-- Hero -->
-<section class="py-32 mx-auto">
+<section class="py-32 mx-auto w-full">
     <div class="container flex flex-col items-center text-center w-full">
         <h1 class="text-primary-900 -translate-x-3 my-6 text-pretty text-4xl font-bold lg:text-6xl" id="hero-text">We are Great <span
                 class="relative inline ml-2 mr-12 sm:ml-2 sm:mr-2 lg:ml-4 top-[-6px]"><span
@@ -287,7 +288,7 @@
                 minSize={0.8}
                 maxSize={5}
                 particleDensity={400}
-                className="w-[80dvw] mx-[10dvw] h-[20dvh]"
+                className="w-full mx-[10dvw] h-[20dvh]"
                 particleColor="#026d3b"
         />
         <div class="flex w-full flex-col justify-center gap-2 sm:flex-row">
@@ -511,7 +512,7 @@
 </div>
 
 <!-- Prayer Times -->
-<div class="w-[75dvw] mx-auto space-y-8 mt-12">
+<div class="w-[80%] mx-auto space-y-8 mt-12">
     <div class="w-full flex flex-row justify-between items-center my-4">
         <div>
             <h1 class="mx-auto font-primary font-bold text-2xl sm:text-3xl md:text-4xl">Prayer Times</h1>
@@ -603,7 +604,7 @@
         <span class="p-4 bg-primary-800 text-white rounded-md font-tertiary text-xs">Friday Sermon starts at 1:30 PM and Prayer commences at 2:15 PM</span>
     </div>
 
-    <div class="flex gap-2 w-[80dvw] sm:mx-[10dvw] overflow-scroll no-scrollbar">
+    <div class="flex gap-2 w-[80dvw] sm:mx-auto overflow-scroll no-scrollbar">
     {#each mosques as mosque}
                 <Badge variant="outline" onclick={() => {
                     selectedMosque = mosque.id
