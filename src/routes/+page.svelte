@@ -175,7 +175,7 @@
 
     async function getHijrahDate() {
         try {
-            const req = await fetch(`http://api.aladhan.com/v1/gToH/${getFormattedDate()}`)
+            const req = await fetch(`https://api.aladhan.com/v1/gToH/${getFormattedDate()}`)
 
             if (!req.ok) throw new Error("Bad Response")
 
