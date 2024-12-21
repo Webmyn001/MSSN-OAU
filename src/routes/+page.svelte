@@ -512,7 +512,7 @@
 </div>
 
 <!-- Prayer Times -->
-<div class="w-[80%] mx-auto space-y-8 mt-12">
+<div id="prayer-times" class="w-[80%] mx-auto space-y-8 mt-12">
     <div class="w-full flex flex-row justify-between items-center my-4">
         <div>
             <h1 class="mx-auto font-primary font-bold text-2xl sm:text-3xl md:text-4xl">Prayer Times</h1>
