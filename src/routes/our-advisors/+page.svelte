@@ -7,6 +7,7 @@
     import {Button} from "$lib/components/ui/button/index.js";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Popover from "$lib/components/ui/popover/index.js";
+    import {MetaTags} from "svelte-meta-tags";
 
 
     let sessionSelectorOpen = $state(false);
@@ -85,6 +86,29 @@
 
 
 </script>
+
+<!-- Meta Tags -->
+<MetaTags
+        title="Our Advisors"
+        titleTemplate="%s | MSSNOAU"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        canonical="https://mssnoau-frontend.vercel.app/our-advisors"
+        openGraph={{
+    url: 'https://mssnoau-frontend.vercel.app/our-advisors',
+    title: 'Our Advisors | MSSNOAU',
+    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
+    images: [
+      {
+        url: 'https://i.ibb.co/HqK7S8Z/our-advisors.jpg',
+        width: 1200,
+        height: 640,
+        alt: 'Website screenshot'
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
+/>
+<!-- End Meta Tags -->
 
 <PageHeader>
     Our Advisors

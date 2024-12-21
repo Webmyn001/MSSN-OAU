@@ -8,6 +8,7 @@
     import * as Popover from "$lib/components/ui/popover/index.js";
     import * as Command from "$lib/components/ui/command/index.js";
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+    import {MetaTags} from "svelte-meta-tags";
 
 
     let sessionSelectorOpen = $state(false);
@@ -571,6 +572,29 @@
      */
     let selectedSession = $state("2024/2025")
 </script>
+
+<!-- Meta Tags -->
+<MetaTags
+        title="Our Executives"
+        titleTemplate="%s | MSSNOAU"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        canonical="https://mssnoau-frontend.vercel.app/our-excos"
+        openGraph={{
+    url: 'https://mssnoau-frontend.vercel.app/-our-excos',
+    title: 'Our Executives | MSSNOAU',
+    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
+    images: [
+      {
+        url: 'https://i.ibb.co/XkXWPtq/our-excos.jpg',
+        width: 1200,
+        height: 640,
+        alt: 'Website screenshot'
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
+/>
+<!-- End Meta Tags -->
 
 <PageHeader>
     Our Executives

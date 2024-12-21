@@ -260,7 +260,7 @@
     description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
     images: [
       {
-        url: 'https://i.ibb.co/gjDc0Nw/mssnoau-screenshot-compressed.png',
+        url: 'https://i.ibb.co/zbWfh5B/home.jpg',
         width: 1200,
         height: 640,
         alt: 'Website screenshot'
@@ -270,6 +270,7 @@
   }}
 />
 <!-- End Meta Tags -->
+
 <!-- Hero -->
 <section class="py-32 mx-auto">
     <div class="container flex flex-col items-center text-center w-full">
