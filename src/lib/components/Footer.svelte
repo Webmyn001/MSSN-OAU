@@ -50,7 +50,7 @@
                         </a>
                     </div>
                     <p class="mt-3 text-sm font-secondary text-text-neutral-800">
-                        Only Blog Posts and Press Releases.
+                        Only Events, Blog Posts and Press Releases.
                     </p>
                 </form>
             </div>

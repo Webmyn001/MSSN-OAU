@@ -510,6 +510,7 @@
         <!-- End Background Color -->
     </div>
 </div>
+<!-- End Events -->
 
 <!-- Prayer Times -->
 <div id="prayer-times" class="w-[80%] mx-auto space-y-8 mt-12">
