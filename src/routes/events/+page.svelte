@@ -299,7 +299,7 @@
                                 style={`background-image: url('${event.image}')`}
                         >
                             <div class="absolute {isPastDate(event.date) ? '' : 'hidden'} inset-0 z-[11] rounded-[10px] backdrop-blur-sm opacity-60 bg-no-repeat bg-cover bg-center bg-[url('/images/ended.webp')]"></div>
-                            <div class="absolute inset-0 {isPastDate(event.date) ? 'bg-black/70' : 'bg-black/20'} blur-sm rounded-[10px]"></div>
+                            <div class="absolute inset-0 {isPastDate(event.date) ? 'bg-black/70' : 'bg-black/30'} blur-sm rounded-[10px]"></div>
                             <time datetime="2022-10-10" class="block backdrop-blur-sm font-mono z-10 text-xs text-neutral-200">
                                 {formatDate(event.date).date}
                             </time>
