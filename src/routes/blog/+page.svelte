@@ -115,7 +115,7 @@
 
 <PageHeader>
     Our Blog
-    <p class="text-neutral-100 font-tertiary text-sm mt-4">
+    <p class="text-neutral-100 text-center font-tertiary text-sm mt-4">
         Reflective, immersive write-ups, curated by the <a href="https://annuurpress.org.ng/" class="semibold underline">An-Nuur Press</a>
     </p>
 </PageHeader>
