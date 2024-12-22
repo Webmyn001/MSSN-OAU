@@ -725,10 +725,7 @@
                                     <AlertDialog.Footer>
                                         <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
                                         <AlertDialog.Action onclick={() => {
-                                        copyTextToClipboard(`
-                                        ${member.name}
-                                        The ${member.position} at ${committee.label}, MSSNOAU
-                                        Phone: ${member.phone}`)
+                                        copyTextToClipboard(`${member.name}\nThe ${member.position} at ${committee.label}, MSSNOAU\nPhone: ${member.phone}`)
                                         .then(() => {
                                             toast.success(member.name + "'s details copied to clipboard.");
                                         })

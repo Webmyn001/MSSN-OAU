@@ -18,6 +18,7 @@
                     <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="/our-excos">Our Excos</a></p>
                     <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="/our-advisors">Our Advisors</a></p>
                     <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="/contact">Contact Us</a></p>
+                    <p><a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700" href="/contact#faqs">FAQs</a></p>
                 </div>
             </div>
             <!-- End Col -->

@@ -1,6 +1,31 @@
 <script>
     import PageHeader from "$lib/components/PageHeader.svelte";
+    import {MetaTags} from "svelte-meta-tags";
 </script>
+
+
+<!-- Meta Tags -->
+<MetaTags
+        title="About Us"
+        titleTemplate="%s | MSSNOAU"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        canonical="https://mssnoau-frontend.vercel.app/alumnae"
+        openGraph={{
+    url: 'https://mssnoau-frontend.vercel.app/alumnae',
+    title: 'About Us | MSSNOAU',
+    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
+    images: [
+      {
+        url: 'https://i.ibb.co/H7t1bv3/about.jpg',
+        width: 1200,
+        height: 640,
+        alt: 'Website screenshot'
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
+/>
+<!-- End Meta Tags -->
 
 <PageHeader>
     About MSSNOAU
