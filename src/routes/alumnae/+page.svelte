@@ -31,11 +31,11 @@
     Reconnect with MSSNOAU
 </PageHeader>
 
-<section class="pb-12">
+<section class="pt-6 pb-12">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center flex-col lg:flex-row md:mt-20">
             <div class="w-full lg:w-1/2">
-                <h2 class="text-5xl text-gray-900 font-semibold leading-[4rem] mb-7 text-center lg:text-left font-secondary">
+                <h2 class="text-2xl sm:3xl md:text-4xl text-gray-900 font-semibold leading-[4rem] mb-7 text-center lg:text-left font-secondary">
                     Give back to <br />The Community</h2>
                 <p class="text-lg text-gray-500 mb-16 text-center lg:text-left font-tertiary md:pr-12">We would love to hear how you, as a valued alumna, believe you can contribute to the growth and success of our organization. Whether through mentorship, resources, or other forms of support, your involvement can make a meaningful impact. Please share with us how you'd like to help.</p>
                 <a class="cursor-pointer py-3 px-8 w-60 bg-primary-700 text-white text-base font-semibold transition-all duration-500 block text-center rounded-xl hover:bg-primary-700/90 mx-auto lg:mx-0" href="#form">Fill the form</a>
