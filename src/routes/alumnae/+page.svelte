@@ -41,7 +41,7 @@
                 <a class="cursor-pointer py-3 px-8 w-60 bg-primary-700 text-white text-base font-semibold transition-all duration-500 block text-center rounded-xl hover:bg-primary-700/90 mx-auto lg:mx-0" href="#form">Fill the form</a>
             </div>
             <div class="w-full lg:w-1/2 lg:mt-0 md:mt-40 mt-16 max-lg:max-w-2xl">
-                <div class="grid grid-cols-1 min-[450px]:grid-cols-2 md:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 min-[450px]:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
                     <img src="/images/bg-1.webp" alt="OAU Pic"
                          class="w-44 h-56 rounded-2xl object-cover md:mt-20 mx-auto min-[450px]:mr-0" />
                     <img src="/images/bg-4.webp" alt="OAU Pic"
