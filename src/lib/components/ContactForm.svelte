@@ -1,11 +1,13 @@
 <script>
     export let wrapperClass = "mt-12 max-w-lg mx-auto"
+
+export let title = "Alumnae Form"
 </script>
 <div class={wrapperClass}>
     <!-- Card -->
     <div id="form" class="flex flex-col border rounded-xl p-4 sm:p-6 lg:p-8">
         <h2 class="mb-8 text-xl font-semibold text-gray-800">
-            Alumnae Form
+            {title}
         </h2>
 
         <form>
