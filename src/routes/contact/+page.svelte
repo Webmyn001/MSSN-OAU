@@ -3,6 +3,7 @@
     import ContactForm from "$lib/components/ContactForm.svelte";
     import * as Accordion from "$lib/components/ui/accordion/index.js";
     import {CircleHelp} from "lucide-svelte";
+    import {MetaTags} from "svelte-meta-tags";
 
     const faqs = [
         {
@@ -40,6 +41,29 @@
     ];
 
 </script>
+
+<!-- Meta Tags -->
+<MetaTags
+        title="Contact Us"
+        titleTemplate="%s | MSSNOAU"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        canonical="https://mssnoau-frontend.vercel.app/"
+        openGraph={{
+    url: 'https://mssnoau-frontend.vercel.app/',
+    title: 'Contact Us | MSSNOAU',
+    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
+    images: [
+      {
+        url: 'https://i.ibb.co/zbWfh5B/home.webp',
+        width: 1200,
+        height: 640,
+        alt: 'Website screenshot'
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
+/>
+<!-- End Meta Tags -->
 
 <PageHeader>
     Contact Us
