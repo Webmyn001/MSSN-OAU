@@ -157,7 +157,7 @@
                             </dl>
                         </div>
                         <!-- End List -->
-                        <AlertDialog.Footer>
+                        <AlertDialog.Footer class="flex flex-col md:flex-row gap-2 sm:gap-3">
                             <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
                             <AlertDialog.Action class="bg-primary-800 text-white bg-primary-800/90"
                                                 onclick={copyAccDetails}>Copy Account Details
