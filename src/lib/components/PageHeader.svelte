@@ -1,4 +1,4 @@
-<div class="relative h-[20dvh] sm:h-[30dvh] lg:h-[40dvh] bg-[url('/images/bg-1.png')] w-full bg-no-repeat bg-cover bg-center">
+<div class="relative h-[20dvh] sm:h-[30dvh] lg:h-[40dvh] bg-[url('/images/bg-1.webp')] w-full bg-no-repeat bg-cover bg-center">
     <div class="absolute inset-0 w-full h-full">
         <div
                 class="w-full h-full blur-sm"

@@ -4,6 +4,7 @@
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
     import {toast} from "svelte-sonner";
     import {formatDate, isPastDate, months} from "$lib/utils/dates.js";
+    import {MetaTags} from "svelte-meta-tags";
 
     function sortEvents(events) {
         const today = new Date();
@@ -67,7 +68,7 @@
     const rawEvents = [
         {
             "title": "Islamic Finance Summit",
-            "image": "/images/al-usrah.png",
+            "image": "/images/al-usrah.webp",
             "summary": "A summit featuring esteemed guest speakers discussing Islamic finance principles and applications.",
             "paid": false,
             "price": "",
@@ -77,7 +78,7 @@
         },
         {
             "title": "Jihad Week 1445 AH Qur'an Competition",
-            "image": "/images/committees/jwc.png",
+            "image": "/images/committees/jwc.webp",
             "summary": "A celebration of knowledge, spirituality, and community through a Qur'an recitation competition.",
             "paid": false,
             "price": "",
@@ -87,7 +88,7 @@
         },
         {
             "title": "Ramadan Iftar Gatherings",
-            "image": "/images/committees/business-committee.jpg",
+            "image": "/images/committees/business-committee.webp",
             "summary": "Daily Iftar gatherings during Ramadan to foster unity and gratitude among Muslim students.",
             "paid": false,
             "price": "",
@@ -97,7 +98,7 @@
         },
         {
             "title": "Muslimah Ball - An Halāl Dinner",
-            "image": "/images/committees/an-nuur.png",
+            "image": "/images/committees/an-nuur.webp",
             "summary": "A special event for Muslim sisters featuring a Halāl dinner and various engaging activities.",
             "paid": true,
             "price": "₦2,000",
@@ -107,7 +108,7 @@
         },
         {
             "title": "FYB Dinner and UNIFEMGA Induction",
-            "image": "/images/committees/jwc.png",
+            "image": "/images/committees/jwc.webp",
             "summary": "A grand dinner and induction ceremony celebrating the achievements of final year brethren.",
             "paid": true,
             "price": "₦5,000",
@@ -117,7 +118,7 @@
         },
         {
             "title": "70th Anniversary Jihad Week Debating Competition",
-            "image": "/images/committees/business-committee.jpg",
+            "image": "/images/committees/business-committee.webp",
             "summary": "A debating competition as part of the activities marking the 70th Anniversary of MSSN.",
             "paid": false,
             "price": "",
@@ -127,7 +128,7 @@
         },
         {
             "title": "Ramadan Feeding Program",
-            "image": "/images/committees/an-nuur.png",
+            "image": "/images/committees/an-nuur.webp",
             "summary": "A program providing meals to students during Ramadan, showcasing dedication and collaboration.",
             "paid": false,
             "price": "",
@@ -137,7 +138,7 @@
         },
         {
             "title": "Health Checkup and Seminar",
-            "image": "/images/committees/jwc.png",
+            "image": "/images/committees/jwc.webp",
             "summary": "Health checkup and seminar as part of the Jihad Week activities.",
             "paid": false,
             "price": "",
@@ -147,7 +148,7 @@
         },
         {
             "title": "Inspiring Workshops and Panel Sessions",
-            "image": "/images/committees/business-committee.jpg",
+            "image": "/images/committees/business-committee.webp",
             "summary": "Workshops and panel sessions aimed at inspiring and educating students.",
             "paid": false,
             "price": "",
@@ -157,7 +158,7 @@
         },
         {
             "title": "Qur'an Recitation and Tafsir Sessions",
-            "image": "/images/committees/an-nuur.png",
+            "image": "/images/committees/an-nuur.webp",
             "summary": "Sessions focusing on Qur'an recitation and interpretation during Jihad Week.",
             "paid": false,
             "price": "",
@@ -167,7 +168,7 @@
         },
         {
             "title": "Al-Usrah",
-            "image": "/images/committees/jwc.png",
+            "image": "/images/committees/jwc.webp",
             "summary": "Weekly sessions for strengthening ourselves in the Deen.",
             "paid": false,
             "price": "",
@@ -219,6 +220,31 @@
     let open = false;
 </script>
 
+<!-- TODO: Add Event Meta Tags -->
+
+<!-- Meta Tags -->
+<MetaTags
+        title="Our Events"
+        titleTemplate="%s | MSSNOAU"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        canonical="https://mssnoau-frontend.vercel.app/"
+        openGraph={{
+    url: 'https://mssnoau-frontend.vercel.app/',
+    title: 'Our Events | MSSNOAU',
+    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
+    images: [
+      {
+        url: 'https://i.ibb.co/zbWfh5B/home.webp',
+        width: 1200,
+        height: 640,
+        alt: 'Website screenshot'
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
+/>
+<!-- End Meta Tags -->
+
 <div class="bg-white py-6 sm:py-8 lg:py-12">
     <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
         <!-- text - start -->
@@ -239,7 +265,7 @@
                 currentEvent = events[i]
                 open = !open
             }}
-                        class="group relative flex h-48 aspect-video sm:aspect-square flex-col overflow-hidden rounded-lg bg-gray-100 shadow-lg md:h-64 lg:h-72">
+                        class="group relative flex h-48 aspect-video sm:aspect-square flex-col overflow-hidden rounded-xl bg-gray-100 shadow-lg md:h-64 lg:h-72">
                     <article
                             class="relative h-full w-full overflow-hidden rounded-xl bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 p-0.5 shadow-xl transition-all duration-500 hover:shadow-sm">
                         <!-- Date container - positioned absolutely and slides in from left -->
@@ -272,8 +298,8 @@
                                 class="h-full relative rounded-[10px] flex flex-col justify-between items-start bg-white p-4 pt-3 transition-all duration-500 group-hover:translate-x-8 sm:p-6 bg-no-repeat bg-cover bg-center"
                                 style={`background-image: url('${event.image}')`}
                         >
-                            <div class="absolute {isPastDate(event.date) ? '' : 'hidden'} inset-0 z-[11] rounded-[10px] bg-no-repeat bg-cover bg-center bg-[url('/images/ended.png')]"></div>
-                            <div class="absolute inset-0 bg-black/50 blur-sm rounded-[10px]"></div>
+                            <div class="absolute {isPastDate(event.date) ? '' : 'hidden'} inset-0 z-[11] rounded-[10px] backdrop-blur-sm opacity-60 bg-no-repeat bg-cover bg-center bg-[url('/images/ended.webp')]"></div>
+                            <div class="absolute inset-0 {isPastDate(event.date) ? 'bg-black/70' : 'bg-black/20'} blur-sm rounded-[10px]"></div>
                             <time datetime="2022-10-10" class="block backdrop-blur-sm font-mono z-10 text-xs text-neutral-200">
                                 {formatDate(event.date).date}
                             </time>
@@ -300,9 +326,11 @@
                             <!-- end large screens only-->
                             <!-- mobile only-->
                             <div class="mt-4 sm:flex-wrap z-10 gap-1 hidden sm:flex">
+                                {#if !isPastDate(event.date)}
                                 <Button class="bg-white text-primary-800 hover:bg-white active:bg-white">See More
                                 </Button>
-                                {#if event.paid}
+                                    {/if}
+                                {#if event.paid && !isPastDate(event.date)}
                                     <Button onclick={() => {
                                         if (isPastDate(event.date)) {
                                             toast.error("This event has passed!")
@@ -335,7 +363,7 @@
                 {currentEvent.summary}
             </AlertDialog.Description>
         </AlertDialog.Header>
-        <div class="flow-root rounded-lg border border-gray-100 py-3 shadow-sm">
+        <div class="flow-root rounded-xl border border-gray-100 py-3 shadow-sm">
             <dl class="-my-3 divide-y divide-gray-100 text-sm">
                 <div class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
                     <dt class="font-medium text-gray-900">Event Name</dt>

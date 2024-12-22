@@ -3,9 +3,8 @@
     import LoaderCircle from "lucide-svelte/icons/loader-circle";
     import {formatDate} from "$lib/utils/dates.js";
     import {onMount} from "svelte";
-    import {ChevronLeft, ChevronRight} from "lucide-svelte";
-    import {Button} from "$lib/components/ui/button/index.js";
     import PageHeader from "$lib/components/PageHeader.svelte";
+    import {MetaTags} from "svelte-meta-tags";
     /**
      * @typedef {Object} Post
      * @property {number} id - The unique identifier for the post.
@@ -58,7 +57,7 @@
      * @type {Post[]}
      */
     let posts = []
-    
+
     /**
      * @returns {Promise<Post[]>}
      */
@@ -89,12 +88,39 @@
     onMount(getPosts)
 
 </script>
+
+<!-- Meta Tags -->
+<MetaTags
+        title="Blog"
+        titleTemplate="%s | MSSNOAU"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        canonical="https://mssnoau-frontend.vercel.app/"
+        openGraph={{
+    url: 'https://mssnoau-frontend.vercel.app/',
+    title: 'Blog | MSSNOAU',
+    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
+    images: [
+      {
+        url: 'https://i.ibb.co/zbWfh5B/home.webp',
+        width: 1200,
+        height: 640,
+        alt: 'Website screenshot'
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
+/>
+<!-- End Meta Tags -->
+
+
 <PageHeader>
     Our Blog
     <p class="text-neutral-100 font-tertiary text-sm mt-4">
         Reflective, immersive write-ups, curated by the <a href="https://annuurpress.org.ng/" class="semibold underline">An-Nuur Press</a>
     </p>
 </PageHeader>
+
+
 <section class="py-16">
     <div class="max-w-7xl mx-auto px-5 sm:px-10 md:px-12 lg:px-5 space-y-14">
 
@@ -109,7 +135,7 @@
                     <!-- Post -->
                     <a href={post.link}
                        target="_blank"
-                       class="flex p-px flex-col bg-gray-100 group border border-gray-200 rounded-lg">
+                       class="flex p-px flex-col bg-gray-100 group border border-gray-200 rounded-xl">
                         <div class="flex rounded-t-[7px] bg-gray-300">
                             <img src={post._embedded['wp:featuredmedia']['0'].source_url}
                                  class="rounded-t-[7px] aspect-[4/2.8] w-full object-cover" alt={post.title.rendered} />
@@ -133,8 +159,8 @@
                     <!-- End Post -->
                 {/each}
                 <!-- Newsletter Form -->
-                <div
-                        class="sm:col-span-2 lg:col-span-1 p-6 sm:p-10 md:p-14 lg:p-8 rounded-lg bg-gray-100 flex flex-col space-y-6 relative">
+                <div id="newsletter"
+                        class="sm:col-span-2 lg:col-span-1 p-6 sm:p-10 md:p-14 lg:p-8 rounded-xl bg-gray-100 flex flex-col space-y-6 relative">
                     <div
                             class="absolute w-14 h-14 rounded-full bg-gradient-to-bl from-green-700 to-violet-500 blur-2xl z-10 -top-7 -left-7 opacity-40">
                     </div>

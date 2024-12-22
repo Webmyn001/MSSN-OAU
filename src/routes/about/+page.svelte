@@ -16,7 +16,7 @@
     description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
     images: [
       {
-        url: 'https://i.ibb.co/H7t1bv3/about.jpg',
+        url: 'https://i.ibb.co/H7t1bv3/about.webp',
         width: 1200,
         height: 640,
         alt: 'Website screenshot'
@@ -42,7 +42,7 @@
 
 <!-- Mission and Vision -->
 <div class="w-full mx-auto flex items-center flex-col mt-8 px-[10dvw]">
-    <img src="/mssn-logo.png" alt="MSSNOAU Logo" class="w-[40dvw] p-6 border border-gray-200 rounded-xl" />
+    <img src="/mssn-logo.webp" alt="MSSNOAU Logo" class="w-[40dvw] p-6 border border-gray-200 rounded-xl" />
     <div class="grid grid-rows-1 sm:grid-cols-2 gap-8 text-center mt-8">
         <div class="flex flex-col gap-2">
             <h4 class="font-secondary text-green-800 text-2xl font-semibold mb-2">Our Mission</h4>
@@ -71,7 +71,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/jwc.png"
+                    src="/images/committees/jwc.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -96,7 +96,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/an-nuur.png"
+                    src="/images/committees/an-nuur.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -116,7 +116,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/business-committee.jpg"
+                    src="/images/committees/business-committee.webp"
                     class="w-3/4 sm:w-full"
                     alt="Business Committee"
             />
@@ -136,7 +136,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/an-nuur.png"
+                    src="/images/committees/an-nuur.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -156,7 +156,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/jwc.png"
+                    src="/images/committees/jwc.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -181,7 +181,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/an-nuur.png"
+                    src="/images/committees/an-nuur.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -201,7 +201,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/jwc.png"
+                    src="/images/committees/jwc.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -226,7 +226,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/an-nuur.png"
+                    src="/images/committees/an-nuur.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -246,7 +246,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/jwc.png"
+                    src="/images/committees/jwc.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -271,7 +271,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/an-nuur.png"
+                    src="/images/committees/an-nuur.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -291,7 +291,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/jwc.png"
+                    src="/images/committees/jwc.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />
@@ -316,7 +316,7 @@
     <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
         <div class="sm:col-span-1 flex items-center justify-center">
             <img
-                    src="/images/committees/an-nuur.png"
+                    src="/images/committees/an-nuur.webp"
                     class="w-3/4 sm:w-full"
                     alt="JWC Committee"
             />

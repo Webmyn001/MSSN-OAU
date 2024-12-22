@@ -16,7 +16,7 @@
     description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
     images: [
       {
-        url: 'https://i.ibb.co/4sznVXp/alumnae.jpg',
+        url: 'https://i.ibb.co/4sznVXp/alumnae.webp',
         width: 1200,
         height: 640,
         alt: 'Website screenshot'
@@ -42,17 +42,17 @@
             </div>
             <div class="w-full lg:w-1/2 lg:mt-0 md:mt-40 mt-16 max-lg:max-w-2xl">
                 <div class="grid grid-cols-1 min-[450px]:grid-cols-2 md:grid-cols-3 gap-8">
-                    <img src="/images/bg-1.png" alt="Team tailwind section"
+                    <img src="/images/bg-1.webp" alt="OAU Pic"
                          class="w-44 h-56 rounded-2xl object-cover md:mt-20 mx-auto min-[450px]:mr-0" />
-                    <img src="/images/bg-4.jpg" alt="Team tailwind section"
+                    <img src="/images/bg-4.webp" alt="OAU Pic"
                          class="w-44 h-56 rounded-2xl object-cover mx-auto min-[450px]:ml-0 md:mx-auto" />
-                    <img src="/images/bg-2.jpg" alt="Team tailwind section"
+                    <img src="/images/bg-2.webp" alt="OAU Pic"
                          class="w-44 h-56 rounded-2xl object-cover md:mt-20 mx-auto min-[450px]:mr-0 md:ml-0" />
-                    <img src="/images/bg-5.jpg" alt="Team tailwind section"
+                    <img src="/images/bg-5.webp" alt="OAU Pic"
                          class="w-44 h-56 rounded-2xl object-cover mx-auto min-[450px]:ml-0 md:mr-0 md:ml-auto" />
-                    <img src="/images/bg-3.png" alt="Team tailwind section"
+                    <img src="/images/bg-3.webp" alt="OAU Pic"
                          class="w-44 h-56 rounded-2xl object-cover md:-mt-20 mx-auto min-[450px]:mr-0 md:mx-auto" />
-                    <img src="/images/bg-6.jpg" alt="Team tailwind section"
+                    <img src="/images/bg-6.webp" alt="OAU Pic"
                          class="w-44 h-56 rounded-2xl object-cover mx-auto min-[450px]:ml-0 md:mr-0" />
 
                 </div>

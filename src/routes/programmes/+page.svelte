@@ -2,55 +2,56 @@
     import PageHeader from "$lib/components/PageHeader.svelte";
     import {slide} from 'svelte/transition'
     import {onMount} from "svelte";
+    import {MetaTags} from "svelte-meta-tags";
 
     const events = [
         {
             title: "Tutorials",
             text: "Academic tutorials organised by the Academic Committee.",
             icon: "/images/svgs/book_and_pencil.svg",
-            image: "/images/chalkboard.png"
+            image: "/images/chalkboard.webp"
         },
         {
             title: "Madrasah",
             text: "Classes on Islamic Education organised by the Islamic Affairs Board.",
             icon: "/images/svgs/book_reading.svg",
-            image: "/images/madrasah.png"
+            image: "/images/madrasah.webp"
         },
         {
             title: "Al-Usrah",
             text: "A weekly meetup centering on Islamic perspective of certain issues.",
             icon: "/images/svgs/classroom.svg",
-            image: "/images/al-usrah.png"
+            image: "/images/al-usrah.webp"
         },
         {
             title: "Freshers' Orientation",
             text: "A programme to welcome and offer guidance to freshmen.",
             icon: "/images/svgs/student_male.svg",
-            image: "/images/freshers.png"
+            image: "/images/freshers.webp"
         },
         {
             title: "Sisters' Circle",
             text: "A weekly sisters-only meetup that aims to strengthen the bonds between sisters, and discuss issues pertaining to them.",
             icon: "/images/svgs/female.svg",
-            image: "/images/sisters-circle.png"
+            image: "/images/sisters-circle.webp"
         },
         {
             title: "Bro Code",
             text: "A one-of-a-kind brother-only meetup session for letting off some steam and engaging in fun activities.",
             icon: "/images/svgs/rodeo.svg",
-            image: "/images/brocode.png"
+            image: "/images/brocode.webp"
         },
         {
             title: "Eid Fest",
             text: "Once in a year, a special day to celebrate another special day, only without the stress.",
             icon: "/images/svgs/food.svg",
-            image: "/images/eid-fest.png"
+            image: "/images/eid-fest.webp"
         },
         {
             title: "Taraweeh",
             text: "Throughout the holy month of Ramadhan in all the hall mosques and at the Central Mosque of Unity.",
             icon: "/images/svgs/night.svg",
-            image: "/images/taraweeh.png"
+            image: "/images/taraweeh.webp"
         },
     ];
 
@@ -66,12 +67,36 @@
         mode = Number(type)
     })
 </script>
+
+<!-- Meta Tags -->
+<MetaTags
+        title="Our Programmes"
+        titleTemplate="%s | MSSNOAU"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        canonical="https://mssnoau-frontend.vercel.app/"
+        openGraph={{
+    url: 'https://mssnoau-frontend.vercel.app/',
+    title: 'Our Programmes | MSSNOAU',
+    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
+    images: [
+      {
+        url: 'https://i.ibb.co/zbWfh5B/home.webp',
+        width: 1200,
+        height: 640,
+        alt: 'Website screenshot'
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
+/>
+<!-- End Meta Tags -->
+
 <PageHeader>
     Our Programmes
 </PageHeader>
 
-{#if mode === 1}
-<!-- Events -->
+{#if mode === 2}
+<!-- Programmes -->
 <section class="py-6">
     <div class="mx-auto max-w-5xl space-y-16 px-6">
 
@@ -88,10 +113,10 @@
         </div>
     </div>
 </section>
-<!-- End Events -->
+<!-- End Programmes -->
 
 {:else}
-<!-- Events -->
+<!-- Programmes -->
 <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
     <div class="relative p-6 md:p-16">
         <!-- Grid -->
@@ -112,7 +137,7 @@
                                 class="{selectedEvent === event.title ? 'bg-white shadow-md hover:border-transparent' : ''} text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
                                 id={event.title} aria-selected={selectedEvent === event.title}>
             <span class="flex gap-x-6">
-                <img class="shrink-0 mt-2 size-6 md:size-7 {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer" src={event.icon} alt={event.title} />
+                <img class="shrink-0 mt-2 size-12 md:size-14 {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer" src={event.icon} alt={event.title} />
                 <span class="grow">
                 <span class="block text-lg font-semibold font-secondary {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800">{event.title}</span>
                     {#if selectedEvent === event.title}
@@ -168,5 +193,5 @@
         <!-- End Background Color -->
     </div>
 </div>
-<!-- End Events -->
+<!-- End Programmes -->
     {/if}

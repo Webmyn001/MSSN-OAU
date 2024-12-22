@@ -46,24 +46,24 @@
         {
             title: "Tutorials",
             text: "Academic tutorials organised by the Academic Committee.",
-            image: "/images/chalkboard.png",
+            image: "/images/chalkboard.webp",
             icon: BookOpenText
         },
         {
             title: "Madrasah",
             text: "Classes on Islamic Education organised by the Islamic Affairs Board.",
-            image: "/images/madrasah.png",
+            image: "/images/madrasah.webp",
             icon: NotebookPen
         },
         {
             title: "Al-Usrah",
             text: "A weekly meetup centering on Islamic perspective of certain issues.",
-            image: "/images/al-usrah.png",
+            image: "/images/al-usrah.webp",
             icon: Presentation
         }, {
             title: "Sisters' Circle",
             text: "A weekly sisters-only meetup that aims to strengthen the bonds between sisters, and discuss issues pertaining to them.",
-            image: "/images/sisters-circle.png",
+            image: "/images/sisters-circle.webp",
             icon: UsersRound
         }
     ]
@@ -239,12 +239,94 @@
         }
     }
 
+    /**
+     * @typedef {Object} Post
+     * @property {number} id - The unique identifier for the post.
+     * @property {string} date - The date the post was created.
+     * @property {string} date_gmt - The GMT date the post was created.
+     * @property {Object} guid - The globally unique identifier (GUID) for the post.
+     * @property {string} modified - The date the post was last modified.
+     * @property {string} modified_gmt - The GMT date the post was last modified.
+     * @property {string} slug - The URL slug for the post.
+     * @property {string} status - The current status of the post (e.g., 'publish').
+     * @property {string} type - The type of content (e.g., 'post').
+     * @property {string} link - The URL link to the post.
+     * @property {Object} title - The title of the post.
+     * @property {Object} content - The content of the post.
+     * @property {Object} excerpt - The excerpt/summary of the post.
+     * @property {boolean} excerpt.protected - If the excerpt is protected or not.
+     * @property {number} author - The ID of the post author.
+     * @property {number} featured_media - The ID of the featured media image.
+     * @property {string} comment_status - The comment status (e.g., 'open').
+     * @property {string} ping_status - The ping status (e.g., 'open').
+     * @property {boolean} sticky - If the post is sticky (pinned).
+     * @property {string} template - The template used for the post.
+     * @property {string} format - The format of the post (e.g., 'standard').
+     * @property {Object} meta - Additional meta information about the post.
+     * @property {Object} _links - Links to related resources.
+     * @property {Object} _embedded - Embedded resources related to the post.
+     * @property {Object[]} _embedded.author - Information about the post author.
+     * @property {number} _embedded.author.id - The author's ID.
+     * @property {string} _embedded.author.name - The author's name.
+     * @property {string} _embedded.author.url - The URL to the author's website.
+     * @property {string} _embedded.author.link - The link to the author's profile.
+     * @property {Object} _embedded.author.avatar_urls - The URLs to the author's avatar images.
+     * @property {string} _embedded.author.avatar_urls[24] - The 24px avatar image URL.
+     * @property {string} _embedded.author.avatar_urls[48] - The 48px avatar image URL.
+     * @property {string} _embedded.author.avatar_urls[96] - The 96px avatar image URL.
+     * @property {Object[]} _embedded.wp:featuredmedia - The featured media related to the post.
+     * @property {number} _embedded.wp:featuredmedia.id - The media ID.
+     * @property {string} _embedded.wp:featuredmedia.link - The URL link to the media.
+     * @property {string} _embedded.wp:featuredmedia.source_url - The source URL of the media.
+     * @property {Object[]} _embedded.wp:term - The taxonomy terms (e.g., categories).
+     * @property {Object} _embedded.wp:term[0] - The first taxonomy term.
+     * @property {number} _embedded.wp:term[0].id - The term ID.
+     * @property {string} _embedded.wp:term[0].link - The URL link to the term.
+     * @property {string} _embedded.wp:term[0].name - The name of the term.
+     * @property {string} _embedded.wp:term[0].slug - The slug of the term.
+     * @property {string} _embedded.wp:term[0].taxonomy - The taxonomy type of the term (e.g., 'category').
+     */
+
+    /**
+     * @type {Post[]}
+     */
+    let posts = []
+
+    /**
+     * @returns {Promise<Post[]>}
+     */
+    const getPosts = async () => {
+        try {
+
+            const req = await fetch("https://annuurpress.org.ng/wp-json/wp/v2/posts?_embed");
+            if (!req.ok) {
+                toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
+                posts = []
+            }
+            const res =  await req.json();
+            console.error(res[0].date)
+            if (!res || !Array.isArray(res)) {
+                toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
+                posts = []
+            }
+            posts = [...res.slice(0,3)]
+        } catch (e) {
+            console.error(e);
+            toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
+            posts = []
+        }
+    }
+
+
+
+
 
     let upcoming_solat = 0;
 
     onMount(() => {
         upcoming_solat = getSolahPeriod()
         getHijrahDate()
+        getPosts()
     })
 
 </script>
@@ -261,7 +343,7 @@
     description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
     images: [
       {
-        url: 'https://i.ibb.co/zbWfh5B/home.jpg',
+        url: 'https://i.ibb.co/zbWfh5B/home.webp',
         width: 1200,
         height: 640,
         alt: 'Website screenshot'
@@ -306,98 +388,98 @@
         <div class="relative mx-auto flex max-w-3xl flex-col">
             <div
                     class="absolute right-[calc(100%+63px)] top-0 hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/man_1.png" alt="placeholder hero"
+                <img src="/images/man_1.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+195px)] top-[52px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/woman_1.png" alt="placeholder hero"
+                <img src="/images/woman_1.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+34px)] top-[144px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/man_2.png" alt="placeholder hero"
+                <img src="/images/man_2.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+268px)] top-[164px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/woman_2.png" alt="placeholder hero"
+                <img src="/images/woman_2.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+156px)] top-[240px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/man_3.png" alt="placeholder hero"
+                <img src="/images/man_3.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+242px)] top-[340px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/woman_3.png" alt="placeholder hero"
+                <img src="/images/woman_3.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute right-[calc(100%+66px)] top-[366px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/man_4.png" alt="placeholder hero"
+                <img src="/images/man_4.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+53px)] top-0 hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/woman_4.png" alt="placeholder hero"
+                <img src="/images/woman_4.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+202px)] top-[34px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/man_5.png" alt="placeholder hero"
+                <img src="/images/man_5.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+97px)] top-[141px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/woman_5.png" alt="placeholder hero"
+                <img src="/images/woman_5.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+282px)] top-[138px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/man_6.png" alt="placeholder hero"
+                <img src="/images/man_6.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+42px)] top-[262px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/woman_6.png" alt="placeholder hero"
+                <img src="/images/woman_6.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+234px)] top-[282px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/man_7.png" alt="placeholder hero"
+                <img src="/images/man_7.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div
                     class="absolute left-[calc(100%+112px)] top-[365px] hidden size-[64px] rounded-2xl bg-zinc-100 ring-1 ring-inset ring-accent-foreground/10 md:block">
-                <img src="/images/woman_7.png" alt="placeholder hero"
+                <img src="/images/woman_7.webp" alt="person"
                      loading="eager"
                      class="h-full w-full rounded-md object-cover object-center"/>
             </div>
             <div class="container mx-auto">
                 <img
-                        src="/images/bg-1.png"
+                        src="/images/bg-1.webp"
                         loading="eager"
                         style="object-fit: cover; object-position: center"
                         alt="central mosque of unity"
                         class="mt-2 flex aspect-[16/9] min-h-[300px] max-h-[500px] w-full flex-col items-center overflow-clip rounded-md border border-border bg-zinc-100 shadow-sm sm:rounded-xl"/>
 
                 <!--                <img-->
-                <!--                        src="/images/bg-2.jpg"-->
+                <!--                        src="/images/bg-2.webp"-->
                 <!--                        style="object-fit: cover; object-position: center"-->
                 <!--                        alt="central mosque of unity"-->
                 <!--                        class="mt-6 flex aspect-[27/10] max-h-[300px] w-full flex-col items-center overflow-clip rounded-xl border border-border bg-zinc-100 shadow-sm" />-->
@@ -529,7 +611,7 @@
     </div>
     <div class="grid grid-rows-5 grid-cols-none sm:grid-cols-2 sm:grid-rows-none lg:grid-cols-5 gap-4 mt-8">
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.webp')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 0 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 Fajr</h2>
@@ -543,7 +625,7 @@
                 </span>
         </div>
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 1 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/noon.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 1 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/noon.webp')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 1 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 {upcoming_solat === 1 ? 'text-white text-2xl' : 'text-primary-100 text-xl'} font-primary font-bold">
                 Dhuhr</h2>
@@ -557,7 +639,7 @@
                 </span>
         </div>
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-xl' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-xl' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.webp')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 2 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 ‘Asr</h2>
@@ -571,7 +653,7 @@
                 </span>
         </div>
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 3 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/late-evening.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 3 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/late-evening.webp')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 3 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 3 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 Maghrib</h2>
@@ -585,7 +667,7 @@
                 </span>
         </div>
 
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/night.png')] bg-no-repeat bg-cover bg-center">
+        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/night.webp')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 4 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
                 ‘Isha’</h2>
@@ -716,91 +798,41 @@
 
     <!-- Grid -->
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {#if posts && posts !== []}
+        {#each posts as post}
         <!-- Card -->
         <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
-           href="https://annuurpress.org.ng/ink-and-ashes/">
+           href={post.link}>
             <div class="aspect-w-16 aspect-h-11">
                 <img class="w-full object-cover rounded-xl h-[210px]" loading="lazy"
-                     src="https://annuurpress.org.ng/wp-content/uploads/2024/12/41507-e1733481937229.jpg"
-                     alt="Inks and Ashes">
+                     src={post._embedded['wp:featuredmedia']['0'].source_url}
+                     alt={post.title.rendered}>
             </div>
             <div class="my-6">
                 <h3 class="text-xl font-secondary font-semibold text-primary-900">
-                    Ink and Ashes
+                    {@html post.title.rendered}
                 </h3>
                 <p class="mt-5 text-gray-600 font-tertiary">
-                    I still remember how we used to run around in circles as though we couldn't stop, how we suckle
-                    sweets...
+                    {@html post.excerpt.rendered}
                 </p>
             </div>
             <div class="mt-auto flex items-center gap-x-3">
-                <img class="size-8 rounded-full" loading="lazy" src="/images/woman_1.png" alt="Aishat Elusogbon">
+                <img class="size-8 rounded-full" loading="lazy" src={post._embedded.author[0].avatar_urls["48"]} alt={post._embedded.author[0].name}>
                 <div>
-                    <h5 class="text-sm text-neutral-800 font-secondary">By Aishat Elusogbon</h5>
+                    <h5 class="text-sm text-neutral-800 font-secondary">By {post._embedded.author[0].name} {post._embedded.author.length > 1 ? "and " + post._embedded.author.length - 1 + " others" : ""}</h5>
                 </div>
             </div>
         </a>
         <!-- End Card -->
-
-        <!-- Card -->
-        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
-           href="https://annuurpress.org.ng/hardship-is-temporary/">
-            <div class="aspect-w-16 aspect-h-11">
-                <img class="w-full object-cover rounded-xl h-[210px]" loading="lazy"
-                     src="https://annuurpress.org.ng/wp-content/uploads/2024/12/alone-4672965_1920-e1733482581401-1536x866.jpg"
-                     alt="Hardship is Temporary">
-            </div>
-            <div class="my-6">
-                <h3 class="text-xl font-semibold font-secondary text-primary-900">
-                    Hardship is Temporary
-                </h3>
-                <p class="mt-5 text-gray-600 font-tertiary">
-                    Hardship is defined as: Phonologically – /hɑ:dʃɪp/ Dictionary-wise – Difficulty To be in hardship
-                    means to be burdened or troubled.Oftentimes, when people...
-                </p>
-            </div>
-            <div class="mt-auto flex items-center gap-x-3">
-                <img  loading="lazy" class="size-8 rounded-full" src="/images/woman_2.png" alt="Rōdhiyah Adesina">
-                <div>
-                    <h5 class="text-sm text-neutral-800 font-secondary">By Rōdhiyah Adesina</h5>
-                </div>
-            </div>
-        </a>
-        <!-- End Card -->
-
-        <!-- Card -->
-        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
-           href="https://annuurpress.org.ng/cheers-to-better-days/">
-            <div class="aspect-w-16 aspect-h-11">
-                <img class="w-full object-cover rounded-xl h-[210px]"
-                     loading="lazy"
-                     src="https://annuurpress.org.ng/wp-content/uploads/2024/11/tree-164915_1280.jpg"
-                     alt="Cheers to Better Days">
-            </div>
-            <div class="my-6">
-                <h3 class="text-xl font-secondary font-semibold text-primary-900">
-                    Cheers to Better Days
-                </h3>
-                <p class="mt-5 text-gray-600 font-tertiary">
-                    Enjoying my busy sleep as I lay,Lay on my weary thatched bed—Oh, I mean a thatched mattress,Or maybe
-                    some cartons...
-                </p>
-            </div>
-            <div class="mt-auto flex items-center gap-x-3">
-                <img class="size-8 rounded-full" src="/images/woman_3.png" loading="lazy" alt="Ruqoyyah Idris">
-                <div>
-                    <h5 class="text-sm text-neutral-800 font-secondary">By Ruqoyyah Idris</h5>
-                </div>
-            </div>
-        </a>
-        <!-- End Card -->
+            {/each}
+            {/if}
     </div>
     <!-- End Grid -->
 
     <!-- Card -->
     <div class="mt-12 text-center gap-4">
         <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-primary-700 text-white shadow-sm hover:bg-primary-700/90 focus:outline-none focus:bg-primary-700/90 disabled:opacity-50 disabled:pointer-events-none"
-           href="https://annuurpress.org.ng/">
+           href="/blog">
             Read more
             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -808,7 +840,7 @@
             </svg>
         </a>
         <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-white text-primary-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
-           href="https://annuurpress.org.ng/">
+           href="/blog#newsletter">
             Join Newsletter
             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -823,7 +855,7 @@
 <!-- Donation CTA -->
 <div id="donate" class="bg-white py-6 sm:py-8 lg:py-12">
     <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
-        <div class="flex flex-col items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 sm:flex-row md:p-8">
+        <div class="flex flex-col items-center justify-between gap-4 rounded-xl bg-gray-100 p-4 sm:flex-row md:p-8">
             <div class="gap-6">
                 <h2 class="text-xl font-bold text-neutral-800 font-primary md:text-2xl">Invest in your Ākhirah</h2>
                 <p class="text-primary-900">We are a non-profit student organisation that only exists due to individual
@@ -833,7 +865,7 @@
             <AlertDialog.Root>
                 <AlertDialog.Trigger>
                     <button type="button"
-                            class="inline-block font-secondary rounded-lg bg-primary-700 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800 focus-visible:ring active:bg-primary-800 md:text-base">
+                            class="inline-block font-secondary rounded-xl bg-primary-700 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800 focus-visible:ring active:bg-primary-800 md:text-base">
                         Donate
                     </button>
 
@@ -903,7 +935,7 @@
 <!-- Suggestions CTA -->
 <div class="bg-white py-6 sm:py-8 lg:py-12">
     <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
-        <div class="flex flex-col overflow-hidden rounded-lg bg-gray-200 sm:flex-row md:h-80">
+        <div class="flex flex-col overflow-hidden rounded-xl bg-gray-200 sm:flex-row md:h-80">
 
 
             <!-- content - start -->
@@ -917,7 +949,7 @@
 
                 <div class="mt-auto">
                     <a href="/contact"
-                       class="inline-block rounded-lg bg-primary-800 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800/90 focus-visible:ring active:bg-primary-800/90 md:text-base">Leave
+                       class="inline-block rounded-xl bg-primary-800 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800/90 focus-visible:ring active:bg-primary-800/90 md:text-base">Leave
                         us a message</a>
                 </div>
             </div>
