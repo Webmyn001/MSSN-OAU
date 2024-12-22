@@ -76,7 +76,7 @@
         <!-- Contact -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16">
             <div class="md:order-2 border-b border-primary-800 pb-10 mb-10 md:border-b-0 md:pb-0 md:mb-0">
-                <ContactForm wrapperClass="mx-auto" />
+                <ContactForm title="Contact Form" wrapperClass="mx-auto" />
             </div>
             <!-- End Contact -->
 
