@@ -55,12 +55,15 @@
                                 </div>
 
                                 <div class="flex flex-col">
+<!--
                                     <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-xl text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100" href="/auth/login">
                                         Log In
                                     </a>
                                     <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-xl text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100" href="/auth/signup">
                                         Sign Up
                                     </a>
+
+-->
                                     <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-xl text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100" href="/contact#faqs">
                                     FAQs
                                 </a>
