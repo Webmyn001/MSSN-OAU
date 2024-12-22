@@ -42,7 +42,7 @@
 
 <!-- Mission and Vision -->
 <div class="w-full mx-auto flex items-center flex-col mt-8 px-[10dvw]">
-    <img src="/mssn-logo.webp" alt="MSSNOAU Logo" class="w-[40dvw] p-6 border border-gray-200 rounded-xl" />
+    <img src="/mssn-logo.png" alt="MSSNOAU Logo" class="w-[40dvw] p-6 border border-gray-200 rounded-xl" />
     <div class="grid grid-rows-1 sm:grid-cols-2 gap-8 text-center mt-8">
         <div class="flex flex-col gap-2">
             <h4 class="font-secondary text-green-800 text-2xl font-semibold mb-2">Our Mission</h4>
