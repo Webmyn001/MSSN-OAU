@@ -4,60 +4,12 @@
     import {onMount} from "svelte";
     import {MetaTags} from "svelte-meta-tags";
 
+    export let data;
 
     /**
-     * @type {MiniEvent[]}
+     * @type {Programme[]}
      */
-    const programmes = [
-        {
-            title: "Tutorials",
-            text: "Academic tutorials organised by the Academic Committee.",
-            icon: "/images/svgs/book_and_pencil.svg",
-            image: "/images/chalkboard.webp"
-        },
-        {
-            title: "Madrasah",
-            text: "Classes on Islamic Education organised by the Islamic Affairs Board.",
-            icon: "/images/svgs/book_reading.svg",
-            image: "/images/madrasah.webp"
-        },
-        {
-            title: "Al-Usrah",
-            text: "A weekly meetup centering on Islamic perspective of certain issues.",
-            icon: "/images/svgs/classroom.svg",
-            image: "/images/al-usrah.webp"
-        },
-        {
-            title: "Freshers' Orientation",
-            text: "A programme to welcome and offer guidance to freshmen.",
-            icon: "/images/svgs/student_male.svg",
-            image: "/images/freshers.webp"
-        },
-        {
-            title: "Sisters' Circle",
-            text: "A weekly sisters-only meetup that aims to strengthen the bonds between sisters, and discuss issues pertaining to them.",
-            icon: "/images/svgs/female.svg",
-            image: "/images/sisters-circle.webp"
-        },
-        {
-            title: "Bro Code",
-            text: "A one-of-a-kind brother-only meetup session for letting off some steam and engaging in fun activities.",
-            icon: "/images/svgs/rodeo.svg",
-            image: "/images/brocode.webp"
-        },
-        {
-            title: "Eid Fest",
-            text: "Once in a year, a special day to celebrate another special day, only without the stress.",
-            icon: "/images/svgs/food.svg",
-            image: "/images/eid-fest.webp"
-        },
-        {
-            title: "Taraweeh",
-            text: "Throughout the holy month of Ramadhan in all the hall mosques and at the Central Mosque of Unity.",
-            icon: "/images/svgs/night.svg",
-            image: "/images/taraweeh.webp"
-        },
-    ];
+    let programmes = []
 
 
     let selectedProgramme = "Tutorials"
@@ -69,6 +21,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get('type') ?? 1;
         mode = Number(type)
+        programmes = data.programmes
     })
 </script>
 

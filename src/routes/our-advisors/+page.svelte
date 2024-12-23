@@ -1,7 +1,7 @@
 <script>
     import PageHeader from "$lib/components/PageHeader.svelte";
     import {MessageCircle, Phone} from "lucide-svelte";
-    import {tick} from "svelte";
+    import {onMount, tick} from "svelte";
     import {useId} from "bits-ui";
     import Ellipsis from "lucide-svelte/icons/ellipsis";
     import {Button} from "$lib/components/ui/button/index.js";
@@ -11,7 +11,8 @@
     import {MetaTags} from "svelte-meta-tags";
 
 
-    let sessionSelectorOpen = $state(false);
+    export let data;
+    $: sessionSelectorOpen = false;
 
 
     // We want to refocus the trigger button when the user selects
@@ -30,61 +31,17 @@
 
     const triggerId = useId();
 
-    const advisors =  [
-        {
-            title: "Dr.",
-            name: "Surajudeen O. Obayopo",
-            position: "Grand Patron",
-            email: "someone@oauife.edu.ng",
-            phone: "0812345678",
-            summary: "Dr. Surajudeen O. is an Associate Professor from the Department of Mechanical Engineering. He has been our patron for the past 3years. He is the current HOD of the Department."
-        },
-        {
-            title: "Dr. Mrs.",
-            name: "L. Sanni",
-            position: "Grand Patron",
-            email: "someone@oauife.edu.ng",
-            phone: "0812345678",
-            summary: "Dr. Mrs. M. L. Sanni is an Senior Lecturer from the Computer Science & Engineering. She has been our matron for the past 3years. She is the current HOD of the Department."
-        },
-        {
-            title: "Dr.",
-            name: "Waheed Bamigbade",
-            position: "Grand Patron",
-            email: "someone@oauife.edu.ng",
-            phone: "0812345678",
-            summary: "Dr Waheed Bamigbade is an Senior Lecturer from the English Language. He has been our staff adviser for the past 3years. He is the current HOD of the Department."
-        },
-        {
-            title: "Dr. Mrs.",
-            name: "Sururoh Bello",
-            position: "Grand Patron",
-            email: "someone@oauife.edu.ng",
-            phone: "0812345678",
-            summary: "Dr. Mrs. Sururoh Bello is an Associate Professor from the Computer Science & Engineering. She has been our staff adviser for the past 3years. She is the current HOD of the Department."
-        },
-        {
-            title: "Mrs.",
-            name: "M. I. Nasir",
-            position: "Grand Patron",
-            email: "someone@oauife.edu.ng",
-            phone: "0812345678",
-            summary: "Mrs. M. I. Nasir is the Chief System Programmer / Deputy Director OAU Computer Centre. She has been our staff adviser for the past 3years. She is the current head of ICT Centre."
-        }
-    ]
 
     /**
      * @type {string}
      */
-    let selectedSession = $state("2024/2025")
+    $: selectedSession = "2024/2025"
 
-    let sessions = [
-        {
-            session: "2024/2025",
-            advisors
-        }
-    ]
+    let sessions = []
 
+    onMount(() => {
+        sessions = data.sessions;
+    })
 
 </script>
 

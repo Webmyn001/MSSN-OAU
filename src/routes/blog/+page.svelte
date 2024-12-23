@@ -5,41 +5,10 @@
     import PageHeader from "$lib/components/PageHeader.svelte";
     import {MetaTags} from "svelte-meta-tags";
 
-    /**
-     * @type {Post[]}
-     */
-    let posts = []
-
-    const getPosts = async () => {
-        try {
-        toast.loading("Loading Posts...", {
-            duration: Number.POSITIVE_INFINITY
-        });
-        const req = await fetch("https://annuurpress.org.ng/wp-json/wp/v2/posts?_embed");
-        if (!req.ok) {
-            toast.dismiss()
-            toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
-            posts = []
-        }
-        const res =  await req.json();
-        if (!res || !Array.isArray(res)) {
-            toast.dismiss()
-            toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
-            posts = []
-        }
-            toast.dismiss()
-        posts = [...res.slice(0, 11)]
-        } catch (e) {
-            toast.dismiss()
-            console.error(e);
-            toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
-            posts = []
-        }
-    }
+    export let data;
 
 
 
-    onMount(getPosts)
 
 </script>
 
@@ -80,23 +49,22 @@
 
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 rounded-t-lg">
-            {#if posts && posts === []}
-            {:else if posts && Array.isArray(posts)}
-                {#each posts as post}
+            {#if data.posts && Array.isArray(data.posts)}
+                {#each data.posts as post}
                     <!-- Post -->
                     <a href={post.link}
                        target="_blank"
                        class="flex p-px flex-col bg-gray-100 group border border-gray-200 rounded-xl">
                         <div class="flex rounded-t-[7px] bg-gray-300">
-                            <img src={post._embedded['wp:featuredmedia']['0'].source_url}
-                                 class="rounded-t-[7px] aspect-[4/2.8] w-full object-cover" alt={post.title.rendered} />
+                            <img src={post.featured_image}
+                                 class="rounded-t-[7px] aspect-[4/2.8] w-full object-cover" alt={post.title} />
                         </div>
                         <div class="flex flex-col p-5 relative justify-between h-full">
                             <h1
                                     class="text-xl/tight text-ellipsis whitespace-nowrap overflow-hidden font-semibold text-gray-800 group-hover:text-green-700">
-                                {@html post.title.rendered}
+                                {@html post.title}
                             </h1>
-                            <p class="text-gray-700 text-ellipsis py-2 line-clamp-2">{@html post.excerpt.rendered}</p>
+                            <p class="text-gray-700 text-ellipsis py-2 line-clamp-2">{@html post.excerpt}</p>
                             <div class="flex items-center space-x-2 text-gray-600">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                      stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

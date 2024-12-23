@@ -3,35 +3,76 @@
     import {format, register} from 'timeago.js'
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
     import * as Tabs from "$lib/components/ui/tabs/index.js";
-
-
     import {toast} from "svelte-sonner";
     import {formatDate, isPastDate, months} from "$lib/utils/dates.js";
     import {MetaTags} from "svelte-meta-tags";
     import PageHeader from "$lib/components/PageHeader.svelte";
+    import {onMount} from "svelte";
+
+    export let data;
 
     /**
+     * Processes and categorizes events into upcoming, past, and excluded events
+     * @typedef {Object} ProcessedEvents
+     * @property {Event[]} upcoming - Future events, sorted nearest to farthest
+     * @property {Event[]} past - Recent past events (within 12 months), sorted newest to oldest
+     * @property {Event[]} excluded - Events older than 12 months
+     *
      * @param {Event[]} events
+     * @returns {ProcessedEvents}
      */
     function processEvents(events) {
-        const now = new Date();
+        // Input validation
+        if (!Array.isArray(events)) {
+            throw new TypeError('Events must be an array');
+        }
 
+        const now = new Date();
+        const twelveMonthsAgo = new Date(now);
+        twelveMonthsAgo.setMonth(now.getMonth() - 12);
+
+        // Cache Date objects to avoid repeated creation
+        const dateCache = new Map();
+        const getEventDate = (event) => {
+            if (!dateCache.has(event)) {
+                dateCache.set(event, new Date(event.date));
+            }
+            return dateCache.get(event);
+        };
 
         /**
-         * Helper function to adjust periodical dates
-         * @param {Event[]} event
-         * @returns { Event[]}
+         * Adjusts periodical events to their next occurrence
+         * @param {Event} event
+         * @returns {Event}
          */
         function adjustPeriodicalEvent(event) {
             if (!event.periodical) return event;
 
             const eventDate = new Date(event.date);
+            const { periodical, day } = event;
 
-            if (event.periodical === "weekly") {
+            // Validate periodical parameters
+            if (!['weekly', 'monthly'].includes(periodical)) {
+                throw new Error(`Invalid periodical type: ${periodical}`);
+            }
+            if (typeof day !== 'number' || day < 0 ||
+                (periodical === 'weekly' && day > 6) ||
+                (periodical === 'monthly' && day > 31)) {
+                throw new Error(`Invalid day value: ${day} for ${periodical} event`);
+            }
+
+            // Adjust date based on periodical type
+            if (periodical === 'weekly') {
+                const currentDay = eventDate.getDay();
+                const daysToAdd = (day - currentDay + 7) % 7;
+                eventDate.setDate(eventDate.getDate() + daysToAdd);
+
+                // If date is in the past, add weeks until it's in the future
                 while (eventDate < now) {
                     eventDate.setDate(eventDate.getDate() + 7);
                 }
-            } else if (event.periodical === "monthly") {
+            } else if (periodical === 'monthly') {
+                eventDate.setDate(day);
                 while (eventDate < now) {
                     eventDate.setMonth(eventDate.getMonth() + 1);
                 }
@@ -40,168 +81,42 @@
             return { ...event, date: eventDate.toISOString() };
         }
 
-        // Adjust periodical events
-        const adjustedEvents = events.map(adjustPeriodicalEvent);
+        try {
+            // Process all events at once
+            const processedEvents = events.reduce((acc, event) => {
+                const adjustedEvent = adjustPeriodicalEvent(event);
+                const eventDate = getEventDate(adjustedEvent);
 
-        // Separate upcoming and past events
-        const upcomingEvents = adjustedEvents.filter(
-            (event) => new Date(event.date) >= now
-        );
-        const pastEvents = adjustedEvents.filter(
-            (event) => new Date(event.date) < now
-        );
+                if (eventDate >= now) {
+                    acc.upcoming.push(adjustedEvent);
+                } else if (eventDate >= twelveMonthsAgo) {
+                    acc.past.push(adjustedEvent);
+                } else {
+                    acc.excluded.push(adjustedEvent);
+                }
+                return acc;
+            }, { upcoming: [], past: [], excluded: [] });
 
-        // Sort upcoming events (nearest to farthest)
-        upcomingEvents.sort(
-            (a, b) => new Date(a.date) - new Date(b.date)
-        );
+            // Sort the arrays
+            processedEvents.upcoming.sort((a, b) => getEventDate(a) - getEventDate(b));
+            processedEvents.past.sort((a, b) => getEventDate(b) - getEventDate(a));
 
-        // Filter and sort past events in the past 3 months (nearest to farthest)
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 12);
-
-        const recentPastEvents = pastEvents
-            .filter((event) => new Date(event.date) >= threeMonthsAgo)
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        // Identify excluded events
-        const excludedEvents = adjustedEvents.filter(
-            (event) =>
-                !upcomingEvents.includes(event) &&
-                !recentPastEvents.includes(event)
-        );
-
-        // Log excluded events
-        console.log("Excluded Events:", excludedEvents);
-
-        // Return the result
-        return {
-            upcoming: upcomingEvents,
-            past: recentPastEvents,
-            excluded: excludedEvents, // Optionally include excluded events in the result
-        };
+            return processedEvents;
+        } catch (error) {
+            console.error('Error processing events:', error);
+            throw error;
+        }
     }
 
 
-
-
-    const rawEvents = [
-        {
-            "title": "Islamic Finance Summit",
-            "image": "/images/al-usrah.webp",
-            "summary": "A summit featuring esteemed guest speakers discussing Islamic finance principles and applications.",
-            "paid": false,
-            "price": "",
-            "date": "2024-05-16T00:00:00Z",
-            "venue": "Obafemi Awolowo University",
-            "url": "",
-        },
-        {
-            "title": "Jihad Week 1445 AH Qur'an Competition",
-            "image": "/images/committees/jwc.webp",
-            "summary": "A celebration of knowledge, spirituality, and community through a Qur'an recitation competition.",
-            "paid": false,
-            "price": "",
-            "date": "2025-01-17T00:00:00Z",
-            "venue": "Obafemi Awolowo University",
-            "url": "",
-        },
-        {
-            "title": "Ramadan Iftar Gatherings",
-            "image": "/images/committees/business-committee.webp",
-            "summary": "Daily Iftar gatherings during Ramadan to foster unity and gratitude among Muslim students.",
-            "paid": false,
-            "price": "",
-            "date": "2024-04-01T00:00:00Z",
-            "venue": "Obafemi Awolowo University",
-            "url": "",
-        },
-        {
-            "title": "Muslimah Ball - An Halāl Dinner",
-            "image": "/images/committees/an-nuur.webp",
-            "summary": "A special event for Muslim sisters featuring a Halāl dinner and various engaging activities.",
-            "paid": true,
-            "price": "₦2,000",
-            "date": "2024-11-30T00:00:00Z",
-            "venue": "Obafemi Awolowo University",
-            "url": "",
-        },
-        {
-            "title": "FYB Dinner and UNIFEMGA Induction",
-            "image": "/images/committees/jwc.webp",
-            "summary": "A grand dinner and induction ceremony celebrating the achievements of final year brethren.",
-            "paid": true,
-            "price": "₦5,000",
-            "date": "2024-08-11T00:00:00Z",
-            "venue": "OAU Central Mosque of Unity",
-            "url": "",
-        },
-        {
-            "title": "70th Anniversary Jihad Week Debating Competition",
-            "image": "/images/committees/business-committee.webp",
-            "summary": "A debating competition as part of the activities marking the 70th Anniversary of MSSN.",
-            "paid": false,
-            "price": "",
-            "date": "2025-01-17T00:00:00Z",
-            "venue": "Obafemi Awolowo University",
-            "url": "",
-        },
-        {
-            "title": "Ramadan Feeding Program",
-            "image": "/images/committees/an-nuur.webp",
-            "summary": "A program providing meals to students during Ramadan, showcasing dedication and collaboration.",
-            "paid": false,
-            "price": "",
-            "date": "2025-01-17T00:00:00Z",
-            "venue": "Obafemi Awolowo University",
-            "url": "",
-        },
-        {
-            "title": "Health Checkup and Seminar",
-            "image": "/images/committees/jwc.webp",
-            "summary": "Health checkup and seminar as part of the Jihad Week activities.",
-            "paid": false,
-            "price": "",
-            "date": "2025-01-17T00:00:00Z",
-            "venue": "OAU Central Mosque",
-            "url": "",
-        },
-        {
-            "title": "Inspiring Workshops and Panel Sessions",
-            "image": "/images/committees/business-committee.webp",
-            "summary": "Workshops and panel sessions aimed at inspiring and educating students.",
-            "paid": false,
-            "price": "",
-            "date": "2025-01-17T00:00:00Z",
-            "venue": "OAU Central Mosque",
-            "url": "",
-        },
-        {
-            "title": "Qur'an Recitation and Tafsir Sessions",
-            "image": "/images/committees/an-nuur.webp",
-            "summary": "Sessions focusing on Qur'an recitation and interpretation during Jihad Week.",
-            "paid": false,
-            "price": "",
-            "date": "2025-01-17T00:00:00Z",
-            "venue": "OAU Central Mosque",
-            "url": "",
-        },
-        {
-            "title": "Al-Usrah",
-            "image": "/images/committees/jwc.webp",
-            "summary": "Weekly sessions for strengthening ourselves in the Deen.",
-            "paid": false,
-            "price": "",
-            "date": "2025-01-17T00:00:00Z",
-            "venue": "OAU Central Mosque",
-            "url": "",
-            "periodical": "weekly",
-            "day": 1
-        }
-    ]
-
-
-    const allEvents = processEvents(rawEvents)
+    /**
+     * @type {ProcessedEvents}
+     */
+    let allEvents = {
+        upcoming: [],
+        past: [],
+        excluded: [],
+    }
 
 
 
@@ -238,14 +153,26 @@
 
 
 
-    let open = $state(false);
+    $: open = false;
 
     /**
      * @type {'upcoming' | 'past'}
      */
-    let mode = $state("upcoming")
-    let events = $derived(allEvents[mode])
-    let currentEvent = events[0];
+    $: mode = "upcoming"
+
+    /**
+     * @type {Event[]}
+     */
+    $: events = allEvents[mode]
+
+    /**
+     * @type {Event}
+     */
+    $: currentEvent = events[0];
+
+    onMount(() => {
+        allEvents = processEvents(data.events)
+    })
 </script>
 
 <PageHeader>
@@ -335,7 +262,7 @@
                             </time>
 
                             <span
-                                    class="mb-4 text-ellipsis [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] sm:mb-0 mt-0.5 block text-md z-10 sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium font-secondary text-white">
+                                    class="mb-4 text-ellipsis [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] sm:mb-0 mt-0.5 block text-center w-full text-md z-10 sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium font-secondary text-white">
                             {event.title}
                         </span>
 
@@ -426,7 +353,7 @@
         </div>
         <AlertDialog.Footer>
             <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-            {#if currentEvent.paid}
+            {#if currentEvent.paid && !isPastDate(currentEvent.date)}
                 <AlertDialog.Action onclick={() => (window.open(event.url, '_blank'))}>Register</AlertDialog.Action>
             {/if}
         </AlertDialog.Footer>
