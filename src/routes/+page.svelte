@@ -706,7 +706,7 @@
     </div>
 
     <div class="flex justify-center items-center w-full mt-8">
-        <span class="p-4 bg-primary-800 text-white rounded-md font-tertiary text-xs">Friday Sermon starts at 1:30 PM and Prayer commences at 2:15 PM</span>
+        <span class="p-4 bg-primary-800 text-white rounded-md font-tertiary text-xs">Friday Sermon starts at 1:30 PM and Prayer commences at 2:00 PM</span>
     </div>
 
     <div class="flex gap-2 w-[80dvw] sm:mx-auto overflow-scroll no-scrollbar">
