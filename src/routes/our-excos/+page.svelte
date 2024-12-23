@@ -145,7 +145,7 @@
                             </span>
                                     </div>
                                 </AlertDialog.Trigger>
-                                <AlertDialog.Content>
+                                <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
                                     <AlertDialog.Header>
                                         <AlertDialog.Title>{member.name}'s Profile</AlertDialog.Title>
                                         <AlertDialog.Description>

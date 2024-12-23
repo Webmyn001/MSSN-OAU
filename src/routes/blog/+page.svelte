@@ -7,7 +7,17 @@
 
     export let data;
 
-
+    onMount(() => {
+        if (data.posts && data.posts.length === 0) {
+            toast.error("Blog server is temporarily unavailable.", {
+                duration: Number.POSITIVE_INFINITY,
+                action: {
+                    label: "Go to blog",
+                    onClick: () => window.open("https://annuurpress.org.ng")
+                }
+            })
+        }
+    })
 
 
 </script>
@@ -38,16 +48,15 @@
 
 <PageHeader>
     Our Blog
-    <p class="text-neutral-100 text-center font-tertiary text-sm mt-4">
-        Reflective, immersive write-ups, curated by the <a href="https://annuurpress.org.ng/" class="semibold underline">An-Nuur Press</a>
+    <p class="text-neutral-100 text-center font-tertiary sm:text-sm text-xs mt-4">
+        Reflective, immersive write-ups, curated by the <a href="https://annuurpress.org.ng/"
+                                                           class="semibold underline">An-Nuur Press</a>
     </p>
 </PageHeader>
 
 
 <section class="py-16">
     <div class="max-w-7xl mx-auto px-5 sm:px-10 md:px-12 lg:px-5 space-y-14">
-
-
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 rounded-t-lg">
             {#if data.posts && Array.isArray(data.posts)}
                 {#each data.posts as post}
@@ -57,7 +66,7 @@
                        class="flex p-px flex-col bg-gray-100 group border border-gray-200 rounded-xl">
                         <div class="flex rounded-t-[7px] bg-gray-300">
                             <img src={post.featured_image}
-                                 class="rounded-t-[7px] aspect-[4/2.8] w-full object-cover" alt={post.title} />
+                                 class="rounded-t-[7px] aspect-[4/2.8] w-full object-cover" alt={post.title}/>
                         </div>
                         <div class="flex flex-col p-5 relative justify-between h-full">
                             <h1
@@ -79,7 +88,7 @@
                 {/each}
                 <!-- Newsletter Form -->
                 <div id="newsletter"
-                        class="sm:col-span-2 lg:col-span-1 p-6 sm:p-10 md:p-14 lg:p-8 rounded-xl bg-gray-100 flex flex-col space-y-6 relative">
+                     class="sm:col-span-2 lg:col-span-1 p-6 sm:p-10 md:p-14 lg:p-8 rounded-xl bg-gray-100 flex flex-col space-y-6 relative">
                     <div
                             class="absolute w-14 h-14 rounded-full bg-gradient-to-bl from-green-700 to-violet-500 blur-2xl z-10 -top-7 -left-7 opacity-40">
                     </div>
@@ -113,7 +122,7 @@
             {/if}
         </div>
 
-<!--   See More    -->
+        <!--   See More    -->
         <div class="flex justify-center">
             <a href="https://annuurpress.org.ng/category/articles/"
                class="px-6 py-3 border rounded-lg border-gray-100 text-green-700 flex items-center gap-x-3">
@@ -124,7 +133,7 @@
                 </svg>
             </a>
         </div>
-<!--   End See More     -->
+        <!--   End See More     -->
 
     </div>
 </section>

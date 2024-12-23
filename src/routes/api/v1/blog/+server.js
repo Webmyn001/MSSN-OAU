@@ -9,7 +9,7 @@ export const GET = async () => {
         const req = await getPantry("blog")
         const wordpressPosts = await fetch("https://annuurpress.org.ng/wp-json/wp/v2/posts?_embed");
         if (!wordpressPosts.ok) {
-            throw new Error("Server error")
+            throw new Error("WordPress Not Responding")
         }
         const res = await wordpressPosts.json();
         const allPosts = [...(req.enabled ? req.posts : []), ...res.filter(post => post.status === 'publish').map(post => {

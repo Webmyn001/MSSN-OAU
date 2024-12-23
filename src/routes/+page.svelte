@@ -3,7 +3,8 @@
     import {
         BookOpenText,
         Clock,
-        Copy, MapPinned,
+        Copy,
+        MapPinned,
         NotebookPen,
         Presentation,
         SquareArrowOutUpRight,
@@ -12,29 +13,86 @@
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
     import {MetaTags} from 'svelte-meta-tags';
-    import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
     import {Badge} from "$lib/components/ui/badge/index.js";
-    import * as Sheet from "$lib/components/ui/sheet/index.js";
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {Button} from "$lib/components/ui/button/index.js";
     import Autoplay from "embla-carousel-autoplay";
-    import * as Carousel from "$lib/components/ui/carousel/index.js";
     import copyTextToClipboard from '$lib/utils/copy.js'
+    import slugify from "$lib/utils/slugify.js";
+    import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+    import * as Sheet from "$lib/components/ui/sheet/index.js";
+    import * as Carousel from "$lib/components/ui/carousel/index.js";
 
+
+    export let data;
 
     let selectedMosque = "awolowo_hall"
 
     const mosques = [
-        { id: "awolowo_hall", label: "Awolowo Hall", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "Awolowo Hall of Residence, After Awo Cafe, OAU." },
-        { id: "fajuyi_hall", label: "Fajuyi Hall", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
-        { id: "etf_hall", label: "ETF Hall", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
-        { id: "pg_hall", label: "PG Hall", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
-        { id: "geology_grounds", label: "Geology Grounds", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
-        { id: "computer_grounds", label: "Computer Grounds", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
-        { id: "spider_grounds", label: "Spider Grounds", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
-        { id: "chem_eng_grounds", label: "Chem. Eng Grounds", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" },
-        { id: "central_mosque", label: "Central Mosque", url: "", images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"], address: "" }
+        {
+            id: "awolowo_hall",
+            label: "Awolowo Hall",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: "Awolowo Hall of Residence, After Awo Cafe, OAU."
+        },
+        {
+            id: "fajuyi_hall",
+            label: "Fajuyi Hall",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: ""
+        },
+        {
+            id: "etf_hall",
+            label: "ETF Hall",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: ""
+        },
+        {
+            id: "pg_hall",
+            label: "PG Hall",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: ""
+        },
+        {
+            id: "geology_grounds",
+            label: "Geology Grounds",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: ""
+        },
+        {
+            id: "computer_grounds",
+            label: "Computer Grounds",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: ""
+        },
+        {
+            id: "spider_grounds",
+            label: "Spider Grounds",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: ""
+        },
+        {
+            id: "chem_eng_grounds",
+            label: "Chem. Eng Grounds",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: ""
+        },
+        {
+            id: "central_mosque",
+            label: "Central Mosque",
+            url: "",
+            images: ["https://images.unsplash.com/photo-1609657726788-44564a8f304a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vc3F1ZSUyMG5pZ2VyaWF8ZW58MHx8MHx8fDA%3D", "https://plus.unsplash.com/premium_photo-1678488478981-c8cf47f2c280?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383963284-91ef78fc9b6d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995539989-1947b660b879?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://plus.unsplash.com/premium_photo-1678481816413-00aabc64678d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1600383962708-4f28dcbce116?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D", "https://images.unsplash.com/photo-1682995759960-531a5ba3a944?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9zcXVlJTIwbmlnZXJpYXxlbnwwfHwwfHx8MA%3D%3D"],
+            address: ""
+        }
     ];
 
     $: selectedMosqueObject = mosques.find(mosque => mosque.id === selectedMosque)
@@ -69,7 +127,7 @@
     ]
 
     const copyAccNumber = async () => {
-        const copy = await copyTextToClipboard("0217023039")
+        const copy = await copyTextToClipboard(data.info.account.number)
         console.log(copy)
         if (copy) {
             toast.success("Account Number Copied!")
@@ -79,7 +137,7 @@
     }
 
     const copyAccDetails = async () => {
-        const copy = await copyTextToClipboard(`Bank Name: GTBank\nAccount Name: Muslim Students’ Society Of Nigeria, OAU\nAccount Number: 0217023039`)
+        const copy = await copyTextToClipboard(`Bank Name: ${data.info.account.bank}\nAccount Name: ${data.info.account.name}\nAccount Number: ${data.info.account.number}`)
         console.log(copy)
         if (copy) {
             toast.success("Account Details Copied!")
@@ -239,94 +297,21 @@
         }
     }
 
-    /**
-     * @typedef {Object} Post
-     * @property {number} id - The unique identifier for the post.
-     * @property {string} date - The date the post was created.
-     * @property {string} date_gmt - The GMT date the post was created.
-     * @property {Object} guid - The globally unique identifier (GUID) for the post.
-     * @property {string} modified - The date the post was last modified.
-     * @property {string} modified_gmt - The GMT date the post was last modified.
-     * @property {string} slug - The URL slug for the post.
-     * @property {string} status - The current status of the post (e.g., 'publish').
-     * @property {string} type - The type of content (e.g., 'post').
-     * @property {string} link - The URL link to the post.
-     * @property {Object} title - The title of the post.
-     * @property {Object} content - The content of the post.
-     * @property {Object} excerpt - The excerpt/summary of the post.
-     * @property {boolean} excerpt.protected - If the excerpt is protected or not.
-     * @property {number} author - The ID of the post author.
-     * @property {number} featured_media - The ID of the featured media image.
-     * @property {string} comment_status - The comment status (e.g., 'open').
-     * @property {string} ping_status - The ping status (e.g., 'open').
-     * @property {boolean} sticky - If the post is sticky (pinned).
-     * @property {string} template - The template used for the post.
-     * @property {string} format - The format of the post (e.g., 'standard').
-     * @property {Object} meta - Additional meta information about the post.
-     * @property {Object} _links - Links to related resources.
-     * @property {Object} _embedded - Embedded resources related to the post.
-     * @property {Object[]} _embedded.author - Information about the post author.
-     * @property {number} _embedded.author.id - The author's ID.
-     * @property {string} _embedded.author.name - The author's name.
-     * @property {string} _embedded.author.url - The URL to the author's website.
-     * @property {string} _embedded.author.link - The link to the author's profile.
-     * @property {Object} _embedded.author.avatar_urls - The URLs to the author's avatar images.
-     * @property {string} _embedded.author.avatar_urls[24] - The 24px avatar image URL.
-     * @property {string} _embedded.author.avatar_urls[48] - The 48px avatar image URL.
-     * @property {string} _embedded.author.avatar_urls[96] - The 96px avatar image URL.
-     * @property {Object[]} _embedded.wp:featuredmedia - The featured media related to the post.
-     * @property {number} _embedded.wp:featuredmedia.id - The media ID.
-     * @property {string} _embedded.wp:featuredmedia.link - The URL link to the media.
-     * @property {string} _embedded.wp:featuredmedia.source_url - The source URL of the media.
-     * @property {Object[]} _embedded.wp:term - The taxonomy terms (e.g., categories).
-     * @property {Object} _embedded.wp:term[0] - The first taxonomy term.
-     * @property {number} _embedded.wp:term[0].id - The term ID.
-     * @property {string} _embedded.wp:term[0].link - The URL link to the term.
-     * @property {string} _embedded.wp:term[0].name - The name of the term.
-     * @property {string} _embedded.wp:term[0].slug - The slug of the term.
-     * @property {string} _embedded.wp:term[0].taxonomy - The taxonomy type of the term (e.g., 'category').
-     */
-
-    /**
-     * @type {Post[]}
-     */
-    let posts = []
-
-    /**
-     * @returns {Promise<Post[]>}
-     */
-    const getPosts = async () => {
-        try {
-
-            const req = await fetch("https://annuurpress.org.ng/wp-json/wp/v2/posts?_embed");
-            if (!req.ok) {
-                toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
-                posts = []
-            }
-            const res =  await req.json();
-            console.error(res[0].date)
-            if (!res || !Array.isArray(res)) {
-                toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
-                posts = []
-            }
-            posts = [...res.slice(0,3)]
-        } catch (e) {
-            console.error(e);
-            toast.error("Something went wrong while fetching the posts. Please try again in a few minutes")
-            posts = []
-        }
-    }
-
-
-
-
 
     let upcoming_solat = 0;
 
     onMount(() => {
         upcoming_solat = getSolahPeriod()
         getHijrahDate()
-        getPosts()
+        if (data.posts && data.posts.length === 0) {
+            toast.error("Blog server is temporarily unavailable.", {
+                duration: Number.POSITIVE_INFINITY,
+                action: {
+                    label: "Go to blog",
+                    onClick: () => window.open("https://annuurpress.org.ng")
+                }
+            })
+        }
     })
 
 </script>
@@ -357,10 +342,11 @@
 <!-- Hero -->
 <section class="py-32 mx-auto w-full">
     <div class="container flex flex-col items-center text-center w-full">
-        <h1 class="text-primary-900 -translate-x-3 my-6 text-pretty text-4xl font-bold lg:text-6xl" id="hero-text">We are Great <span
-                class="relative inline ml-2 mr-12 sm:ml-2 sm:mr-2 lg:ml-4 top-[-6px]"><span
-                class="yoruba top-[8px] sm:top-[10px] lg:top-[12px] absolute text-[#28145B] scale-105">Ife's</span><span
-                class="scale-105 yoruba absolute -z-10 text-[#EBB957]">Ìfẹ́'s</span></span>
+        <h1 class="text-primary-900 -translate-x-3 my-6 text-pretty text-4xl font-bold lg:text-6xl" id="hero-text">We
+            are Great <span
+                    class="relative inline ml-2 mr-12 sm:ml-2 sm:mr-2 lg:ml-4 top-[-6px]"><span
+                    class="yoruba top-[8px] sm:top-[10px] lg:top-[12px] absolute text-[#28145B] scale-105">Ife's</span><span
+                    class="scale-105 yoruba absolute -z-10 text-[#EBB957]">Ìfẹ́'s</span></span>
         </h1>
         <!-- #EBB957, #28145B -->
         <p class="mb-8 max-w-3xl text-zinc-600 lg:text-xl">
@@ -688,8 +674,8 @@
     </div>
 
     <div class="flex gap-2 w-[80dvw] sm:mx-auto overflow-scroll no-scrollbar">
-    {#each mosques as mosque}
-                <Badge variant="outline" onclick={() => {
+        {#each mosques as mosque}
+            <Badge variant="outline" onclick={() => {
                     selectedMosque = mosque.id
                     showMosqueModal = !showMosqueModal
                     console.log(mosque.id)
@@ -702,19 +688,26 @@
 </div>
 <!-- End Prayer Times -->
 
+
 <!-- Upcoming Events Section -->
 <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
     <!-- Title -->
     <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between mb-10 lg:mb-14">
         <div class="text-right sm:text-center">
-        <h2 class="text-2xl font-bold font-primary md:text-4xl md:leading-tight ">Upcoming Events</h2>
-        <p class="mt-1 text-primary-800 sm:text-center font-secondary">More info and registration for some of our upcoming community events.</p>
+            <h2 class="text-2xl font-bold font-primary md:text-4xl md:leading-tight ">Upcoming Events</h2>
+            <p class="mt-1 text-primary-800 sm:text-center font-secondary">More info and registration for some of
+                our upcoming community events.</p>
         </div>
 
         <div class="mt-12 text-center">
-            <a class="py-3 text-nowrap px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-white text-primary-800 shadow-sm hover:bg-primary-50 focus:outline-none focus:bg-primary-50 disabled:opacity-50 disabled:pointer-events-none" href="/events">
+            <a class="py-3 text-nowrap px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-white text-primary-800 shadow-sm hover:bg-primary-50 focus:outline-none focus:bg-primary-50 disabled:opacity-50 disabled:pointer-events-none"
+               href="/events">
                 All Events
-                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
             </a>
         </div>
 
@@ -723,65 +716,64 @@
 
     <!-- Grid -->
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Card -->
-        <a class="group flex flex-col focus:outline-none" href="#">
-            <div class="relative pt-[50%] sm:pt-[70%] rounded-xl overflow-hidden">
-                <img loading="lazy" class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-xl" src="https://plus.unsplash.com/premium_photo-1678310600127-b3311b803a49?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGVpZCUyMHBhcnR5fGVufDB8fDB8fHww" alt="Eid Fest">
-                <span class="font-tertiary absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-primary-800 text-white py-1.5 px-3">
-          Paid - ₦3000
+        {#each data.events as event}
+            <!-- Card -->
+            <a class="group flex flex-col focus:outline-none"
+               href={`/events#${slugify(event.title + " " + event.date)}`}>
+                <div class="relative pt-[50%] sm:pt-[70%] rounded-xl overflow-hidden">
+                    <img loading="lazy"
+                         class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-xl"
+                         src={event.image}
+                         alt={event.title}>
+                    {#if event.paid && event.price && event.price.length > 0}
+                            <span class="font-tertiary absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-primary-800 text-white py-1.5 px-3">
+          Paid - {event.price}
         </span>
-            </div>
+                    {/if}
+                </div>
 
-            <div class="mt-7">
-                <h3 class="text-xl font-secondary font-semibold text-gray-800 group-hover:text-gray-600">
-                    Eid Fest 2025
-                </h3>
-                <p class="mt-3 font-tertiary text-gray-800">
-                    After all the hectic hustle of Eid, it’s time to finally let off some heat...
-                </p>
-                <p class="mt-5 inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium font-secondary">
-                    More Info
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                </p>
-            </div>
-        </a>
-        <!-- End Card -->
+                <div class="mt-7">
+                    <h3 class="text-xl font-secondary font-semibold text-gray-800 group-hover:text-gray-600">
+                        {event.title}
+                    </h3>
+                    <p class="mt-3 font-tertiary text-gray-800 line-clamp-2 text-ellipsis">
+                        {event.summary}
+                    </p>
+                    <button onclick={ () => goto(`/events#${slugify(event.title + " " + event.date)}`)}
+                            class="mt-5 inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium font-secondary">
+                        More Info
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </a>
+            <!-- End Card -->
+        {/each}
 
-        <!-- Card -->
-        <a class="group flex flex-col focus:outline-none" href="#">
-            <div class="relative pt-[50%] sm:pt-[70%] rounded-xl overflow-hidden">
-                <img loading="lazy" class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-xl" src="https://images.unsplash.com/photo-1651293478838-1f51675131c5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aXNsYW1pYyUyMGxlY3R1cmV8ZW58MHx8MHx8fDA%3D" alt="Al-Usrah">
-            </div>
-
-            <div class="mt-7">
-                <h3 class="text-xl font-secondary font-semibold text-gray-800 group-hover:text-gray-600">
-                    Al-Usrah
-                </h3>
-                <p class="mt-3 font-tertiary text-gray-800">
-                    It's time for our special weekly programme, where we get together to remind ourselves of...
-                </p>
-                <p class="mt-5 font-secondary inline-flex items-center gap-x-1 text-sm text-primary-700 decoration-2 group-hover:underline group-focus:underline font-medium">
-                    More Info
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                </p>
-            </div>
-        </a>
-        <!-- End Card -->
-
-        <!-- Card -->
-        <a class="group relative flex flex-col w-full min-h-60 bg-[url('https://plus.unsplash.com/premium_photo-1676496046182-356a6a0ed002?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=560&q=80')] bg-center bg-cover rounded-xl hover:shadow-lg focus:outline-none focus:shadow-lg transition" href="#">
+        <!-- Article Card -->
+        <a class="group relative flex flex-col w-full min-h-60 bg-[url('https://plus.unsplash.com/premium_photo-1676496046182-356a6a0ed002?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=560&q=80')] bg-center bg-cover rounded-xl hover:shadow-lg focus:outline-none focus:shadow-lg transition"
+           href="#">
             <div class="absolute inset-0 bg-black/40 blur-sm rounded-xl"></div>
             <div class="flex-auto p-4 md:p-6 z-10">
-                <h3 class="text-xl text-white/90 group-hover:text-white font-tertiary"><span class="font-bold text-primary-100 font-secondary">How To</span> register for Paid MSSN Events online via the website.</h3>
+                <h3 class="text-xl text-white/90 group-hover:text-white font-tertiary"><span
+                        class="font-bold text-primary-100 font-secondary">How To</span> register for Paid MSSN
+                    Events online via the website.</h3>
             </div>
             <div class="pt-0 p-4 md:p-6">
                 <div class="inline-flex items-center gap-2 text-sm font-medium text-white group-hover:text-white/70 group-focus:text-white/70">
                     Read Article
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
                 </div>
             </div>
         </a>
-        <!-- End Card -->
+        <!-- Article Card -->
     </div>
     <!-- End Grid -->
 </div>
@@ -798,34 +790,36 @@
 
     <!-- Grid -->
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {#if posts && posts !== []}
-        {#each posts as post}
-        <!-- Card -->
-        <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
-           href={post.link}>
-            <div class="aspect-w-16 aspect-h-11">
-                <img class="w-full object-cover rounded-xl h-[210px]" loading="lazy"
-                     src={post._embedded['wp:featuredmedia']['0'].source_url}
-                     alt={post.title.rendered}>
-            </div>
-            <div class="my-6">
-                <h3 class="text-xl font-secondary font-semibold text-primary-900">
-                    {@html post.title.rendered}
-                </h3>
-                <p class="mt-5 text-gray-600 font-tertiary">
-                    {@html post.excerpt.rendered}
-                </p>
-            </div>
-            <div class="mt-auto flex items-center gap-x-3">
-                <img class="size-8 rounded-full" loading="lazy" src={post._embedded.author[0].avatar_urls["48"]} alt={post._embedded.author[0].name}>
-                <div>
-                    <h5 class="text-sm text-neutral-800 font-secondary">By {post._embedded.author[0].name} {post._embedded.author.length > 1 ? "and " + post._embedded.author.length - 1 + " others" : ""}</h5>
+        {#each data.posts as post}
+            <!-- Card -->
+            <a class="group flex flex-col h-full border border-primary-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-5"
+               href={post.link}
+               target="_blank"
+            >
+                <div class="aspect-w-16 aspect-h-11">
+                    <img class="w-full object-cover rounded-xl h-[210px]" loading="lazy"
+                         src={post.featured_image}
+                         alt={post.title}>
                 </div>
-            </div>
-        </a>
-        <!-- End Card -->
-            {/each}
-            {/if}
+                <div class="my-6">
+                    <h3 class="text-xl font-secondary font-semibold text-primary-900">
+                        {@html post.title}
+                    </h3>
+                    <p class="mt-5 text-gray-600 font-tertiary">
+                        {@html post.excerpt}
+                    </p>
+                </div>
+                <div class="mt-auto flex items-center gap-x-3">
+                    <img class="size-8 rounded-full" loading="lazy" src={post.authors[0].avatar_urls["48"]}
+                         alt={post.authors[0].name}>
+                    <div>
+                        <h5 class="text-sm text-neutral-800 font-secondary">
+                            By {post.authors[0].name} {post.authors.length > 1 ? "and " + post.author.length - 1 + " others" : ""}</h5>
+                    </div>
+                </div>
+            </a>
+            <!-- End Card -->
+        {/each}
     </div>
     <!-- End Grid -->
 
@@ -834,7 +828,8 @@
         <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-primary-700 text-white shadow-sm hover:bg-primary-700/90 focus:outline-none focus:bg-primary-700/90 disabled:opacity-50 disabled:pointer-events-none"
            href="/blog">
             Read more
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                 viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m9 18 6-6-6-6"/>
             </svg>
@@ -842,7 +837,8 @@
         <a class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium rounded-xl border border-primary-200 bg-white text-primary-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
            href="/blog#newsletter">
             Join Newsletter
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                 viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m9 18 6-6-6-6"/>
             </svg>
@@ -870,7 +866,7 @@
                     </button>
 
                 </AlertDialog.Trigger>
-                <AlertDialog.Content>
+                <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
                     <AlertDialog.Header>
                         <AlertDialog.Title class="font-primary text-primary-800">Donate
                         </AlertDialog.Title>
@@ -884,7 +880,7 @@
                             <dd>
                                 <ul>
                                     <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800">
-                                        Muslim Students’ Society Of Nigeria, OAU
+                                        {data.info.account.name}
                                     </li>
                                 </ul>
                             </dd>
@@ -897,7 +893,7 @@
                             <dd>
                                 <ul>
                                     <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800">
-                                        GTBank
+                                        {data.info.account.bank}
                                     </li>
                                 </ul>
                             </dd>
@@ -910,7 +906,7 @@
                             <dd>
                                 <ul>
                                     <li class="me-1 inline-flex items-center text-sm text-neutral-800">
-                                        0217023039
+                                        {data.info.account.number}
                                         <Copy onclick={copyAccNumber}
                                               class="size-4 text-primary-700 cursor-pointer ml-4"/>
                                     </li>
@@ -957,7 +953,8 @@
 
             <!-- image - start -->
             <div class="order-first h-48 w-full bg-gray-300 sm:order-none sm:h-auto sm:w-1/2 lg:w-2/5">
-                <img src="https://images.unsplash.com/photo-1612955625275-08aebd897b3a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHN1Z2dlc3Rpb24lMjBib3h8ZW58MHx8MHx8fDA%3D" loading="lazy" alt="Suggestion Box"
+                <img src="https://images.unsplash.com/photo-1612955625275-08aebd897b3a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHN1Z2dlc3Rpb24lMjBib3h8ZW58MHx8MHx8fDA%3D"
+                     loading="lazy" alt="Suggestion Box"
                      class="h-full w-full object-cover object-center"/>
             </div>
             <!-- image - end -->
@@ -967,46 +964,48 @@
 <!-- End Suggestions CTA -->
 
 {#if selectedMosqueObject}
-<Sheet.Root bind:open={showMosqueModal}>
-    <Sheet.Trigger>
-    </Sheet.Trigger>
-    <Sheet.Content onCloseAutoFocus={event => event.preventDefault()} side="bottom">
-        <Sheet.Header>
-            <Sheet.Title class="font-primary">{selectedMosqueObject?.label}</Sheet.Title>
-            <Sheet.Description class="font-tertiary text-xs">
-                At {selectedMosqueObject?.address}
-            </Sheet.Description>
-        </Sheet.Header>
-        <Carousel.Root
-                plugins={[
+    <Sheet.Root bind:open={showMosqueModal}>
+        <Sheet.Trigger>
+        </Sheet.Trigger>
+        <Sheet.Content onCloseAutoFocus={event => event.preventDefault()} side="bottom">
+            <Sheet.Header>
+                <Sheet.Title class="font-primary">{selectedMosqueObject?.label}</Sheet.Title>
+                <Sheet.Description class="font-tertiary text-xs">
+                    At {selectedMosqueObject?.address}
+                </Sheet.Description>
+            </Sheet.Header>
+            <Carousel.Root
+                    plugins={[
     Autoplay({
       delay: 5000,
     }),
   ]}
-                class="w-full"
-                opts={{ align: "center", loop: true }}
-        >
-            <Carousel.Content class="aspect-square">
-                {#each selectedMosqueObject?.images as image, i}
-                <Carousel.Item>
-                    <img class="aspect-square w-[60dvw] rounded-xl mx-auto mt-6" src={image} alt={`${selectedMosqueObject.label} ${i + 1}`} />
-                </Carousel.Item>
+                    class="w-full"
+                    opts={{ align: "center", loop: true }}
+            >
+                <Carousel.Content class="aspect-square">
+                    {#each selectedMosqueObject?.images as image, i}
+                        <Carousel.Item>
+                            <img class="aspect-square w-[60dvw] rounded-xl mx-auto mt-6" src={image}
+                                 alt={`${selectedMosqueObject.label} ${i + 1}`}/>
+                        </Carousel.Item>
                     {/each}
-            </Carousel.Content>
-            <Carousel.Previous />
-            <Carousel.Next />
-        </Carousel.Root>
+                </Carousel.Content>
+                <Carousel.Previous/>
+                <Carousel.Next/>
+            </Carousel.Root>
 
-        <Sheet.Footer class="gap-3">
-            <Button onclick={() => (showMosqueModal = !showMosqueModal)} variant="outline">Close</Button>
-            <Button class="bg-primary-800 hover:bg-primary-800/90 text-white" onclick={() => (window.open(selectedMosqueObject?.url, '_blank'))}>
-                <MapPinned class="size-6 mx-2" />
-                View on Maps
-            </Button>
-        </Sheet.Footer>
-    </Sheet.Content>
-</Sheet.Root>
-    {/if}
+            <Sheet.Footer class="gap-3">
+                <Button onclick={() => (showMosqueModal = !showMosqueModal)} variant="outline">Close</Button>
+                <Button class="bg-primary-800 hover:bg-primary-800/90 text-white"
+                        onclick={() => (window.open(selectedMosqueObject?.url, '_blank'))}>
+                    <MapPinned class="size-6 mx-2"/>
+                    View on Maps
+                </Button>
+            </Sheet.Footer>
+        </Sheet.Content>
+    </Sheet.Root>
+{/if}
 
 <style>
     .yoruba {

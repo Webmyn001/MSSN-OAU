@@ -3,6 +3,7 @@ import tailwindcssAnimate from "tailwindcss-animate";
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
 import preline from 'preline/plugin';
+import lineclamp from '@tailwindcss/line-clamp';
 
 /** @type {import('tailwindcss').Config} */
 const config = {
@@ -112,7 +113,7 @@ const config = {
             },
         },
     },
-    plugins: [typography, forms, preline, tailwindcssAnimate]
+    plugins: [typography, forms, preline, tailwindcssAnimate, lineclamp]
 };
 
 export default config;

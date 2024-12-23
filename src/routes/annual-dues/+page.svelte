@@ -7,8 +7,10 @@
     import {Copy} from "lucide-svelte";
     import {MetaTags} from "svelte-meta-tags";
 
+    export let data;
+
     const copyAccNumber = async () => {
-        const copy = await copyTextToClipboard("0217023039")
+        const copy = await copyTextToClipboard(data.info.account.number)
         console.log(copy)
         if (copy) {
             toast.success("Account Number Copied!")
@@ -18,7 +20,7 @@
     }
 
     const copyAccDetails = async () => {
-        const copy = await copyTextToClipboard(`Bank Name: GTBank\nAccount Name: Muslim Students’ Society Of Nigeria, OAU\nAccount Number: 0217023039`)
+        const copy = await copyTextToClipboard(`Bank Name: ${data.info.account.bank}\nAccount Name: ${data.info.account.name}\nAccount Number: ${data.info.account.number}`)
         console.log(copy)
         if (copy) {
             toast.success("Account Details Copied!")
@@ -84,7 +86,7 @@
                     <span class="px-1.5 text-white text-sm font-medium leading-6">Pay Annual Dues</span>
                 </button>
                     </AlertDialog.Trigger>
-                    <AlertDialog.Content>
+                    <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
                         <AlertDialog.Header>
                             <AlertDialog.Title class="font-primary text-primary-800">Pay Annual Dues
                             </AlertDialog.Title>
@@ -105,7 +107,7 @@
                                 <dd>
                                     <ul>
                                         <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800">
-                                            Muslim Students’ Society Of Nigeria, OAU
+                                            {data.info.account.name}
                                         </li>
                                     </ul>
                                 </dd>
@@ -118,7 +120,7 @@
                                 <dd>
                                     <ul>
                                         <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800">
-                                            GTBank
+                                            {data.info.account.bank}
                                         </li>
                                     </ul>
                                 </dd>
@@ -131,7 +133,7 @@
                                 <dd>
                                     <ul>
                                         <li class="me-1 inline-flex items-center text-sm text-neutral-800">
-                                            0217023039
+                                            {data.info.account.number}
                                             <Copy onclick={copyAccNumber}
                                                   class="size-4 text-primary-700 cursor-pointer ml-4"/>
                                         </li>
