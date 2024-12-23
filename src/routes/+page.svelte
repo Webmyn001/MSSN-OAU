@@ -12,7 +12,7 @@
     } from 'lucide-svelte'
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
-    import {MetaTags} from 'svelte-meta-tags';
+    import {JsonLd, MetaTags} from 'svelte-meta-tags';
     import {Badge} from "$lib/components/ui/badge/index.js";
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
@@ -359,6 +359,17 @@
     ],
     siteName: 'MSSNOAU'
   }}
+/>
+<JsonLd schema={{
+            "@context": "http://schema.org",
+            "@type": "WebPage",
+            "name": "We are OAU Great Ìfẹ́'s Muslim Community | MSSNOAU",
+            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
+            "publisher": {
+                "@type": "Organization",
+                "name": "MSSNOAU.org"
+            }
+        }}
 />
 <!-- End Meta Tags -->
 

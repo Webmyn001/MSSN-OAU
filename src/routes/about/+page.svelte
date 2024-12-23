@@ -1,6 +1,6 @@
 <script>
     import PageHeader from "$lib/components/PageHeader.svelte";
-    import {MetaTags} from "svelte-meta-tags";
+    import {MetaTags, JsonLd} from "svelte-meta-tags";
 </script>
 
 
@@ -25,6 +25,17 @@
     siteName: 'MSSNOAU'
   }}
 />
+<JsonLd schema={{
+            "@context": "http://schema.org",
+            "@type": "WebPage",
+            "name": "About Us | MSSNOAU",
+            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
+            "publisher": {
+                "@type": "Organization",
+                "name": "MSSNOAU.org"
+            }
+        }}
+        />
 <!-- End Meta Tags -->
 
 <PageHeader>

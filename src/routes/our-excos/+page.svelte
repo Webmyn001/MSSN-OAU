@@ -8,7 +8,7 @@
     import * as Popover from "$lib/components/ui/popover/index.js";
     import * as Command from "$lib/components/ui/command/index.js";
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-    import {MetaTags} from "svelte-meta-tags";
+    import {JsonLd, MetaTags} from "svelte-meta-tags";
 
     export let data;
 
@@ -68,6 +68,17 @@
     ],
     siteName: 'MSSNOAU'
   }}
+/>
+<JsonLd schema={{
+            "@context": "http://schema.org",
+            "@type": "WebPage",
+            "name": "We are OAU Great Ìfẹ́'s Muslim Community | MSSNOAU",
+            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
+            "publisher": {
+                "@type": "Organization",
+                "name": "MSSNOAU.org"
+            }
+        }}
 />
 <!-- End Meta Tags -->
 

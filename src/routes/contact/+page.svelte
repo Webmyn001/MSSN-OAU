@@ -3,7 +3,7 @@
     import ContactForm from "$lib/components/ContactForm.svelte";
     import * as Accordion from "$lib/components/ui/accordion/index.js";
     import {CircleHelp} from "lucide-svelte";
-    import {MetaTags} from "svelte-meta-tags";
+    import {MetaTags, JsonLd} from "svelte-meta-tags";
 
     export let data;
 
@@ -34,6 +34,17 @@
     siteName: 'MSSNOAU'
   }}
 />
+<JsonLd schema={{
+            "@context": "http://schema.org",
+            "@type": "WebPage",
+            "name": "Contact Us | MSSNOAU",
+            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
+            "publisher": {
+                "@type": "Organization",
+                "name": "MSSNOAU.org"
+            }
+        }}
+        />
 <!-- End Meta Tags -->
 
 <PageHeader>

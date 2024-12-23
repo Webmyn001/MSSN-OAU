@@ -4,7 +4,6 @@
     import {onMount} from "svelte";
     import PageHeader from "$lib/components/PageHeader.svelte";
     import {MetaTags, JsonLd} from "svelte-meta-tags";
-    import {page} from '@sveltejs/kit'
 
     export let data;
 
@@ -24,14 +23,14 @@
         {
             "@context": "http://schema.org",
             "@type": "WebPage",
-            "name": "Blog",
+            "name": "Our Blog | MSSNOAU",
             "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
             "publisher": {
-                "@type": "NonProfitOrganization",
+                "@type": "Organization",
                 "name": "MSSNOAU.org"
             }
         },
-        ...data.posts.map(post => {
+        ...data?.posts.map(post => {
         return {
             '@type': 'Article',
             mainEntityOfPage: {
@@ -46,7 +45,7 @@
             dateModified: post.date,
             author: {
                 '@type': 'Person',
-                name: post.author
+                name: post.authors[0].name
             },
             publisher: {
                 '@type': 'Organization',
@@ -85,7 +84,7 @@
 />
 {#if jsonLd}
 <JsonLd
-        schema={JsonLd}
+        schema={[...jsonLd]}
 />
     {/if}
 <!-- End Meta Tags -->
