@@ -4,7 +4,11 @@
     import {onMount} from "svelte";
     import {MetaTags} from "svelte-meta-tags";
 
-    const events = [
+
+    /**
+     * @type {MiniEvent[]}
+     */
+    const programmes = [
         {
             title: "Tutorials",
             text: "Academic tutorials organised by the Academic Committee.",
@@ -56,8 +60,8 @@
     ];
 
 
-    let selectedEvent = "Tutorials"
-    $: selectedImage = events.find(event => event.title === selectedEvent)?.image
+    let selectedProgramme = "Tutorials"
+    $: selectedImage = programmes.find(event => event.title === selectedProgramme)?.image
 
     let mode = 1;
 
@@ -101,13 +105,13 @@
     <div class="mx-auto max-w-5xl space-y-16 px-6">
 
         <div class="relative mx-auto grid max-w-4xl divide-x divide-y border *:p-12 sm:grid-cols-2 lg:grid-cols-3">
-            {#each events as event}
+            {#each programmes as programme}
             <div class="space-y-2">
                 <div class="flex items-center flex-col gap-4">
-                    <img class="size-12 sm:size-16 md:size-20 lg:size-24" alt={event.title} src={event.image} />
-                    <h3 class="text-title text-sm font-medium">{event.title}</h3>
+                    <img class="size-12 sm:size-16 md:size-20 lg:size-24" alt={programme.title} src={programme.image} />
+                    <h3 class="text-title text-sm font-medium">{programme.title}</h3>
                 </div>
-                <p class="text-body text-center text-sm">{event.text}</p>
+                <p class="text-body text-center text-sm">{programme.text}</p>
             </div>
                 {/each}
         </div>
@@ -129,19 +133,19 @@
                 <!-- Tab Navs -->
                 <nav class="grid gap-4 mt-5 md:mt-10">
 
-                    {#each events as event}
+                    {#each programmes as programme}
                         <button type="button"
                                 onclick={() => {
-                                    selectedEvent = event.title
+                                    selectedProgramme = programme.title
                                 }}
-                                class="{selectedEvent === event.title ? 'bg-white shadow-md hover:border-transparent' : ''} text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
-                                id={event.title} aria-selected={selectedEvent === event.title}>
+                                class="{selectedProgramme === programme.title ? 'bg-white shadow-md hover:border-transparent' : ''} text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
+                                id={programme.title} aria-selected={selectedProgramme === programme.title}>
             <span class="flex gap-x-6">
-                <img class="shrink-0 mt-2 size-12 md:size-14 {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer" src={event.icon} alt={event.title} />
+                <img class="shrink-0 mt-2 size-12 md:size-14 {selectedProgramme === programme.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer" src={programme.icon} alt={programme.title} />
                 <span class="grow">
-                <span class="block text-lg font-semibold font-secondary {selectedEvent === event.title ? 'text-primary-700' : ''} text-neutral-800">{event.title}</span>
-                    {#if selectedEvent === event.title}
-                <span in:slide out:slide class="block mt-1 text-neutral-800 font-tertiary">{event.text}</span>
+                <span class="block text-lg font-semibold font-secondary {selectedProgramme === programme.title ? 'text-primary-700' : ''} text-neutral-800">{programme.title}</span>
+                    {#if selectedProgramme === programme.title}
+                <span in:slide out:slide class="block mt-1 text-neutral-800 font-tertiary">{programme.text}</span>
                       {/if}
               </span>
             </span>
@@ -161,7 +165,7 @@
                             {#key selectedImage}
                                 <img loading="lazy" class="shadow-xl shadow-gray-200 rounded-xl"
                                      src={selectedImage}
-                                     alt={selectedEvent}/>
+                                     alt={selectedProgramme}/>
                             {/key}
                         </div>
                     </div>

@@ -2,67 +2,87 @@
     import {Button} from "$lib/components/ui/button/index.js";
     import {format, register} from 'timeago.js'
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+    import * as Tabs from "$lib/components/ui/tabs/index.js";
+
+
     import {toast} from "svelte-sonner";
     import {formatDate, isPastDate, months} from "$lib/utils/dates.js";
     import {MetaTags} from "svelte-meta-tags";
+    import PageHeader from "$lib/components/PageHeader.svelte";
 
-    function sortEvents(events) {
-        const today = new Date();
+    /**
+     * @param {Event[]} events
+     */
+    function processEvents(events) {
+        const now = new Date();
 
-        // Helper to calculate the closest weekly date
-        const getNextWeeklyDate = (day) => {
-            const now = new Date(today);
-            now.setDate(today.getDate() + ((7 - today.getDay() + day) % 7 || 7));
-            return now;
+
+        /**
+         * Helper function to adjust periodical dates
+         * @param {Event[]} event
+         * @returns { Event[]}
+         */
+        function adjustPeriodicalEvent(event) {
+            if (!event.periodical) return event;
+
+            const eventDate = new Date(event.date);
+
+            if (event.periodical === "weekly") {
+                while (eventDate < now) {
+                    eventDate.setDate(eventDate.getDate() + 7);
+                }
+            } else if (event.periodical === "monthly") {
+                while (eventDate < now) {
+                    eventDate.setMonth(eventDate.getMonth() + 1);
+                }
+            }
+
+            return { ...event, date: eventDate.toISOString() };
+        }
+
+        // Adjust periodical events
+        const adjustedEvents = events.map(adjustPeriodicalEvent);
+
+        // Separate upcoming and past events
+        const upcomingEvents = adjustedEvents.filter(
+            (event) => new Date(event.date) >= now
+        );
+        const pastEvents = adjustedEvents.filter(
+            (event) => new Date(event.date) < now
+        );
+
+        // Sort upcoming events (nearest to farthest)
+        upcomingEvents.sort(
+            (a, b) => new Date(a.date) - new Date(b.date)
+        );
+
+        // Filter and sort past events in the past 3 months (nearest to farthest)
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 12);
+
+        const recentPastEvents = pastEvents
+            .filter((event) => new Date(event.date) >= threeMonthsAgo)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Identify excluded events
+        const excludedEvents = adjustedEvents.filter(
+            (event) =>
+                !upcomingEvents.includes(event) &&
+                !recentPastEvents.includes(event)
+        );
+
+        // Log excluded events
+        console.log("Excluded Events:", excludedEvents);
+
+        // Return the result
+        return {
+            upcoming: upcomingEvents,
+            past: recentPastEvents,
+            excluded: excludedEvents, // Optionally include excluded events in the result
         };
-
-        // Helper to calculate the closest monthly date
-        const getNextMonthlyDate = (day) => {
-            const now = new Date(today);
-            const currentMonth = now.getMonth();
-            now.setDate(day);
-            if (now < today) {
-                now.setMonth(currentMonth + 1); // Move to next month if it's already passed
-            }
-            return now;
-        };
-
-        // Process and assign sortable dates for periodical events
-        const enrichedEvents = events.map(event => {
-            const enrichedEvent = { ...event };
-
-            if (event.periodical === "weekly" && event.day !== undefined) {
-                const nextDate = getNextWeeklyDate(event.day);
-                enrichedEvent.date = nextDate.toISOString(); // Update the date
-                enrichedEvent.sortableDate = nextDate;
-            } else if (event.periodical === "monthly" && event.day !== undefined) {
-                const nextDate = getNextMonthlyDate(event.day);
-                enrichedEvent.date = nextDate.toISOString(); // Update the date
-                enrichedEvent.sortableDate = nextDate;
-            } else if (event.date) {
-                enrichedEvent.sortableDate = new Date(event.date);
-            } else {
-                enrichedEvent.sortableDate = null; // Events without dates go to the bottom
-            }
-
-            return enrichedEvent;
-        });
-
-        // Sort events by the closest date
-        return enrichedEvents.sort((a, b) => {
-            const dateA = a.sortableDate;
-            const dateB = b.sortableDate;
-
-            // If both have valid dates
-            if (dateA && dateB) {
-                return dateA - dateB; // Earlier dates come first
-            }
-
-            // Events without valid dates are pushed to the bottom
-            if (!dateA) return 1;
-            if (!dateB) return -1;
-        });
     }
+
+
 
 
     const rawEvents = [
@@ -179,7 +199,9 @@
             "day": 1
         }
     ]
-    const events = sortEvents(rawEvents)
+
+
+    const allEvents = processEvents(rawEvents)
 
 
 
@@ -215,10 +237,27 @@
     register('my-locale', localeFunc);
 
 
-    let currentEvent = events[0];
 
-    let open = false;
+    let open = $state(false);
+
+    /**
+     * @type {'upcoming' | 'past'}
+     */
+    let mode = $state("upcoming")
+    let events = $derived(allEvents[mode])
+    let currentEvent = events[0];
 </script>
+
+<PageHeader>
+    Our Events
+    <br/>
+    <Tabs.Root bind:value={mode}>
+        <Tabs.List>
+            <Tabs.Trigger value="upcoming">Upcoming</Tabs.Trigger>
+            <Tabs.Trigger value="past">Last 12 Months</Tabs.Trigger>
+        </Tabs.List>
+    </Tabs.Root>
+</PageHeader>
 
 <!-- TODO: Add Event Meta Tags -->
 
@@ -247,22 +286,13 @@
 
 <div class="bg-white py-6 sm:py-8 lg:py-12">
     <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
-        <!-- text - start -->
-        <div class="mb-10 md:mb-16">
-            <h2 class="mb-4 text-center text-2xl font-bold text-gray-800 md:mb-6 lg:text-3xl">Our Events</h2>
-
-            <p class="mx-auto max-w-screen-md text-center text-gray-500 md:text-lg">This is a section of some simple
-                filler text, also known as placeholder text. It shares some characteristics of a real written text but
-                is random or otherwise generated.</p>
-        </div>
-        <!-- text - end -->
 
         <div class="grid gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-8">
 
             {#each events as event, i}
                 <!-- Article Start -->
                 <button onclick={() => {
-                currentEvent = events[i]
+                currentEvent = event
                 open = !open
             }}
                         class="group relative flex h-48 aspect-video sm:aspect-square flex-col overflow-hidden rounded-xl bg-gray-100 shadow-lg md:h-64 lg:h-72">
@@ -299,13 +329,13 @@
                                 style={`background-image: url('${event.image}')`}
                         >
                             <div class="absolute {isPastDate(event.date) ? '' : 'hidden'} inset-0 z-[11] rounded-[10px] backdrop-blur-sm opacity-60 bg-no-repeat bg-cover bg-center bg-[url('/images/ended.webp')]"></div>
-                            <div class="absolute inset-0 {isPastDate(event.date) ? 'bg-black/70' : 'bg-black/30'} blur-sm rounded-[10px]"></div>
-                            <time datetime="2022-10-10" class="block backdrop-blur-sm font-mono z-10 text-xs text-neutral-200">
+                            <div class="absolute inset-0 {isPastDate(event.date) ? 'bg-black/70' : 'bg-black/50'} backdrop-blur-sm rounded-[10px]"></div>
+                            <time datetime="2022-10-10" class="block [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] font-mono z-10 text-xs text-neutral-200">
                                 {formatDate(event.date).date}
                             </time>
 
                             <span
-                                    class="mb-4 text-ellipsis backdrop-blur-sm sm:mb-0 mt-0.5 block text-md z-10 sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium text-primary-100">
+                                    class="mb-4 text-ellipsis [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] sm:mb-0 mt-0.5 block text-md z-10 sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium font-secondary text-white">
                             {event.title}
                         </span>
 
@@ -336,7 +366,7 @@
                                             toast.error("This event has passed!")
                                             return;
                                         }
-                                        currentEvent = events[i]
+                                        currentEvent = event
                                         open = !open
                                     }}
                                             class="bg-primary-800 hover:bg-primary-800/90 text-white active:bg-primary-800/90">Register
@@ -355,7 +385,7 @@
 </div>
 
 
-<AlertDialog.Root {open}>
+<AlertDialog.Root bind:open>
     <AlertDialog.Content>
         <AlertDialog.Header>
             <AlertDialog.Title>{currentEvent.title}</AlertDialog.Title>
