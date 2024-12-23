@@ -66,7 +66,7 @@
 
 
 /**
- * @typedef {Object} MiniEvent
+ * @typedef {Object} Programme
  * @property {string} title
  * @property {string} text
  * @property {string} icon
@@ -75,7 +75,7 @@
 
 
 /**
- * @export {MiniEvent}
+ * @export {Programme}
  */
 
 
@@ -94,3 +94,49 @@
  * @property {Object} avatar_urls - URLs for the author's avatar.
  * @property {string} name - The name of the author.
  */
+
+
+/**
+ * @typedef Member
+ * @property {string} name
+ * @property {string} photo
+ * @property {'Male' | 'Female'} gender
+ * @property {'100' | '200' | '300' | '400' | '500' | '600' | '700'} level
+ * @property {string} department
+ * @property {string} position
+ * @property {string} phone
+ */
+
+/**
+ * @typedef Members
+ * @type {Member[]}
+ */
+
+/**
+ * @typedef Committee
+ * @property {string} label
+ * @property {Members} members
+ */
+
+/**
+ * @typedef ExcoSession
+ * @property {string} session
+ * @property {Committee[]} all
+ */
+
+/**
+ * @typedef {Object} Advisor
+ * @property {string} title - The advisor's title (e.g., Dr., Mrs., etc.).
+ * @property {string} name - The advisor's full name.
+ * @property {string} position - The advisor's position (e.g., Grand Patron).
+ * @property {string} email - The advisor's email address.
+ * @property {string} phone - The advisor's phone number.
+ * @property {string} summary - A short description of the advisor's background and role.
+ */
+
+/**
+ * @typedef {Object} AdvisorSession
+ * @property {string} session - The session identifier (e.g., "2024/2025").
+ * @property {Advisor[]} advisors - List of advisors for the session.
+ */
+
