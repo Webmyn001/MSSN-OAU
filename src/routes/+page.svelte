@@ -154,6 +154,19 @@
     let hijrahDate = ""
     let shortHijrahDate = ""
 
+    function formatTime(dateInput) {
+        const date = new Date(dateInput);  // Ensure it's a Date object
+
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const hour12 = hours % 12 || 12; // Convert hour to 12-hour format
+        const minuteFormatted = minutes < 10 ? '0' + minutes : minutes; // Add leading zero for minutes
+
+        return `${hour12}:${minuteFormatted} ${ampm}`;
+    }
+
     function getFormattedDateVerbose() {
         const now = new Date();
 
@@ -202,24 +215,34 @@
         return `${day}-${month}-${year}`;
     }
 
+    let solahTimes = data.info.prayer_times
+
     function getSolahPeriod() {
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
+
 
         // Helper to convert hours and minutes into a comparable "minutes since midnight"
-        const toMinutes = (h, m) => h * 60 + m;
+        const toMinutes = (date) => {
+            const tempdate = new Date(date ?? undefined)
+            const hours = tempdate.getHours();
+            const minutes = tempdate.getMinutes();
+            return hours * 60 + minutes
+        };
+
+        function timeToMinutesSinceMidnight(hour, minute) {
+            // Convert hour to minutes and add the minutes
+            return (hour * 60) + minute;
+        }
 
         // Define time thresholds in "minutes since midnight"
         const times = {
-            morning: toMinutes(6, 20),
-            afternoon: toMinutes(14, 0),
-            evening: toMinutes(16, 50),
-            night: toMinutes(19, 10),
-            lateNight: toMinutes(22, 0),
+            morning: timeToMinutesSinceMidnight(6, 20),
+            afternoon: timeToMinutesSinceMidnight(14, 0),
+            evening: timeToMinutesSinceMidnight(16, 50),
+            night: timeToMinutesSinceMidnight(19, 10),
+            lateNight: timeToMinutesSinceMidnight(22, 0),
         };
 
-        const currentTime = toMinutes(hours, minutes);
+        const currentTime = toMinutes(new Date().toISOString());
 
         // Determine the period based on the time
         if (currentTime >= times.lateNight || currentTime < times.morning) return 0;
@@ -361,10 +384,12 @@
         />
         <div class="flex w-full flex-col justify-center gap-2 sm:flex-row">
             <button
+                    onclick={() => goto('/about')}
                     class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary-900 text-white hover:bg-primary-900/90 h-10 px-4 py-2 w-full sm:w-auto">
                 About Us
             </button>
             <button
+                    onclick={() => goto('our-excos')}
                     class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-primary-100 tet-primary-800 h-10 px-4 py-2 w-full sm:w-auto">
                 Our Excos
             </button>
@@ -606,7 +631,7 @@
                     class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 0 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        5:22 AM • 5:42 AM
+                        {formatTime(solahTimes.subhi.adhan)} • {formatTime(solahTimes.subhi.iqamah)}
                     </span>
                 </span>
         </div>
@@ -620,7 +645,7 @@
                     class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 1 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        1:00 PM • 1:15 PM
+                        {formatTime(solahTimes.dhuhr.adhan)} • {formatTime(solahTimes.dhuhr.iqamah)}
                     </span>
                 </span>
         </div>
@@ -634,7 +659,7 @@
                     class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 2 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        3:55 PM • 4:10 PM
+                        {formatTime(solahTimes.asr.adhan)} • {formatTime(solahTimes.asr.iqamah)}
                     </span>
                 </span>
         </div>
@@ -648,7 +673,7 @@
                     class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 3 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        6:25 PM • 6:32 PM
+                        {formatTime(solahTimes.maghrib.adhan)} • {formatTime(solahTimes.maghrib.iqamah)}
                     </span>
                 </span>
         </div>
@@ -662,7 +687,7 @@
                     class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 4 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
     <Clock class="shrink-0 size-3 text-green-900"/>
                     <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        8:00 PM • 8:10 PM
+                        {formatTime(solahTimes.isha.adhan)} • {formatTime(solahTimes.isha.iqamah)}
                     </span>
                 </span>
         </div>

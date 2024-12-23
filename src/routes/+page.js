@@ -4,6 +4,7 @@ export const load = async ({ fetch }) => {
 
     const blogRes = await blogReq.json()
     const eventRes = await eventsReq.json()
+    console.log(eventRes)
 
         return {
             posts: (blogRes?.data?.posts ?? []).slice(0,3),

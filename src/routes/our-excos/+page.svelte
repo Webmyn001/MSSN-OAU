@@ -204,7 +204,7 @@
                                         .then(() => {
                                             toast.success(member.name + "'s details copied to clipboard.");
                                         })
-                                        .catch(e => {
+                                        .catch(() => {
                                             toast.error("Failed to copy " + member.name + "'s details to clipboard.")
                                         })
                                     }}>Copy Details

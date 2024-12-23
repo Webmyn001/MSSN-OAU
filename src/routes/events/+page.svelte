@@ -3,7 +3,7 @@
     import {format, register} from 'timeago.js'
     import {toast} from "svelte-sonner";
     import {formatDate, isPastDate, months} from "$lib/utils/dates.js";
-    import {MetaTags} from "svelte-meta-tags";
+    import {MetaTags, JsonLd} from "svelte-meta-tags";
     import PageHeader from "$lib/components/PageHeader.svelte";
     import {onMount} from "svelte";
     import slugify from "$lib/utils/slugify.js";
@@ -168,8 +168,45 @@
      */
     $: currentEvent = events[0];
 
+    let jsonLd;
+
     onMount(() => {
         allEvents = processEvents(data.events)
+        jsonLd = [
+            {
+                "@context": "http://schema.org",
+                "@type": "WebPage",
+                "name": "Events",
+                "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
+                "publisher": {
+                    "@type": "NonProfitOrganization",
+                    "name": "MSSNOAU.org"
+                }
+            },
+            ...allEvents.upcoming.map(event => {
+                return {
+                    "@context": "https://www.schema.org",
+                    "@type": "Event",
+                    "name": event.title,
+                    "url": "https://events.mssnoau.org/" + formatDate(event.date).date + '/' + slugify(event.title),
+                    "description": event.summary,
+                    "startDate": formatDate(event.date),
+                    "endDate": formatDate(event.date),
+                    "location": {
+                        "@type": "Place",
+                        "name": "Obafemi Awolowo University",
+                        "address": {
+                            "@type": "PostalAddress",
+                            "streetAddress": "Obafemi Awolowo University",
+                            "addressLocality": "Ile-Ife",
+                            "addressRegion": "Osun",
+                            "postalCode": "200211",
+                            "addressCountry": "NG"
+                        }
+                    }
+                }
+            })
+        ]
     })
 </script>
 
@@ -207,6 +244,7 @@
     siteName: 'MSSNOAU'
   }}
 />
+<JsonLd schema={jsonLd} />
 <!-- End Meta Tags -->
 
 <div class="bg-white py-6 sm:py-8 lg:py-12">
@@ -221,7 +259,7 @@
                         open = !open
                     }}
                         class="group relative flex mx-auto h-36 sm:h-48 aspect-video sm:aspect-square flex-col overflow-hidden rounded-xl bg-gray-100 shadow-lg md:h-64 lg:h-72">
-                    <article
+                    <div
                             class="relative h-full w-full overflow-hidden rounded-xl bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 p-0.5 shadow-xl transition-all duration-500 hover:shadow-sm">
                         <!-- Date container - positioned absolutely and slides in from left -->
                         <div class="absolute -left-full top-0 h-full transition-all duration-500 group-hover:left-0">
@@ -302,7 +340,7 @@
                             </div>
                             <!-- end mobile only-->
                         </div>
-                    </article>
+                    </div>
                 </button>
                 <!-- Article End -->
             {/each}

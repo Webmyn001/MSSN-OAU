@@ -3,7 +3,8 @@
     import {formatDate} from "$lib/utils/dates.js";
     import {onMount} from "svelte";
     import PageHeader from "$lib/components/PageHeader.svelte";
-    import {MetaTags} from "svelte-meta-tags";
+    import {MetaTags, JsonLd} from "svelte-meta-tags";
+    import {page} from '@sveltejs/kit'
 
     export let data;
 
@@ -18,6 +19,45 @@
             })
         }
     })
+
+    const jsonLd = [
+        {
+            "@context": "http://schema.org",
+            "@type": "WebPage",
+            "name": "Blog",
+            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
+            "publisher": {
+                "@type": "NonProfitOrganization",
+                "name": "MSSNOAU.org"
+            }
+        },
+        ...data.posts.map(post => {
+        return {
+            '@type': 'Article',
+            mainEntityOfPage: {
+                '@type': 'WebPage',
+                '@id': post.link
+            },
+            headline: post.title,
+            image: [
+                post.featured_image
+            ],
+            datePublished: post.date,
+            dateModified: post.date,
+            author: {
+                '@type': 'Person',
+                name: post.author
+            },
+            publisher: {
+                '@type': 'Organization',
+                name: 'MSSNOAU',
+                logo: {
+                    '@type': 'ImageObject',
+                    url: 'https://mssnoau.sirv.com/mssn-logo.png'
+                }
+            }
+        }
+    })]
 
 
 </script>
@@ -43,6 +83,11 @@
     siteName: 'MSSNOAU'
   }}
 />
+{#if jsonLd}
+<JsonLd
+        schema={JsonLd}
+/>
+    {/if}
 <!-- End Meta Tags -->
 
 
