@@ -9,7 +9,7 @@ export const GET = async ({ setHeaders }) => {
     try {
         const cached = await redis.get("blog")
         if (cached) {
-            console.log("hit")
+            
             return json({
                 status: true,
                 data: {
@@ -17,7 +17,7 @@ export const GET = async ({ setHeaders }) => {
                 }
             })
         }
-        console.log("miss")
+        
         const req = await getPantry("blog")
         const wordpressPosts = await fetch("https://annuurpress.org.ng/wp-json/wp/v2/posts?_embed");
         if (!wordpressPosts.ok) {

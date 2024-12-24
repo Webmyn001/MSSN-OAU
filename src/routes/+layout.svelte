@@ -6,7 +6,11 @@
     import {Toaster} from "$lib/components/ui/sonner";
     import Footer from "$lib/components/Footer.svelte";
 
-    let {children} = $props();
+    let {children, data} = $props();
+
+    const info = $state(data.info)
+
+
 
 
     afterNavigate(() => {
@@ -46,7 +50,16 @@
 ]}
 />
 
-<Toaster richColors/>
-<NavBar/>
-{@render children()}
-<Footer/>
+{#if info && !(info?.maintenance && info?.maintenance_ends)}
+    <Toaster richColors/>
+    <NavBar/>
+    {@render children()}
+    <Footer/>
+{:else}
+        {#await import("$lib/components/Maintenance.svelte") then M}
+            {@const Maintenance = M.default}
+            <Maintenance time={info?.maintenance_ends} />
+            {:catch error}
+            <p>{error?.message}</p>
+        {/await}
+{/if}

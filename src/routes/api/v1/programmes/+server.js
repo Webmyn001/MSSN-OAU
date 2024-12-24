@@ -9,7 +9,7 @@ export const GET = async ({ setHeaders }) => {
     try {
         const cached = await redis.get("programmes")
         if (cached) {
-            console.log("hit")
+            
             return json({
                 status: true,
                 data: {
@@ -17,7 +17,7 @@ export const GET = async ({ setHeaders }) => {
                 }
             })
         }
-        console.log("miss")
+        
         const req = await getPantry("programmes")
         if (req && req.programmes) {
             const ttl = await redis.ttl("programmes")

@@ -1,5 +1,4 @@
 <script>
-    import Sparkles from "$lib/components/Sparkles/Sparkles.svelte";
     import {
         BookOpenText,
         Clock,
@@ -17,17 +16,17 @@
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {Button} from "$lib/components/ui/button/index.js";
-    import Autoplay from "embla-carousel-autoplay";
     import copyTextToClipboard from '$lib/utils/copy.js'
-    import slugify from "$lib/utils/slugify.js";
-    import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+    import slugify from "$lib/utils/slugify.js"
     import * as Sheet from "$lib/components/ui/sheet/index.js";
+    import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+    import Autoplay from "embla-carousel-autoplay";
     import * as Carousel from "$lib/components/ui/carousel/index.js";
+    import Sparkles from "$lib/components/Sparkles/Sparkles.svelte";
 
+let {data} = $props();
 
-    export let data;
-
-    let selectedMosque = "awolowo_hall"
+    let selectedMosque = $state("awolowo_hall")
 
     const mosques = [
         {
@@ -95,9 +94,9 @@
         }
     ];
 
-    $: selectedMosqueObject = mosques.find(mosque => mosque.id === selectedMosque)
+    const selectedMosqueObject = $state(mosques.find(mosque => mosque.id === selectedMosque))
 
-    let showMosqueModal = false;
+    let showMosqueModal = $state(false);
 
 
     const programmes = [
@@ -128,7 +127,6 @@
 
     const copyAccNumber = async () => {
         const copy = await copyTextToClipboard(data.info.account.number)
-        console.log(copy)
         if (copy) {
             toast.success("Account Number Copied!")
         } else {
@@ -138,7 +136,6 @@
 
     const copyAccDetails = async () => {
         const copy = await copyTextToClipboard(`Bank Name: ${data.info.account.bank}\nAccount Name: ${data.info.account.name}\nAccount Number: ${data.info.account.number}`)
-        console.log(copy)
         if (copy) {
             toast.success("Account Details Copied!")
         } else {
@@ -146,13 +143,13 @@
         }
     }
 
-    let selectedEvent = "Tutorials"
+    let selectedEvent = $state("Tutorials")
 
-    $: selectedImage = programmes.find(event => event.title === selectedEvent)?.image
+    const selectedImage = $derived(programmes.find(event => event.title === selectedEvent)?.image)
 
 
-    let hijrahDate = ""
-    let shortHijrahDate = ""
+    let hijrahDate = $state("")
+    let shortHijrahDate = $state("")
 
     function formatTime(dateInput) {
         const date = new Date(dateInput);  // Ensure it's a Date object
@@ -215,7 +212,7 @@
         return `${day}-${month}-${year}`;
     }
 
-    let solahTimes = data.info.prayer_times
+    let solahTimes = $derived(data.info.prayer_times)
 
     function getSolahPeriod() {
 
@@ -321,7 +318,7 @@
     }
 
 
-    let upcoming_solat = 0;
+    let upcoming_solat = $state(0);
 
     onMount(() => {
         upcoming_solat = getSolahPeriod()
@@ -386,6 +383,7 @@
         <p class="mb-8 max-w-3xl text-zinc-600 lg:text-xl">
             community of diverse, forward-thinking and progressive muslim men and women united in faith.
         </p>
+        {#if Sparkles}
         <Sparkles
                 minSize={0.8}
                 maxSize={5}
@@ -393,6 +391,7 @@
                 className="w-full mx-[10dvw] h-[20dvh]"
                 particleColor="#026d3b"
         />
+            {/if}
         <div class="flex w-full flex-col justify-center gap-2 sm:flex-row">
             <button
                     onclick={() => goto('/about')}
@@ -714,7 +713,6 @@
             <Badge variant="outline" onclick={() => {
                     selectedMosque = mosque.id
                     showMosqueModal = !showMosqueModal
-                    console.log(mosque.id)
                 }}>{mosque.label}</Badge>
         {/each}
     </div>
@@ -894,6 +892,7 @@
                     and
                     collective efforts, both in cash and kind.</p>
             </div>
+            {#if AlertDialog}
             <AlertDialog.Root>
                 <AlertDialog.Trigger>
                     <button type="button"
@@ -959,6 +958,7 @@
                     </AlertDialog.Footer>
                 </AlertDialog.Content>
             </AlertDialog.Root>
+                {/if}
         </div>
     </div>
 </div>
@@ -999,7 +999,7 @@
 </div>
 <!-- End Suggestions CTA -->
 
-{#if selectedMosqueObject}
+{#if selectedMosqueObject && Sheet && Carousel}
     <Sheet.Root bind:open={showMosqueModal}>
         <Sheet.Trigger>
         </Sheet.Trigger>
@@ -1012,17 +1012,18 @@
             </Sheet.Header>
             <Carousel.Root
                     plugins={[
-    Autoplay({
-      delay: 5000,
-    }),
-  ]}
+                        Autoplay({
+                            delay: 5000,
+                        }),
+                    ]}
                     class="w-full"
                     opts={{ align: "center", loop: true }}
             >
-                <Carousel.Content class="aspect-square">
+                <Carousel.Content>
                     {#each selectedMosqueObject?.images as image, i}
                         <Carousel.Item>
-                            <img class="aspect-square w-[60dvw] rounded-xl mx-auto mt-6" src={image}
+                            <img class="h-[40dvh] sm:h-[50dvh] w-full object-cover rounded-xl mx-auto my-6"
+                                 src={image}
                                  alt={`${selectedMosqueObject.label} ${i + 1}`}/>
                         </Carousel.Item>
                     {/each}

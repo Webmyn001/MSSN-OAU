@@ -84,8 +84,7 @@ const config = {
             fontFamily: {
                 primary: ['Merienda', 'serif'],
                 secondary: ['Montserrat', 'sans-serif'],
-                tertiary: ['Glegoo', 'sans-serif'],
-
+                tertiary: ['Glegoo', 'sans-serif']
             },
             keyframes: {
                 "accordion-down": {

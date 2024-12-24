@@ -11,7 +11,6 @@
 
     const copyAccNumber = async () => {
         const copy = await copyTextToClipboard(data.info.account.number)
-        console.log(copy)
         if (copy) {
             toast.success("Account Number Copied!")
         } else {
@@ -21,7 +20,6 @@
 
     const copyAccDetails = async () => {
         const copy = await copyTextToClipboard(`Bank Name: ${data.info.account.bank}\nAccount Name: ${data.info.account.name}\nAccount Number: ${data.info.account.number}`)
-        console.log(copy)
         if (copy) {
             toast.success("Account Details Copied!")
         } else {

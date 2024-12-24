@@ -9,7 +9,7 @@
 
     const info = data.info;
     const faqs = info.faqs;
-    console.log(faqs)
+
 
 </script>
 

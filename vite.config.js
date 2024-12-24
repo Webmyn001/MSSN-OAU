@@ -10,8 +10,8 @@ export default defineConfig({
     },
 	plugins: [
         sentryVitePlugin({
-            org: process.env.SENTRY_ORG,
-            project: process.env.SENTRY_PROJECT,
+            org: "mssnoau",
+            project: "mssnoau-frontend",
 
             // Auth tokens can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/
             authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -20,8 +20,8 @@ export default defineConfig({
             autoUploadSourceMaps: true,
             adapter: "vercel",
         sourceMapsUploadOptions: {
-            org: process.env.SENTRY_ORG,
-            project: process.env.SENTRY_PROJECT
+            org: "mssnoau",
+            project: "mssnoau-frontend"
         }
     }),
         sveltekit(),
