@@ -1,11 +1,23 @@
 import {json} from "@sveltejs/kit";
 import {getPantry} from "$lib/utils/pantry.server.js";
+import {redis} from "$lib/utils/redis.server.js";
 
 /**
  * @type {import("@sveltejs/kit").RequestHandler}
  */
-export const GET = async () => {
+export const GET = async ({ setHeaders }) => {
     try {
+        const cached = await redis.get("blog")
+        if (cached) {
+            console.log("hit")
+            return json({
+                status: true,
+                data: {
+                    posts: JSON.parse(cached)
+                }
+            })
+        }
+        console.log("miss")
         const req = await getPantry("blog")
         const wordpressPosts = await fetch("https://annuurpress.org.ng/wp-json/wp/v2/posts?_embed");
         if (!wordpressPosts.ok) {
@@ -27,6 +39,13 @@ export const GET = async () => {
                 })
             }
         })]
+        if (allPosts && allPosts.length > 0) {
+            const ttl = await redis.ttl("blog")
+            setHeaders({
+                "cache-control": `max-age=${ttl}`,
+            });
+            redis.set("blog", JSON.stringify(allPosts), "EX", 300)
+        }
         return json({
             status: true,
             data: {
