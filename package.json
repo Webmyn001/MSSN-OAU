@@ -49,6 +49,7 @@
 		"@tailwindcss/forms": "^0.5.9",
 		"@tailwindcss/line-clamp": "^0.4.4",
 		"@tailwindcss/typography": "^0.5.15",
+		"@vercel/speed-insights": "^1.1.0",
 		"embla-carousel-autoplay": "^8.5.1",
 		"ioredis": "^5.4.2",
 		"pantry-node": "^0.1.3",

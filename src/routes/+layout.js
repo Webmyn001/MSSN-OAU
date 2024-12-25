@@ -1,3 +1,6 @@
+import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+
+injectSpeedInsights();
 export const load = async ({ fetch }) => {
     const req = await fetch("/api/v1/info")
 
