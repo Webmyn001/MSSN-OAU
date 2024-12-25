@@ -18,11 +18,6 @@
     import {Button} from "$lib/components/ui/button/index.js";
     import copyTextToClipboard from '$lib/utils/copy.js'
     import slugify from "$lib/utils/slugify.js"
-    import * as Sheet from "$lib/components/ui/sheet/index.js";
-    import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-    import Autoplay from "embla-carousel-autoplay";
-    import * as Carousel from "$lib/components/ui/carousel/index.js";
-    import Sparkles from "$lib/components/Sparkles/Sparkles.svelte";
 
 let {data} = $props();
 
@@ -383,7 +378,8 @@ let {data} = $props();
         <p class="mb-8 max-w-3xl text-zinc-600 lg:text-xl">
             community of diverse, forward-thinking and progressive muslim men and women united in faith.
         </p>
-        {#if Sparkles}
+            {#await import("$lib/components/Sparkles/Sparkles.svelte") then S}
+                {@const Sparkles = S.default}
         <Sparkles
                 minSize={0.8}
                 maxSize={5}
@@ -391,7 +387,7 @@ let {data} = $props();
                 className="w-full mx-[10dvw] h-[20dvh]"
                 particleColor="#026d3b"
         />
-            {/if}
+                {/await}
         <div class="flex w-full flex-col justify-center gap-2 sm:flex-row">
             <button
                     onclick={() => goto('/about')}
@@ -494,7 +490,7 @@ let {data} = $props();
             <div class="container mx-auto">
                 <img
                         src="/images/bg-1.webp"
-                        loading="eager"
+                        loading="lazy"
                         style="object-fit: cover; object-position: center"
                         alt="central mosque of unity"
                         class="mt-2 flex aspect-[16/9] min-h-[300px] max-h-[500px] w-full flex-col items-center overflow-clip rounded-md border border-border bg-zinc-100 shadow-sm sm:rounded-xl"/>
@@ -892,7 +888,7 @@ let {data} = $props();
                     and
                     collective efforts, both in cash and kind.</p>
             </div>
-            {#if AlertDialog}
+            {#await import('$lib/components/ui/alert-dialog/index.js') then AlertDialog}
             <AlertDialog.Root>
                 <AlertDialog.Trigger>
                     <button type="button"
@@ -958,7 +954,7 @@ let {data} = $props();
                     </AlertDialog.Footer>
                 </AlertDialog.Content>
             </AlertDialog.Root>
-                {/if}
+                {/await}
         </div>
     </div>
 </div>
@@ -999,7 +995,8 @@ let {data} = $props();
 </div>
 <!-- End Suggestions CTA -->
 
-{#if selectedMosqueObject && Sheet && Carousel}
+{#if selectedMosqueObject}
+    {#await import('$lib/components/ui/sheet/index.js') then Sheet}
     <Sheet.Root bind:open={showMosqueModal}>
         <Sheet.Trigger>
         </Sheet.Trigger>
@@ -1010,6 +1007,9 @@ let {data} = $props();
                     At {selectedMosqueObject?.address}
                 </Sheet.Description>
             </Sheet.Header>
+            {#await import('$lib/components/ui/carousel/index.js') then Carousel}
+                {#await import('embla-carousel-autoplay') then A}
+                    {@const Autoplay = A.default}
             <Carousel.Root
                     plugins={[
                         Autoplay({
@@ -1031,6 +1031,8 @@ let {data} = $props();
                 <Carousel.Previous/>
                 <Carousel.Next/>
             </Carousel.Root>
+                    {/await}
+                {/await}
 
             <Sheet.Footer class="gap-3">
                 <Button onclick={() => (showMosqueModal = !showMosqueModal)} variant="outline">Close</Button>
@@ -1042,6 +1044,7 @@ let {data} = $props();
             </Sheet.Footer>
         </Sheet.Content>
     </Sheet.Root>
+        {/await}
 {/if}
 
 <style>
