@@ -70,7 +70,6 @@
   }}
 />
 <JsonLd schema={{
-            "@context": "http://schema.org",
             "@type": "WebPage",
             "name": "We are OAU Great Ìfẹ́'s Muslim Community | MSSNOAU",
             "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
@@ -156,7 +155,7 @@
                             </span>
                                     </div>
                                 </AlertDialog.Trigger>
-                                <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
+                                <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen scrollbar-hide">
                                     <AlertDialog.Header>
                                         <AlertDialog.Title>{member.name}'s Profile</AlertDialog.Title>
                                         <AlertDialog.Description>
@@ -164,7 +163,7 @@
                                         </AlertDialog.Description>
                                     </AlertDialog.Header>
                                     <!-- Profile -->
-                                    <div class="flex items-center gap-x-3">
+                                    <div class="flex items-center gap-x-3 ">
                                         <div class="shrink-0">
                                             <img class="shrink-0 size-16 rounded-full" src={member.photo}
                                                  alt={member.name}/>

@@ -84,7 +84,7 @@
                     <span class="px-1.5 text-white text-sm font-medium leading-6">Pay Annual Dues</span>
                 </button>
                     </AlertDialog.Trigger>
-                    <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
+                    <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen scrollbar-hide">
                         <AlertDialog.Header>
                             <AlertDialog.Title class="font-primary text-primary-800">Pay Annual Dues
                             </AlertDialog.Title>

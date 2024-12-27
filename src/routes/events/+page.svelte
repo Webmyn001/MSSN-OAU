@@ -185,7 +185,6 @@
             },
             ...allEvents.upcoming.map(event => {
                 return {
-                    "@context": "https://www.schema.org",
                     "@type": "Event",
                     "name": event.title,
                     "url": "https://events.mssnoau.org/" + formatDate(event.date).date + '/' + slugify(event.title),
@@ -351,14 +350,14 @@
 
 
 <AlertDialog.Root bind:open>
-    <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
+    <AlertDialog.Content class="scrollbar-hide lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
         <AlertDialog.Header>
             <AlertDialog.Title>{currentEvent.title}</AlertDialog.Title>
             <AlertDialog.Description>
                 {currentEvent.summary}
             </AlertDialog.Description>
         </AlertDialog.Header>
-        <div class="flow-root rounded-xl border border-gray-100 py-3 shadow-sm">
+        <div class=" flow-root rounded-xl border border-gray-100 py-3 shadow-sm">
             <dl class="-my-3 divide-y divide-gray-100 text-sm">
                 <div class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
                     <dt class="font-medium text-gray-900">Event Name</dt>
@@ -398,3 +397,4 @@
         </AlertDialog.Footer>
     </AlertDialog.Content>
 </AlertDialog.Root>
+

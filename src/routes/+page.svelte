@@ -353,7 +353,6 @@ let {data} = $props();
   }}
 />
 <JsonLd schema={{
-            "@context": "http://schema.org",
             "@type": "WebPage",
             "name": "We are OAU Great Ìfẹ́'s Muslim Community | MSSNOAU",
             "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
@@ -368,11 +367,11 @@ let {data} = $props();
 <!-- Hero -->
 <section class="py-32 mx-auto w-full">
     <div class="container flex flex-col items-center text-center w-full">
-        <h1 class="text-primary-900 -translate-x-3 my-6 text-pretty text-4xl font-bold lg:text-6xl" id="hero-text">We
+        <h1 class="text-primary-900 oau -translate-x-3 my-6 text-pretty text-4xl font-bold lg:text-6xl" id="hero-text">We
             are Great <span
-                    class="relative inline ml-2 mr-12 sm:ml-2 sm:mr-2 lg:ml-4 top-[-6px]"><span
-                    class="yoruba top-[8px] sm:top-[10px] lg:top-[12px] absolute text-[#28145B] scale-105">Ife's</span><span
-                    class="scale-105 yoruba absolute -z-10 text-[#EBB957]">Ìfẹ́'s</span></span>
+                    class="relative oau inline ml-2 mr-12 sm:ml-2 sm:mr-2 lg:ml-4 top-[-6px]"><span
+                    class="yoruba oau top-[8px] sm:top-[10px] lg:top-[12px] absolute text-[#28145B] scale-105">Ife's</span><span
+                    class="scale-105 oau yoruba absolute -z-10 text-[#EBB957]">Ìfẹ́'s</span></span>
         </h1>
         <!-- #EBB957, #28145B -->
         <p class="mb-8 max-w-3xl text-zinc-600 lg:text-xl">
@@ -704,9 +703,9 @@ let {data} = $props();
         <span class="p-4 bg-primary-800 text-white rounded-md font-tertiary text-xs">Friday Sermon starts at 1:30 PM and Prayer commences at 2:00 PM</span>
     </div>
 
-    <div class="flex gap-2 w-[80dvw] sm:mx-auto overflow-scroll no-scrollbar">
+    <div class="flex gap-2 w-[80dvw] sm:mx-auto overflow-scroll scrollbar-hide">
         {#each mosques as mosque}
-            <Badge variant="outline" onclick={() => {
+            <Badge class="cursor-pointer" variant="outline" onclick={() => {
                     selectedMosque = mosque.id
                     showMosqueModal = !showMosqueModal
                 }}>{mosque.label}</Badge>
@@ -897,7 +896,7 @@ let {data} = $props();
                     </button>
 
                 </AlertDialog.Trigger>
-                <AlertDialog.Content class="lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
+                <AlertDialog.Content class="scrollbar-hide lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
                     <AlertDialog.Header>
                         <AlertDialog.Title class="font-primary text-primary-800">Donate
                         </AlertDialog.Title>
@@ -998,9 +997,7 @@ let {data} = $props();
 {#if selectedMosqueObject}
     {#await import('$lib/components/ui/sheet/index.js') then Sheet}
     <Sheet.Root bind:open={showMosqueModal}>
-        <Sheet.Trigger>
-        </Sheet.Trigger>
-        <Sheet.Content onCloseAutoFocus={event => event.preventDefault()} side="bottom">
+        <Sheet.Content class="scrollbar-hide" onCloseAutoFocus={event => event.preventDefault()} side="bottom">
             <Sheet.Header>
                 <Sheet.Title class="font-primary">{selectedMosqueObject?.label}</Sheet.Title>
                 <Sheet.Description class="font-tertiary text-xs">
@@ -1063,13 +1060,8 @@ let {data} = $props();
         unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
     }
 
-    .no-scrollbar {
-        scrollbar-width: none; /* For Firefox */
-        -ms-overflow-style: none; /* For Internet Explorer and Edge */
-    }
-
-    .no-scrollbar::-webkit-scrollbar {
-        display: none; /* For Chrome, Safari, and Opera */
+    .oau {
+        cursor: url('/oau-logo.png') 32 32, auto;
     }
 
 </style>
