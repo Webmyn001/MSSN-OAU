@@ -1,7 +1,6 @@
 <script>
     import '../app.css';
     import {JsonLd} from 'svelte-meta-tags';
-    import {afterNavigate} from "$app/navigation";
     import NavBar from "$lib/components/NavBar.svelte";
     import {Toaster} from "$lib/components/ui/sonner";
     import Footer from "$lib/components/Footer.svelte";
@@ -13,15 +12,11 @@
 
 
 
-    afterNavigate(() => {
-        window.HSStaticMethods.autoInit();
-    });
 </script>
 
 <JsonLd
         schema={[{
-            "@context": "http://www.schema.org",
-            "@type": ["EducationalOrganization", "NonProfitOrganization"],
+            "@type": "NonProfitOrganization",
             "name": "MSSNOAU",
             "url": "https://mssnoau-frontend.vercel.app",
             "logo": "https://mssnoau.sirv.com/mssn-logo.png",
