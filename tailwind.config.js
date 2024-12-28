@@ -80,9 +80,9 @@ const config = {
                 sm: "calc(var(--radius) - 4px)"
             },
             fontFamily: {
-                primary: ['Merienda', 'serif'],
+                primary: ['Mulish Variable', 'serif'],
                 secondary: ['Montserrat', 'sans-serif'],
-                tertiary: ['Glegoo', 'sans-serif']
+                tertiary: ['Karma', 'sans-serif']
             },
             keyframes: {
                 "accordion-down": {
