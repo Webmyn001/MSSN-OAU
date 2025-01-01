@@ -4,6 +4,7 @@
     import NavBar from "$lib/components/NavBar.svelte";
     import {Toaster} from "$lib/components/ui/sonner";
     import Footer from "$lib/components/Footer.svelte";
+    import { partytownSnippet } from '@builder.io/partytown/integration'
 
     let {children, data} = $props();
 
@@ -13,7 +14,9 @@
 
 
 </script>
-
+<svelte:head>
+  {@html '<script>' + partytownSnippet() + '</script>'}
+</svelte:head>
 <JsonLd
         schema={[{
             "@type": "NonProfitOrganization",
