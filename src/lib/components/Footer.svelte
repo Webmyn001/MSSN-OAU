@@ -33,7 +33,9 @@
                            href="/contact">FAQs & Contact Us</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-text-neutral-800 hover:text-text-neutral-700 focus:outline-none focus:text-text-neutral-700"
-                           href="https://mssnoau.betteruptime.com/">Status</a></p>
+                           href="https://mssnoau.betteruptime.com/" aria-label="Status page" >
+                            <iframe title="Status" src="https://mssnoau.betteruptime.com/badge?theme=light" width="250" height="30" ></iframe>
+                        </a></p>
                 </div>
             </div>
             <!-- End Col -->
