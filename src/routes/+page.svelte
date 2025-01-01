@@ -19,7 +19,7 @@
     import copyTextToClipboard from '$lib/utils/copy.js'
     import slugify from "$lib/utils/slugify.js"
 
-let {data} = $props();
+    let {data} = $props();
 
     let selectedMosque = $state("awolowo_hall")
 

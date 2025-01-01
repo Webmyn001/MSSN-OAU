@@ -3,7 +3,6 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import { sentryVitePlugin } from "@sentry/vite-plugin";
-import { partytownVite } from '@builder.io/partytown/utils';
 
 export default defineConfig({
     build: {
@@ -26,7 +25,6 @@ export default defineConfig({
         }
     }),
         sveltekit(),
-        partytownVite(),
         ViteImageOptimizer({
         test: /\.(jpe?g|png|gif|tiff|webp|svg|avif)$/i,
         exclude: undefined,
