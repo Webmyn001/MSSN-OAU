@@ -56,7 +56,7 @@
     <!-- Decorative background elements -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <!-- Subtle pattern overlay -->
-        <div class="absolute inset-0 bg-[url('/pattern.svg')] opacity-[0.03] mix-blend-overlay"></div>
+        <div class="absolute inset-0 bg-[url('/images/pattern.svg')] opacity-[0.03] mix-blend-overlay"></div>
     </div>
 
     <div class="container relative mx-auto px-4 sm:px-6 flex flex-col items-center text-center">

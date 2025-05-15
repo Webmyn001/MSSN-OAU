@@ -1,6 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+// Temporarily comment out ViteImageOptimizer
+// import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 // Temporarily comment out Sentry imports until dependencies are resolved
 // import { sentrySvelteKit } from "@sentry/sveltekit";
 // import { sentryVitePlugin } from "@sentry/vite-plugin";
@@ -20,39 +21,10 @@ export default defineConfig({
                 comments: false // Remove all comments
             }
         },
+        // Disable chunking to avoid initialization order issues
         rollupOptions: {
             output: {
-                manualChunks: (id) => {
-                    // Group node_modules code
-                    if (id.includes('node_modules')) {
-                        // UI libraries
-                        if (id.includes('bits-ui') || 
-                            id.includes('svelte-sonner') || 
-                            id.includes('tailwind-merge') || 
-                            id.includes('tailwind-variants')) {
-                            return 'vendor-ui';
-                        }
-                        
-                        // Svelte related
-                        if (id.includes('svelte')) {
-                            return 'vendor-svelte';
-                        }
-                        
-                        // Icons and visual elements
-                        if (id.includes('lucide') || 
-                            id.includes('embla-carousel')) {
-                            return 'vendor-icons';
-                        }
-                        
-                        // All other dependencies
-                        return 'vendor';
-                    }
-                    
-                    // Split application code
-                    if (id.includes('$lib/components/ui')) {
-                        return 'ui';
-                    }
-                }
+                manualChunks: () => 'app' // Put everything in one chunk
             }
         },
         // Reduce initial load time
@@ -77,6 +49,8 @@ export default defineConfig({
         //     }
         // }),
         sveltekit(),
+        // Temporarily comment out ViteImageOptimizer
+        /*
         ViteImageOptimizer({
         test: /\.(jpe?g|png|gif|tiff|webp|svg|avif)$/i,
         includePublic: true,
@@ -120,5 +94,6 @@ export default defineConfig({
                 quality: 80
             }
         })
+        */
     ]
 });
