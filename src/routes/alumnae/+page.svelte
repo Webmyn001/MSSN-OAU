@@ -1,7 +1,7 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import {MetaTags} from "svelte-meta-tags";
-    import ContactForm from "$lib/components/ContactForm.svelte";
+    import ContactForm from "$lib/components/forms/ContactForm.svelte";
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
     import { Image } from '$lib/components/ui/image'

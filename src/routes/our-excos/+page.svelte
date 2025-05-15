@@ -11,6 +11,7 @@
     import { JsonLd, MetaTags } from "svelte-meta-tags";
     import { fly, fade, scale } from "svelte/transition";
     import { spring } from "svelte/motion";
+    import { Image } from '$lib/components/ui/image';
 
     let { data } = $props();
 
@@ -237,10 +238,12 @@
                                             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-700/20 backdrop-blur-sm -z-10 transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"></div>
                                             
                                             <!-- Photo -->
-                                            <img
-                                                src={member.photo || "/placeholder.svg"}
-                                                    alt={member.name}
-                                                class="w-28 h-28 rounded-2xl object-cover mx-auto transition-all duration-500 border-2 border-solid border-white/50 group-hover:border-green-600 shadow-md group-hover:shadow-green-200/50 group-hover:shadow-lg"
+                                            <Image
+                                                src={member.photo || "/images/placeholder.webp"}
+                                                alt={member.name}
+                                                className="w-28 h-28 rounded-2xl object-cover mx-auto transition-all duration-500 border-2 border-solid border-white/50 group-hover:border-green-600 shadow-md group-hover:shadow-green-200/50 group-hover:shadow-lg"
+                                                width={112}
+                                                height={112}
                                             />
                                             
                                             <!-- Decorative elements -->
@@ -274,8 +277,13 @@
                                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 bg-green-50/50 rounded-xl border border-green-100">
                                         <div class="shrink-0 relative">
                                             <div class="absolute inset-0 rounded-full bg-gradient-to-br from-green-500/20 to-green-700/20 backdrop-blur-sm -z-10 transform scale-110"></div>
-                                            <img class="shrink-0 size-24 rounded-full border-2 border-white shadow-md" src={member.photo || "/placeholder.svg"}
-                                                 alt={member.name}/>
+                                            <Image 
+                                                className="shrink-0 size-24 rounded-full border-2 border-white shadow-md" 
+                                                src={member.photo || "/images/placeholder.webp"}
+                                                alt={member.name}
+                                                width={96}
+                                                height={96}
+                                            />
                                         </div>
                                         <div class="grow">
                                             <h1 class="text-xl font-medium text-gray-800">

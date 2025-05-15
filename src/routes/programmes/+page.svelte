@@ -126,9 +126,6 @@
     
     <div class="mx-auto max-w-5xl space-y-16 px-6 relative z-10">
         {#if visible}
-            <!-- Debug indicator for programme count -->
-            <p class="text-center text-sm text-gray-500">Loaded {programmes.length} programmes</p>
-            
             {#if programmes.length > 0}
                 <div 
                     class="relative mx-auto grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -139,36 +136,39 @@
                         <div 
                             role="button"
                             tabindex="0"
-                            class="space-y-4 bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group"
+                            class="flex flex-col rounded-xl border border-primary-100 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group h-[360px]"
                             in:scale={{ duration: 600, delay: 400 + (i * 150) }}
                             onmouseenter={() => hoveredProgramme = programme.title}
                             onmouseleave={() => hoveredProgramme = null}
+                            onclick={() => openProgrammeDetails(programme)}
                         >
-                            <!-- Decorative gradient background -->
-                            <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            
-                            <div class="flex items-center flex-col gap-4 relative z-10">
-                                <div class="p-3 rounded-full bg-primary-100 group-hover:bg-primary-200 transition-colors">
-                                    <img 
-                                        class="size-16 sm:size-20 transition-transform duration-500 group-hover:scale-110" 
-                                        alt={programme.title} 
-                                        src={programme.image || "/placeholder.svg"} 
-                                    />
+                            <!-- Image section (top half) -->
+                            <div class="relative w-full h-1/2 overflow-hidden">
+                                <img 
+                                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                    alt={programme.title} 
+                                    src={programme.image || "/images/placeholder.webp"} 
+                                />
+                                
+                                <!-- Title overlay with blur -->
+                                <div class="absolute bottom-0 left-0 right-0 backdrop-blur-md bg-black/30 p-3">
+                                    <h3 class="text-white font-medium font-secondary text-lg">{programme.title}</h3>
                                 </div>
-                                <h3 class="text-primary-800 text-lg font-medium font-secondary text-center w-full">{programme.title}</h3>
                             </div>
                             
-                            <p class="text-gray-700 text-center text-sm relative z-10">{programme.summary || ''}</p>
-                            
-                            <!-- View Details Button -->
-                            <div class="pt-4 flex justify-center relative z-10">
-                                <button
-                                    class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors"
-                                    onclick={() => openProgrammeDetails(programme)}
-                                >
-                                    View Details
-                                    <ChevronRight class="size-4" />
-                                </button>
+                            <!-- Description section (bottom half) -->
+                            <div class="flex-1 p-4 bg-white flex flex-col">
+                                <p class="text-gray-700 text-sm flex-1">{programme.summary || ''}</p>
+                                
+                                <!-- View Details Button -->
+                                <div class="pt-3 flex justify-end">
+                                    <button
+                                        class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors group-hover:underline"
+                                    >
+                                        View Details
+                                        <ChevronRight class="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <!-- End Programme Card -->
@@ -226,7 +226,7 @@
                     <!-- Description -->
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 mb-2">Description</h3>
-                        <p class="text-gray-700">{programmeDetails.description}</p>
+                        <p class="text-gray-700">{@html programmeDetails.description}</p>
                     </div>
                     
                     <!-- Schedule -->
@@ -314,7 +314,7 @@
                     <!-- Description -->
                     <div>
                         <h3 class="text-base font-medium text-gray-900 mb-2">Description</h3>
-                        <p class="text-sm text-gray-700">{programmeDetails.description}</p>
+                        <p class="text-sm text-gray-700">{@html programmeDetails.description}</p>
                     </div>
                     
                     <!-- Schedule -->

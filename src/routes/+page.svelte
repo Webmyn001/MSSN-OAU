@@ -23,37 +23,12 @@
     import PrayerTimesSection from '$lib/components/home/PrayerTimesSection.svelte';
     import UpcomingEvents from '$lib/components/home/UpcomingEvents.svelte';
     import Donate from '$lib/components/home/Donate.svelte';
-    import Programmes from '$lib/components/Programmes.svelte';
+    import Programmes from '$lib/components/sections/Programmes.svelte';
     import BlogSection from '$lib/components/home/BlogSection.svelte';
     import SuggestionsSection from '$lib/components/home/SuggestionsSection.svelte';
+    import { programmes } from '$lib/data/programmes';
 
     let {data} = $props();
-
-    const programmes = [
-        {
-            title: "Tutorials",
-            text: "Academic tutorials organised by the Academic Committee.",
-            image: "/images/chalkboard.webp",
-            icon: BookOpenText
-        },
-        {
-            title: "Madrasah",
-            text: "Classes on Islamic Education organised by the Islamic Affairs Board.",
-            image: "/images/madrasah.webp",
-            icon: NotebookPen
-        },
-        {
-            title: "Al-Usrah",
-            text: "A weekly meetup centering on Islamic perspective of certain issues.",
-            image: "/images/al-usrah.webp",
-            icon: Presentation
-        }, {
-            title: "Sisters' Circle",
-            text: "A weekly sisters-only meetup that aims to strengthen the bonds between sisters, and discuss issues pertaining to them.",
-            image: "/images/sisters-circle.webp",
-            icon: UsersRound
-        }
-    ]
 
     const copyAccNumber = async () => {
         if (!data.info || !data.info.account) return;

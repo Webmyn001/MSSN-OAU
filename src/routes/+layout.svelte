@@ -4,8 +4,8 @@
     import NavBar from "$lib/components/layout/NavBar.svelte";
     import {Toaster} from "$lib/components/ui/sonner";
     import Footer from "$lib/components/layout/Footer.svelte";
-    import PageTransition from "$lib/components/PageTransition.svelte";
-    import ViewportContainer from "$lib/components/ViewportContainer.svelte";
+    import PageTransition from "$lib/components/layout/transition/PageTransition.svelte";
+    import ViewportContainer from "$lib/components/layout/ViewportContainer.svelte";
 
     let {children, data} = $props();
 
@@ -61,10 +61,9 @@
       <Footer/>
     </ViewportContainer>
 {:else}
-    {#await import("$lib/components/Maintenance.svelte") then M}
-        {@const Maintenance = M.default}
-        <Maintenance time={info?.maintenance_ends} />
-    {:catch error}
-        <p>{error?.message}</p>
-    {/await}
+    {#if page.url.pathname !== '/maintenance' && data.showMaintenancePage}
+        {#await import("$lib/components/global/Maintenance.svelte") then M}
+            <svelte:component this={M.default} />
+        {/await}
+    {/if}
 {/if}

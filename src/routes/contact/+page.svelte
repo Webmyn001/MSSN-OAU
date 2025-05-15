@@ -1,7 +1,7 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import {MetaTags, JsonLd} from "svelte-meta-tags";
-    import ContactForm from "$lib/components/ContactForm.svelte";
+    import ContactForm from "$lib/components/forms/ContactForm.svelte";
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount, onDestroy } from 'svelte'
     import * as Accordion from '$lib/components/ui/accordion'
