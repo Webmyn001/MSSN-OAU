@@ -1,28 +1,94 @@
 <script>
-    import PageHeader from "$lib/components/PageHeader.svelte";
-    import {slide} from 'svelte/transition'
-    import {onMount} from "svelte";
-    import {MetaTags} from "svelte-meta-tags";
-
-    export let data;
-
-    /**
-     * @type {Programme[]}
-     */
-    let programmes = []
-
-
-    let selectedProgramme = "Tutorials"
-    $: selectedImage = programmes.find(event => event.title === selectedProgramme)?.image
-
-    let mode = 1;
-
+    import PageHeader from "$lib/components/layout/PageHeader.svelte";
+    import { fly, fade, scale } from 'svelte/transition';
+    import { onMount } from 'svelte';
+    import { MetaTags } from "svelte-meta-tags";
+    import * as Dialog from '$lib/components/ui/dialog';
+    import * as Sheet from '$lib/components/ui/sheet';
+    import { Button } from '$lib/components/ui/button';
+    import { Loader2, X, ChevronRight, Info } from 'lucide-svelte';
+    import { browser } from '$app/environment';
+    
+    let { data } = $props();
+    
+    /** @type {Array} */
+    let programmes = $state([]);
+    let visible = $state(false);
+    let hoveredProgramme = $state(null);
+    let selectedProgramme = $state(null);
+    let isLoading = $state(false);
+    let isDialogOpen = $state(false);
+    let isSheetOpen = $state(false);
+    let isLargeScreen = $state(true);
+    let programmeDetails = $state(null);
+    
     onMount(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type') ?? 1;
-        mode = Number(type)
-        programmes = data.programmes
-    })
+        visible = true;
+        
+        // Check if data.programmes is available
+        if (data.programmes && data.programmes.length > 0) {
+            programmes = data.programmes;
+            console.log('Using API data:', programmes.length, 'programmes loaded');
+        } else {
+            // No fallback data, just keep programmes empty
+            console.warn('API data not available, showing empty state');
+            programmes = [];
+        }
+        
+        console.log('Final programmes data:', programmes);
+        
+        if (browser) {
+            isLargeScreen = window.innerWidth >= 768;
+            
+            const handleResize = () => {
+                isLargeScreen = window.innerWidth >= 768;
+            };
+            
+            window.addEventListener('resize', handleResize);
+            return () => window.removeEventListener('resize', handleResize);
+        }
+    });
+
+    function openProgrammeDetails(programme) {
+        selectedProgramme = programme;
+        
+        // Show dialog or sheet based on screen size
+        if (isLargeScreen) {
+            isDialogOpen = true;
+        } else {
+            isSheetOpen = true;
+        }
+        
+        // Set loading state
+        isLoading = true;
+        
+        // Simulate fetching details (in a real app, you'd fetch this data)
+        // Since we're not actually fetching, just use the programme data directly
+        setTimeout(() => {
+            programmeDetails = {
+                ...programme,
+                description: programme.description || programme.text,
+                schedule: programme.schedule || [],
+                coordinators: programme.coordinators || [],
+                benefits: programme.benefits || []
+            };
+            isLoading = false;
+        }, 500);
+    }
+    
+    function closeProgrammeDetails() {
+        if (isLargeScreen) {
+            isDialogOpen = false;
+        } else {
+            isSheetOpen = false;
+        }
+        
+        setTimeout(() => {
+            selectedProgramme = null;
+            programmeDetails = null;
+        }, 300);
+    }
+    $inspect(programmes)
 </script>
 
 <!-- Meta Tags -->
@@ -52,103 +118,256 @@
     Our Programmes
 </PageHeader>
 
-{#if mode === 2}
-<!-- Programmes -->
-<section class="py-6">
-    <div class="mx-auto max-w-5xl space-y-16 px-6">
-
-        <div class="relative mx-auto grid max-w-4xl divide-x divide-y border *:p-12 sm:grid-cols-2 lg:grid-cols-3">
-            {#each programmes as programme}
-            <div class="space-y-2">
-                <div class="flex items-center flex-col gap-4">
-                    <img class="size-12 sm:size-16 md:size-20 lg:size-24" alt={programme.title} src={programme.image} />
-                    <h3 class="text-title text-sm font-medium">{programme.title}</h3>
-                </div>
-                <p class="text-body text-center text-sm">{programme.text}</p>
-            </div>
-                {/each}
-        </div>
-    </div>
-</section>
-<!-- End Programmes -->
-
-{:else}
-<!-- Programmes -->
-<div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-    <div class="relative p-6 md:p-16">
-        <!-- Grid -->
-        <div class="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
-            <div class="mb-10 lg:mb-0 lg:col-span-6 lg:col-start-8 lg:order-2">
-                <h2 class="text-2xl text-neutral-800 font-bold sm:text-3xl font-primary">
-                    Our Programmes
-                </h2>
-
-                <!-- Tab Navs -->
-                <nav class="grid gap-4 mt-5 md:mt-10">
-
-                    {#each programmes as programme}
-                        <button type="button"
-                                onclick={() => {
-                                    selectedProgramme = programme.title
-                                }}
-                                class="{selectedProgramme === programme.title ? 'bg-white shadow-md hover:border-transparent' : ''} text-start hover:bg-gray-200 focus:outline-none focus:bg-gray-200 p-4 md:p-5 rounded-xl active"
-                                id={programme.title} aria-selected={selectedProgramme === programme.title}>
-            <span class="flex gap-x-6">
-                <img class="shrink-0 mt-2 size-12 md:size-14 {selectedProgramme === programme.title ? 'text-primary-700' : ''} text-neutral-800 cursor-pointer" src={programme.icon} alt={programme.title} />
-                <span class="grow">
-                <span class="block text-lg font-semibold font-secondary {selectedProgramme === programme.title ? 'text-primary-700' : ''} text-neutral-800">{programme.title}</span>
-                    {#if selectedProgramme === programme.title}
-                <span in:slide out:slide class="block mt-1 text-neutral-800 font-tertiary">{programme.text}</span>
-                      {/if}
-              </span>
-            </span>
-                        </button>
+<!-- Programmes Section with enhanced styling -->
+<section class="py-6 relative overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
+    
+    <div class="mx-auto max-w-5xl space-y-16 px-6 relative z-10">
+        {#if visible}
+            <!-- Debug indicator for programme count -->
+            <p class="text-center text-sm text-gray-500">Loaded {programmes.length} programmes</p>
+            
+            {#if programmes.length > 0}
+                <div 
+                    class="relative mx-auto grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                    in:fly={{ y: 30, duration: 800, delay: 200 }}
+                >
+                    {#each programmes as programme, i}
+                        <!-- Enhanced Programme Card -->
+                        <div 
+                            role="button"
+                            tabindex="0"
+                            class="space-y-4 bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group"
+                            in:scale={{ duration: 600, delay: 400 + (i * 150) }}
+                            onmouseenter={() => hoveredProgramme = programme.title}
+                            onmouseleave={() => hoveredProgramme = null}
+                        >
+                            <!-- Decorative gradient background -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            
+                            <div class="flex items-center flex-col gap-4 relative z-10">
+                                <div class="p-3 rounded-full bg-primary-100 group-hover:bg-primary-200 transition-colors">
+                                    <img 
+                                        class="size-16 sm:size-20 transition-transform duration-500 group-hover:scale-110" 
+                                        alt={programme.title} 
+                                        src={programme.image || "/placeholder.svg"} 
+                                    />
+                                </div>
+                                <h3 class="text-primary-800 text-lg font-medium font-secondary text-center w-full">{programme.title}</h3>
+                            </div>
+                            
+                            <p class="text-gray-700 text-center text-sm relative z-10">{programme.summary || ''}</p>
+                            
+                            <!-- View Details Button -->
+                            <div class="pt-4 flex justify-center relative z-10">
+                                <button
+                                    class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors"
+                                    onclick={() => openProgrammeDetails(programme)}
+                                >
+                                    View Details
+                                    <ChevronRight class="size-4" />
+                                </button>
+                            </div>
+                        </div>
+                        <!-- End Programme Card -->
                     {/each}
-
-                </nav>
-                <!-- End Tab Navs -->
-            </div>
-            <!-- End Col -->
-
-            <div class="lg:col-span-6">
-                <div class="relative">
-                    <!-- Tab Content -->
-                    <div>
-                        <div id="tabs-with-card-1" role="tabpanel" aria-labelledby="tabs-with-card-item-1">
-                            {#key selectedImage}
-                                <img loading="lazy" class="shadow-xl shadow-gray-200 rounded-xl"
-                                     src={selectedImage}
-                                     alt={selectedProgramme}/>
-                            {/key}
+                </div>
+            {:else}
+                <!-- Empty state -->
+                <div 
+                    class="flex flex-col items-center justify-center py-16 px-4"
+                    in:fade={{ duration: 800, delay: 200 }}
+                >
+                    <div class="bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 p-8 shadow-sm w-full max-w-lg text-center">
+                        <div class="mb-6 bg-primary-50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
+                            <Info class="size-10 text-primary-400" />
+                        </div>
+                        <h3 class="text-xl font-medium text-primary-800 mb-3">No Programmes Available</h3>
+                        <p class="text-gray-600 mb-6">Our programmes are currently being updated. Please check back soon for a list of our exciting activities and initiatives.</p>
+                        <div class="border-t border-gray-100 pt-4 mt-2">
+                            <p class="text-sm text-gray-500">If you have any questions, please contact our team.</p>
                         </div>
                     </div>
-                    <!-- End Tab Content -->
-
-                    <!-- SVG Element -->
-                    <div class="hidden absolute top-0 end-0 translate-x-20 md:block lg:translate-x-20">
-                        <svg class="w-16 h-auto text-primary-800" width="121" height="135" viewBox="0 0 121 135"
-                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 16.4754C11.7688 27.4499 21.2452 57.3224 5 89.0164" stroke="currentColor"
-                                  stroke-width="10" stroke-linecap="round"/>
-                            <path d="M33.6761 112.104C44.6984 98.1239 74.2618 57.6776 83.4821 5" stroke="currentColor"
-                                  stroke-width="10" stroke-linecap="round"/>
-                            <path d="M50.5525 130C68.2064 127.495 110.731 117.541 116 78.0874" stroke="currentColor"
-                                  stroke-width="10" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <!-- End SVG Element -->
                 </div>
-            </div>
-            <!-- End Col -->
-        </div>
-        <!-- End Grid -->
-
-        <!-- Background Color -->
-        <div class="absolute inset-0 grid grid-cols-12 size-full">
-            <div class="col-span-full lg:col-span-7 lg:col-start-6 bg-gray-100 w-full h-5/6 rounded-xl sm:h-3/4 lg:h-full"></div>
-        </div>
-        <!-- End Background Color -->
+            {/if}
+        {/if}
     </div>
-</div>
-<!-- End Programmes -->
-    {/if}
+    
+    <!-- Dialog for large screens -->
+    <Dialog.Root bind:open={isDialogOpen}>
+        <Dialog.Content class="sm:max-w-[600px]">
+            <Dialog.Header>
+                <Dialog.Title>{selectedProgramme?.title || 'Programme Details'}</Dialog.Title>
+                <Dialog.Description>
+                    Detailed information about this programme
+                </Dialog.Description>
+            </Dialog.Header>
+            
+            {#if isLoading}
+                <div class="flex flex-col items-center justify-center py-12">
+                    <Loader2 class="size-12 text-primary-700 animate-spin mb-4" />
+                    <p class="text-gray-600">Loading programme details...</p>
+                </div>
+            {:else if programmeDetails}
+                <div class="space-y-6">
+                    <!-- Programme Image -->
+                    <div class="flex justify-center">
+                        <div class="p-4 rounded-full bg-primary-100">
+                            <img 
+                                src={programmeDetails.image || "/placeholder.svg"} 
+                                alt={programmeDetails.title}
+                                class="size-24 object-contain" 
+                            />
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Description</h3>
+                        <p class="text-gray-700">{programmeDetails.description}</p>
+                    </div>
+                    
+                    <!-- Schedule -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Schedule</h3>
+                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                            {#each programmeDetails.schedule as item}
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                                    <div>
+                                        <p class="font-medium text-gray-800">{item.day}</p>
+                                        <p class="text-sm text-gray-600">{item.time}</p>
+                                    </div>
+                                    <div class="text-sm text-gray-700">{item.location}</div>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                    
+                    <!-- Coordinators -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Coordinators</h3>
+                        <div class="space-y-3">
+                            {#each programmeDetails.coordinators as coordinator}
+                                <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
+                                    <div class="size-10 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-bold">
+                                        {coordinator.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">{coordinator.name}</p>
+                                        <p class="text-sm text-gray-600">{coordinator.role}</p>
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                    
+                    <!-- Benefits -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Benefits</h3>
+                        <ul class="list-disc pl-5 space-y-1 text-gray-700">
+                            {#each programmeDetails.benefits as benefit}
+                                <li>{benefit}</li>
+                            {/each}
+                        </ul>
+                    </div>
+                </div>
+            {/if}
+            
+            <Dialog.Footer>
+                <Button variant="outline" onclick={closeProgrammeDetails}>
+                    Close
+                </Button>
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
+    
+    <!-- Sheet for small screens -->
+    <Sheet.Root bind:open={isSheetOpen}>
+        <Sheet.Content side="bottom" class="h-[85vh] overflow-y-auto">
+            <div class="px-4 py-2 flex justify-between items-center border-b border-gray-100">
+                <h2 class="text-lg font-medium text-gray-900">{selectedProgramme?.title || 'Programme Details'}</h2>
+                <Button variant="ghost" size="icon" onclick={closeProgrammeDetails}>
+                    <X class="size-4" />
+                </Button>
+            </div>
+            
+            {#if isLoading}
+                <div class="flex flex-col items-center justify-center py-12">
+                    <Loader2 class="size-12 text-primary-700 animate-spin mb-4" />
+                    <p class="text-gray-600">Loading programme details...</p>
+                </div>
+            {:else if programmeDetails}
+                <div class="p-4 space-y-6">
+                    <!-- Programme Image -->
+                    <div class="flex justify-center">
+                        <div class="p-4 rounded-full bg-primary-100">
+                            <img 
+                                src={programmeDetails.image || "/placeholder.svg"} 
+                                alt={programmeDetails.title}
+                                class="size-20 object-contain" 
+                            />
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div>
+                        <h3 class="text-base font-medium text-gray-900 mb-2">Description</h3>
+                        <p class="text-sm text-gray-700">{programmeDetails.description}</p>
+                    </div>
+                    
+                    <!-- Schedule -->
+                    <div>
+                        <h3 class="text-base font-medium text-gray-900 mb-2">Schedule</h3>
+                        <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+                            {#each programmeDetails.schedule as item}
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                                    <div>
+                                        <p class="font-medium text-sm text-gray-800">{item.day}</p>
+                                        <p class="text-xs text-gray-600">{item.time}</p>
+                                    </div>
+                                    <div class="text-xs text-gray-700">{item.location}</div>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                    
+                    <!-- Coordinators -->
+                    <div>
+                        <h3 class="text-base font-medium text-gray-900 mb-2">Coordinators</h3>
+                        <div class="space-y-2">
+                            {#each programmeDetails.coordinators as coordinator}
+                                <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
+                                    <div class="size-8 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-bold text-xs">
+                                        {coordinator.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-sm text-gray-800">{coordinator.name}</p>
+                                        <p class="text-xs text-gray-600">{coordinator.role}</p>
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                    
+                    <!-- Benefits -->
+                    <div>
+                        <h3 class="text-base font-medium text-gray-900 mb-2">Benefits</h3>
+                        <ul class="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                            {#each programmeDetails.benefits as benefit}
+                                <li>{benefit}</li>
+                            {/each}
+                        </ul>
+                    </div>
+                </div>
+            {/if}
+            
+            <div class="p-4 border-t border-gray-100">
+                <Button class="w-full" onclick={closeProgrammeDetails}>
+                    Close
+                </Button>
+            </div>
+        </Sheet.Content>
+    </Sheet.Root>
+</section>
