@@ -1,41 +1,39 @@
 <script>
     import PageHeader from "$lib/components/PageHeader.svelte";
-    import {MetaTags, JsonLd} from "svelte-meta-tags";
+    import SEO from "$lib/components/SEO.svelte";
 </script>
 
-
-<!-- Meta Tags -->
-<MetaTags
-        title="About Us"
-        titleTemplate="%s | MSSNOAU"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/alumnae"
-        openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/alumnae',
-    title: 'About Us | MSSNOAU',
-    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
-    images: [
-      {
-        url: 'https://i.ibb.co/H7t1bv3/about.webp',
-        width: 1200,
-        height: 640,
-        alt: 'Website screenshot'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
-/>
-<JsonLd schema={{
+<SEO
+    title="About Us"
+    path="/about"
+    description="Learn about the Muslim Students Society of Nigeria at OAU - our mission, vision, committees, and how we support Muslim students in their academic, spiritual, and personal growth."
+    images={[
+        {
+            url: 'https://i.ibb.co/H7t1bv3/about.webp',
+            width: 1200,
+            height: 640,
+            alt: 'About MSSNOAU'
+        }
+    ]}
+    keywords="MSSN OAU, about MSSNOAU, Muslim student community, Islamic student organization, MSSN committees, Jihad Week Committee, An-Nur Press, Muslim students OAU, Islamic mission and vision"
+    schema={{
+        "@type": "AboutPage",
+        "name": "About MSSNOAU",
+        "description": "Learn about the Muslim Students Society of Nigeria at OAU - our mission, vision, committees, and how we support Muslim students in their academic, spiritual, and personal growth.",
+        "mainEntityOfPage": {
             "@type": "WebPage",
-            "name": "About Us | MSSNOAU",
-            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
-            "publisher": {
-                "@type": "Organization",
-                "name": "MSSNOAU.org"
+            "@id": "https://mssnoau.org/about"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "MSSNOAU",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://mssnoau.sirv.com/mssn-logo.png"
             }
-        }}
-        />
-<!-- End Meta Tags -->
+        }
+    }}
+/>
 
 <PageHeader>
     About MSSNOAU
@@ -115,7 +113,7 @@
             <h2 class="text-3xl mb-4 font-semibold font-primary">An-Nur Press Agency Editorial Board</h2>
             <p class="mb-4"><span class="font-semibold">An-Nur Press Agency Editorial Board</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
 
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
+            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
 
             <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of An-Nur Press Agency Editorial Board, <a class="text-green-800 underline" href="">Click here</a>.</p>
         </div>
@@ -135,7 +133,7 @@
             <h2 class="text-3xl mb-4 font-semibold font-primary">Business Committee</h2>
             <p class="mb-4"><span class="font-semibold">Business Committee</span>  is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
 
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
+            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
 
             <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Business Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
         </div>
@@ -155,7 +153,7 @@
             <h2 class="text-3xl mb-4 font-semibold font-primary">Welfare Committee</h2>
             <p class="mb-4"><span class="font-semibold">Welfare Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
 
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
+            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
 
             <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Welfare Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
         </div>
@@ -200,7 +198,7 @@
             <h2 class="text-3xl mb-4 font-semibold font-primary">ICT & Publicity Committee</h2>
             <p class="mb-4"><span class="font-semibold">ICT & Publicity Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
 
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
+            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
 
             <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of ICT & Publicity Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
         </div>
@@ -245,7 +243,7 @@
             <h2 class="text-3xl mb-4 font-semibold font-primary">Moro Committee</h2>
             <p class="mb-4"><span class="font-semibold">Moro Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
 
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
+            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
 
             <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Moro Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
         </div>
@@ -290,7 +288,7 @@
             <h2 class="text-3xl mb-4 font-semibold font-primary">Asset Maintenance Office</h2>
             <p class="mb-4"><span class="font-semibold">Asset Maintenance Office</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
 
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
+            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
 
             <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Asset Maintenance Office, <a class="text-green-800 underline" href="">Click here</a>.</p>
         </div>
@@ -335,7 +333,7 @@
             <h2 class="text-3xl mb-4 font-semibold font-primary">Islamic Affairs Committee</h2>
             <p class="mb-4"><span class="font-semibold">Islamic Affairs Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
 
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
+            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
 
             <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Islamic Affairs Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
         </div>

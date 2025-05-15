@@ -11,13 +11,14 @@
     } from 'lucide-svelte'
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
-    import {JsonLd, MetaTags} from 'svelte-meta-tags';
+    import {JsonLd} from 'svelte-meta-tags';
     import {Badge} from "$lib/components/ui/badge/index.js";
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {Button} from "$lib/components/ui/button/index.js";
     import copyTextToClipboard from '$lib/utils/copy.js'
     import slugify from "$lib/utils/slugify.js"
+    import SEO from '$lib/components/SEO.svelte';
 
     let {data} = $props();
 
@@ -330,6 +331,38 @@
     })
 
 </script>
+
+<SEO 
+    path="/"
+    title=""
+    description="Welcome to the Muslim Students Society of Nigeria, OAU Branch – the official community of Muslim students at Obafemi Awolowo University. Join us for academic excellence, Islamic education, and community engagement."
+    images={[
+        {
+            url: 'https://mssnoau.sirv.com/mssn-home.jpg',
+            width: 1200,
+            height: 630,
+            alt: 'MSSNOAU - Muslim Students Society of Nigeria, OAU Branch'
+        }
+    ]}
+    keywords="MSSN, MSSNOAU, Muslim Students Society, Obafemi Awolowo University, OAU, Islamic organization, Muslim community, prayer times, Islamic events, donate to MSSN, Great Ife"
+    schema={{
+        "@type": "WebPage",
+        "@id": "https://mssnoau.org/#webpage",
+        "url": "https://mssnoau.org/",
+        "name": "Muslim Students Society of Nigeria, OAU Branch | MSSNOAU",
+        "isPartOf": {
+            "@id": "https://mssnoau.org/#website"
+        },
+        "about": {
+            "@id": "https://mssnoau.org/#organization"
+        },
+        "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://mssnoau.sirv.com/mssn-home.jpg"
+        },
+        "inLanguage": "en-US"
+    }}
+/>
 
 <!-- Meta Tags -->
 <MetaTags
@@ -686,7 +719,7 @@
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/night.webp')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 4 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
-                ‘Isha’</h2>
+                ‘Isha'h</h2>
 
             <span
                     class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 4 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
