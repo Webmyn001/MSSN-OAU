@@ -1,6 +1,20 @@
 <script>
-    import PageHeader from "$lib/components/PageHeader.svelte";
+    import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import {MetaTags, JsonLd} from "svelte-meta-tags";
+    import { onMount } from 'svelte';
+
+    // Import data from page load function
+    export let data;
+    
+    // Access committees from data prop
+    $: committees = data.committees || [];
+    
+    // State for showing all committees or just initial 3
+    let showAll = false;
+
+    function toggleShowAll() {
+        showAll = !showAll;
+    }
 </script>
 
 
@@ -43,8 +57,8 @@
 
 <!-- Who We Are -->
 <div class="mt-8 mx-[10dvw] flex items-center flex-col">
-    <h3 class="font-semibold text-2xl sm:text-3xl font-secondary mb-4">WHO WE ARE</h3>
-    <p class="font-tertiary w-full text-center">The Muslim Students Society of Nigeria (MSSN), Obafemi Awolowo University (MSSNOAU) ia a branch among MSSN higher institution branches and is an inclusive platform for all Muslim students in the university to find spiritual expression, islamic knowledge, and fellowship irrespective of their backgrounds and orientation.</p>
+    <h3 class="font-semibold text-2xl sm:text-3xl font-secondary mb-4 text-primary">WHO WE ARE</h3>
+    <p class="font-tertiary w-full text-center">The Muslim Students Society of Nigeria (MSSN), Obafemi Awolowo University (MSSNOAU) is a branch among MSSN higher institution branches and is an inclusive platform for all Muslim students in the university to find spiritual expression, islamic knowledge, and fellowship irrespective of their backgrounds and orientation.</p>
     <br /><br />
     <p class="font-tertiary w-full text-center">At MSSNOAU, we foster a vibrant and inclusive community where every member is encouraged to grow and excel. Our diverse programs and activities are designed to cater to the holistic development of our members, ensuring they achieve academic excellence while maintaining strong spiritual and moral values.</p>
 </div>
@@ -52,17 +66,17 @@
 
 <!-- Mission and Vision -->
 <div class="w-full mx-auto flex items-center flex-col mt-8 px-[10dvw]">
-    <img src="/mssn-logo.png" alt="MSSNOAU Logo" class="w-[40dvw] p-6 border border-gray-200 rounded-xl" />
+    <img src="/mssn-logo.png" alt="MSSNOAU Logo" class="w-[40dvw] max-w-[300px] p-6 border border-gray-200 rounded-xl shadow-md" />
     <div class="grid grid-rows-1 sm:grid-cols-2 gap-8 text-center mt-8">
         <div class="flex flex-col gap-2">
-            <h4 class="font-secondary text-green-800 text-2xl font-semibold mb-2">Our Mission</h4>
+            <h4 class="font-secondary text-primary-700 text-2xl font-semibold mb-2">Our Mission</h4>
             <p class="font-tertiary text-center leading-relaxed">
                 To work relentlessly towards the establishment of a society that fosters all-around human development. To achieve this, MSSN will continuously strive towards strengthening Ummah educationally, emotionally, spiritually and politically through a wide spectrum of activities in the university and the larger society in partnership with like-minded organizations. To succeed, MSSN must ensure that its members are God-fearing, knowledgeable, united and with superior moral values.
             </p>
         </div>
 
         <div class="flex flex-col gap-2">
-            <h4 class="font-secondary text-green-800 text-2xl font-semibold mb-2">Our Vision</h4>
+            <h4 class="font-secondary text-primary-700 text-2xl font-semibold mb-2">Our Vision</h4>
             <p class="font-tertiary text-center leading-relaxed">
                 To establish an Islamic Ummah governed by the principles and rules of the Shariah. To become a leading student organization that inspires Muslim students to become dynamic leaders, passionate about their faith, knowledge, and community, and to create a supportive environment that nurtures their overall well-being and success.
             </p>
@@ -73,276 +87,77 @@
 
 
 <!-- Our Committees -->
-<div class="mt-12 mb-8 mx-[10dvw] flex items-center flex-col">
-    <h3 class="font-semibold text-2xl sm:text-3xl font-secondary mb-4">Our Committees</h3>
-    <p class="font-tertiary w-full text-center">The Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, has established various committees to cater to the diverse needs of Muslim students on campus. Here at MSSN OAU, we also established this committee so that students can join just to gain other extraordinary activities. This will allow them to be useful for the society and community at large.</p>
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/jwc.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Jihad Week Committee (JWC)</h2>
-            <p class="mb-4"><span class="font-semibold">The Jihad Week Committee (JWC)</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p class="font-semibold">Aim:</p>
-            <ul class="list-disc ml-5">
-                <li>To provide a platform for Muslim students to rejuvenate their faith and spiritual growth</li>
-                <li>To empower Muslim students with knowledge, skills, and inspiration</li>
-                <li>To foster a sense of community and brotherhood/sisterhood among Muslim students amongst others.</li>
-            </ul>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Jihad Week Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
+<div class="mt-16 mb-12 px-4 md:px-8 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="font-semibold text-3xl sm:text-4xl font-secondary mb-4 text-primary-700">Our Committees</h2>
+        <p class="font-tertiary max-w-3xl mx-auto text-gray-600">The Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, has established various committees to cater to the diverse needs of Muslim students on campus. Students can join these committees to develop valuable skills and contribute meaningfully to the community.</p>
     </div>
-    <!--  End Committee  -->
 
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/an-nuur.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
+    {#if committees.length > 0}
+        <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {#each (showAll ? committees : committees.slice(0, 3)) as committee}
+                <div class="rounded-xl overflow-hidden shadow-md border border-gray-100 bg-white hover:shadow-lg transition-shadow duration-300">
+                    <div class="h-48 bg-primary-50 relative">
+                        <img 
+                            src={committee.image} 
+                            alt={committee.alt} 
+                            class="w-full h-full object-cover" 
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-4">
+                            <span class={committee.badgeColor + " text-xs font-medium px-2.5 py-1 rounded-full"}>{committee.badge}</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold font-secondary text-primary-800 mb-3">{committee.name}</h3>
+                        <p class="text-gray-600 text-sm mb-4">{committee.description}</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-primary-700 mb-2">Main Objectives:</h4>
+                            <ul class="space-y-1 text-sm text-gray-600 list-disc pl-5">
+                                {#each committee.objectives as objective}
+                                    <li>{objective}</li>
+                                {/each}
+                            </ul>
+                        </div>
+                        
+                        <a href="#" class="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-600">
+                            Join this committee
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            {/each}
         </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">An-Nur Press Agency Editorial Board</h2>
-            <p class="mb-4"><span class="font-semibold">An-Nur Press Agency Editorial Board</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of An-Nur Press Agency Editorial Board, <a class="text-green-800 underline" href="">Click here</a>.</p>
+        
+        {#if committees.length > 3}
+            <!-- View All Committees Button -->
+            <div class="text-center mt-10">
+                <button on:click={toggleShowAll} class="inline-flex items-center justify-center rounded-lg bg-primary-700 px-6 py-3 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
+                    {#if showAll}
+                        Show Less
+                    {:else}
+                        View All Committees
+                    {/if}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </button>
+            </div>
+        {/if}
+    {:else}
+        <!-- Empty state for when no committees are available -->
+        <div class="text-center py-10">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-800 mb-2">No Committees Available</h3>
+            <p class="text-gray-500 max-w-md mx-auto">Committee information is currently unavailable. Please check back later.</p>
         </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/business-committee.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="Business Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Business Committee</h2>
-            <p class="mb-4"><span class="font-semibold">Business Committee</span>  is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Business Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/an-nuur.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Welfare Committee</h2>
-            <p class="mb-4"><span class="font-semibold">Welfare Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Welfare Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/jwc.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Academic Committee</h2>
-            <p class="mb-4"><span class="font-semibold">The Academic Committee (JWC)</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p class="font-semibold">Aim:</p>
-            <ul class="list-disc ml-5">
-                <li>To provide a platform for Muslim students to rejuvenate their faith and spiritual growth</li>
-                <li>To empower Muslim students with knowledge, skills, and inspiration</li>
-                <li>To foster a sense of community and brotherhood/sisterhood among Muslim students amongst others.</li>
-            </ul>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Academic Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/an-nuur.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">ICT & Publicity Committee</h2>
-            <p class="mb-4"><span class="font-semibold">ICT & Publicity Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of ICT & Publicity Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/jwc.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Mosque Cleaning Committee</h2>
-            <p class="mb-4"><span class="font-semibold">The Mosque Cleaning Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p class="font-semibold">Aim:</p>
-            <ul class="list-disc ml-5">
-                <li>To provide a platform for Muslim students to rejuvenate their faith and spiritual growth</li>
-                <li>To empower Muslim students with knowledge, skills, and inspiration</li>
-                <li>To foster a sense of community and brotherhood/sisterhood among Muslim students amongst others.</li>
-            </ul>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Mosque Cleaning Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/an-nuur.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Moro Committee</h2>
-            <p class="mb-4"><span class="font-semibold">Moro Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Moro Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/jwc.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Secondary School Committee</h2>
-            <p class="mb-4"><span class="font-semibold">The Secondary School Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p class="font-semibold">Aim:</p>
-            <ul class="list-disc ml-5">
-                <li>To provide a platform for Muslim students to rejuvenate their faith and spiritual growth</li>
-                <li>To empower Muslim students with knowledge, skills, and inspiration</li>
-                <li>To foster a sense of community and brotherhood/sisterhood among Muslim students amongst others.</li>
-            </ul>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Asset Secondary School Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/an-nuur.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Asset Maintenance Office</h2>
-            <p class="mb-4"><span class="font-semibold">Asset Maintenance Office</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Asset Maintenance Office, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/jwc.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Ramadan Committee</h2>
-            <p class="mb-4"><span class="font-semibold">The Ramadan Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p class="font-semibold">Aim:</p>
-            <ul class="list-disc ml-5">
-                <li>To provide a platform for Muslim students to rejuvenate their faith and spiritual growth</li>
-                <li>To empower Muslim students with knowledge, skills, and inspiration</li>
-                <li>To foster a sense of community and brotherhood/sisterhood among Muslim students amongst others.</li>
-            </ul>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Ramadan Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-    <!--  Committee  -->
-    <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-        <div class="sm:col-span-1 flex items-center justify-center">
-            <img
-                    src="/images/committees/an-nuur.webp"
-                    class="w-3/4 sm:w-full"
-                    alt="JWC Committee"
-            />
-        </div>
-        <div class="sm:col-span-2">
-            <h2 class="text-3xl mb-4 font-semibold font-primary">Islamic Affairs Committee</h2>
-            <p class="mb-4"><span class="font-semibold">Islamic Affairs Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-            <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community’s spiritual, intellectual, and moral endeavors.</p>
-
-            <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Islamic Affairs Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-        </div>
-    </div>
-    <!--  End Committee  -->
-
-
-
+    {/if}
 </div>
 <!-- End Our Committees -->
