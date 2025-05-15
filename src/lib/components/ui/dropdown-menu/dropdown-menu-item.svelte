@@ -1,40 +1,16 @@
 <script>
-    import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
-    import { cn } from "$lib/utils.js";
+	import { cn } from "$lib/utils.js";
+	import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
 
-    /**
-     * @typedef {import("bits-ui").DropdownMenuItemProps} $$Props
-     * @property {boolean} [inset] - Optional inset style.
-     */
-
-    /**
-     * @typedef {import("bits-ui").DropdownMenuItemEvents} $$Events
-     */
-
-    /** @type {$$Props["class"]} */
-    let className = undefined;
-
-    /** @type {$$Props["inset"]} */
-    export let inset = undefined;
-
-    export { className as class };
+	let { ref = $bindable(null), class: className, inset, ...restProps } = $props();
 </script>
 
-
 <DropdownMenuPrimitive.Item
-        class={cn(
-		"data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+	bind:ref
+	class={cn(
+		"data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
 		inset && "pl-8",
 		className
 	)}
-        {...$$restProps}
-        on:click
-        on:keydown
-        on:focusin
-        on:focusout
-        on:pointerdown
-        on:pointerleave
-        on:pointermove
->
-    <slot />
-</DropdownMenuPrimitive.Item>
+	{...restProps}
+/>
