@@ -4,7 +4,7 @@ import { PANTRY_ID } from '$env/static/private'
 const pantryClient = new Pantry(PANTRY_ID)
 
 /**
- * @typedef {'advisors' | 'info' | 'programmes' | 'excos' | 'events' | 'blog'} PantryName
+ * @typedef {'advisors' | 'info' | 'programmes' | 'excos' | 'events' | 'blog' | 'committees'} PantryName
  */
 
 /**

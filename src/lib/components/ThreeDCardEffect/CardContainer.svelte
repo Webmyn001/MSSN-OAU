@@ -33,9 +33,9 @@
 >
     <div
             bind:this={containerRef}
-            on:mouseenter={handleMouseEnter}
-            on:mousemove={handleMouseMove}
-            on:mouseleave={handleMouseLeave}
+            onmouseenter={handleMouseEnter}
+            onmousemove={handleMouseMove}
+            onmouseleave={handleMouseLeave}
             class={cn(
 			'relative flex items-center justify-center transition-all duration-200 ease-linear',
 			className

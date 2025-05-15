@@ -1,6 +1,6 @@
 import {json} from "@sveltejs/kit";
-import {getPantry} from "$lib/utils/pantry.server.js";
 import {redis} from "$lib/utils/redis.server.js";
+import {programmes} from "$lib/data/programmes";
 
 /**
  * @type {import("@sveltejs/kit").RequestHandler}
@@ -18,18 +18,20 @@ export const GET = async ({ setHeaders }) => {
             })
         }
         
-        const req = await getPantry("programmes")
-        if (req && req.programmes) {
-            const ttl = await redis.ttl("programmes")
-            setHeaders({
-                "cache-control": `max-age=${ttl}`,
-            });
-            redis.set("programmes", JSON.stringify(req), "EX", 300)
-        }
+        // Use local data instead of fetching from Pantry
+        const data = {programmes};
+        
+        // Cache the data
+        const ttl = 300; // 5 minutes
+        setHeaders({
+            "cache-control": `max-age=${ttl}`,
+        });
+        await redis.set("programmes", JSON.stringify(data), "EX", ttl);
+        
         return json({
             status: true,
             data: {
-                programmes: req.programmes
+                programmes: data.programmes
             }
         })
     } catch (e) {
@@ -37,7 +39,7 @@ export const GET = async ({ setHeaders }) => {
             status: false,
             message: e?.message ?? "Something went wrong"
         }, {
-            statusCode: 500,
+            status: 500
         })
     }
 }

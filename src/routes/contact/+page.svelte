@@ -1,16 +1,33 @@
 <script>
-    import PageHeader from "$lib/components/PageHeader.svelte";
-    import ContactForm from "$lib/components/ContactForm.svelte";
-    import * as Accordion from "$lib/components/ui/accordion/index.js";
-    import {CircleHelp} from "lucide-svelte";
+    import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import {MetaTags, JsonLd} from "svelte-meta-tags";
+    import ContactForm from "$lib/components/forms/ContactForm.svelte";
+    import { fly, fade, scale } from 'svelte/transition'
+    import { onMount, onDestroy } from 'svelte'
+    import * as Accordion from '$lib/components/ui/accordion'
+    import { MapPin, Mail, CircleHelp, ChevronRight, Phone, ExternalLink } from 'lucide-svelte'
+    import { page } from '$app/stores'
 
-    export let data;
+    /** @type {{ map_link?: string, address?: string, email?: string, phone?: string, faqs?: Array<{ question: string, answer: string }> }} */
+    let info = {};
+    /** @type {Array<{ question: string, answer: string }>} */
+    let faqs = [];
+    let visible = false;
+    /** @type {number|null} */
+    let hoveredFaq = null;
 
-    const info = data.info;
-    const faqs = info.faqs;
-
-
+    // Subscribe to the page store to get info and faqs
+    let unsubscribe;
+    onMount(() => {
+        unsubscribe = page.subscribe(($page) => {
+            info = $page.data?.info || {};
+            faqs = $page.data?.info?.faqs || [];
+        });
+        visible = true;
+    });
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
+    });
 </script>
 
 <!-- Meta Tags -->
@@ -50,90 +67,173 @@
     Contact Us
 </PageHeader>
 
-<!-- Contact Section -->
-<div>
-    <div class="max-w-5xl px-4 xl:px-0 py-10 lg:py-20 mx-auto">
-
-        <!-- Contact -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16">
-            <div class="md:order-2 border-b border-primary-800 pb-10 mb-10 md:border-b-0 md:pb-0 md:mb-0">
-                <ContactForm title="Contact Form" wrapperClass="mx-auto" />
-            </div>
-            <!-- End Contact -->
-
-            <!-- Part -->
-            <div class="space-y-14">
-                <!-- Address Part -->
-                <div class="flex gap-x-5">
-                    <svg class="shrink-0 size-6 text-primary-800" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                    <div class="grow">
-                        <h4 class="text-neutral-800 font-semibold">Our address:</h4>
-
-                        <a href={info.map_link} class="mt-1 text-neutral-700 text-sm not-italic">
-                            {info.address}, <br />
-                            OAU, Ilé-Ifẹ̀
-                        </a>
-                    </div>
+<!-- Contact Section with enhanced styling -->
+<div class="relative overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
+    
+    <div class="max-w-5xl px-4 xl:px-0 py-10 lg:py-20 mx-auto relative z-10">
+        {#if visible}
+            <!-- Contact Grid -->
+            <div 
+                class="grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16"
+                in:fly={{ y: 30, duration: 800, delay: 200 }}
+            >
+                <div class="md:order-2 border-b border-primary-300 pb-10 mb-10 md:border-b-0 md:pb-0 md:mb-0">
+                    <ContactForm />
                 </div>
-                <!-- End Address Part -->
+                
+                <!-- Contact Info -->
+                <div class="space-y-14">
+                    <!-- Address Part with animation -->
+                    <div 
+                        class="flex gap-x-5 group"
+                        in:fly={{ x: -30, duration: 800, delay: 400 }}
+                    >
+                        <div class="shrink-0 size-12 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                            <MapPin class="size-6 text-primary-700" />
+                        </div>
+                        <div class="grow">
+                            <h4 class="text-primary-800 font-semibold font-secondary text-lg">Our address:</h4>
 
-                <!-- Email Part -->
-                <div class="flex gap-x-5">
-                    <svg class="shrink-0 size-6 text-primary-800" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg>
-                    <div class="grow">
-                        <h4 class="text-neutral-800 font-semibold">Email us:</h4>
-
-                        <a class="mt-1 text-neutral-700 text-sm hover:text-neutral-700/90 focus:outline-none focus:text-neutral-200" href={"mailto:" + info.email} target="_blank">
-                            {info.email}
-                        </a>
-                    </div>
-                </div>
-                <!-- End Email Part -->
-
-                <!-- FAQs Part -->
-                <div class="flex gap-x-5">
-                    <CircleHelp class="shrink-0 size-6 text-primary-800" />
-                    <div class="grow">
-                        <h4 class="text-neutral-800 font-semibold">FAQs</h4>
-                        <p class="mt-1 text-neutral-700">We've collated and answered some question you may have.</p>
-                        <p class="mt-2">
-                            <a class="group inline-flex items-center gap-x-2 font-medium text-sm text-primary-800 decoration-2 hover:underline focus:outline-none focus:underline" href="#faqs">
-                                See FAQs
-                                <svg class="shrink-0 size-4 transition group-hover:translate-x-0.5 group-hover:translate-x-0 group-focus:translate-x-0.5 group-focus:translate-x-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            <a 
+                                href={info?.map_link} 
+                                class="mt-2 text-neutral-700 text-sm font-primary not-italic hover:text-primary-600 transition-colors flex items-center gap-2 group"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <span>
+                                    {info?.address}, <br />
+                                    OAU, Ilé-Ifẹ̀
+                                </span>
+                                <ExternalLink class="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                             </a>
-                        </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Email Part with animation -->
+                    <div 
+                        class="flex gap-x-5 group"
+                        in:fly={{ x: -30, duration: 800, delay: 600 }}
+                    >
+                        <div class="shrink-0 size-12 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                            <Mail class="size-6 text-primary-700" />
+                        </div>
+                        <div class="grow">
+                            <h4 class="text-primary-800 font-semibold font-secondary text-lg">Email us:</h4>
+
+                            <a 
+                                class="mt-2 text-neutral-700 text-sm font-primary hover:text-primary-600 focus:outline-none focus:text-primary-600 transition-colors flex items-center gap-2 group" 
+                                href={"mailto:" + info?.email} 
+                                target="_blank"
+                            >
+                                <span>{info?.email}</span>
+                                <ExternalLink class="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Phone Part with animation (if available) -->
+                    {#if info?.phone}
+                        <div 
+                            class="flex gap-x-5 group"
+                            in:fly={{ x: -30, duration: 800, delay: 800 }}
+                        >
+                            <div class="shrink-0 size-12 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                                <Phone class="size-6 text-primary-700" />
+                            </div>
+                            <div class="grow">
+                                <h4 class="text-primary-800 font-semibold font-secondary text-lg">Call us:</h4>
+
+                                <a 
+                                    class="mt-2 text-neutral-700 text-sm font-primary hover:text-primary-600 focus:outline-none focus:text-primary-600 transition-colors flex items-center gap-2 group" 
+                                    href={"tel:" + info?.phone} 
+                                >
+                                    <span>{info?.phone}</span>
+                                    <ExternalLink class="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </a>
+                            </div>
+                        </div>
+                    {/if}
+                    
+                    <!-- FAQs Part with animation -->
+                    <div 
+                        class="flex gap-x-5 group"
+                        in:fly={{ x: -30, duration: 800, delay: 1000 }}
+                    >
+                        <div class="shrink-0 size-12 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                            <CircleHelp class="size-6 text-primary-700" />
+                        </div>
+                        <div class="grow">
+                            <h4 class="text-primary-800 font-semibold font-secondary text-lg">FAQs</h4>
+                            <p class="mt-2 text-neutral-700 font-primary">We've collated and answered some question you may have.</p>
+                            <p class="mt-3">
+                                <a 
+                                    class="group inline-flex items-center gap-x-2 font-medium text-sm text-primary-700 decoration-2 hover:underline focus:outline-none focus:underline transition-colors" 
+                                    href="#faqs"
+                                >
+                                    See FAQs
+                                    <ChevronRight class="shrink-0 size-4 transition group-hover:translate-x-0.5 group-focus:translate-x-0.5" />
+                                </a>
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <!-- End FAQs Part-->
-
+                <!-- End Contact Info -->
             </div>
-            <!-- End Part -->
-
-        </div>
+            <!-- End Contact Grid -->
+        {/if}
     </div>
 </div>
 <!-- End Contact Section -->
 
-<!-- FAQs -->
-<section id="faqs" class="max-w-5xl px-4 xl:px-0 py-10 lg:py-20 mx-auto">
-    <div class="container">
-        <div class="flex flex-col items-start text-left">
-            <h2 class="mb-3 max-w-3xl text-2xl font-primary font-semibold md:mb-4 md:text-4xl lg:mb-6 text-primary-800">
-                Frequently asked questions
-            </h2>
-        </div>
-        <div data-orientation="vertical">
-            <Accordion.Root type="single">
-                {#each faqs as faq, i}
-                <Accordion.Item value={`faq_${i}`}>
-                    <Accordion.Trigger class="hover:text-primary-800">{faq.question}</Accordion.Trigger>
-                    <Accordion.Content>
-                        {@html faq.answer}
-                    </Accordion.Content>
-                </Accordion.Item>
+<!-- Enhanced FAQs Section -->
+<section id="faqs" class="max-w-5xl px-4 xl:px-0 py-10 lg:py-20 mx-auto relative">
+    <!-- Decorative background elements -->
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
+    
+    <div class="container relative z-10">
+        {#if visible}
+            <div 
+                class="flex flex-col items-start text-left mb-10"
+                in:fly={{ y: 30, duration: 800, delay: 200 }}
+            >
+                <h2 class="mb-3 max-w-3xl text-2xl font-primary font-semibold md:mb-4 md:text-4xl lg:mb-6 text-primary-700 relative inline-block">
+                    Frequently asked questions
+                    <span class="absolute -bottom-2 left-0 w-1/4 h-1 bg-primary-700 rounded-full"></span>
+                </h2>
+            </div>
+            
+            <div 
+                data-orientation="vertical"
+                in:fly={{ y: 30, duration: 800, delay: 400 }}
+                class="bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 shadow-md p-6"
+            >
+                <Accordion.Root type="single" collapsible>
+                    {#each faqs as faq, i}
+                        <Accordion.Item 
+                            value={`faq_${i}`}
+                            class="border-b border-primary-100 last:border-b-0"
+                            onmouseenter={() => hoveredFaq = i}
+                            onmouseleave={() => hoveredFaq = null}
+                        >
+                            <Accordion.Trigger 
+                                class="hover:text-primary-700 font-secondary py-4 text-left {hoveredFaq === i ? 'text-primary-700' : 'text-gray-800'} transition-colors"
+                            >
+                                {faq.question || ''}
+                            </Accordion.Trigger>
+                            <Accordion.Content class="pb-4">
+                                <div class="font-primary text-neutral-700 prose prose-sm max-w-none">
+                                    {@html faq.answer || ''}
+                                </div>
+                            </Accordion.Content>
+                        </Accordion.Item>
                     {/each}
-            </Accordion.Root>
-        </div>
+                </Accordion.Root>
+            </div>
+        {/if}
     </div>
 </section>
-<!-- End FAQs -->
+<!-- End FAQs Section -->

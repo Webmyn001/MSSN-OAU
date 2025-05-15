@@ -1,37 +1,62 @@
-import { sentrySvelteKit } from "@sentry/sveltekit";
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
-import { sentryVitePlugin } from "@sentry/vite-plugin";
+// Temporarily comment out ViteImageOptimizer
+// import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+// Temporarily comment out Sentry imports until dependencies are resolved
+// import { sentrySvelteKit } from "@sentry/sveltekit";
+// import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 export default defineConfig({
     build: {
         sourcemap: true, // Source map generation must be turned on
+        minify: 'terser', // Use terser for better minification
+        terserOptions: {
+            compress: {
+                drop_console: true, // Remove console.log in production
+                drop_debugger: true,
+                passes: 2, // Additional optimization passes
+                ecma: 2020 // Modern JS for better minification
+            },
+            format: {
+                comments: false // Remove all comments
+            }
+        },
+        // Disable chunking to avoid initialization order issues
+        rollupOptions: {
+            output: {
+                manualChunks: () => 'app' // Put everything in one chunk
+            }
+        },
+        // Reduce initial load time
+        cssCodeSplit: true,
+        assetsInlineLimit: 4096, // Inline small assets (4kb or less)
+        chunkSizeWarningLimit: 1000
     },
 	plugins: [
-        sentryVitePlugin({
-            org: "mssnoau",
-            project: "mssnoau-frontend",
-
-            // Auth tokens can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/
-            authToken: process.env.SENTRY_AUTH_TOKEN,
-        }),
-        sentrySvelteKit({
-            autoUploadSourceMaps: true,
-            adapter: "vercel",
-        sourceMapsUploadOptions: {
-            org: "mssnoau",
-            project: "mssnoau-frontend"
-        }
-    }),
+        // Temporarily comment out Sentry plugins
+        // sentryVitePlugin({
+        //     org: "mssnoau",
+        //     project: "mssnoau-frontend",
+        //     // Auth tokens can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/
+        //     authToken: process.env.SENTRY_AUTH_TOKEN,
+        // }),
+        // sentrySvelteKit({
+        //     autoUploadSourceMaps: true,
+        //     adapter: "vercel",
+        //     sourceMapsUploadOptions: {
+        //         org: "mssnoau",
+        //         project: "mssnoau-frontend"
+        //     }
+        // }),
         sveltekit(),
+        // Temporarily comment out ViteImageOptimizer
+        /*
         ViteImageOptimizer({
         test: /\.(jpe?g|png|gif|tiff|webp|svg|avif)$/i,
-        exclude: undefined,
-        include: undefined,
         includePublic: true,
         logStats: true,
-        ansiColors: true,
+            cache: true,
+            cacheLocation: "node_modules/.cache/.vite-plugin-image-optimizer",
         svg: {
             multipass: true,
             plugins: [
@@ -40,52 +65,35 @@ export default defineConfig({
                     params: {
                         overrides: {
                             cleanupNumericValues: false,
-                            removeViewBox: false, // https://github.com/svg/svgo/issues/1128
-                        },
-                        cleanupIDs: {
-                            minify: false,
-                            remove: false,
-                        },
-                        convertPathData: false,
+                                removeViewBox: false,
+                                inlineStyles: false
+                            }
                     },
-                },
-                'sortAttrs',
-                {
-                    name: 'addAttributesToSVGElement',
-                    params: {
-                        attributes: [{ xmlns: 'http://www.w3.org/2000/svg' }],
-                    },
-                },
+                    }
             ],
         },
         png: {
-            // https://sharp.pixelplumbing.com/api-output#png
-            quality: 100,
+                quality: 80,
+                compressionLevel: 9
         },
         jpeg: {
-            // https://sharp.pixelplumbing.com/api-output#jpeg
-            quality: 100,
+                quality: 80,
+                progressive: true
         },
         jpg: {
-            // https://sharp.pixelplumbing.com/api-output#jpeg
-            quality: 100,
-        },
-        tiff: {
-            // https://sharp.pixelplumbing.com/api-output#tiff
-            quality: 100,
-        },
-        // gif does not support lossless compression
-        // https://sharp.pixelplumbing.com/api-output#gif
-        gif: {},
+                quality: 80,
+                progressive: true
+            },
         webp: {
-            // https://sharp.pixelplumbing.com/api-output#webp
-            lossless: true,
+                lossless: false,
+                quality: 85,
+                effort: 6
         },
         avif: {
-            // https://sharp.pixelplumbing.com/api-output#avif
-            lossless: true,
-        },
-        cache: false,
-        cacheLocation: undefined,
-    })]
+                lossless: false,
+                quality: 80
+            }
+        })
+        */
+    ]
 });
