@@ -1,13 +1,32 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import ContactForm from "$lib/components/forms/ContactForm.svelte";
-    import SEO from "$lib/components/SEO.svelte";
-    import { ORGANIZATION } from "$lib/config";
+    import { fly, fade, scale } from 'svelte/transition'
+    import { onMount, onDestroy } from 'svelte'
+    import * as Accordion from '$lib/components/ui/accordion'
+    import { MapPin, Mail, CircleHelp, ChevronRight, Phone, ExternalLink } from '@lucide/svelte'
+    import { page } from '$app/stores'
 
-    export let data;
+    /** @type {{ map_link?: string, address?: string, email?: string, phone?: string, faqs?: Array<{ question: string, answer: string }> }} */
+    let info = {};
+    /** @type {Array<{ question: string, answer: string }>} */
+    let faqs = [];
+    let visible = false;
+    /** @type {number|null} */
+    let hoveredFaq = null;
 
-    const info = data.info;
-    const faqs = info.faqs;
+    // Subscribe to the page store to get info and faqs
+    let unsubscribe;
+    onMount(() => {
+        unsubscribe = page.subscribe(($page) => {
+            info = $page.data?.info || {};
+            faqs = $page.data?.info?.faqs || [];
+        });
+        visible = true;
+    });
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
+    });
 </script>
 
 <SEO

@@ -7,7 +7,7 @@
     import * as Dialog from "$lib/components/ui/dialog";
     import * as Sheet from "$lib/components/ui/sheet";
     import * as Tabs from "$lib/components/ui/tabs";
-    import { AlertCircle, Loader2, Check, X, Eye, EyeOff } from 'lucide-svelte';
+    import { AlertCircle, Loader2, Check, X, Eye, EyeOff } from '@lucide/svelte';
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import { MetaTags, JsonLd } from "svelte-meta-tags";
     import * as Form from '$lib/components/ui/form';
@@ -400,7 +400,7 @@
                     <button 
                         type="button" 
                         class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
-                        on:click={togglePasswordVisibility}
+                        onclick={togglePasswordVisibility}
                     >
                         {#if showPassword}
                             <EyeOff class="h-5 w-5" />
@@ -430,7 +430,7 @@
                     <button 
                         type="button" 
                         class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
-                        on:click={toggleConfirmPasswordVisibility}
+                        onclick={toggleConfirmPasswordVisibility}
                     >
                         {#if showConfirmPassword}
                             <EyeOff class="h-5 w-5" />
@@ -461,7 +461,7 @@
             type="submit"
             class="w-full font-medium font-secondary"
             disabled={!isFormValid || isLoading}
-            on:click={handleSignup}
+            onclick={handleSignup}
         >
             {#if isLoading}
             <Loader2 class="mr-2 h-4 w-4 animate-spin" />
@@ -553,7 +553,7 @@
                     <Button 
                         class="w-full font-medium font-secondary"
                         disabled={!isOtpComplete || isOtpLoading}
-                        on:click={verifyOtp}
+                        onclick={verifyOtp}
                     >
                         {#if isOtpLoading}
                         <Loader2 class="mr-2 h-4 w-4 animate-spin" />
@@ -567,7 +567,7 @@
                         <button 
                             type="button" 
                             class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                            on:click={resendOtp}
+                            onclick={resendOtp}
                             disabled={otpResent}
                         >
                             Didn't receive the code? Resend
@@ -650,7 +650,7 @@
                         <Button 
                             class="w-full font-medium font-secondary"
                             disabled={!isOtpComplete || isOtpLoading}
-                            on:click={verifyOtp}
+                            onclick={verifyOtp}
                         >
                             {#if isOtpLoading}
                             <Loader2 class="mr-2 h-4 w-4 animate-spin" />
@@ -664,7 +664,7 @@
                             <button 
                                 type="button" 
                                 class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                                on:click={resendOtp}
+                                onclick={resendOtp}
                                 disabled={otpResent}
                             >
                                 Didn't receive the code? Resend

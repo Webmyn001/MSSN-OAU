@@ -5,7 +5,7 @@
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
     import { Image } from '$lib/components/ui/image'
-    import { ArrowRight } from 'lucide-svelte'
+    import { ArrowRight } from '@lucide/svelte'
 	import { PUBLIC_ALUMNAE_FORM } from "$env/static/public";
 
     let visible = $state(false);

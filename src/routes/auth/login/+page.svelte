@@ -7,37 +7,38 @@
     import * as Dialog from "$lib/components/ui/dialog";
     import * as Sheet from "$lib/components/ui/sheet";
     import * as Tabs from "$lib/components/ui/tabs";
-    import { AlertCircle, Loader2, Check, X } from 'lucide-svelte';
+    import { AlertCircle, Loader2, Check, X } from '@lucide/svelte';
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import { MetaTags, JsonLd } from "svelte-meta-tags";
     import * as Form from '$lib/components/ui/form';
     
     // State management
-    let email = "";
-    let password = "";
-    let isLoading = false;
-    let loginError = null;
-    let showOtpScreen = false;
-    let showModal = false;
-    let otpValues = ["", "", "", "", "", ""];
-    let otpError = null;
-    let isOtpLoading = false;
-    let otpResent = false;
-    let loginSuccess = false;
-    let isEmailValid = false;
-    let isPasswordValid = false;
-    let connectionError = false; // Add flag for connection errors
+    let email = $state("");
+    let password = $state("");
+    let isLoading = $state(false);
+    let loginError = $state("");
+    let showOtpScreen = $state(false);
+    let showModal = $state(false);
+    let otpValues = $state(["", "", "", "", "", ""]);
+    let otpError = $state("");
+    let isOtpLoading = $state(false);
+    let otpResent = $state(false);
+    let loginSuccess = $state(false);
+    let isEmailValid = $state(false);
+    let isPasswordValid = $state(false);
+    let connectionError = $state(false); // Add flag for connection errors
     
     // Responsive state
-    let isMobile = false;
+    let isMobile = $state(false);
     
     // Form validation
-    $: {
+    $effect(() => {
         isEmailValid = email.includes('@') && email.includes('.');
         isPasswordValid = password.length >= 8;
-    }
-    $: isFormValid = isEmailValid && isPasswordValid;
-    $: isOtpComplete = otpValues.every(v => v !== "");
+    })
+    
+    const isFormValid = $derived(isEmailValid && isPasswordValid);
+    const isOtpComplete = $derived(otpValues.every(v => v !== ""));
     
     onMount(() => {
         // Check window size for responsiveness
@@ -262,7 +263,7 @@
                 <span>Unable to connect to authentication server. Please try again later or contact support.</span>
             </div>
             <div class="mt-2 text-xs">
-                <button class="text-amber-800 underline" on:click={handleLogin}>
+                <button class="text-amber-800 underline" onclick={handleLogin}>
                     Retry Connection
                 </button>
             </div>
@@ -273,7 +274,7 @@
             type="submit"
             class="w-full font-medium font-secondary"
             disabled={!isFormValid || isLoading}
-            on:click={handleLogin}
+            onclick={handleLogin}
         >
             {#if isLoading}
             <Loader2 class="mr-2 h-4 w-4 animate-spin" />
@@ -341,8 +342,8 @@
                                 maxlength="1"
                                 class="w-12 h-12 text-center font-bold text-xl"
                                 value={otpValues[index]}
-                                on:input={(e) => handleOtpInputChange(index, e)}
-                                on:keydown={(e) => handleOtpKeyDown(index, e)}
+                                oninput={(e) => handleOtpInputChange(index, e)}
+                                onkeydown={(e) => handleOtpKeyDown(index, e)}
                             />
                             {/each}
                         </div>
@@ -365,7 +366,7 @@
                     <Button 
                         class="w-full font-medium font-secondary"
                         disabled={!isOtpComplete || isOtpLoading}
-                        on:click={verifyOtp}
+                        onclick={verifyOtp}
                     >
                         {#if isOtpLoading}
                         <Loader2 class="mr-2 h-4 w-4 animate-spin" />
@@ -379,7 +380,7 @@
                         <button 
                             type="button" 
                             class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                            on:click={resendOtp}
+                            onclick={resendOtp}
                             disabled={otpResent}
                         >
                             Didn't receive the code? Resend
@@ -438,8 +439,8 @@
                                     maxlength="1"
                                     class="w-10 h-12 text-center font-bold text-xl"
                                     value={otpValues[index]}
-                                    on:input={(e) => handleOtpInputChange(index, e)}
-                                    on:keydown={(e) => handleOtpKeyDown(index, e)}
+                                    oninput={(e) => handleOtpInputChange(index, e)}
+                                    onkeydown={(e) => handleOtpKeyDown(index, e)}
                                 />
                                 {/each}
                             </div>
@@ -462,7 +463,7 @@
                         <Button 
                             class="w-full font-medium font-secondary"
                             disabled={!isOtpComplete || isOtpLoading}
-                            on:click={verifyOtp}
+                            onclick={verifyOtp}
                         >
                             {#if isOtpLoading}
                             <Loader2 class="mr-2 h-4 w-4 animate-spin" />
@@ -476,7 +477,7 @@
                             <button 
                                 type="button" 
                                 class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                                on:click={resendOtp}
+                                onclick={resendOtp}
                                 disabled={otpResent}
                             >
                                 Didn't receive the code? Resend

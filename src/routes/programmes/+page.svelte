@@ -6,7 +6,7 @@
     import * as Dialog from '$lib/components/ui/dialog';
     import * as Sheet from '$lib/components/ui/sheet';
     import { Button } from '$lib/components/ui/button';
-    import { Loader2, X, ChevronRight, Info } from 'lucide-svelte';
+    import { Loader2, X, ChevronRight, Info } from '@lucide/svelte';
     import { browser } from '$app/environment';
     
     let { data } = $props();

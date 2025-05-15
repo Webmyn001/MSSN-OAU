@@ -1,5 +1,5 @@
 <script>
-    import { Clock } from 'lucide-svelte';
+    import { Clock } from '@lucide/svelte';
     import { formatTime } from '$lib/stores/prayerTimes';
     import { fly, scale, fade } from 'svelte/transition';
     import { spring } from 'svelte/motion';

@@ -1,6 +1,6 @@
 <script>
-	import { SquareArrowOutUpRight } from "lucide-svelte";
-	import { BookOpenText, NotebookPen, Presentation, UsersRound } from 'lucide-svelte';
+	import { SquareArrowOutUpRight } from "@lucide/svelte";
+	import { BookOpenText, NotebookPen, Presentation, UsersRound } from '@lucide/svelte';
 	import { Image } from '$lib/components/ui/image';
 	import { slide, fade, fly } from 'svelte/transition';
 	import { goto } from '$app/navigation';

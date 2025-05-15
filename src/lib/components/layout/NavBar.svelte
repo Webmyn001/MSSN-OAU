@@ -7,7 +7,7 @@
         ArrowLeft,
         Menu,
         X
-    } from 'lucide-svelte'
+    } from '@lucide/svelte'
     import {onMount} from 'svelte'
     import { Image } from '$lib/components/ui/image';
 

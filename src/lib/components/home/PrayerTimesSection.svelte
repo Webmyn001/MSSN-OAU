@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { prayerTimes as solahTimes, upcomingPrayer, formatTime } from '$lib/stores/prayerTimes';
     import { Badge } from '$lib/components/ui/badge';
-    import { Clock, MapPin, Calendar, Moon, MapPinned } from 'lucide-svelte';
+    import { Clock, MapPin, Calendar, Moon, MapPinned } from '@lucide/svelte';
     import { mosques } from '$lib/stores/mosques';
     import PrayerTimeCard from './PrayerTimeCard.svelte';
     import { fade, fly } from 'svelte/transition';
@@ -334,7 +334,7 @@
                             {#each selectedMosqueObject.images as _, i}
                                 <button 
                                     class="w-2 h-2 rounded-full transition-all duration-300 {Carousel.api?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
-                                    on:click={() => Carousel.api?.scrollTo(i)}
+                                    onclick={() => Carousel.api?.scrollTo(i)}
                                     aria-label={`Go to slide ${i + 1}`}
                                 ></button>
                             {/each}
@@ -445,7 +445,7 @@
                             {#each selectedMosqueObject.images as _, i}
                                 <button 
                                     class="w-2 h-2 rounded-full transition-all duration-300 {Carousel.api?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
-                                    on:click={() => Carousel.api?.scrollTo(i)}
+                                    onclick={() => Carousel.api?.scrollTo(i)}
                                     aria-label={`Go to slide ${i + 1}`}
                                 ></button>
                             {/each}

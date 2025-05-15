@@ -1,6 +1,6 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown } from "lucide-svelte";
+    import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown } from "@lucide/svelte";
     import copyTextToClipboard from "$lib/utils/copy.js";
     import { toast } from "svelte-sonner";
     import { tick, onMount } from "svelte";

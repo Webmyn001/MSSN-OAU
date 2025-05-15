@@ -2,7 +2,7 @@
 	import copyTextToClipboard from '$lib/utils/copy';
     import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
-	import { Copy } from 'lucide-svelte';
+	import { Copy } from '@lucide/svelte';
 
      const copyAccNumber = async () => {
         const copy = await copyTextToClipboard(page.data.info.account.number)

@@ -7,7 +7,7 @@
         Presentation,
         SquareArrowOutUpRight,
         UsersRound
-    } from 'lucide-svelte'
+    } from '@lucide/svelte'
     import { Image } from '$lib/components/ui/image'
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
@@ -61,6 +61,7 @@
             })
         }
     })
+    console.log(data?.info?.account)
 </script>
 
 <SEO 
@@ -483,7 +484,7 @@
 
 
 <!-- Upcoming Events Section -->
-<UpcomingEvents {data} />
+<UpcomingEvents events={data?.events} />
 <!-- End Upcoming Events Section -->
 
 <!-- Blog Section -->
@@ -491,6 +492,7 @@
 <!-- End Blog Section -->
 
 <!-- Donation CTA -->
+ <i class="hidden" id="donate"></i>
 {#if data.info && data.info.account}
 <Donate />
 {/if}

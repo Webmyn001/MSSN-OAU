@@ -3,7 +3,7 @@
     import * as Alert from "$lib/components/ui/alert/index.js"
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
-    import { Copy, CircleAlert, MapPinned, Phone, MessageCircle } from 'lucide-svelte';
+    import { Copy, CircleAlert, MapPinned, Phone, MessageCircle } from '@lucide/svelte';
     import copyTextToClipboard from "$lib/utils/copy.js";
     import {toast} from "svelte-sonner";
     import {MetaTags} from "svelte-meta-tags";
@@ -177,7 +177,7 @@
                                             <li class="me-1 inline-flex items-center text-sm font-medium text-primary-800">
                                                 {data.info.account.number}
                                                 <button 
-                                                    on:click={copyAccNumber}
+                                                    onclick={copyAccNumber}
                                                     class="ml-4 p-1.5 rounded-full bg-gray-100 hover:bg-primary-100 transition-colors"
                                                 >
                                                     <Copy class="size-3.5 text-primary-700"/>
@@ -196,7 +196,7 @@
                                             <li class="me-1 inline-flex items-center text-sm font-medium text-primary-800">
                                                 {finsec_no}
                                                 <button 
-                                                    on:click={() => copyTextToClipboard(finsec_no)}
+                                                    onclick={() => copyTextToClipboard(finsec_no)}
                                                     class="ml-4 p-1.5 rounded-full bg-gray-100 hover:bg-primary-100 transition-colors"
                                                 >
                                                     <Copy class="size-3.5 text-primary-700"/>

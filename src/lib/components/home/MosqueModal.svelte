@@ -3,7 +3,7 @@
     import * as Sheet from '$lib/components/ui/sheet';
     import * as Carousel from '$lib/components/ui/carousel';
     import { Button } from '$lib/components/ui/button';
-    import { MapPinned } from 'lucide-svelte';
+    import { MapPinned } from '@lucide/svelte';
     
     export let mosque = {
         id: "",

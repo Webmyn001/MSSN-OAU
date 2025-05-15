@@ -1,6 +1,6 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { MessageCircle, Phone, Ellipsis, ChevronDown, Check, Mail, ExternalLink } from "lucide-svelte";
+    import { MessageCircle, Phone, Ellipsis, ChevronDown, Check, Mail, ExternalLink } from "@lucide/svelte";
     import { tick, onMount } from "svelte";
     import { useId } from "bits-ui";
     import { Button } from "$lib/components/ui/button/index.js";

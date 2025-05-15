@@ -1,7 +1,7 @@
 <script>
     import { Button } from '$lib/components/ui/button';
     import * as Card from '$lib/components/ui/card';
-    import { Check, BookUser, CalendarDays, Clock, MapPin } from 'lucide-svelte';
+    import { Check, BookUser, CalendarDays, Clock, MapPin } from '@lucide/svelte';
     import { goto } from '$app/navigation';
     import slugify from "$lib/utils/slugify.js";
     import { fly, fade, scale } from 'svelte/transition';
