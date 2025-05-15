@@ -6,6 +6,7 @@
     import * as Accordion from '$lib/components/ui/accordion'
     import { MapPin, Mail, CircleHelp, ChevronRight, Phone, ExternalLink } from '@lucide/svelte'
     import { page } from '$app/stores'
+	import { ORGANIZATION } from "$lib/config";
 
     /** @type {{ map_link?: string, address?: string, email?: string, phone?: string, faqs?: Array<{ question: string, answer: string }> }} */
     let info = {};

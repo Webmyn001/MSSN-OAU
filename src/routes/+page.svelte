@@ -11,7 +11,6 @@
     import { Image } from '$lib/components/ui/image'
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
-    import {JsonLd} from 'svelte-meta-tags';
     import {Badge} from "$lib/components/ui/badge/index.js";
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
@@ -19,6 +18,13 @@
     import copyTextToClipboard from '$lib/utils/copy.js'
     import slugify from "$lib/utils/slugify.js"
     import SEO from '$lib/components/SEO.svelte';
+    import { programmes } from '$lib/data/programmes';
+
+    // Home section components
+    import UpcomingEvents from '$lib/components/home/UpcomingEvents.svelte';
+    import BlogSection from '$lib/components/home/BlogSection.svelte';
+    import Donate from '$lib/components/home/Donate.svelte';
+    import SuggestionsSection from '$lib/components/home/SuggestionsSection.svelte';
 
     let {data} = $props();
 
@@ -97,36 +103,7 @@
 />
 
 <!-- Meta Tags -->
-<MetaTags
-        title="We are OAU Great Ìfẹ́'s Muslim Community"
-        titleTemplate="%s | MSSNOAU"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/"
-        openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/',
-    title: 'We are OAU Great Ìfẹ́\'s Muslim Community | MSSNOAU',
-    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
-    images: [
-      {
-        url: 'https://i.ibb.co/zbWfh5B/home.webp',
-        width: 1200,
-        height: 640,
-        alt: 'Website screenshot'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
-/>
-<JsonLd schema={{
-            "@type": "WebPage",
-            "name": "We are OAU Great Ìfẹ́'s Muslim Community | MSSNOAU",
-            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
-            "publisher": {
-                "@type": "Organization",
-                "name": "MSSNOAU.org"
-            }
-        }}
-/>
+<!-- Removed direct MetaTags and JsonLd usage -->
 <!-- End Meta Tags -->
 
 <!-- Hero -->
@@ -423,7 +400,7 @@
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-xl' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.webp')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 2 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
-                ‘Asr</h2>
+                'Asr</h2>
 
             <span
                     class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 2 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
@@ -451,7 +428,7 @@
         <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/night.webp')] bg-no-repeat bg-cover bg-center">
             <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
             <h2 class="z-10 font-primary font-bold {upcoming_solat === 4 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
-                ‘Isha'h</h2>
+                'Isha'h</h2>
 
             <span
                     class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 4 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
