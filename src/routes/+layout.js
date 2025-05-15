@@ -1,16 +1,158 @@
-import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+import { browser } from '$app/environment';
 
-injectSpeedInsights();
-export const load = async ({ fetch }) => {
-    const req = await fetch("/api/v1/info")
+// Define which data to load from the server
+export const prerender = true;
+export const trailingSlash = 'always';
+export const ssr = true;
+export const csr = true; // Enable client-side rendering for hydration
 
-    if (req.ok) {
-        /**
-         * @type {PostRes[]}
-         */
-        const res = await req.json()
-        if (res && res.data.info) {
-            return res.data
+// Add route-based code splitting
+export const load = async ({ fetch, route }) => {
+    // Create a promise for data fetching that we can use later
+    const dataPromise = fetchSiteData(fetch);
+    
+    // Client-side only code
+    if (browser) {
+        // Load performance monitoring tools only on client side
+        loadClientSideTools();
+        
+        // Preload resources based on current route if route is defined
+        if (route && route.id) {
+            preloadRouteAssets(route.id);
         }
+    }
+    
+    // Return the data promise to be resolved
+    return await dataPromise;
+};
+
+/**
+ * Preload route-specific resources based on the current route
+ * @param {string} routeId - The current route ID
+ */
+function preloadRouteAssets(routeId) {
+    // Only run in browser
+    if (!browser) return;
+    
+    // Check if assets exist before preloading
+    const ensureImageExists = (src) => {
+        // Create a new image object to test if file exists
+        const img = new Image();
+        img.onerror = () => console.debug(`Image not found: ${src}`);
+        img.onload = () => preloadImage(src);
+        img.src = src;
+    };
+    
+    // Preload assets based on route with a small delay
+    setTimeout(() => {
+        if (routeId === '/') {
+            // Preload essential images that we know exist
+            preloadImage('/mssn-logo.webp');
+            
+            // Test if hero image exists before preloading
+            ensureImageExists('/hero-bg.webp');
+        } else if (routeId.includes('/blog')) {
+            // No need to preload images that don't exist yet
+            // Future improvement: preload actual blog images when available
+        } else if (routeId.includes('/events')) {
+            // Future improvement: preload actual event images when available
+        }
+    }, 300);
+}
+
+/**
+ * Preload an image using browser's link preload
+ * @param {string} src - Image source URL
+ */
+function preloadImage(src) {
+    if (!browser) return;
+    
+    // Check if preload link already exists
+    const existingLink = document.querySelector(`link[rel="preload"][href="${src}"]`);
+    if (existingLink) return;
+    
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = src;
+    
+    // Set type based on extension
+    if (src.endsWith('.webp')) {
+        link.type = 'image/webp';
+    } else if (src.endsWith('.png')) {
+        link.type = 'image/png';
+    } else if (src.endsWith('.jpg') || src.endsWith('.jpeg')) {
+        link.type = 'image/jpeg';
+    }
+    
+    document.head.appendChild(link);
+}
+
+/**
+ * Load client-side only tools with dynamic imports for better code splitting
+ */
+async function loadClientSideTools() {
+    try {
+        // Use requestIdleCallback for non-essential scripts
+        const requestIdleCallback = 
+            window.requestIdleCallback || 
+            ((cb) => setTimeout(cb, 1));
+            
+        requestIdleCallback(() => {
+            // Wrap in a Promise.all to load tools in parallel when needed
+            // but don't wait for them to complete
+            Promise.all([
+                import('@vercel/speed-insights/sveltekit')
+                    .then(module => module.injectSpeedInsights())
+                    .catch(error => console.error('Failed to load Speed Insights:', error))
+            ]);
+        });
+        
+        // Register service worker for improved caching
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .catch(error => {
+                        console.error('Service worker registration failed:', error);
+                    });
+            });
+        }
+    } catch (error) {
+        console.error('Error loading client tools:', error);
+        // Non-critical, so we can continue without throwing
+    }
+}
+
+/**
+ * Fetch site data with error handling and fallback
+ * @param {Function} fetch - SvelteKit fetch function
+ * @returns {Promise<Object>} Site data object
+ */
+async function fetchSiteData(fetch) {
+    try {
+        const response = await fetch("/api/v1/info");
+        
+        if (!response.ok) {
+            throw new Error(`API response error: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        console.log(result);
+        // Validate data structure
+        if (result?.data?.info) {
+            return result.data;
+        }
+        
+        throw new Error('Invalid data structure received from API');
+    } catch (error) {
+        console.error('Error fetching site data:', error);
+        
+        // Return fallback data
+        return {
+            info: {},
+            events: [],
+            posts: []
+        };
     }
 }

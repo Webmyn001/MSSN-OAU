@@ -1,9 +1,11 @@
 <script>
     import '../app.css';
     import {JsonLd} from 'svelte-meta-tags';
-    import NavBar from "$lib/components/NavBar.svelte";
+    import NavBar from "$lib/components/layout/NavBar.svelte";
     import {Toaster} from "$lib/components/ui/sonner";
-    import Footer from "$lib/components/Footer.svelte";
+    import Footer from "$lib/components/layout/Footer.svelte";
+    import PageTransition from "$lib/components/PageTransition.svelte";
+    import ViewportContainer from "$lib/components/ViewportContainer.svelte";
 
     let {children, data} = $props();
 
@@ -48,13 +50,21 @@
 {#if info && !(info?.maintenance && info?.maintenance_ends)}
     <Toaster richColors/>
     <NavBar/>
-    {@render children()}
-    <Footer/>
+    
+    <main>
+      <PageTransition>
+        {@render children()}
+      </PageTransition>
+    </main>
+    
+    <ViewportContainer estimatedHeight={600}>
+      <Footer/>
+    </ViewportContainer>
 {:else}
-        {#await import("$lib/components/Maintenance.svelte") then M}
-            {@const Maintenance = M.default}
-            <Maintenance time={info?.maintenance_ends} />
-            {:catch error}
-            <p>{error?.message}</p>
-        {/await}
+    {#await import("$lib/components/Maintenance.svelte") then M}
+        {@const Maintenance = M.default}
+        <Maintenance time={info?.maintenance_ends} />
+    {:catch error}
+        <p>{error?.message}</p>
+    {/await}
 {/if}
