@@ -9,7 +9,7 @@ const config = {
 		adapter: adapter({
 			// enable edge functions if needed
 			// edge: true,
-			runtime: 'edge',
+			runtime: 'nodejs20.x',
 			external: [],
 			split: false
 		}),

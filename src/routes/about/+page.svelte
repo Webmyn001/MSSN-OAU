@@ -1,6 +1,6 @@
 <script>
-    import PageHeader from "$lib/components/PageHeader.svelte";
-    import {MetaTags, JsonLd} from "svelte-meta-tags";
+    import PageHeader from "$lib/components/layout/PageHeader.svelte";
+    import SEO from "$lib/components/SEO.svelte";
     
     // Define the committees variable and showAll state
     let committees = $state([]); // This should be populated with your committee data

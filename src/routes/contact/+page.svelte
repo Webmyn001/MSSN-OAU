@@ -1,6 +1,6 @@
 <script>
-    import PageHeader from "$lib/components/PageHeader.svelte";
-    import ContactForm from "$lib/components/ContactForm.svelte";
+    import PageHeader from "$lib/components/layout/PageHeader.svelte";
+    import ContactForm from "$lib/components/forms/ContactForm.svelte";
     import SEO from "$lib/components/SEO.svelte";
     import { ORGANIZATION } from "$lib/config";
 
