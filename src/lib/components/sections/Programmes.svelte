@@ -60,17 +60,20 @@
     // Handle image load
     function handleImageLoad() {
         imageLoaded = true;
-        setTimeout(() => {
-            imageVisible = true;
-        }, 100);
+        imageVisible = true;
     }
     
     onMount(() => {
         updateActiveTabPosition();
+        // Reset loading state on mount
+        imageLoaded = false;
+        imageVisible = false;
     });
     
     $effect(() => {
         if (selectedEvent) {
+            // Reset loading states when selected event changes
+            imageLoaded = false;
             imageVisible = false;
             setTimeout(() => {
                 updateActiveTabPosition();
@@ -185,8 +188,8 @@
                                             width={800}
                                             height={500}
                                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 800px"
-                                            src={selectedImage || "/placeholder.svg"}
-                                            alt={selectedEvent}
+                                            src={selectedImage || "/images/placeholder.webp"}
+                                            alt={`${selectedEvent} Programme - MSSN OAU`}
                                             onload={handleImageLoad}
                                         />
                                         
@@ -199,10 +202,10 @@
                                     </div>
                                 {/key}
                                 
-                                <!-- Loading indicator -->
+                                <!-- Overlay loading indicator -->
                                 {#if !imageLoaded}
-                                    <div class="absolute inset-0 flex items-center justify-center bg-gray-100/50 backdrop-blur-sm rounded-lg">
-                                        <div class="w-10 h-10 border-4 border-primary-700/30 border-t-primary-700 rounded-full animate-spin"></div>
+                                    <div class="absolute inset-0 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-lg">
+                                        <div class="size-12 border-3 border-primary-200 border-t-primary-700 rounded-full animate-spin"></div>
                                     </div>
                                 {/if}
                             </div>
@@ -210,44 +213,9 @@
                     </div>
                     <!-- End Tab Content -->
                 </div>
-
-                <!-- SVG Element with animation -->
-                <div 
-                    class="hidden absolute top-0 end-0 translate-x-20 md:block lg:translate-x-20 animate-float"
-                    in:fade={{ duration: 1000, delay: 800 }}
-                >
-                    <svg class="w-16 h-auto text-primary-800" width="121" height="135" viewBox="0 0 121 135"
-                         fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 16.4754C11.7688 27.4499 21.2452 57.3224 5 89.0164" stroke="currentColor"
-                              stroke-width="10" stroke-linecap="round"/>
-                        <path d="M33.6761 112.104C44.6984 98.1239 74.2618 57.6776 83.4821 5" stroke="currentColor"
-                              stroke-width="10" stroke-linecap="round"/>
-                        <path d="M50.5525 130C68.2064 127.495 110.731 117.541 116 78.0874" stroke="currentColor"
-                              stroke-width="10" stroke-linecap="round"/>
-                    </svg>
-                </div>
-                <!-- End SVG Element -->
             </div>
             <!-- End Col -->
         </div>
         <!-- End Grid -->
-
-        <!-- Background Color with glassmorphism -->
-        <div class="absolute inset-0 grid grid-cols-12 size-full">
-            <div class="col-span-full lg:col-span-7 lg:col-start-6 bg-gray-100/70 backdrop-blur-sm w-full h-5/6 rounded-xl sm:h-3/4 lg:h-full"></div>
-        </div>
-        <!-- End Background Color -->
     </div>
-</div>
-
-<style>
-    /* Floating animation for SVG */
-    @keyframes float {
-        0%, 100% { transform: translateY(0) rotate(0); }
-        50% { transform: translateY(-10px) rotate(1deg); }
-    }
-    
-    .animate-float {
-        animation: float 6s ease-in-out infinite;
-    }
-</style>
+</div> 

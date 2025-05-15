@@ -16,7 +16,7 @@
             <div class="w-full flex-col justify-center items-center gap-5 flex">
                 <div class="w-full flex-col justify-center items-center gap-6 flex">
                     <div class="w-full flex-col justify-center items-center gap-2.5 flex">
-                        <h2 class="text-center text-gray-800 text-3xl md:text-4xl lg:5xl font-bold font-primary leading-normal text-primary-900 scheherazade-new-semibold mx-auto">وَاللَّهُ مَعَ الصَّابِرِينَ</h2>
+                        <h2 class="text-center text-3xl md:text-4xl lg:5xl font-bold font-primary leading-normal text-primary-900 scheherazade-new-semibold mx-auto">وَاللَّهُ مَعَ الصَّابِرِينَ</h2>
                         <p class="text-center text-gray-500 text-base font-normal leading-relaxed mx-auto">Our website is currently undergoing maintenance.
                             <br />
                             Please bear with us while we're patching things up. We should be done {format(time)}</p>
@@ -61,4 +61,4 @@
         background: #fffef0;
         filter: url(#wavy2);
     }
-</style>
+</style> 

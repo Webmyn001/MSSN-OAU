@@ -8,6 +8,7 @@
     export let fetchpriority = 'auto'; // high, low, auto
     export let className = '';
     export let sizes = undefined;
+    export let onload = undefined;
     
     // TypeScript type assertions
     const loadingAttr = /** @type {'lazy' | 'eager' | null} */ (loading);
@@ -28,6 +29,10 @@
             srcSet = `${basePath}.${extension} 1x`;
         }
     }
+
+    function handleLoad(event) {
+        if (onload) onload(event);
+    }
 </script>
 
 <img
@@ -41,4 +46,5 @@
     fetchpriority={fetchPriorityAttr}
     srcset={srcSet}
     {sizes}
+    on:load={handleLoad}
 /> 

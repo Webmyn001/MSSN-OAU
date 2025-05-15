@@ -248,20 +248,24 @@
 
                 {#if formError}
                     <div class="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                        {formError}
+                        <div class="flex items-center gap-2">
+                            <svg class="h-5 w-5 text-red-700" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            <p>{formError}</p>
+                        </div>
                     </div>
                 {/if}
 
-                <div class="mt-6 grid">
+                <div class="mt-6">
                     <Button 
                         type="submit" 
-                        variant="default"
+                        class="w-full"
                         disabled={isSubmitting}
-                        class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium font-secondary rounded-lg border border-transparent bg-primary-700 text-white hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 disabled:opacity-70 disabled:pointer-events-none"
                     >
                         {#if isSubmitting}
-                            <Loader2 class="size-4 animate-spin" />
-                            Processing...
+                            <Loader2 class="mr-2 h-4 w-4 animate-spin" />
+                            <span>Processing...</span>
                         {:else}
                             {submitLabel}
                         {/if}
@@ -271,4 +275,4 @@
         {/if}
     </div>
     <!-- End Card -->
-</div>
+</div> 

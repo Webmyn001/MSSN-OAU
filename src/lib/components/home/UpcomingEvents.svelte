@@ -6,6 +6,7 @@
     import slugify from "$lib/utils/slugify.js";
     import { fly, fade, scale } from 'svelte/transition';
     import { onMount } from 'svelte';
+    import { Image } from '$lib/components/ui/image';
     
     // Define the event type structure to fix type errors
     /**
@@ -34,15 +35,15 @@
             time: "2:00 PM",
             location: "Computer Building",
             description: "Join us for our weekly Ta'leem sessions where we discuss topics related to Islam and spirituality.",
-            image: "/images/events/taleem.webp"
+            image: "https://plus.unsplash.com/premium_photo-1677621879478-fe161e8c9362?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZnJpZGF5JTIwbXVzbGltfGVufDB8fDB8fHww"
         },
         {
-            title: "Monthly Night Vigil",
+            title: "Monthly Quran Recitation",
             date: "Last Saturday of every month",
             time: "10:00 PM",
             location: "Central Mosque",
-            description: "Join us for our monthly night vigil as we engage in midnight prayers, dhikr, and spiritual reflection.",
-            image: "/images/events/night-vigil.webp"
+            description: "Join us for our monthly Quran recitation as we engage in recitation, dhikr, and spiritual reflection.",
+            image: "https://images.unsplash.com/photo-1728294087366-d57768c7e0ec?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fG11c2xpbSUyMGNpcmNsZXxlbnwwfHwwfHx8MA%3D%3D"
         },
         {
             title: "Annual Ramadan Planning",
@@ -50,7 +51,7 @@
             time: "4:00 PM",
             location: "Central Mosque",
             description: "Join the planning committee for Ramadan activities and programs.",
-            image: "/images/events/ramadan.webp"
+            image: "https://images.unsplash.com/photo-1633677491383-b1769a69f157?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHJhbWFkYW58ZW58MHx8MHx8fDA%3D"
         }
     ]
     } = $props();
@@ -125,12 +126,14 @@
                     onmouseleave={() => hoveredCard = null}
                 >
                     <div class="relative pt-[50%] sm:pt-[70%] overflow-hidden">
-                        <img 
+                        <Image 
                             loading="lazy"
-                            class="size-full absolute top-0 start-0 object-cover transition-transform duration-700 ease-in-out rounded-t-xl {hoveredCard === event.title ? 'scale-110' : 'scale-100'}"
-                            src={event.image || "/placeholder.svg"}
+                            className="size-full absolute top-0 start-0 object-cover transition-transform duration-700 ease-in-out rounded-t-xl {hoveredCard === event.title ? 'scale-110' : 'scale-100'}"
+                            src={event.image || "/images/placeholder.webp"}
                             alt={event.title}
-                        >
+                            width={400}
+                            height={300}
+                        />
                         
                         <!-- Gradient overlay -->
                         <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

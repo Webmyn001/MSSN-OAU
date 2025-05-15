@@ -4,6 +4,7 @@
     import { onMount } from 'svelte';
     import { fly, fade, scale } from 'svelte/transition';
     import { spring } from 'svelte/motion';
+    import { Image } from '$lib/components/ui/image';
     
     // For animated text reveal
     let visible = false;
@@ -43,7 +44,7 @@
         ];
         
         imageUrls.forEach(url => {
-            const img = new Image();
+            const img = new window.Image();
             img.onload = handleImageLoad;
             img.src = url;
         });
@@ -51,7 +52,7 @@
 </script>
 
 <section 
-    class="relative py-24 md:py-32 w-full overflow-hidden"
+    class=" select-none relative py-24 md:py-32 w-full overflow-hidden"
 >
     <!-- Decorative background elements -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -68,7 +69,9 @@
                 <span class="inline-block relative oau mt-2">
                     <span class="relative z-10 yoruba text-[#28145B] inline-block" in:fly={{ y: 30, duration: 800, delay: 600 }}>
                         Ife's
-                        <span class="absolute left-0 bottom-0 w-full h-[6px] bg-[#EBB957] rounded-full transform translate-y-2 opacity-70"></span>
+                        <svg class="absolute left-0 bottom-0 w-full transform translate-y-4 opacity-80" height="12" viewBox="0 0 100 12" fill="none" preserveAspectRatio="none">
+                            <path d="M0,6 C15,2 35,10 50,8 C65,6 85,0 100,4" stroke="#EBB957" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                     </span>
                     <span class="absolute left-[-2px] top-0 z-0 yoruba text-[#EBB957] blur-[0.5px]" in:fly={{ y: 30, duration: 800, delay: 600 }}>Ìfẹ́'s</span>
                 </span>
@@ -146,50 +149,60 @@
                     <!-- Left side profile images -->
                     <div class="absolute left-[-80px] top-[10%] hidden md:block">
                         <div class="relative">
-                            <img 
+                            <Image 
                                 src="/images/man_1.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                className="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                width={64}
+                                height={64}
                             />
-                            <img 
+                            <Image 
                                 src="/images/woman_1.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-14 rounded-full object-cover border-2 border-white shadow-md absolute -bottom-6 -right-4"
+                                className="size-14 rounded-full object-cover border-2 border-white shadow-md absolute -bottom-6 -right-4"
+                                width={56}
+                                height={56}
                             />
                         </div>
                     </div>
                     
                     <div class="absolute left-[-120px] top-[40%] hidden md:block">
                         <div class="relative">
-                            <img 
+                            <Image 
                                 src="/images/man_2.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-14 rounded-full object-cover border-2 border-white shadow-md"
+                                className="size-14 rounded-full object-cover border-2 border-white shadow-md"
+                                width={56}
+                                height={56}
                             />
                         </div>
                     </div>
                     
                     <div class="absolute left-[-60px] bottom-[15%] hidden md:block">
                         <div class="relative">
-                            <img 
+                            <Image 
                                 src="/images/woman_2.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                className="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                width={64}
+                                height={64}
                             />
-                            <img 
+                            <Image 
                                 src="/images/man_3.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-12 rounded-full object-cover border-2 border-white shadow-md absolute -top-8 -right-2"
+                                className="size-12 rounded-full object-cover border-2 border-white shadow-md absolute -top-8 -right-2"
+                                width={48}
+                                height={48}
                             />
                         </div>
                     </div>
@@ -197,50 +210,60 @@
                     <!-- Right side profile images -->
                     <div class="absolute right-[-80px] top-[15%] hidden md:block">
                         <div class="relative">
-                            <img 
+                            <Image 
                                 src="/images/woman_3.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                className="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                width={64}
+                                height={64}
                             />
-                            <img 
+                            <Image 
                                 src="/images/man_4.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-14 rounded-full object-cover border-2 border-white shadow-md absolute -bottom-4 -left-6"
+                                className="size-14 rounded-full object-cover border-2 border-white shadow-md absolute -bottom-4 -left-6"
+                                width={56}
+                                height={56}
                             />
                         </div>
                     </div>
                     
                     <div class="absolute right-[-100px] top-[50%] hidden md:block">
                         <div class="relative">
-                            <img 
+                            <Image 
                                 src="/images/woman_4.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-14 rounded-full object-cover border-2 border-white shadow-md"
+                                className="size-14 rounded-full object-cover border-2 border-white shadow-md"
+                                width={56}
+                                height={56}
                             />
                         </div>
                     </div>
                     
                     <div class="absolute right-[-70px] bottom-[10%] hidden md:block">
                         <div class="relative">
-                            <img 
+                            <Image 
                                 src="/images/man_5.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                className="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                width={64}
+                                height={64}
                             />
-                            <img 
+                            <Image 
                                 src="/images/woman_5.webp" 
                                 alt="community member"
                                 loading="eager"
                                 onload={handleImageLoad}
-                                class="size-12 rounded-full object-cover border-2 border-white shadow-md absolute -top-6 -left-4"
+                                className="size-12 rounded-full object-cover border-2 border-white shadow-md absolute -top-6 -left-4"
+                                width={48}
+                                height={48}
                             />
                         </div>
                     </div>
@@ -254,12 +277,14 @@
                     <div class="absolute inset-0 bg-gradient-to-b from-[#28145B]/5 to-[#EBB957]/5 mix-blend-overlay opacity-70 group-hover:opacity-100 transition-opacity duration-700"></div>
                     
                     <!-- Image with subtle hover effect -->
-                    <img
+                    <Image
                         src="/images/bg-1.webp"
                         loading="eager"
                         onload={handleImageLoad}
                         alt="central mosque of unity"
-                        class="mt-2 flex aspect-[16/9] min-h-[300px] max-h-[600px] w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                        className="mt-2 flex aspect-[16/9] min-h-[300px] max-h-[600px] w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                        width={1280}
+                        height={720}
                     />
                     
                     <!-- Caption with proper design system styling -->
