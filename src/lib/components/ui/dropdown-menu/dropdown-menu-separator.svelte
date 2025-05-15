@@ -1,19 +1,12 @@
 <script>
-    import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
-    import { cn } from "$lib/utils.js";
+	import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
+	import { cn } from "$lib/utils.js";
 
-    /**
-     * @typedef {import("bits-ui").DropdownMenuSeparatorProps} $$Props
-     */
-
-    /** @type {$$Props["class"]} */
-    let className = undefined;
-
-    export { className as class };
+	let { ref = $bindable(null), class: className, ...restProps } = $props();
 </script>
 
-
 <DropdownMenuPrimitive.Separator
-        class={cn("bg-muted -mx-1 my-1 h-px", className)}
-        {...$$restProps}
+	bind:ref
+	class={cn("bg-muted -mx-1 my-1 h-px", className)}
+	{...restProps}
 />

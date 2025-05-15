@@ -4,7 +4,7 @@
     import {toast} from "svelte-sonner";
     import {formatDate, isPastDate, months} from "$lib/utils/dates.js";
     import {MetaTags, JsonLd} from "svelte-meta-tags";
-    import PageHeader from "$lib/components/PageHeader.svelte";
+    import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import {onMount} from "svelte";
     import slugify from "$lib/utils/slugify.js";
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
@@ -237,7 +237,7 @@
         url: 'https://i.ibb.co/zbWfh5B/home.webp',
         width: 1200,
         height: 640,
-        alt: 'Website screenshot'
+        alt: 'MSSNOAU Website Screenshot'
       }
     ],
     siteName: 'MSSNOAU'
@@ -352,12 +352,33 @@
 <AlertDialog.Root bind:open>
     <AlertDialog.Content class="scrollbar-hide lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
         <AlertDialog.Header>
-            <AlertDialog.Title>{currentEvent.title}</AlertDialog.Title>
+            <AlertDialog.Title class="text-2xl font-secondary">{currentEvent.title}</AlertDialog.Title>
             <AlertDialog.Description>
                 {currentEvent.summary}
             </AlertDialog.Description>
         </AlertDialog.Header>
-        <div class=" flow-root rounded-xl border border-gray-100 py-3 shadow-sm">
+        
+        <!-- Event Image -->
+        {#if currentEvent.image}
+            <div class="relative w-full h-48 sm:h-64 overflow-hidden rounded-xl mb-4">
+                <img 
+                    src={currentEvent.image} 
+                    alt={currentEvent.title} 
+                    class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                <div class="absolute bottom-3 left-3 flex gap-2">
+                    <span class="px-2.5 py-1 rounded-full bg-white/80 backdrop-blur-sm text-xs font-medium text-primary-700">
+                        {formatDate(currentEvent.date).date}
+                    </span>
+                    <span class="px-2.5 py-1 rounded-full bg-white/80 backdrop-blur-sm text-xs font-medium text-primary-700">
+                        {currentEvent.paid ? currentEvent.price : "FREE"}
+                    </span>
+                </div>
+            </div>
+        {/if}
+        
+        <div class="flow-root rounded-xl border border-gray-100 py-3 shadow-sm bg-white">
             <dl class="-my-3 divide-y divide-gray-100 text-sm">
                 <div class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
                     <dt class="font-medium text-gray-900">Event Name</dt>
@@ -371,30 +392,127 @@
 
                 <div class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
                     <dt class="font-medium text-gray-900">Date</dt>
-                    <dd class="text-gray-700 sm:col-span-2">{formatDate(currentEvent.date).time}
-                        on {formatDate(currentEvent.date).date} ({format(currentEvent.date)}
-                        )
+                    <dd class="text-gray-700 sm:col-span-2">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center bg-primary-100 text-primary-800 size-8 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </span>
+                            <div>
+                                <span>{formatDate(currentEvent.date).time} on {formatDate(currentEvent.date).date}</span>
+                                <span class="text-xs text-gray-500 ml-2">({format(currentEvent.date, 'my-locale')})</span>
+                            </div>
+                        </div>
                     </dd>
                 </div>
 
                 <div class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
                     <dt class="font-medium text-gray-900">Price</dt>
-                    <dd class="text-gray-700 sm:col-span-2">{currentEvent.paid ? currentEvent.price : "FREE"}</dd>
+                    <dd class="text-gray-700 sm:col-span-2">
+                        <span class={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${currentEvent.paid ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
+                            {currentEvent.paid ? currentEvent.price : "FREE"}
+                        </span>
+                    </dd>
                 </div>
 
                 <div class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
                     <dt class="font-medium text-gray-900">Details</dt>
-                    <dd class="text-gray-700 sm:col-span-2">{currentEvent.summary}</dd>
+                    <dd class="text-gray-700 sm:col-span-2 prose prose-sm max-w-none">
+                        {#if currentEvent.description}
+                            {@html currentEvent.description}
+                        {:else}
+                            {currentEvent.summary}
+                        {/if}
+                    </dd>
                 </div>
+                
+                {#if currentEvent.periodical}
+                <div class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
+                    <dt class="font-medium text-gray-900">Schedule Type</dt>
+                    <dd class="text-gray-700 sm:col-span-2">
+                        <span class="inline-flex px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">
+                            {currentEvent.periodical === 'weekly' ? 'Weekly Event' : 'Monthly Event'}
+                        </span>
+                    </dd>
+                </div>
+                {/if}
 
             </dl>
         </div>
-        <AlertDialog.Footer>
-            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+        
+        <AlertDialog.Footer class="gap-2">
+            <AlertDialog.Cancel class="rounded-lg">Cancel</AlertDialog.Cancel>
             {#if currentEvent.paid && !isPastDate(currentEvent.date)}
-                <AlertDialog.Action onclick={() => (window.open(event.url, '_blank'))}>Register</AlertDialog.Action>
+                <AlertDialog.Action 
+                    class="bg-primary-700 hover:bg-primary-800 text-white rounded-lg" 
+                    onclick={() => (window.open(currentEvent.url || '#', '_blank'))}
+                >
+                    Register Now
+                </AlertDialog.Action>
             {/if}
         </AlertDialog.Footer>
     </AlertDialog.Content>
 </AlertDialog.Root>
+
+<!-- Empty state (when no events) -->
+{#if events.length === 0}
+<div class="bg-white py-12">
+    <div class="mx-auto max-w-lg text-center px-4">
+        <div class="bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 p-8 shadow-sm">
+            <div class="mb-6 bg-primary-50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-10 text-primary-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-800 mb-3">No {mode === "upcoming" ? "Upcoming" : "Past"} Events Available</h3>
+            <p class="text-gray-600 mb-6">
+                {#if mode === "upcoming"}
+                    We don't have any upcoming events at the moment. Please check back soon for our future activities and gatherings.
+                {:else}
+                    We don't have any past events for the last 12 months on record. Try checking the upcoming events tab for future activities.
+                {/if}
+            </p>
+            <div class="flex justify-center gap-3">
+                {#if mode === "past"}
+                    <button 
+                        class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-primary-300 bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors"
+                        onclick={() => mode = "upcoming"}
+                    >
+                        View Upcoming Events
+                    </button>
+                {:else}
+                    <button 
+                        class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-primary-300 bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors"
+                        onclick={() => window.location.reload()}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 2v6h-6"></path>
+                            <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                            <path d="M3 22v-6h6"></path>
+                            <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                        </svg>
+                        Refresh Page
+                    </button>
+                {/if}
+                <a 
+                    href="/contact"
+                    class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-primary-700 text-white hover:bg-primary-800 transition-colors"
+                >
+                    Contact Us
+                </a>
+            </div>
+            <div class="border-t border-gray-100 pt-4 mt-6">
+                <p class="text-sm text-gray-500">Follow our social media channels for the latest updates.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{/if}
 
