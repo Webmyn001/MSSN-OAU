@@ -11,15 +11,24 @@
 
     /**
      * SEO Component for consistent metadata across the site
-     * @param {string} title - Page title 
-     * @param {string} description - Page description
-     * @param {string} path - Path for canonical URL and Open Graph URL (without domain)
-     * @param {string} type - Open Graph type (default: 'website')
-     * @param {Array} images - Array of Open Graph image objects
-     * @param {Object} schema - Custom schema.org JSON-LD data
-     * @param {string} keywords - SEO keywords (comma separated)
+     * @type {{ 
+     *   title?: string,
+     *   description?: string,
+     *   path?: string,
+     *   type?: string,
+     *   images?: Array<{url: string, width: number, height: number, alt: string}>,
+     *   schema?: Object,
+     *   keywords?: string[]
+     * }}
      */
     
+    // Helper to convert comma-separated string to string array, or use existing array
+    const formatKeywords = (kw) => {
+        if (Array.isArray(kw)) return kw;
+        if (typeof kw === 'string') return kw.split(',').map(k => k.trim()).filter(k => k);
+        return [];
+    };
+
     // Props with defaults
     let {
         title = "",
@@ -35,9 +44,14 @@
             }
         ],
         schema = null,
-        keywords = DEFAULT_KEYWORDS
+        keywords = formatKeywords(DEFAULT_KEYWORDS)
     } = $props();
     
+    // Ensure externally passed keywords are also formatted if they are a string by mistake
+    // However, ideally, consumers should pass string[] directly.
+    // Forcing to array if it's a string passed as prop:
+    const finalKeywords = $derived(formatKeywords(keywords));
+
     // Format the canonical and OG URLs
     const url = path ? `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}` : SITE_URL;
     
@@ -50,7 +64,7 @@
     titleTemplate={title ? `%s | ${SITE_NAME}` : SITE_NAME}
     description={description}
     canonical={url}
-    keywords={keywords}
+    keywords={finalKeywords}
     openGraph={{
         url,
         title: formattedTitle,

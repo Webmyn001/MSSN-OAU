@@ -11,6 +11,10 @@
      * @property {string} name - Name of the committee
      * @property {string} description - Description of the committee's purpose and activities
      * @property {string} [image] - Optional URL/path to committee image
+     * @property {string} [alt] - Optional alt text for the committee image
+     * @property {string} [badge] - Optional text for a badge on the committee card
+     * @property {string} [badgeColor] - Optional Tailwind CSS class for badge background color
+     * @property {string[]} [objectives] - Optional list of objectives for the committee
      */
     /** @type {Committee[]} */
     let committees = $state([]); // This should be populated with your committee data
@@ -22,7 +26,9 @@
     }
 
     onMount(() => {
-        committees = data.committees;
+        if (data && data.committees) {
+            committees = data.committees;
+        }
     })
 </script>
 
@@ -97,136 +103,56 @@
 <div class="mt-16 mb-12 px-4 md:px-8 max-w-7xl mx-auto">
     <div class="text-center mb-12">
         <h2 class="font-semibold text-3xl sm:text-4xl font-secondary mb-4 text-primary-700">Our Committees</h2>
-        <p class="font-tertiary max-w-3xl mx-auto text-gray-600">The Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, has established various committees to cater to the diverse needs of Muslim students on campus. Students can join these committees to develop valuable skills and contribute meaningfully to the community.</p>
+        <p class="font-tertiary max-w-3xl mx-auto text-gray-600">The Muslim Students\' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, has established various committees to cater to the diverse needs of Muslim students on campus. Students can join these committees to develop valuable skills and contribute meaningfully to the community.</p>
     </div>
 
     {#if committees.length > 0}
-        <!--  Committee  -->
-        <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-            <div class="sm:col-span-1 flex items-center justify-center">
-                <img
-                        src="/images/committees/an-nuur.webp"
-                        class="w-3/4 sm:w-full"
-                        alt="JWC Committee"
-                />
-            </div>
-            <div class="sm:col-span-2">
-                <h2 class="text-3xl mb-4 font-semibold font-primary">An-Nur Press Agency Editorial Board</h2>
-                <p class="mb-4"><span class="font-semibold">An-Nur Press Agency Editorial Board</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-                <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
-
-                <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of An-Nur Press Agency Editorial Board, <a class="text-green-800 underline" href="">Click here</a>.</p>
-            </div>
+        <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {#each (showAll ? committees : committees.slice(0, 3)) as committee}
+                <div class="rounded-xl overflow-hidden shadow-md border border-gray-100 bg-white hover:shadow-lg transition-shadow duration-300">
+                    <div class="h-48 bg-primary-50 relative">
+                        <img 
+                            src={committee.image}
+                            alt={committee.alt || committee.name} 
+                            class="w-full h-full object-cover" 
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        {#if committee.badge}
+                        <div class="absolute bottom-0 left-0 p-4">
+                            <span class={(committee.badgeColor || 'bg-primary-600 text-white') + " text-xs font-medium px-2.5 py-1 rounded-full"}>{committee.badge}</span>
+                        </div>
+                        {/if}
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold font-secondary text-primary-800 mb-3">{committee.name}</h3>
+                        <p class="text-gray-600 text-sm mb-4">{committee.description}</p>
+                        
+                        {#if committee.objectives && committee.objectives.length > 0}
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-primary-700 mb-2">Main Objectives:</h4>
+                            <ul class="space-y-1 text-sm text-gray-600 list-disc pl-5">
+                                {#each committee.objectives as objective}
+                                    <li>{objective}</li>
+                                {/each}
+                            </ul>
+                        </div>
+                        {/if}
+                        
+                        <a href="#" class="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-600">
+                            Join this committee
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            {/each}
         </div>
-        <!--  End Committee  -->
-
-        <!--  Committee  -->
-        <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-            <div class="sm:col-span-1 flex items-center justify-center">
-                <img
-                        src="/images/committees/business-committee.webp"
-                        class="w-3/4 sm:w-full"
-                        alt="Business Committee"
-                />
-            </div>
-            <div class="sm:col-span-2">
-                <h2 class="text-3xl mb-4 font-semibold font-primary">Business Committee</h2>
-                <p class="mb-4"><span class="font-semibold">Business Committee</span>  is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-                <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
-
-                <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Business Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-            </div>
-        </div>
-        <!--  End Committee  -->
-
-        <!--  Committee  -->
-        <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-            <div class="sm:col-span-1 flex items-center justify-center">
-                <img
-                        src="/images/committees/an-nuur.webp"
-                        class="w-3/4 sm:w-full"
-                        alt="JWC Committee"
-                />
-            </div>
-            <div class="sm:col-span-2">
-                <h2 class="text-3xl mb-4 font-semibold font-primary">Welfare Committee</h2>
-                <p class="mb-4"><span class="font-semibold">Welfare Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-                <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
-
-                <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Welfare Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-            </div>
-        </div>
-        <!--  End Committee  -->
-
-        <!--  Committee  -->
-        <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-            <div class="sm:col-span-1 flex items-center justify-center">
-                <img
-                        src="/images/committees/jwc.webp"
-                        class="w-3/4 sm:w-full"
-                        alt="JWC Committee"
-                />
-            </div>
-            <div class="sm:col-span-2">
-                <h2 class="text-3xl mb-4 font-semibold font-primary">Academic Committee</h2>
-                <p class="mb-4"><span class="font-semibold">The Academic Committee (JWC)</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-                <p class="font-semibold">Aim:</p>
-                <ul class="list-disc ml-5">
-                    <li>To provide a platform for Muslim students to rejuvenate their faith and spiritual growth</li>
-                    <li>To empower Muslim students with knowledge, skills, and inspiration</li>
-                    <li>To foster a sense of community and brotherhood/sisterhood among Muslim students amongst others.</li>
-                </ul>
-
-                <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of Academic Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-            </div>
-        </div>
-        <!--  End Committee  -->
-
-        <!--  Committee  -->
-        <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-r-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-white to-primary-50">
-            <div class="sm:col-span-1 flex items-center justify-center">
-                <img
-                        src="/images/committees/an-nuur.webp"
-                        class="w-3/4 sm:w-full"
-                        alt="JWC Committee"
-                />
-            </div>
-            <div class="sm:col-span-2">
-                <h2 class="text-3xl mb-4 font-semibold font-primary">ICT & Publicity Committee</h2>
-                <p class="mb-4"><span class="font-semibold">ICT & Publicity Committee</span> is a committee under the Muslim Students' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, dedicated to organizing a spiritual upliftment and developmental program for Muslim students.</p>
-
-                <p>This press is designed to keep you informed and inspired with the latest updates, insightful articles, and news about our community's spiritual, intellectual, and moral endeavors.</p>
-
-                <p class="font-semibold mt-4">To Join <a class="text-green-800 underline" href="/our-excos#">Other Members</a> of ICT & Publicity Committee, <a class="text-green-800 underline" href="">Click here</a>.</p>
-            </div>
-        </div>
-        <!--  End Committee  -->
-
-        <!--  Committee  -->
-        <div class="grid sm:grid-cols-3 w-full mt-8 gap-8 px-4 py-6 rounded-xl sm:border-l-4 border-t-4 sm:border-t-0 border-green-300 sm:bg-gradient-to-r bg-gradient-to-t from-primary-50 to-white">
-            <div class="sm:col-span-1 flex items-center justify-center">
-                <img
-                        src="/images/committees/jwc.webp"
-                        class="w-3/4 sm:w-full"
-                        alt="JWC Committee"
-                />
-            </div>
-             <div class="sm:col-span-2">
-                <!-- Content for the last committee item would go here -->
-                 <h2 class="text-3xl mb-4 font-semibold font-primary">Another Committee (Example)</h2>
-                 <p class="mb-4">Details about this committee...</p>
-            </div>
-        </div>
-        <!-- End Committee -->
         
         {#if committees.length > 3}
             <!-- View All Committees Button -->
             <div class="text-center mt-10">
-                <button onclick={toggleShowAll} class="inline-flex items-center justify-center rounded-lg bg-primary-700 px-6 py-3 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
+                <button on:click={toggleShowAll} class="inline-flex items-center justify-center rounded-lg bg-primary-700 px-6 py-3 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
                     {#if showAll}
                         Show Less
                     {:else}
