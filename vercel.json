@@ -1,18 +1,6 @@
 {
-  "buildCommand": "npm run build",
   "framework": "sveltekit",
-  "outputDirectory": ".svelte-kit/output",
-  "regions": ["dub1"],
   "installCommand": "npm install",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/node"
-    }
-  ],
-  "build": {
-    "env": {
-      "VERCEL_DISABLE_OPTIMIZER": "1"
-    }
-  }
-} 
+  "buildCommand": "npm run build",
+  "regions": ["dub1"]
+}
