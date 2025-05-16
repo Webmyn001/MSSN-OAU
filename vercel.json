@@ -3,4 +3,4 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "regions": ["dub1"]
-}
+} 
