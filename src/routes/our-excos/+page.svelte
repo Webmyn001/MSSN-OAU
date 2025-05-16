@@ -12,7 +12,7 @@
     import { fly, fade, scale } from "svelte/transition";
     import { Image } from '$lib/components/ui/image';
     import { browser } from '$app/environment';
-    import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
+    // import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
 
     /**
      * @typedef {Object} SocialLink
@@ -369,73 +369,79 @@
     </div>
 </section>
 
-{#if activeMemberForModal}
-    <ResponsiveModal 
-        bind:open={memberModalOpen}
-        title={activeMemberForModal.name}
-        description={`${activeMemberForModal.position}${activeMemberForModal.committeeName ? `, ${activeMemberForModal.committeeName}` : ''}`}
-        onOpenChange={(isOpen) => { if (!isOpen) closeMemberModal(); }}
-        contentClass="sm:max-w-md"
-    >
-        <!-- Trigger is implicit from the member card click -->
-        <div class="space-y-4">
-            <div class="flex justify-center pt-2">
-                 <Image 
-                    src={activeMemberForModal.photo || 'https://secure.gravatar.com/avatar/?d=mp&s=120'} 
-                    alt={activeMemberForModal.name} 
-                    width={120} 
-                    height={120} 
-                    className="rounded-full shadow-lg border-4 border-white"
-                />
+{#if memberModalOpen && activeMemberForModal}
+    {#await import('$lib/components/layout/ResponsiveModal.svelte') then module}
+        {@const ResponsiveModal = module.default}
+        <ResponsiveModal 
+            bind:open={memberModalOpen}
+            title={activeMemberForModal.name}
+            description={`${activeMemberForModal.position}${activeMemberForModal.committeeName ? `, ${activeMemberForModal.committeeName}` : ''}`}
+            onOpenChange={(isOpen) => { if (!isOpen) closeMemberModal(); }}
+            contentClass="sm:max-w-md"
+        >
+            <!-- Trigger is implicit from the member card click -->
+            <div class="space-y-4">
+                <div class="flex justify-center pt-2">
+                     <Image 
+                        src={activeMemberForModal.photo || 'https://secure.gravatar.com/avatar/?d=mp&s=120'} 
+                        alt={activeMemberForModal.name} 
+                        width={120} 
+                        height={120} 
+                        className="rounded-full shadow-lg border-4 border-white"
+                    />
+                </div>
+
+                {#if activeMemberForModal.bio}
+                    <div class="text-sm text-gray-600 text-center prose prose-sm max-w-none">
+                        {@html activeMemberForModal.bio}
+                    </div>
+                {/if}
+
+                <div class="space-y-2 text-sm border-t pt-4 mt-4">
+                    {#if activeMemberForModal.phone}
+                        <a href={`tel:${activeMemberForModal.phone}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
+                            <Phone class="h-4 w-4 mr-2 shrink-0" /> {activeMemberForModal.phone}
+                        </a>
+                    {/if}
+                    {#if activeMemberForModal.email}
+                        <a href={`mailto:${activeMemberForModal.email}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
+                            <Mail class="h-4 w-4 mr-2 shrink-0" /> {activeMemberForModal.email}
+                        </a>
+                    {/if}
+                </div>
+                
+                {#if activeMemberForModal.socials && activeMemberForModal.socials.length > 0}
+                    <div class="flex justify-center sm:justify-start flex-wrap gap-2 pt-2 border-t mt-4">
+                        {#each activeMemberForModal.socials as social (social.platform)}
+                            <Button as="a" href={social.link} target="_blank" rel="noopener noreferrer" variant="outline" size="sm" class="text-xs flex items-center gap-1.5">
+                                {social.platform} <ExternalLink class="h-3 w-3" />
+                            </Button>
+                        {/each}
+                    </div>
+                {/if}
             </div>
 
-            {#if activeMemberForModal.bio}
-                <div class="text-sm text-gray-600 text-center prose prose-sm max-w-none">
-                    {@html activeMemberForModal.bio}
-                </div>
-            {/if}
-
-            <div class="space-y-2 text-sm border-t pt-4 mt-4">
-                {#if activeMemberForModal.phone}
-                    <a href={`tel:${activeMemberForModal.phone}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
-                        <Phone class="h-4 w-4 mr-2 shrink-0" /> {activeMemberForModal.phone}
-                    </a>
-                {/if}
-                {#if activeMemberForModal.email}
-                    <a href={`mailto:${activeMemberForModal.email}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
-                        <Mail class="h-4 w-4 mr-2 shrink-0" /> {activeMemberForModal.email}
-                    </a>
-                {/if}
+            {#snippet footer()} 
+            <div class="flex flex-col sm:flex-row gap-2 w-full">
+                <Button variant="outline" onclick={closeMemberModal} class="w-full sm:flex-1">Close</Button>
+                <Button 
+                    onclick={() => {
+                        if (activeMemberForModal) {
+                            copyContactDetails(activeMemberForModal);
+                        }
+                    }} 
+                    class="w-full sm:flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    disabled={!activeMemberForModal || (!activeMemberForModal.phone && !activeMemberForModal.email)}
+                >
+                    <Copy class="mr-2 h-4 w-4" /> Copy Details
+                </Button>
             </div>
-            
-            {#if activeMemberForModal.socials && activeMemberForModal.socials.length > 0}
-                <div class="flex justify-center sm:justify-start flex-wrap gap-2 pt-2 border-t mt-4">
-                    {#each activeMemberForModal.socials as social (social.platform)}
-                        <Button as="a" href={social.link} target="_blank" rel="noopener noreferrer" variant="outline" size="sm" class="text-xs flex items-center gap-1.5">
-                            {social.platform} <ExternalLink class="h-3 w-3" />
-                        </Button>
-                    {/each}
-                </div>
-            {/if}
-        </div>
-
-        {#snippet footer()} 
-        <div class="flex flex-col sm:flex-row gap-2 w-full">
-            <Button variant="outline" onclick={closeMemberModal} class="w-full sm:flex-1">Close</Button>
-            <Button 
-                onclick={() => {
-                    if (activeMemberForModal) {
-                        copyContactDetails(activeMemberForModal);
-                    }
-                }} 
-                class="w-full sm:flex-1 bg-green-600 hover:bg-green-700 text-white"
-                disabled={!activeMemberForModal || (!activeMemberForModal.phone && !activeMemberForModal.email)}
-            >
-                <Copy class="mr-2 h-4 w-4" /> Copy Details
-            </Button>
-        </div>
-        {/snippet}
-    </ResponsiveModal>
+            {/snippet}
+        </ResponsiveModal>
+    {:catch error}
+        <p class="text-red-500 text-center p-4">Error loading modal: {error.message}</p>
+        <!-- You could offer a retry button or alternative content here -->
+    {/await}
 {/if}
 
 <style>

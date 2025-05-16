@@ -11,7 +11,7 @@ export const load = async ({ fetch }) => {
 
 	return {
 		posts: (blogRes?.data?.posts ?? []).slice(0, 3),
-		events: eventRes.data.events.slice(0, 2),
+		events: eventRes.data.events.slice(0, 3),
 		programmes: programmeRes.data.programmes.splice(0, 4),
 		info: infoRes.data || {
 			account: {

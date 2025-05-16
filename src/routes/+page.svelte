@@ -71,7 +71,7 @@
             })
         }
     })
-    console.log('homepage', data?.info?.info?.account)
+    console.log('homepage', data)
 </script>
 
 <SEO 
