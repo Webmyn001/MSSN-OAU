@@ -1,166 +1,173 @@
-<script>
+<script lang="ts">
     import { fly } from 'svelte/transition';
     import { onMount } from 'svelte';
-    import { Button } from "$lib/components/ui/button";
+    import { Button, buttonVariants } from "$lib/components/ui/button";
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
-    import * as Dialog from "$lib/components/ui/dialog";
-    import * as Sheet from "$lib/components/ui/sheet";
-    import * as Tabs from "$lib/components/ui/tabs";
-    import { AlertCircle, Loader2, Check, X } from '@lucide/svelte';
+    import { AlertCircle, Loader2, Check, X, ShieldCheck, MailWarning, Info } from '@lucide/svelte';
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import { MetaTags, JsonLd } from "svelte-meta-tags";
     import * as Form from '$lib/components/ui/form';
+    import { browser } from '$app/environment';
+    import { toast } from 'svelte-sonner';
     
     // State management
+    /** @type {string} */
     let email = $state("");
+    /** @type {string} */
     let password = $state("");
+    /** @type {boolean} */
     let isLoading = $state(false);
-    let loginError = $state("");
+    /** @type {string | null} */
+    let loginError = $state(null);
+    /** @type {boolean} */
     let showOtpScreen = $state(false);
+    /** @type {boolean} */
     let showModal = $state(false);
+    /** @type {string[]} */
     let otpValues = $state(["", "", "", "", "", ""]);
-    let otpError = $state("");
+    /** @type {string | null} */
+    let otpError = $state(null);
+    /** @type {boolean} */
     let isOtpLoading = $state(false);
+    /** @type {boolean} */
     let otpResent = $state(false);
+    /** @type {boolean} */
     let loginSuccess = $state(false);
-    let isEmailValid = $state(false);
-    let isPasswordValid = $state(false);
-    let connectionError = $state(false); // Add flag for connection errors
+    /** @type {boolean} */
+    let connectionError = $state(false); 
     
-    // Responsive state
-    let isMobile = $state(false);
-    
-    // Form validation
-    $effect(() => {
-        isEmailValid = email.includes('@') && email.includes('.');
-        isPasswordValid = password.length >= 8;
-    })
-    
+    // Derived state for validation
+    /** @type {boolean} */
+    const isEmailValid = $derived(email.includes('@') && email.includes('.'));
+    /** @type {boolean} */
+    const isPasswordValid = $derived(password.length >= 8);
+    /** @type {boolean} */
     const isFormValid = $derived(isEmailValid && isPasswordValid);
+    /** @type {boolean} */
     const isOtpComplete = $derived(otpValues.every(v => v !== ""));
     
-    onMount(() => {
-        // Check window size for responsiveness
-        checkWindowSize();
-        window.addEventListener('resize', checkWindowSize);
-        
-        return () => {
-            window.removeEventListener('resize', checkWindowSize);
-        };
-    });
-    
-    function checkWindowSize() {
-        isMobile = window.innerWidth < 768;
-    }
-    
-    function handleLogin() {
+    /** @param {SubmitEvent} e */
+    function handleLogin(e) {
+        e.preventDefault();
         if (!isFormValid) return;
-        
         isLoading = true;
         loginError = null;
-        connectionError = false; // Reset connection error
+        connectionError = false;
+        loginSuccess = false;
+        showOtpScreen = false;
         
-        // Simulate API call
         setTimeout(() => {
             isLoading = false;
-            
-            // Mock successful login attempt leading to OTP verification
-            showOtpScreen = true;
-            showModal = true;
+            if (email === "test@example.com" && password === "password123") {
+                showOtpScreen = true;
+                showModal = true; 
+            } else if (email === "error@example.com") {
+                loginError = "This account has been suspended.";
+                showModal = true;
+            } else if (email === "connection@error.com") {
+                connectionError = true;
+                loginError = "Network error. Please check your connection.";
+                showModal = true;
+            } else {
+                loginError = "Invalid email or password. Please try again.";
+                showModal = true;
+            }
         }, 1500);
     }
     
+    /** 
+     * @param {number} index 
+     * @param {Event & {currentTarget: HTMLInputElement, target: HTMLInputElement}} event 
+     */
     function handleOtpInputChange(index, event) {
-        const value = event.target.value;
-        
-        // Only allow numbers
+        const target = event.target;
+        const value = target.value;
         if (!/^\d*$/.test(value)) {
+            target.value = otpValues[index]; // Restore old value if not a digit
             return;
         }
-        
-        // Update the current input
-        otpValues[index] = value.charAt(0);
-        
-        // Auto-focus next input if current input is filled
+        otpValues[index] = value.charAt(0); // Take only the first character
         if (value && index < otpValues.length - 1) {
-            const nextInput = document.getElementById(`otp-${index + 1}`);
-            if (nextInput) nextInput.focus();
+            if (browser) {
+                const nextInput = /** @type {HTMLInputElement | null} */ (document.getElementById(`otp-${index + 1}`));
+                if (nextInput) nextInput.focus();
+            }
         }
-        
-        // Update the array reactively
-        otpValues = [...otpValues];
+        otpValues = [...otpValues]; // Trigger reactivity for array mutation
     }
     
+    /** 
+     * @param {number} index 
+     * @param {KeyboardEvent & {currentTarget: HTMLInputElement, target: HTMLInputElement}} event 
+     */
     function handleOtpKeyDown(index, event) {
-        // Handle backspace to move to previous input
         if (event.key === 'Backspace' && !otpValues[index] && index > 0) {
-            const prevInput = document.getElementById(`otp-${index - 1}`);
-            if (prevInput) prevInput.focus();
+            if (browser) {
+                const prevInput = /** @type {HTMLInputElement | null} */ (document.getElementById(`otp-${index - 1}`));
+                if (prevInput) prevInput.focus();
+            }
         }
     }
     
     function verifyOtp() {
         if (!isOtpComplete) return;
-        
         isOtpLoading = true;
         otpError = null;
-        
-        // Simulate API call for OTP verification
         setTimeout(() => {
             isOtpLoading = false;
-            
-            // Simulate successful OTP verification
             if (otpValues.join('') === '123456') {
                 loginSuccess = true;
-                
-                // Redirect after successful login
+                showOtpScreen = false; 
                 setTimeout(() => {
-                    window.location.href = '/'; // Redirect to home page
+                    if (browser) window.location.href = '/'; 
                 }, 2000);
             } else {
-                otpError = "Invalid OTP code. Please try again.";
+                otpError = "Invalid OTP. Please try again or resend.";
             }
         }, 1500);
     }
     
     function resendOtp() {
-        otpResent = true;
-        setTimeout(() => {
-            otpResent = false;
-        }, 3000);
-    }
-    
-    function resetForm() {
-        email = "";
-        password = "";
-        isLoading = false;
-        loginError = null;
-        showOtpScreen = false;
-        showModal = false;
-        otpValues = ["", "", "", "", "", ""];
+        isOtpLoading = true; 
         otpError = null;
-        isOtpLoading = false;
-        otpResent = false;
-        loginSuccess = false;
+        setTimeout(() => {
+            isOtpLoading = false;
+            otpResent = true;
+            toast.success("A new OTP has been sent to your email.");
+            setTimeout(() => otpResent = false, 5000);
+        }, 1000);
     }
     
-    function closeModal() {
+    function closeModalAndReset() {
         showModal = false;
-        // If OTP screen was shown but not successfully completed, reset it
-        if (showOtpScreen && !loginSuccess) {
+        setTimeout(() => {
+            loginError = null;
             showOtpScreen = false;
             otpValues = ["", "", "", "", "", ""];
             otpError = null;
-        }
+            loginSuccess = false;
+            connectionError = false;
+        }, 300); 
     }
-    
-    // Simulate connection error handler (in a real app, this would be triggered by network failures)
-    function simulateConnectionError() {
-        connectionError = true;
-        isLoading = false;
-        loginError = "Unable to connect to authentication server. Please check your network connection.";
-    }
+
+    // Derived state for modal content
+    /** @type {string} */
+    const modalTitle = $derived(
+        loginSuccess ? "Login Successful!" :
+        showOtpScreen ? "Enter Verification Code" :
+        loginError ? (connectionError ? "Connection Error" : "Login Failed") :
+        ""
+    );
+
+    /** @type {string} */
+    const modalDescription = $derived(
+        loginSuccess ? "You will be redirected shortly." :
+        showOtpScreen ? "A 6-digit code has been sent to your email address." :
+        loginError ? loginError :
+        ""
+    );
+
 </script>
 
 <!-- Meta Tags -->
@@ -168,29 +175,30 @@
     title="Log In"
     titleTemplate="%s | MSSNOAU"
     description="Log in to your MSSNOAU account to access exclusive content and features."
-    canonical="https://mssnoau-frontend.vercel.app/auth/login"
+    canonical="https://mssnoau.org/auth/login"
     openGraph={{
-        url: 'https://mssnoau-frontend.vercel.app/auth/login',
+        url: 'https://mssnoau.org/auth/login',
         title: 'Log In | MSSNOAU',
-        description: 'Log in to your MSSNOAU account to access exclusive content and features.',
+        description: 'Access your MSSNOAU account.',
         images: [
             {
-                url: 'https://i.ibb.co/zbWfh5B/home.webp',
+                url: 'https://mssnoau.sirv.com/og/og-login.jpg',
                 width: 1200,
-                height: 640,
-                alt: 'MSSNOAU Login'
+                height: 630,
+                alt: 'MSSNOAU Login Page'
             }
         ],
         siteName: 'MSSNOAU'
     }}
 />
 <JsonLd schema={{
+    "@context": "https://schema.org",
     "@type": "WebPage",
     "name": "Log In | MSSNOAU",
-    "description": "Log in to your MSSNOAU account to access exclusive content and features.",
+    "description": "Log in to your MSSNOAU account.",
     "publisher": {
         "@type": "Organization",
-        "name": "MSSNOAU.org"
+        "name": "MSSNOAU"
     }
 }}
 />
@@ -201,320 +209,142 @@
 </PageHeader>
 
 <!-- Main Login Form on Page -->
-<div class="max-w-md mx-auto px-4 py-8">
+<div class="max-w-md mx-auto px-4 py-8 sm:py-12" in:fly={{ y: 20, duration: 500, delay: 200 }}>
     <div class="text-center mb-8">
-        <h1 class="text-2xl font-semibold font-secondary text-primary-700">Welcome Back</h1>
-        <p class="text-gray-600">Enter your credentials to access your account</p>
+        <h1 class="text-2xl sm:text-3xl font-semibold font-secondary text-primary-800">Welcome Back!</h1>
+        <p class="text-gray-600 mt-1">Enter your credentials to access your account.</p>
     </div>
 
-    <div class="space-y-4">
+    <form onsubmit={handleLogin} class="space-y-6 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200">
         <div>
-            <Label for="email-main">Email</Label>
+            <Label for="email-main" class="text-sm font-medium">Email Address</Label>
             <Input 
                 id="email-main" 
                 type="email" 
-                placeholder="Enter your email" 
+                placeholder="you@example.com" 
                 bind:value={email}
                 required
+                class="mt-1"
+                aria-invalid={email && !isEmailValid ? true : undefined}
             />
             {#if email && !isEmailValid}
-            <p class="text-red-500 flex items-center text-xs mt-1">
-                <AlertCircle class="w-3 h-3 mr-1" />
-                Please enter a valid email address
+            <p class="text-red-600 flex items-center text-xs mt-1.5">
+                <AlertCircle class="w-3.5 h-3.5 mr-1 shrink-0" />
+                Please enter a valid email address.
             </p>
             {/if}
         </div>
         
         <div>
             <div class="flex justify-between items-center">
-                <Label for="password-main">Password</Label>
-                <a href="/auth/forgot-password" class="text-xs text-primary-600 hover:text-primary-700 font-medium">
+                <Label for="password-main" class="text-sm font-medium">Password</Label>
+                <a href="/auth/forgot-password" class="text-xs text-primary-600 hover:text-primary-700 hover:underline font-medium">
                     Forgot password?
                 </a>
             </div>
             <Input 
                 id="password-main" 
                 type="password" 
-                placeholder="Enter your password" 
+                placeholder="••••••••"
                 bind:value={password}
                 required
+                class="mt-1"
+                aria-invalid={password && !isPasswordValid ? true : undefined}
             />
             {#if password && !isPasswordValid}
-            <p class="text-red-500 flex items-center text-xs mt-1">
-                <AlertCircle class="w-3 h-3 mr-1" />
-                Password must be at least 8 characters long
+            <p class="text-red-600 flex items-center text-xs mt-1.5">
+                <AlertCircle class="w-3.5 h-3.5 mr-1 shrink-0" />
+                Password must be at least 8 characters.
             </p>
             {/if}
         </div>
         
-        {#if loginError}
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative text-sm" role="alert">
-            <div class="flex items-center">
-                <AlertCircle class="w-4 h-4 mr-2" />
-                <span>{loginError}</span>
-            </div>
-        </div>
-        {/if}
-        
-        {#if connectionError}
-        <div class="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg relative text-sm" role="alert">
-            <div class="flex items-center">
-                <AlertCircle class="w-4 h-4 mr-2" />
-                <span>Unable to connect to authentication server. Please try again later or contact support.</span>
-            </div>
-            <div class="mt-2 text-xs">
-                <button class="text-amber-800 underline" onclick={handleLogin}>
-                    Retry Connection
-                </button>
-            </div>
-        </div>
-        {/if}
-        
-        <Button 
-            type="submit"
-            class="w-full font-medium font-secondary"
-            disabled={!isFormValid || isLoading}
-            onclick={handleLogin}
-        >
+        <Button type="submit" disabled={!isFormValid || isLoading} class="w-full text-base py-3">
             {#if isLoading}
-            <Loader2 class="mr-2 h-4 w-4 animate-spin" />
-            Logging in...
+                <Loader2 class="mr-2 h-5 w-5 animate-spin" /> Signing In...
             {:else}
-            Log In
+                Sign In
             {/if}
         </Button>
-        
-        <div class="text-center mt-4">
-            <p class="text-sm text-gray-600">
-                Don't have an account?
-                <a href="/auth/signup" class="text-primary-600 hover:text-primary-700 font-medium">
-                    Sign up
-                </a>
-            </p>
+
+        <div class="text-center text-sm text-gray-600">
+            Don't have an account? 
+            <a href="/auth/signup" class="font-medium text-primary-600 hover:text-primary-700 hover:underline">Sign up here</a>
         </div>
-    </div>
+    </form>
 </div>
 
-<!-- Desktop View: Dialog (OTP and success messages only) -->
-{#if !isMobile && showModal}
-<Dialog.Root open={true} onOpenChange={closeModal}>
-    <Dialog.Content class="max-w-md mx-auto sm:max-w-md">
-        <div 
-            class="relative" 
-            in:fly={{ y: 20, duration: 300, delay: 150 }}
+<!-- Modal for OTP, Success, Error -->
+{#if showModal}
+    {#await import('$lib/components/layout/ResponsiveModal.svelte') then module}
+        {@const ResponsiveModal = module.default}
+        <ResponsiveModal 
+            bind:open={showModal} 
+            title={modalTitle}
+            description={modalDescription}
+            onOpenChange={(isOpen) => { if (!isOpen) closeModalAndReset(); }}
+            contentClass={showOtpScreen ? "sm:max-w-lg" : "sm:max-w-sm"} 
+            closeOnOutsideClick={!isOtpLoading && !loginSuccess} 
+            closeOnEscape={!isOtpLoading && !loginSuccess} 
         >
-            <Dialog.Header>
-                <Dialog.Title class="text-2xl font-semibold font-secondary text-primary-700 text-center">
-                    {#if loginSuccess}
-                        Login Successful!
-                    {:else if showOtpScreen}
-                        Verify Your Account
-                    {/if}
-                </Dialog.Title>
-                <Dialog.Description class="text-center">
-                    {#if loginSuccess}
-                        Redirecting you to the dashboard...
-                    {:else if showOtpScreen}
-                        We've sent a 6-digit code to your email. Please enter it below to verify your identity.
-                    {/if}
-                </Dialog.Description>
-            </Dialog.Header>
-
             {#if loginSuccess}
-                <div class="flex flex-col items-center justify-center p-8">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                        <Check class="h-8 w-8 text-green-600" />
-                    </div>
-                    <p class="text-center text-sm text-gray-500 mt-2">Logging you in...</p>
+                <div class="text-center py-6">
+                    <ShieldCheck class="h-16 w-16 text-green-500 mx-auto mb-4" />
+                    <p class="text-gray-700">You have successfully logged in.</p>
                 </div>
             {:else if showOtpScreen}
-                <!-- OTP Input -->
-                <div class="mt-6 space-y-4">
-                    <div class="text-center mb-6">
-                        <Label class="text-sm font-medium text-gray-700">Enter the 6-digit OTP</Label>
-                        
-                        <div class="mt-3 flex justify-center gap-2">
-                            {#each otpValues as _, index}
-                            <Input
-                                id={`otp-${index}`}
-                                type="text"
+                <div class="space-y-4 pt-2">
+                    <div class="grid grid-cols-6 gap-2 sm:gap-3">
+                        {#each otpValues as value, i (i)}
+                            <Input 
+                                type="text" 
+                                maxlength="1" 
+                                id={`otp-${i}`}
+                                bind:value={otpValues[i]} 
+                                oninput={(e) => handleOtpInputChange(i, e)} 
+                                onkeydown={(e) => handleOtpKeyDown(i, e)}
+                                class="text-center text-lg sm:text-xl h-12 sm:h-14 focus:ring-2 focus:ring-primary-500 transition-all duration-200 ease-in-out"
+                                aria-label={`OTP digit ${i + 1}`}
+                                autocomplete="one-time-code"
+                                pattern="[0-9]*"
                                 inputmode="numeric"
-                                maxlength="1"
-                                class="w-12 h-12 text-center font-bold text-xl"
-                                value={otpValues[index]}
-                                oninput={(e) => handleOtpInputChange(index, e)}
-                                onkeydown={(e) => handleOtpKeyDown(index, e)}
+                                disabled={isOtpLoading}
                             />
-                            {/each}
-                        </div>
-                        
-                        {#if otpError}
-                        <div class="mt-3 flex items-center text-red-500 text-sm">
-                            <AlertCircle class="w-4 h-4 mr-1" />
-                            <span>{otpError}</span>
-                        </div>
-                        {/if}
-                        
-                        {#if otpResent}
-                        <div class="mt-3 flex items-center justify-center text-green-600 text-sm">
-                            <Check class="w-4 h-4 mr-1" />
-                            <span>OTP sent successfully!</span>
-                        </div>
-                        {/if}
+                        {/each}
                     </div>
-                    
-                    <Button 
-                        class="w-full font-medium font-secondary"
-                        disabled={!isOtpComplete || isOtpLoading}
-                        onclick={verifyOtp}
-                    >
-                        {#if isOtpLoading}
-                        <Loader2 class="mr-2 h-4 w-4 animate-spin" />
-                        Verifying...
-                        {:else}
-                        Verify OTP
-                        {/if}
-                    </Button>
-                    
-                    <div class="text-center">
-                        <button 
-                            type="button" 
-                            class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                            onclick={resendOtp}
-                            disabled={otpResent}
-                        >
-                            Didn't receive the code? Resend
-                        </button>
-                    </div>
+                    {#if otpError}
+                        <p class="text-red-600 text-sm flex items-center">
+                            <AlertCircle class="w-4 h-4 mr-1.5 shrink-0" />
+                            {otpError}
+                        </p>
+                    {/if}
+                </div>
+            {:else if loginError}
+                <div class="text-center py-6">
+                    {#if connectionError}
+                        <MailWarning class="h-16 w-16 text-destructive mx-auto mb-4" />
+                    {:else}
+                        <AlertCircle class="h-16 w-16 text-destructive mx-auto mb-4" />
+                    {/if}
+                    <p class="text-gray-700">{loginError || "An unexpected error occurred."}</p>
                 </div>
             {/if}
-        </div>
-    </Dialog.Content>
-</Dialog.Root>
-{:else if isMobile && showModal}
-<!-- Mobile View: Sheet (OTP and success messages only) -->
-<Sheet.Root open={true} onOpenChange={closeModal}>
-    <Sheet.Content side="bottom" class="h-[80vh] rounded-t-xl px-4">
-        <div 
-            class="relative h-full flex flex-col" 
-            in:fly={{ y: 20, duration: 300, delay: 150 }}
-        >
-            <Sheet.Header class="text-center">
-                <Sheet.Title class="text-xl font-semibold font-secondary text-primary-700">
-                    {#if loginSuccess}
-                        Login Successful!
-                    {:else if showOtpScreen}
-                        Verify Your Account
-                    {/if}
-                </Sheet.Title>
-                <Sheet.Description>
-                    {#if loginSuccess}
-                        Redirecting you to the dashboard...
-                    {:else if showOtpScreen}
-                        We've sent a 6-digit code to your email. Please enter it below to verify your identity.
-                    {/if}
-                </Sheet.Description>
-            </Sheet.Header>
-            
-            <div class="flex-grow">
-                {#if loginSuccess}
-                    <div class="flex flex-col items-center justify-center p-8">
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                            <Check class="h-8 w-8 text-green-600" />
-                        </div>
-                        <p class="text-center text-sm text-gray-500 mt-2">Logging you in...</p>
-                    </div>
-                {:else if showOtpScreen}
-                    <!-- OTP Input -->
-                    <div class="mt-6 space-y-4">
-                        <div class="text-center mb-6">
-                            <Label class="text-sm font-medium text-gray-700">Enter the 6-digit OTP</Label>
-                            
-                            <div class="mt-3 flex justify-center gap-2">
-                                {#each otpValues as _, index}
-                                <Input
-                                    id={`otp-mobile-${index}`}
-                                    type="text"
-                                    inputmode="numeric"
-                                    maxlength="1"
-                                    class="w-10 h-12 text-center font-bold text-xl"
-                                    value={otpValues[index]}
-                                    oninput={(e) => handleOtpInputChange(index, e)}
-                                    onkeydown={(e) => handleOtpKeyDown(index, e)}
-                                />
-                                {/each}
-                            </div>
-                            
-                            {#if otpError}
-                            <div class="mt-3 flex items-center text-red-500 text-sm">
-                                <AlertCircle class="w-4 h-4 mr-1" />
-                                <span>{otpError}</span>
-                            </div>
-                            {/if}
-                            
-                            {#if otpResent}
-                            <div class="mt-3 flex items-center justify-center text-green-600 text-sm">
-                                <Check class="w-4 h-4 mr-1" />
-                                <span>OTP sent successfully!</span>
-                            </div>
-                            {/if}
-                        </div>
-                        
-                        <Button 
-                            class="w-full font-medium font-secondary"
-                            disabled={!isOtpComplete || isOtpLoading}
-                            onclick={verifyOtp}
-                        >
-                            {#if isOtpLoading}
-                            <Loader2 class="mr-2 h-4 w-4 animate-spin" />
-                            Verifying...
-                            {:else}
-                            Verify OTP
-                            {/if}
-                        </Button>
-                        
-                        <div class="text-center">
-                            <button 
-                                type="button" 
-                                class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                                onclick={resendOtp}
-                                disabled={otpResent}
-                            >
-                                Didn't receive the code? Resend
-                            </button>
-                        </div>
-                    </div>
-                {/if}
-            </div>
-        </div>
-    </Sheet.Content>
-</Sheet.Root>
-{/if}
 
-<!-- SEO and accessibility friendly content for the page when no JS - this will be hidden via JS -->
-<div class="max-w-md mx-auto px-4 py-8" id="fallback-content">
-    <div class="space-y-4">
-        <div>
-            <Label for="email-fallback">Email</Label>
-            <Input id="email-fallback" type="email" placeholder="Enter your email" required />
-        </div>
-        
-        <div>
-            <Label for="password-fallback">Password</Label>
-            <Input id="password-fallback" type="password" placeholder="Enter your password" required />
-        </div>
-        
-        <Button type="submit" class="w-full font-medium font-secondary">
-            Log In
-        </Button>
-        
-        <div class="text-center mt-4">
-            <p class="text-sm text-gray-600">
-                Don't have an account?
-                <a href="/auth/signup" class="text-primary-600 hover:text-primary-700 font-medium">
-                    Sign up
-                </a>
-            </p>
-        </div>
-    </div>
-</div>
+            {#snippet footer()}
+                {#if showOtpScreen && !loginSuccess}
+                    <Button variant="outline" onclick={closeModalAndReset} disabled={isOtpLoading} class="w-full sm:w-auto">Cancel</Button>
+                    <Button onclick={resendOtp} disabled={isOtpLoading || otpResent} class="w-full sm:w-auto">
+                        {#if isOtpLoading && !otpResent} <Loader2 class="size-4 mr-2 animate-spin" /> {/if}
+                        {otpResent ? 'OTP Sent!' : 'Resend Code'}
+                    </Button>
+                    <Button onclick={verifyOtp} disabled={isOtpLoading || !isOtpComplete} class="w-full sm:w-auto">
+                        {#if isOtpLoading && !isOtpComplete} <Loader2 class="size-4 mr-2 animate-spin" /> {:else if isOtpLoading && isOtpComplete} <Loader2 class="size-4 mr-2 animate-spin" /> {/if}                        Verify OTP
+                    </Button>
+                {:else if loginError && !loginSuccess}
+                    <Button onclick={closeModalAndReset} class="w-full">Close</Button>
+                {/if}
+                <!-- No footer shown for loginSuccess state as it auto-closes or redirects -->
+            {/snippet}
+        </ResponsiveModal>
+    {/await}
+{/if}
