@@ -10,19 +10,21 @@
     } from '$lib/config';
 
     /**
-     * SEO Component for consistent metadata across the site
-     * @type {{ 
-     *   title?: string,
-     *   description?: string,
-     *   path?: string,
-     *   type?: string,
-     *   images?: Array<{url: string, width: number, height: number, alt: string}>,
-     *   schema?: Object,
-     *   keywords?: string[]
-     * }}
+     * SEO Component for consistent metadata across the site.
+     * @param {string} [title=""] - Page title.
+     * @param {string} [description=DEFAULT_DESCRIPTION] - Page description.
+     * @param {string} [path=""] - Path for canonical URL and Open Graph URL (without domain).
+     * @param {string} [type="website"] - Open Graph type.
+     * @param {Array<{url: string, width: number, height: number, alt: string}>} [images] - Array of Open Graph image objects. Defaults to DEFAULT_OG_IMAGE.
+     * @param {Object} [schema=null] - Custom schema.org JSON-LD data.
+     * @param {string[]} [keywords] - SEO keywords (array of strings). Defaults to formatted DEFAULT_KEYWORDS.
      */
     
-    // Helper to convert comma-separated string to string array, or use existing array
+    /**
+     * Helper to convert comma-separated string to string array, or use existing array.
+     * @param {string | string[]} kw - The keyword(s) to format.
+     * @returns {string[]}
+     */
     const formatKeywords = (kw) => {
         if (Array.isArray(kw)) return kw;
         if (typeof kw === 'string') return kw.split(',').map(k => k.trim()).filter(k => k);
@@ -44,12 +46,10 @@
             }
         ],
         schema = null,
-        keywords = formatKeywords(DEFAULT_KEYWORDS)
+        keywords = formatKeywords(DEFAULT_KEYWORDS) // Default is now processed
     } = $props();
     
     // Ensure externally passed keywords are also formatted if they are a string by mistake
-    // However, ideally, consumers should pass string[] directly.
-    // Forcing to array if it's a string passed as prop:
     const finalKeywords = $derived(formatKeywords(keywords));
 
     // Format the canonical and OG URLs
@@ -70,13 +70,15 @@
         title: formattedTitle,
         description,
         images,
-        site_name: SITE_NAME,
+        siteName: SITE_NAME, // Corrected from site_name
         type
     }}
     twitter={{
-        handle: TWITTER_HANDLE,
-        site: TWITTER_HANDLE,
+        creator: TWITTER_HANDLE, // Use 'creator' for user handle
+        site: TWITTER_HANDLE,    // Often the same as creator or the site's main handle
         cardType: 'summary_large_image'
+        // title: formattedTitle, // Usually not needed if cardType is summary_large_image and pulls from OG
+        // description: description // Usually not needed if cardType is summary_large_image and pulls from OG
     }}
 />
 
