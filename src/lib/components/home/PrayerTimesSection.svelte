@@ -9,6 +9,7 @@
     import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
     import AutoplayModule from 'embla-carousel-autoplay';
     import { getFormattedDateVerbose, getFormattedDateVerboseShort } from '$lib/utils/dateFormatting.js';
+    import * as Carousel from '$lib/components/ui/carousel/index.js';
     
     // For date formatting
     // function getFormattedDateVerbose() { ... } // Removed
@@ -72,6 +73,9 @@
     // Get the selected mosque object
     const selectedMosqueObject = $derived($mosques.find(mosque => mosque.id === selectedMosque));
     
+    // Carousel API instance
+    let carouselAPI = $state();
+    
     onMount(async () => {
         try {
             const now = new Date();
@@ -79,7 +83,6 @@
             const month = String(now.getMonth() + 1).padStart(2, '0'); 
             const year = now.getFullYear();
             
-            // Format the date as DD-MM-YYYY for API
             const formattedDate = `${day}-${month}-${year}`;
             
             const req = await fetch(`https://api.aladhan.com/v1/gToH/${formattedDate}`);
@@ -93,8 +96,8 @@
             hijrahDate = `${res.data.hijri.day} ${res.data.hijri.month.en}, ${res.data.hijri.year}${res.data.hijri.designation.abbreviated}`;
             shortHijrahDate = res.data.hijri.date.replaceAll("-", "/") + res.data.hijri.designation.abbreviated;
         } catch (e) {
-            console.error("Error retrieving Hijrah Date:", e?.message);
-            // Fallback values
+            const error = e instanceof Error ? e : new Error(String(e));
+            console.error("Error retrieving Hijrah Date:", error.message);
             hijrahDate = "Hijri date unavailable";
             shortHijrahDate = "Hijri date unavailable";
         }
@@ -282,6 +285,7 @@
             <div class="relative -mt-8 px-4">
                 <div class="rounded-xl overflow-hidden shadow-lg border border-white/20">
                     <Carousel.Root
+                        bind:api={carouselAPI}
                         plugins={[AutoplayModule({ delay: 5000 })]}
                         class="w-full"
                         opts={{ align: "center", loop: true }}
@@ -313,8 +317,8 @@
                         <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1 z-10">
                             {#each selectedMosqueObject.images as _, i}
                                 <button 
-                                    class="w-2 h-2 rounded-full transition-all duration-300 {Carousel.api?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
-                                    onclick={() => Carousel.api?.scrollTo(i)}
+                                    class="w-2 h-2 rounded-full transition-all duration-300 {carouselAPI?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
+                                    onclick={() => carouselAPI?.scrollTo(i)}
                                     aria-label={`Go to slide ${i + 1}`}
                                 ></button>
                             {/each}
@@ -393,6 +397,7 @@
             <div class="relative -mt-6 px-4">
                 <div class="rounded-xl overflow-hidden shadow-lg border border-white/20">
                     <Carousel.Root
+                        bind:api={carouselAPI}
                         plugins={[AutoplayModule({ delay: 5000 })]}
                         class="w-full"
                         opts={{ align: "center", loop: true }}
@@ -424,8 +429,8 @@
                         <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1 z-10">
                             {#each selectedMosqueObject.images as _, i}
                                 <button 
-                                    class="w-2 h-2 rounded-full transition-all duration-300 {Carousel.api?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
-                                    onclick={() => Carousel.api?.scrollTo(i)}
+                                    class="w-2 h-2 rounded-full transition-all duration-300 {carouselAPI?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
+                                    onclick={() => carouselAPI?.scrollTo(i)}
                                     aria-label={`Go to slide ${i + 1}`}
                                 ></button>
                             {/each}
