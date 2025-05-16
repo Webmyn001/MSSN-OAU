@@ -6,7 +6,27 @@
     import { onMount, onDestroy } from 'svelte';
 
     // Modern props declaration
-    let { prayerName = '', adhanTime = '', iqamahTime = '', background = '', isUpcoming = false, gradientColor = 'from-blue-500/80 to-purple-600/80', icon = '🕌' } = $props();
+    /**
+     * @typedef {Object} PrayerTimeCardProps
+     * @property {string} prayerName
+     * @property {string | number | Date} adhanTime
+     * @property {string | number | Date} iqamahTime
+     * @property {string} background
+     * @property {boolean} [isUpcoming]
+     * @property {string} [gradientColor]
+     * @property {string} [icon]
+     */
+    
+    /** @type {PrayerTimeCardProps} */
+    let { 
+        prayerName = '', 
+        adhanTime = '', 
+        iqamahTime = '', 
+        background = '', 
+        isUpcoming = false, 
+        gradientColor = 'from-blue-500/80 to-purple-600/80', 
+        icon = '🕌' 
+    } = $props();
     
     // Spring animation for hover effect
     const hovered = spring(1);

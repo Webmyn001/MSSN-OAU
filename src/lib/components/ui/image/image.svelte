@@ -46,5 +46,5 @@
     fetchpriority={fetchPriorityAttr}
     srcset={srcSet}
     {sizes}
-    on:load={handleLoad}
+    onload={handleLoad}
 /> 

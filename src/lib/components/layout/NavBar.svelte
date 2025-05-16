@@ -69,6 +69,8 @@
 
     afterNavigate(() => {
         currentPath = page?.url?.pathname || '/';
+        isOpen = false;
+        isDropdownOpen = false;
     });
 
     $effect(() => {
