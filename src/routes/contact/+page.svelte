@@ -5,8 +5,9 @@
     import { onMount, onDestroy } from 'svelte'
     import * as Accordion from '$lib/components/ui/accordion'
     import { MapPin, Mail, CircleHelp, ChevronRight, Phone, ExternalLink } from '@lucide/svelte'
-    import { page } from '$app/stores'
+    import { page } from '$app/state'
 	import { ORGANIZATION } from "$lib/config";
+	import Seo from "$lib/components/SEO.svelte";
 
     /** @type {{ map_link?: string, address?: string, email?: string, phone?: string, faqs?: Array<{ question: string, answer: string }> }} */
     let info = {};
@@ -17,20 +18,14 @@
     let hoveredFaq = null;
 
     // Subscribe to the page store to get info and faqs
-    let unsubscribe;
     onMount(() => {
-        unsubscribe = page.subscribe(($page) => {
-            info = $page.data?.info || {};
-            faqs = $page.data?.info?.faqs || [];
-        });
+            info = page.data?.info || {};
+            faqs = page.data?.info?.faqs || [];
         visible = true;
-    });
-    onDestroy(() => {
-        if (unsubscribe) unsubscribe();
     });
 </script>
 
-<SEO
+<Seo
     title="Contact Us"
     path="/contact"
     description="Get in touch with the Muslim Students Society of Nigeria, OAU Branch. Contact our team for inquiries, feedback, or to join our community. Find our location, phone numbers, and email addresses."

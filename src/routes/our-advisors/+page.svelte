@@ -289,7 +289,7 @@
                                                 {#if advisor.socials?.whatsapp}
                                                     <a 
                                                         href={`https://wa.me/${advisor.socials.whatsapp.replace(/\+/g, '')}`}
-                                                        class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors duration-300"
+                                                        class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors duration-300"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >

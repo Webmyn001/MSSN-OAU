@@ -1,6 +1,6 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown } from "@lucide/svelte";
+    import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown, MessageCircle } from "@lucide/svelte";
     import copyTextToClipboard from "$lib/utils/copy.js";
     import { toast } from "svelte-sonner";
     import { tick, onMount } from "svelte";
@@ -27,13 +27,15 @@
     // Initialize sessions and selectedSession when data changes
     $effect(() => {
         const newSessions = data?.excos?.sessions || [];
+        // Update sessions if they have actually changed
         if (JSON.stringify(newSessions) !== JSON.stringify(sessions)) {
             sessions = newSessions;
-            if (newSessions.length > 0) {
-                // Initialize selectedSession: prefer "2024/2025" or default to the first
+            // Only set selectedSession if it's currently undefined AND newSessions are available
+            if (selectedSession === undefined && newSessions.length > 0) {
                 const preferred = newSessions.find(s => s.session === "2024/2025");
                 selectedSession = preferred ? preferred.session : newSessions[0].session;
-            } else {
+            } else if (newSessions.length === 0) {
+                // If newSessions is empty, reset selectedSession
                 selectedSession = undefined;
             }
         }
@@ -44,9 +46,14 @@
         }
         
         // Set loaded state after a short delay for animation purposes
-        setTimeout(() => {
-            isLoaded = true;
-        }, 300);
+        // This can be tied to data.excos being available instead of a fixed timeout
+        if (data?.excos?.sessions) {
+            setTimeout(() => {
+                isLoaded = true;
+            }, 300);
+        } else {
+            isLoaded = false; // Reset if data is not there
+        }
     });
 
     // Derived state for the currently selected session's full data
@@ -63,6 +70,16 @@
             document.getElementById(id)?.focus();
         });
     }
+
+    $effect(() => {
+        // This effect runs when selectedSession or currentDisplaySessionData changes.
+        // Open your browser's developer console to see these logs.
+        // If you have Svelte DevTools, $inspect will show them there too.
+        console.log('[Our Excos Page] Selected session changed to:', selectedSession);
+        console.log('[Our Excos Page] currentDisplaySessionData is now:', currentDisplaySessionData);
+        $inspect(selectedSession, 'selectedSession (Our Excos)');
+        $inspect(currentDisplaySessionData, 'currentDisplaySessionData (Our Excos)');
+    });
 
     onMount(() => {
         visible = true;
@@ -85,6 +102,7 @@
             });
         };
     }
+    $inspect(data);
 </script>
 
 <!-- Meta Tags -->
@@ -116,7 +134,7 @@
                 "@type": "Organization",
                 "name": "MSSNOAU.org"
     },
-    "hasPart": currentDisplaySessionData && currentDisplaySessionData.executives && currentDisplaySessionData.executives.length > 0 ? {
+    "mainEntity": currentDisplaySessionData && currentDisplaySessionData.executives && currentDisplaySessionData.executives.length > 0 ? {
         "@type": "ItemList",
         "itemListElement": currentDisplaySessionData.executives.flatMap(committee =>
             committee.members.map(member => ({
@@ -163,7 +181,7 @@
             </div>
         </Popover.Trigger>
                 <Popover.Content class="w-[300px] p-0 rounded-xl border border-green-100 shadow-xl" side="bottom" align="center">
-                    <Command.Root class="rounded-xl overflow-hidden">
+                    <Command.Root bind:value={selectedSession} class="rounded-xl overflow-hidden">
                         <Command.Input placeholder="Choose Session..." class="border-green-100 focus:ring-green-500" />
                 <Command.List>
                     <Command.Empty>No results found.</Command.Empty>
@@ -171,10 +189,6 @@
                                 {#each sessions as sessionItem (sessionItem.session)}
                             <Command.Item
                                             value={sessionItem.session}
-                                            onSelect={value => {
-                                                selectedSession = value;
-                                        closeAndFocusTrigger(triggerId);
-                                            }}
                                             class="aria-selected:bg-green-50 aria-selected:text-green-900"
                                     >
                                         <span>{sessionItem.session}</span>
@@ -302,10 +316,18 @@
                                                     <Phone class="w-3 h-3" />
                                                     Call
                                                 </a>
+
+                                                <a 
+                                                    href={`sms:${member.phone}`}
+                                                    class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-neutral-100 text-neutral-800 hover:bg-neutral-200 transition-colors duration-300"
+                                                >
+                                                    <MessageCircle class="w-3 h-3" />
+                                                    Message
+                                                </a>
                                                 
                                                 <a 
                                                     href={`https://wa.me/234${member.phone.replace(/^0/, "").replace(/^234/, "").replace(/^\+234/, "").replaceAll(" ", "")}`}
-                                                    class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors duration-300"
+                                                    class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors duration-300"
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                 >
