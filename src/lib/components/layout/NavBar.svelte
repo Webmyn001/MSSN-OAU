@@ -10,11 +10,13 @@
     } from '@lucide/svelte'
     import {onMount} from 'svelte'
     import { Image } from '$lib/components/ui/image';
+    import { browser } from '$app/environment';
 
     let isOpen = $state(false);
     let isDropdownOpen = $state(false);
 
     // Track active path for highlighting current page
+    /** @type {string} */
     let currentPath = $state(page?.url?.pathname || '/');
 
     function toggleNav() {
@@ -25,23 +27,36 @@
         isDropdownOpen = !isDropdownOpen;
     }
 
+    /**
+     * @param {EventTarget | null} node
+     * @param {() => void} handler
+     */
     function clickOutside(node, handler) {
+        /** @param {MouseEvent} event */
         const handleClick = (event) => {
-            if (!node.contains(event.target)) {
+            if (node && event.target && !node.contains(/** @type {Node} */ (event.target))) {
                 handler();
             }
         };
 
-        document.addEventListener('click', handleClick, true);
+        if (browser) {
+            document.addEventListener('click', handleClick, true);
+        }
 
         return {
             destroy() {
-                document.removeEventListener('click', handleClick, true);
+                if (browser) {
+                    document.removeEventListener('click', handleClick, true);
+                }
             }
         };
     }
 
     // Check if a given path is active
+    /**
+     * @param {string} path
+     * @returns {boolean}
+     */
     function isActive(path) {
         if (path === '/') {
             return currentPath === path;
@@ -49,14 +64,26 @@
         return currentPath.startsWith(path);
     }
 
-    /**
-     * @type {number}
-     */
-    let innerWidth = $state(null);
+    /** @type {number} */
+    let innerWidth = $state(browser ? window.innerWidth : 0);
 
     afterNavigate(() => {
         currentPath = page?.url?.pathname || '/';
-    })
+    });
+
+    $effect(() => {
+        if (browser) {
+            const updateWidth = () => {
+                innerWidth = window.innerWidth;
+                if (window.innerWidth >= 1024) {
+                    isOpen = false;
+                    isDropdownOpen = false;
+                }
+            };
+            window.addEventListener('resize', updateWidth);
+            return () => window.removeEventListener('resize', updateWidth);
+        }
+    });
 </script>
 
 <header class="flex flex-wrap lg:justify-start lg:flex-nowrap z-50 w-full py-3 lg:py-0 border-b bg-gradient-to-r from-white via-white to-primary-50 shadow-md">
@@ -106,7 +133,6 @@
                 <div
                   id="navbar-menu"
                   class="w-full lg:block lg:h-auto z-[51] {isOpen ? 'bg-white pb-5 lg:pb-0' : ''}"
-                  transition:slide={{duration: 300, easing: cubicOut}}
                 >
                     <div class="flex flex-col gap-y-3 lg:gap-y-0 mt-5 lg:flex-row lg:items-center lg:justify-end lg:mt-0 lg:ps-5">
                         <!-- Navigation Links -->
@@ -194,7 +220,6 @@
                             {#if isDropdownOpen}
                                 <div
                                   class="absolute z-[52] right-0 mt-2 w-64 lg:w-auto bg-white/95 backdrop-blur-md shadow-[0_15px_35px_-5px_rgba(0,0,0,0.15)] border border-primary-100/50 rounded-xl py-3 px-3 transition-all duration-300 transform origin-top-right"
-                                  transition:slide={{duration: 200, easing: cubicOut}}
                                   role="menu"
                                 >
                                     <div class="lg:grid lg:grid-cols-3 lg:gap-4 lg:min-w-[600px]">
@@ -283,14 +308,4 @@
     <!-- Decorative Islamic pattern - bottom border -->
     <div class="absolute bottom-0 left-0 w-full h-[3px] bg-gradient-to-r from-primary-500 via-primary-400 to-primary-500"></div>
 </header>
-
-<svelte:window
-  bind:innerWidth
-  onresize={() => {
-    if (window.innerWidth >= 1024) {
-      isOpen = false;
-      isDropdownOpen = false;
-    }
-  }}
-/>
 

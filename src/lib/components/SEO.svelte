@@ -30,7 +30,7 @@
         if (typeof kw === 'string') return kw.split(',').map(k => k.trim()).filter(k => k);
         return [];
     };
-
+    
     // Props with defaults
     let {
         title = "",
@@ -51,7 +51,7 @@
     
     // Ensure externally passed keywords are also formatted if they are a string by mistake
     const finalKeywords = $derived(formatKeywords(keywords));
-
+    
     // Format the canonical and OG URLs
     const url = path ? `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}` : SITE_URL;
     

@@ -121,7 +121,7 @@
                 <a 
                     in:fly={{ y: 20, duration: 800, delay: 800 + (i * 200) }}
                     class="group flex flex-col h-full focus:outline-none rounded-xl overflow-hidden backdrop-blur-sm bg-white/30 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
-                    href={`/events#${slugify(event.title + " " + event.date)}`}
+                    href={`/events/${slugify(event.title)}`}
                     onmouseenter={() => hoveredCard = event.title}
                     onmouseleave={() => hoveredCard = null}
                 >
