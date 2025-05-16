@@ -120,9 +120,9 @@
                         {#if committee.badge}
                         <div class="absolute bottom-0 left-0 p-4">
                             <span class={(committee.badgeColor || 'bg-primary-600 text-white') + " text-xs font-medium px-2.5 py-1 rounded-full"}>{committee.badge}</span>
-                        </div>
+        </div>
                         {/if}
-                    </div>
+        </div>
                     <div class="p-5">
                         <h3 class="text-xl font-semibold font-secondary text-primary-800 mb-3">{committee.name}</h3>
                         <p class="text-gray-600 text-sm mb-4">{committee.description}</p>
@@ -134,8 +134,8 @@
                                 {#each committee.objectives as objective}
                                     <li>{objective}</li>
                                 {/each}
-                            </ul>
-                        </div>
+            </ul>
+        </div>
                         {/if}
                         
                         <a href="#" class="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-600">
@@ -144,15 +144,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
-                    </div>
-                </div>
+        </div>
+    </div>
             {/each}
         </div>
         
         {#if committees.length > 3}
             <!-- View All Committees Button -->
             <div class="text-center mt-10">
-                <button on:click={toggleShowAll} class="inline-flex items-center justify-center rounded-lg bg-primary-700 px-6 py-3 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
+                <button onclick={toggleShowAll} class="inline-flex items-center justify-center rounded-lg bg-primary-700 px-6 py-3 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
                     {#if showAll}
                         Show Less
                     {:else}

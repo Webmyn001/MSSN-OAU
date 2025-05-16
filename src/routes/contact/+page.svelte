@@ -96,7 +96,7 @@
                     <p class="mb-4 text-gray-600">
                         Send us an email and we'll get back to you within 48 hours.
                     </p>
-                    <a href="mailto:salam@mssnoau.org" class="text-primary-700 font-semibold">salam@mssnoau.org</a>
+                    <a href={`mailto:${page.data?.info?.email}`} class="text-primary-700 font-semibold">{page.data?.info?.email}</a>
                 </div>
             </div>
             <div class="mb-8 flex flex-col gap-6 overflow-hidden md:flex-row">

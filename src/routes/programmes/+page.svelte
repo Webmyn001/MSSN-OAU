@@ -1,32 +1,64 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import { fly, fade, scale } from 'svelte/transition';
-    import { onMount } from 'svelte';
+    // import { onMount } from 'svelte'; // To be replaced by $effect
     import { MetaTags } from "svelte-meta-tags";
-    import * as Dialog from '$lib/components/ui/dialog';
-    import * as Sheet from '$lib/components/ui/sheet';
     import { Button } from '$lib/components/ui/button';
     import { Loader2, X, ChevronRight, Info } from '@lucide/svelte';
-    import { browser } from '$app/environment';
-    
+    import ResponsiveModal from '$lib/components/layout/ResponsiveModal.svelte';
+
+    /**
+     * @typedef {Object} ProgrammeScheduleItem
+     * @property {string} day
+     * @property {string} time
+     * @property {string} [venue]
+     */
+
+    /**
+     * @typedef {Object} ProgrammeCoordinator
+     * @property {string} name
+     * @property {string} [role]
+     * @property {string} [contact]
+     */
+
+    /**
+     * @typedef {Object} Programme
+     * @property {string | number} id
+     * @property {string} title
+     * @property {string} [summary]
+     * @property {string} [description]
+     * @property {string} [image]
+     * @property {string} [text] - Legacy field for description
+     * @property {ProgrammeScheduleItem[]} [schedule]
+     * @property {ProgrammeCoordinator[]} [coordinators]
+     * @property {string[]} [benefits]
+     */
+
+    /**
+     * @typedef {Object} PageData
+     * @property {Programme[]} [programmes]
+     * @property {any} [props] // For $props()
+     */
+
+    /** @type {PageData} */
     let { data } = $props();
     
-    /** @type {Array} */
+    /** @type {Programme[]} */
     let programmes = $state([]);
     let visible = $state(false);
+    /** @type {Programme | null} */
     let hoveredProgramme = $state(null);
+    /** @type {Programme | null} */
     let selectedProgramme = $state(null);
     let isLoading = $state(false);
-    let isDialogOpen = $state(false);
-    let isSheetOpen = $state(false);
-    let isLargeScreen = $state(true);
+    /** @type {Programme | null} */
     let programmeDetails = $state(null);
+    let modalOpen = $state(false);
     
-    onMount(() => {
+    $effect(() => {
         visible = true;
-        
         // Check if data.programmes is available
-        if (data.programmes && data.programmes.length > 0) {
+        if (data?.programmes && data.programmes.length > 0) {
             programmes = data.programmes;
             console.log('Using API data:', programmes.length, 'programmes loaded');
         } else {
@@ -36,59 +68,38 @@
         }
         
         console.log('Final programmes data:', programmes);
-        
-        if (browser) {
-            isLargeScreen = window.innerWidth >= 768;
-            
-            const handleResize = () => {
-                isLargeScreen = window.innerWidth >= 768;
-            };
-            
-            window.addEventListener('resize', handleResize);
-            return () => window.removeEventListener('resize', handleResize);
-        }
     });
 
+    /** @param {Programme} programme */
     function openProgrammeDetails(programme) {
         selectedProgramme = programme;
+        modalOpen = true;
         
-        // Show dialog or sheet based on screen size
-        if (isLargeScreen) {
-            isDialogOpen = true;
-        } else {
-            isSheetOpen = true;
-        }
-        
-        // Set loading state
         isLoading = true;
         
-        // Simulate fetching details (in a real app, you'd fetch this data)
-        // Since we're not actually fetching, just use the programme data directly
         setTimeout(() => {
-            programmeDetails = {
-                ...programme,
-                description: programme.description || programme.text,
-                schedule: programme.schedule || [],
-                coordinators: programme.coordinators || [],
-                benefits: programme.benefits || []
-            };
+            if (selectedProgramme) { // Ensure selectedProgramme is still valid
+                programmeDetails = {
+                    ...selectedProgramme,
+                    description: selectedProgramme.description || selectedProgramme.text,
+                    schedule: selectedProgramme.schedule || [],
+                    coordinators: selectedProgramme.coordinators || [],
+                    benefits: selectedProgramme.benefits || []
+                };
+            }
             isLoading = false;
         }, 500);
     }
     
     function closeProgrammeDetails() {
-        if (isLargeScreen) {
-            isDialogOpen = false;
-        } else {
-            isSheetOpen = false;
-        }
-        
+        modalOpen = false;
+        // Delay reset for animation
         setTimeout(() => {
             selectedProgramme = null;
             programmeDetails = null;
         }, 300);
     }
-    $inspect(programmes)
+    $inspect(programmes, selectedProgramme, programmeDetails)
 </script>
 
 <!-- Meta Tags -->
@@ -96,9 +107,9 @@
         title="Our Programmes"
         titleTemplate="%s | MSSNOAU"
         description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/"
+        canonical="https://mssnoau-frontend.vercel.app/programmes/"
         openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/',
+    url: 'https://mssnoau-frontend.vercel.app/programmes/',
     title: 'Our Programmes | MSSNOAU',
     description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
     images: [
@@ -106,7 +117,7 @@
         url: 'https://i.ibb.co/zbWfh5B/home.webp',
         width: 1200,
         height: 640,
-        alt: 'Website screenshot'
+        alt: 'MSSNOAU Programmes'
       }
     ],
     siteName: 'MSSNOAU'
@@ -131,16 +142,17 @@
                     class="relative mx-auto grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
                     in:fly={{ y: 30, duration: 800, delay: 200 }}
                 >
-                    {#each programmes as programme, i}
+                    {#each programmes as programme, i (programme.id)}
                         <!-- Enhanced Programme Card -->
                         <div 
                             role="button"
                             tabindex="0"
                             class="flex flex-col rounded-xl border border-primary-100 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group h-[360px]"
                             in:scale={{ duration: 600, delay: 400 + (i * 150) }}
-                            onmouseenter={() => hoveredProgramme = programme.title}
+                            onmouseenter={() => hoveredProgramme = programme}
                             onmouseleave={() => hoveredProgramme = null}
                             onclick={() => openProgrammeDetails(programme)}
+                            onkeydown={(e) => { if (e.key === 'Enter') openProgrammeDetails(programme) }}
                         >
                             <!-- Image section (top half) -->
                             <div class="relative w-full h-1/2 overflow-hidden">
@@ -162,12 +174,10 @@
                                 
                                 <!-- View Details Button -->
                                 <div class="pt-3 flex justify-end">
-                                    <button
-                                        class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors group-hover:underline"
-                                    >
+                                    <div class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors group-hover:underline">
                                         View Details
                                         <ChevronRight class="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -195,179 +205,102 @@
         {/if}
     </div>
     
-    <!-- Dialog for large screens -->
-    <Dialog.Root bind:open={isDialogOpen}>
-        <Dialog.Content class="sm:max-w-[600px]">
-            <Dialog.Header>
-                <Dialog.Title>{selectedProgramme?.title || 'Programme Details'}</Dialog.Title>
-                <Dialog.Description>
-                    Detailed information about this programme
-                </Dialog.Description>
-            </Dialog.Header>
-            
-            {#if isLoading}
-                <div class="flex flex-col items-center justify-center py-12">
-                    <Loader2 class="size-12 text-primary-700 animate-spin mb-4" />
-                    <p class="text-gray-600">Loading programme details...</p>
-                </div>
-            {:else if programmeDetails}
-                <div class="space-y-6">
-                    <!-- Programme Image -->
-                    <div class="flex justify-center">
-                        <div class="p-4 rounded-full bg-primary-100">
-                            <img 
-                                src={programmeDetails.image || "/placeholder.svg"} 
-                                alt={programmeDetails.title}
-                                class="size-24 object-contain" 
-                            />
+    {#if selectedProgramme}
+        <ResponsiveModal 
+            bind:open={modalOpen} 
+            title={selectedProgramme.title}
+            description={`Detailed information about the ${selectedProgramme.title} programme.`}
+            onOpenChange={(isOpen) => { if (!isOpen) closeProgrammeDetails(); }}
+            contentClass="sm:max-w-[600px]"
+        >
+            <!-- Default slot for main content -->
+            <div class="py-6 px-1">
+                {#if isLoading}
+                    <div class="flex flex-col items-center justify-center py-12">
+                        <Loader2 class="size-12 text-primary-700 animate-spin mb-4" />
+                        <p class="text-gray-600">Loading programme details...</p>
+                    </div>
+                {:else if programmeDetails}
+                    <div class="space-y-6">
+                        <div class="flex justify-center my-4">
+                            <div class="p-2 rounded-lg bg-primary-50 border border-primary-100 shadow-sm">
+                                <img 
+                                    src={programmeDetails.image || "/images/placeholder.webp"} 
+                                    alt={programmeDetails.title}
+                                    class="h-28 w-28 object-contain rounded-md" 
+                                />
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Description -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Description</h3>
-                        <p class="text-gray-700">{@html programmeDetails.description}</p>
-                    </div>
-                    
-                    <!-- Schedule -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Schedule</h3>
-                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
-                            {#each programmeDetails.schedule as item}
-                                <div class="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0">
-                                    <div>
-                                        <p class="font-medium text-gray-800">{item.day}</p>
-                                        <p class="text-sm text-gray-600">{item.time}</p>
-                                    </div>
-                                    <div class="text-sm text-gray-700">{item.location}</div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Description</h3>
+                            <div class="prose prose-sm max-w-none text-gray-700">{@html programmeDetails.description || 'No description available.'}</div>
+                        </div>
+                        
+                        {#if programmeDetails.schedule && programmeDetails.schedule.length > 0}
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Schedule</h3>
+                                <div class="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
+                                    {#each programmeDetails.schedule as item (item.day + item.time) }
+                                        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                                            <div>
+                                                <p class="font-medium text-gray-800">{item.day}</p>
+                                                <p class="text-xs text-gray-500">{item.time}</p>
+                                            </div>
+                                            <p class="text-sm text-gray-600 sm:text-right">{item.venue || 'Online'}</p>
+                                        </div>
+                                    {/each}
                                 </div>
-                            {/each}
-                        </div>
-                    </div>
-                    
-                    <!-- Coordinators -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Coordinators</h3>
-                        <div class="space-y-3">
-                            {#each programmeDetails.coordinators as coordinator}
-                                <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-                                    <div class="size-10 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-bold">
-                                        {coordinator.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">{coordinator.name}</p>
-                                        <p class="text-sm text-gray-600">{coordinator.role}</p>
-                                    </div>
+                            </div>
+                        {/if}
+
+                        {#if programmeDetails.coordinators && programmeDetails.coordinators.length > 0}
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Coordinators</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {#each programmeDetails.coordinators as coordinator (coordinator.name)}
+                                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                            <p class="font-medium text-gray-800">{coordinator.name}</p>
+                                            {#if coordinator.role}<p class="text-xs text-gray-500">{coordinator.role}</p>{/if}
+                                            {#if coordinator.contact}<p class="text-xs text-primary-600 hover:underline"><a href="tel:{coordinator.contact}">{coordinator.contact}</a></p>{/if}
+                                        </div>
+                                    {/each}
                                 </div>
-                            {/each}
-                        </div>
+                            </div>
+                        {/if}
+
+                        {#if programmeDetails.benefits && programmeDetails.benefits.length > 0}
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Benefits/Objectives</h3>
+                                <ul class="list-disc list-inside space-y-1.5 text-gray-700 pl-2">
+                                    {#each programmeDetails.benefits as benefit (benefit)}
+                                        <li>{benefit}</li>
+                                    {/each}
+                                </ul>
+                            </div>
+                        {/if}
+
+                        {#if !programmeDetails.description && !(programmeDetails.schedule && programmeDetails.schedule.length > 0) && !(programmeDetails.coordinators && programmeDetails.coordinators.length > 0) && !(programmeDetails.benefits && programmeDetails.benefits.length > 0)}
+                            <p class="text-center text-gray-500 py-8">More details coming soon for this programme.</p>
+                        {/if}
                     </div>
-                    
-                    <!-- Benefits -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Benefits</h3>
-                        <ul class="list-disc pl-5 space-y-1 text-gray-700">
-                            {#each programmeDetails.benefits as benefit}
-                                <li>{benefit}</li>
-                            {/each}
-                        </ul>
-                    </div>
-                </div>
-            {/if}
-            
-            <Dialog.Footer>
-                <Button variant="outline" onclick={closeProgrammeDetails}>
-                    Close
-                </Button>
-            </Dialog.Footer>
-        </Dialog.Content>
-    </Dialog.Root>
-    
-    <!-- Sheet for small screens -->
-    <Sheet.Root bind:open={isSheetOpen}>
-        <Sheet.Content side="bottom" class="h-[85vh] overflow-y-auto">
-            <div class="px-4 py-2 flex justify-between items-center border-b border-gray-100">
-                <h2 class="text-lg font-medium text-gray-900">{selectedProgramme?.title || 'Programme Details'}</h2>
-                <Button variant="ghost" size="icon" onclick={closeProgrammeDetails}>
-                    <X class="size-4" />
-                </Button>
+                {/if}
             </div>
-            
-            {#if isLoading}
-                <div class="flex flex-col items-center justify-center py-12">
-                    <Loader2 class="size-12 text-primary-700 animate-spin mb-4" />
-                    <p class="text-gray-600">Loading programme details...</p>
-                </div>
-            {:else if programmeDetails}
-                <div class="p-4 space-y-6">
-                    <!-- Programme Image -->
-                    <div class="flex justify-center">
-                        <div class="p-4 rounded-full bg-primary-100">
-                            <img 
-                                src={programmeDetails.image || "/placeholder.svg"} 
-                                alt={programmeDetails.title}
-                                class="size-20 object-contain" 
-                            />
-                        </div>
-                    </div>
-                    
-                    <!-- Description -->
-                    <div>
-                        <h3 class="text-base font-medium text-gray-900 mb-2">Description</h3>
-                        <p class="text-sm text-gray-700">{@html programmeDetails.description}</p>
-                    </div>
-                    
-                    <!-- Schedule -->
-                    <div>
-                        <h3 class="text-base font-medium text-gray-900 mb-2">Schedule</h3>
-                        <div class="bg-gray-50 rounded-lg p-3 space-y-2">
-                            {#each programmeDetails.schedule as item}
-                                <div class="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0">
-                                    <div>
-                                        <p class="font-medium text-sm text-gray-800">{item.day}</p>
-                                        <p class="text-xs text-gray-600">{item.time}</p>
-                                    </div>
-                                    <div class="text-xs text-gray-700">{item.location}</div>
-                                </div>
-                            {/each}
-                        </div>
-                    </div>
-                    
-                    <!-- Coordinators -->
-                    <div>
-                        <h3 class="text-base font-medium text-gray-900 mb-2">Coordinators</h3>
-                        <div class="space-y-2">
-                            {#each programmeDetails.coordinators as coordinator}
-                                <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-                                    <div class="size-8 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-bold text-xs">
-                                        {coordinator.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-sm text-gray-800">{coordinator.name}</p>
-                                        <p class="text-xs text-gray-600">{coordinator.role}</p>
-                                    </div>
-                                </div>
-                            {/each}
-                        </div>
-                    </div>
-                    
-                    <!-- Benefits -->
-                    <div>
-                        <h3 class="text-base font-medium text-gray-900 mb-2">Benefits</h3>
-                        <ul class="list-disc pl-5 space-y-1 text-sm text-gray-700">
-                            {#each programmeDetails.benefits as benefit}
-                                <li>{benefit}</li>
-                            {/each}
-                        </ul>
-                    </div>
-                </div>
-            {/if}
-            
-            <div class="p-4 border-t border-gray-100">
-                <Button class="w-full" onclick={closeProgrammeDetails}>
-                    Close
-                </Button>
-            </div>
-        </Sheet.Content>
-    </Sheet.Root>
+
+            {#snippet footer()}
+                <Button variant="outline" onclick={closeProgrammeDetails} class="">Close</Button>
+                <!-- Add other actions if needed, e.g., Register button -->
+            {/snippet}
+        </ResponsiveModal>
+    {/if}
 </section>
+
+<style>
+    .prose :global(p) {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    .prose :global(ul) {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+</style>
