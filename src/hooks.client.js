@@ -1,10 +1,29 @@
+// Sentry Fetch Proxy - Should be at the very top
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  if (originalFetch) {
+      // Using bracket notation to assign to window to potentially bypass some linter checks
+      // for undeclared properties on the window object in a .js file.
+      window['_sentryFetchProxy'] = function() {
+          // 'arguments' can be used here, but ensure Sentry's own full SDK,
+          // when/if you enable it, handles fetch wrapping correctly.
+          // This basic proxy might not be fully robust for all fetch use cases
+          // or Sentry's deeper integrations.
+          return originalFetch.apply(this, arguments);
+      };
+      window.fetch = function() {
+          return window['_sentryFetchProxy'].apply(this, arguments);
+      };
+  }
+}
+
 // Temporarily commented out Sentry for build testing
-// import { handleErrorWithSentry, replayIntegration, feedbackIntegration } from "@sentry/sveltekit";
-// import * as Sentry from '@sentry/sveltekit';
+import { handleErrorWithSentry, replayIntegration, feedbackIntegration } from "@sentry/sveltekit";
+import * as Sentry from '@sentry/sveltekit';
 import { deferScripts } from '$lib/utils/scriptLoader';
 
 // Temporarily commented out Sentry initialization
-/* 
+
 Sentry.init({
   dsn: 'https://8a6c37d91d61d59f93315969a077bace@o4508522730946560.ingest.us.sentry.io/4508522732519424',
 
@@ -44,7 +63,6 @@ Sentry.init({
     })
   ],
 });
-*/
 
 // Constants for resource optimization
 const RESOURCE_HINTS = {

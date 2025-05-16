@@ -1,6 +1,6 @@
 <script lang="ts">
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown, MessageCircle, X, Info } from "@lucide/svelte";
+    import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown, MessageCircle, X, Info, MessageSquareText, Smartphone } from "@lucide/svelte";
     import copyTextToClipboard from "$lib/utils/copy.js";
     import { toast } from "svelte-sonner";
     import { tick } from "svelte";
@@ -400,7 +400,13 @@
                 <div class="space-y-2 text-sm border-t pt-4 mt-4">
                     {#if activeMemberForModal.phone}
                         <a href={`tel:${activeMemberForModal.phone}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
-                            <Phone class="h-4 w-4 mr-2 shrink-0" /> {activeMemberForModal.phone}
+                            <Phone class="h-4 w-4 mr-2 shrink-0" /> Call: {activeMemberForModal.phone}
+                        </a>
+                        <a href={`https://wa.me/${activeMemberForModal.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
+                            <MessageSquareText class="h-4 w-4 mr-2 shrink-0" /> Chat on WhatsApp
+                        </a>
+                        <a href={`sms:${activeMemberForModal.phone}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
+                            <Smartphone class="h-4 w-4 mr-2 shrink-0" /> Send SMS
                         </a>
                     {/if}
                     {#if activeMemberForModal.email}
