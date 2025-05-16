@@ -68,7 +68,7 @@
     /** @type {string | number | null} */
     let hoveredMember = $state(null);
     let visible = $state(false);
-    
+
     /** @type {Member | null} */
     let activeMemberForModal = $state(null);
     let memberModalOpen = $state(false);
@@ -109,7 +109,7 @@
         sessionSelectorOpen = false;
         tick().then(() => {
             if (browser) {
-                document.getElementById(id)?.focus();
+            document.getElementById(id)?.focus();
             }
         });
     }
@@ -150,13 +150,13 @@
         const committeeNameStr = member.committeeName || '';
         const details = `${member.name}\n${member.position}, ${committeeNameStr}, MSSNOAU${member.phone ? `\nPhone: ${member.phone}` : ''}${member.email ? `\nEmail: ${member.email}` : ''}`;
         copyTextToClipboard(details)
-        .then(() => {
+            .then(() => {
             toast.success(`${member.name}'s details copied.`);
             closeMemberModal();
-        })
-        .catch(() => {
+            })
+            .catch(() => {
             toast.error(`Failed to copy ${member.name}'s details.`);
-        });
+            });
     }
 </script>
 
@@ -168,28 +168,28 @@
         canonical="https://mssnoau.org/our-excos"
         openGraph={{
             url: 'https://mssnoau.org/our-excos',
-            title: 'Our Executives | MSSNOAU',
+    title: 'Our Executives | MSSNOAU',
             description: 'Meet the executives of MSSN OAU. Committee members, positions, and contact details.',
-            images: [
-              {
+    images: [
+      {
                 url: data?.excos?.sessions?.find(s => s.session === selectedSession)?.executives?.[0]?.members?.[0]?.photo || 'https://mssnoau.sirv.com/og/og-excos.jpg',
-                width: 1200,
+        width: 1200,
                 height: 630,
                 alt: `MSSN OAU Executives ${selectedSession || ''}`
-              }
-            ],
-            siteName: 'MSSNOAU'
-        }}
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
 />
 {#if currentDisplaySessionData?.executives}
 <JsonLd schema={{
     "@context": "https://schema.org",
-    "@type": "WebPage",
+            "@type": "WebPage",
     "name": `Our Executives ${selectedSession ? `- ${selectedSession} Session` : ''} | MSSNOAU`,
     "description": `Meet the executives of the Muslim Students Society of Nigeria, OAU Branch for the ${selectedSession || 'current'} session.`,
     "url": `https://mssnoau.org/our-excos${selectedSession ? '?session=' + encodeURIComponent(selectedSession) : ''}`,
     "mainEntity": {
-        "@type": "Organization",
+                "@type": "Organization",
         "name": `MSSN OAU Executives - ${selectedSession || 'Current'} Session`,
         "member": currentDisplaySessionData.executives.flatMap(committee =>
             committee.members.map(member => ({
@@ -214,7 +214,7 @@
     <div class="relative">
         {#if visible}
             <h1 in:fly={{ y: 30, duration: 800, delay: 200 }} class="relative z-10">
-                Our Executives
+    Our Executives
                 <span class="absolute -bottom-2 left-1/4 right-1/4 h-1 bg-green-600 rounded-full"></span>
             </h1>
         {/if}
@@ -222,17 +222,17 @@
     <br/>
     {#if sessions.length > 0 && visible}
         <div in:fly={{ y: 30, duration: 800, delay: 400 }}>
-            <Popover.Root bind:open={sessionSelectorOpen}>
+    <Popover.Root bind:open={sessionSelectorOpen}>
                 <Popover.Trigger id={triggerId} class="flex justify-center mx-auto mt-4">
                     <button class="group inline-flex items-center bg-white/20 hover:bg-white/30 border border-white/20 p-1 ps-4 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-green-700 transition-all duration-300">
-                        <span class="me-2 text-white text-sm font-medium">
-                            {selectedSession || "Choose Session"}
-                        </span>
-                        <span class="group-hover:bg-white/30 py-1.5 px-2.5 flex justify-center items-center gap-x-2 rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300">
-                            <ChevronDown class="shrink-0 size-4 transition-transform duration-300 group-hover:rotate-180" />
-                        </span>
-                    </button>
-                </Popover.Trigger>
+                            <span class="me-2 text-white text-sm font-medium">
+                                {selectedSession || "Choose Session"}
+                    </span>
+                            <span class="group-hover:bg-white/30 py-1.5 px-2.5 flex justify-center items-center gap-x-2 rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300">
+                                <ChevronDown class="shrink-0 size-4 transition-transform duration-300 group-hover:rotate-180" />
+        </span>
+                </button>
+        </Popover.Trigger>
                 <Popover.Content class="w-[300px] p-0 rounded-xl border border-green-100 shadow-xl" side="bottom" align="center" portalProps={{ target: 'body' }}>
                     <Command.Root class="rounded-xl overflow-hidden">
                         <Command.Input placeholder="Search Session..." class="border-green-100 focus:ring-green-500" />
@@ -240,22 +240,22 @@
                             <Command.Empty class="py-6 text-center text-sm">No results found.</Command.Empty>
                             <Command.Group class="p-2" heading="Sessions" value="sessions_group">
                                 {#each sessions as sessionItem (sessionItem.session)}
-                                    <Command.Item
-                                        value={sessionItem.session}
+                            <Command.Item
+                                            value={sessionItem.session}
                                         class="aria-selected:bg-green-50 aria-selected:text-green-900 cursor-pointer"
                                         onSelect={() => {
                                             selectedSession = sessionItem.session;
-                                            closeAndFocusTrigger(triggerId);
-                                        }}
+                                        closeAndFocusTrigger(triggerId);
+                                            }}
                                     >
                                         <span>{sessionItem.session}</span>
-                                    </Command.Item>
-                                {/each}
-                            </Command.Group>
-                        </Command.List>
-                    </Command.Root>
-                </Popover.Content>
-            </Popover.Root>
+                            </Command.Item>
+                        {/each}
+                    </Command.Group>
+                </Command.List>
+            </Command.Root>
+        </Popover.Content>
+    </Popover.Root>
         </div>
     {/if}
 </PageHeader>
@@ -306,22 +306,22 @@
                     <div class="grid grid-cols-1 min-[450px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-14 mt-8">
                         {#each committee.members as member (member.id)}
                             {@const isMemberModalOpen = activeMemberForModal?.id === member.id}
-                            <div 
-                                role="button"
-                                tabindex="0"
+                                    <div 
+                                        role="button"
+                                        tabindex="0"
                                 class="group cursor-pointer text-center relative outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-lg"
                                 onclick={() => openMemberModal(member, committee.committee)}
                                 onkeydown={(e) => e.key === 'Enter' && openMemberModal(member, committee.committee)}
-                                onmouseenter={() => hoveredMember = member.id}
-                                onmouseleave={() => hoveredMember = null}
+                                        onmouseenter={() => hoveredMember = member.id}
+                                        onmouseleave={() => hoveredMember = null}
                                 in:scale={{ duration: 600, delay: 200 + getRandomDelay(0, 400) }}
-                            >
-                                <div class="relative mb-5 mx-auto w-28 h-28">
-                                    <Image 
+                                    >
+                                        <div class="relative mb-5 mx-auto w-28 h-28">
+                                            <Image
                                         src={member.photo || "/images/avatar.webp"} 
                                         alt={`${member.name} - ${member.position}`}
-                                        width={112}
-                                        height={112}
+                                                width={112}
+                                                height={112}
                                         loading="lazy"
                                         className={`object-cover rounded-full shadow-xl transition-all duration-500 ease-in-out 
                                                 ${hoveredMember === member.id ? 'ring-4 ring-green-500/70 ring-offset-2 scale-105' : 'ring-2 ring-green-200/50'}
@@ -331,10 +331,10 @@
                                     <div class={`absolute bottom-0 right-0 bg-green-600 text-white p-1.5 rounded-full shadow-md transition-opacity duration-300 ${hoveredMember === member.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-80' }`}>
                                         <MessageCircle class="w-3 h-3" />
                                     </div>
-                                </div>
+                                        </div>
                                 <h3 class="text-md font-semibold text-green-900 group-hover:text-green-700 transition-colors">{member.name}</h3>
                                 <p class="text-xs text-gray-600 group-hover:text-green-600 transition-colors">{member.position}</p>
-                            </div>
+                                    </div>
                         {/each}
                     </div>
                 </div>
@@ -344,7 +344,7 @@
                  <div class="bg-gray-50 rounded-xl border border-gray-200 p-8 shadow-sm w-full max-w-md text-center mx-auto">
                     <div class="mb-6 bg-primary-50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
                         <Info class="size-10 text-primary-400" />
-                    </div>
+                </div>
                     <h3 class="text-xl font-medium text-primary-800 mb-3">No Executives Found</h3>
                     <p class="text-gray-600 mb-6">
                         No executive members are listed for the selected session ({selectedSession || 'Unknown Session'}). Please select another session or check back later.

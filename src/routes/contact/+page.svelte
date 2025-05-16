@@ -6,7 +6,7 @@
     import * as Accordion from '$lib/components/ui/accordion'
     import { MapPin, Mail, CircleHelp, ChevronDown, Phone, ExternalLink } from '@lucide/svelte'
     import { page } from '$app/state'
-	import { ORGANIZATION } from "$lib/config";
+    import { ORGANIZATION } from "$lib/config";
 	import Seo from "$lib/components/SEO.svelte";
 
     // Data provided in the user query

@@ -41,7 +41,7 @@
         past: Event[];
         excluded: Event[];
     }
-    
+
     /**
      * Processes and categorizes events into upcoming, past, and excluded events
      * @param {Event[]} events
@@ -315,18 +315,18 @@
         canonical="https://mssnoau.org/events"
         openGraph={{
             url: 'https://mssnoau.org/events',
-            title: 'Our Events | MSSNOAU',
+    title: 'Our Events | MSSNOAU',
             description: 'Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch.',
-            images: [
-              {
+    images: [
+      {
                 url: data.events?.[0]?.image || 'https://mssnoau.sirv.com/og/og-events.jpg', // Fallback OG image
-                width: 1200,
+        width: 1200,
                 height: 630,
                 alt: 'MSSNOAU Events'
-              }
-            ],
-            siteName: 'MSSNOAU'
-        }}
+      }
+    ],
+    siteName: 'MSSNOAU'
+  }}
         schema={jsonLd}
 />
 
@@ -445,8 +445,8 @@
         {#if currentEvent.additional_details}
              <div class="prose prose-sm max-w-none text-gray-600">
                 {@html currentEvent.additional_details}
-            </div>
-        {/if}
+                </div>
+                {/if}
 
         <div class="space-y-3 text-sm mt-5">
             <div class="flex items-start">
@@ -457,7 +457,7 @@
                     <span class="ml-2 text-xs font-medium text-green-700">({format(currentEvent.date, 'my-locale')})</span>
                     {/if}
                 </span>
-            </div>
+        </div>
             <div class="flex items-start">
                 <MapPin class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
                 <span class="text-gray-700">{currentEvent.venue}</span>

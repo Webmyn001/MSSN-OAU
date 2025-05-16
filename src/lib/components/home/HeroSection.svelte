@@ -68,7 +68,22 @@
                 <span class="inline-block relative oau mt-2">
                     <span class="relative z-10 yoruba text-[#28145B] inline-block" in:fly={{ y: 30, duration: 800, delay: 600 }}>
                         Ife's
-                        <span class="absolute left-0 bottom-0 w-full h-[6px] bg-[#EBB957] rounded-full transform translate-y-2 opacity-70"></span>
+                        <svg
+                            class="absolute left-0 bottom-0 w-full opacity-70"
+                            style="height: 10px; transform: translateY(7px);"
+                            viewBox="0 0 100 10"
+                            preserveAspectRatio="none"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M2,5 Q10,2.5 25,5.2 Q40,3 50,5.5 T73,4.8 T98,5"
+                                stroke="#EBB957"
+                                stroke-width="2.5"
+                                fill="none"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
                     </span>
                     <span class="absolute left-[-2px] top-0 z-0 yoruba text-[#EBB957] blur-[0.5px]" in:fly={{ y: 30, duration: 800, delay: 600 }}>Ìfẹ́'s</span>
                 </span>
