@@ -4,7 +4,7 @@
     import { Button, buttonVariants } from "$lib/components/ui/button";
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
-    import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
+    // import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte"; // Removed static import
     import { AlertCircle, Loader2, Check, X, Eye, EyeOff, UserPlus, MailCheck, Info } from '@lucide/svelte';
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import { MetaTags, JsonLd } from "svelte-meta-tags";
@@ -322,75 +322,79 @@
 </div>
 
 {#if showModal}
-    <ResponsiveModal 
-        bind:open={showModal} 
-        title={modalTitle}
-        description={modalDescription}
-        onOpenChange={(isOpen) => { if (!isOpen) closeModalAndReset(); }}
-        contentClass={showOtpScreen ? "sm:max-w-lg" : "sm:max-w-sm"} 
-        closeOnOutsideClick={!isOtpLoading && !signupSuccess} 
-        closeOnEscape={!isOtpLoading && !signupSuccess}
-    >
-        {#if signupSuccess}
-        {#snippet footer()}
-            
-        <div class="text-center py-6">
-            <MailCheck class="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <p class="text-gray-700">Your account has been created successfully.</p>
-        </div>
-        <Button onclick={() => { if (browser) window.location.href='/auth/login';}} class="w-full">Proceed to Login</Button>
-        {/snippet}
-        {:else if showOtpScreen}
-            <div class="space-y-4 pt-2">
-                <div class="grid grid-cols-6 gap-2 sm:gap-3">
-                    {#each otpValues as value, i}
-                        <Input 
-                            type="text" 
-                            maxlength="1" 
-                            id={`otp-${i}`}
-                            bind:value={otpValues[i]} 
-                            oninput={(e) => handleOtpInputChange(i, e)} 
-                            onkeydown={(e) => handleOtpKeyDown(i, e)}
-                            class="text-center text-lg sm:text-xl h-12 sm:h-14 focus:ring-2 focus:ring-primary-500 transition-all duration-200 ease-in-out"
-                            aria-label={`OTP digit ${i + 1}`}
-                            autocomplete="one-time-code"
-                            pattern="[0-9]*"
-                            inputmode="numeric"
-                            disabled={isOtpLoading}
-                        />
-                    {/each}
+    {#await import('$lib/components/layout/ResponsiveModal.svelte') then module}
+        {@const ResponsiveModal = module.default}
+        <ResponsiveModal 
+            bind:open={showModal} 
+            title={modalTitle}
+            description={modalDescription}
+            onOpenChange={(isOpen) => { if (!isOpen) closeModalAndReset(); }}
+            contentClass={showOtpScreen ? "sm:max-w-lg" : "sm:max-w-sm"} 
+            closeOnOutsideClick={!isOtpLoading && !signupSuccess} 
+            closeOnEscape={!isOtpLoading && !signupSuccess}
+        >
+            {#if signupSuccess}
+                <div class="text-center py-6">
+                    <MailCheck class="h-16 w-16 text-green-500 mx-auto mb-4" />
+                    <p class="text-gray-700">Your account has been created successfully.</p>
                 </div>
-                {#if otpError}
-                    <p class="text-red-600 text-sm flex items-center">
-                        <AlertCircle class="w-4 h-4 mr-1.5 shrink-0" />
-                        {otpError}
+            {:else if showOtpScreen}
+                <div class="space-y-4 pt-2">
+                    <div class="grid grid-cols-6 gap-2 sm:gap-3">
+                        {#each otpValues as value, i (i)}
+                            <Input 
+                                type="text" 
+                                maxlength="1" 
+                                id={`otp-${i}`}
+                                bind:value={otpValues[i]} 
+                                oninput={(e) => handleOtpInputChange(i, e)} 
+                                onkeydown={(e) => handleOtpKeyDown(i, e)}
+                                class="text-center text-lg sm:text-xl h-12 sm:h-14 focus:ring-2 focus:ring-primary-500 transition-all duration-200 ease-in-out"
+                                aria-label={`OTP digit ${i + 1}`}
+                                autocomplete="one-time-code"
+                                pattern="[0-9]*"
+                                inputmode="numeric"
+                                disabled={isOtpLoading}
+                            />
+                        {/each}
+                    </div>
+                    {#if otpError}
+                        <p class="text-red-600 text-sm flex items-center">
+                            <AlertCircle class="w-4 h-4 mr-1.5 shrink-0" />
+                            {otpError}
+                        </p>
+                    {/if}
+                    <p class="text-xs text-gray-500 text-center">
+                        Didn't receive the code? 
+                        <button 
+                            onclick={resendOtp} 
+                            disabled={isOtpLoading || otpResent}
+                            class="font-medium text-primary-600 hover:text-primary-700 underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
+                        >
+                            {#if isOtpLoading && !otpResent}Resending...{:else if otpResent}Code Sent!{:else}Resend Code{/if}
+                        </button>
                     </p>
+                </div>
+            {:else if signupError} <!-- This is the case for signupError and not success and not OTP -->
+                <div class="text-center py-4">
+                    <AlertCircle class="h-12 w-12 text-red-500 mx-auto mb-3" />
+                    <p class="text-gray-600">{signupError}</p>
+                </div>
+            {/if}
+
+            <!-- Consolidated Footer Snippet -->
+            {#snippet footer()}
+                {#if signupSuccess}
+                    <Button onclick={() => { if (browser) window.location.href='/auth/login';}} class="w-full">Proceed to Login</Button>
+                {:else if showOtpScreen}
+                    <Button variant="outline" onclick={closeModalAndReset} disabled={isOtpLoading} class="w-full sm:w-auto">Cancel</Button>
+                    <Button onclick={verifyOtp} disabled={!isOtpComplete || isOtpLoading} class="w-full sm:w-auto">
+                        {#if isOtpLoading}<Loader2 class="mr-2 h-4 w-4 animate-spin" />{:else}Verify Email{/if}
+                    </Button>
+                {:else if signupError}
+                    <Button onclick={closeModalAndReset} class="w-full">Close</Button>
                 {/if}
-                <p class="text-xs text-gray-500 text-center">
-                    Didn't receive the code? 
-                    <button 
-                        onclick={resendOtp} 
-                        disabled={isOtpLoading || otpResent}
-                        class="font-medium text-primary-600 hover:text-primary-700 underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
-                    >
-                        {#if isOtpLoading && !otpResent}Resending...{:else if otpResent}Code Sent!{:else}Resend Code{/if}
-                    </button>
-                </p>
-            </div>
-            {#snippet footer()}
-            <Button variant="outline" onclick={closeModalAndReset} disabled={isOtpLoading} class="w-full sm:w-auto">Cancel</Button>
-            <Button onclick={verifyOtp} disabled={!isOtpComplete || isOtpLoading} class="w-full sm:w-auto">
-                {#if isOtpLoading}<Loader2 class="mr-2 h-4 w-4 animate-spin" />{:else}Verify Email{/if}
-            </Button>
             {/snippet}
-        {:else if signupError} <!-- This is the case for signupError and not success and not OTP -->
-            <div class="text-center py-4">
-                <AlertCircle class="h-12 w-12 text-red-500 mx-auto mb-3" />
-                <p class="text-gray-600">{signupError}</p>
-            </div>
-            {#snippet footer()}
-            <Button onclick={closeModalAndReset} class="w-full">Close</Button>
-            {/snippet}
-        {/if}
-    </ResponsiveModal>
+        </ResponsiveModal>
+    {/await}
 {/if}
