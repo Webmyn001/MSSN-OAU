@@ -6,6 +6,7 @@
     import Footer from "$lib/components/layout/Footer.svelte";
     import PageTransition from "$lib/components/layout/transition/PageTransition.svelte";
     import ViewportContainer from "$lib/components/layout/ViewportContainer.svelte";
+	import { page } from '$app/state';
 
     let {children, data} = $props();
 
@@ -97,6 +98,7 @@
 {#if info && !(info?.maintenance && info?.maintenance_ends)}
     <Toaster richColors/>
     <NavBar/>
+    <div id="modal-portal"></div>
     
     <main>
       <PageTransition>
@@ -108,9 +110,10 @@
       <Footer/>
     </ViewportContainer>
 {:else}
-    {#if page.url.pathname !== '/maintenance' && data.showMaintenancePage}
+    {#if page.url.pathname !== '/maintenance' && info?.maintenance} 
         {#await import("$lib/components/global/Maintenance.svelte") then M}
-            <svelte:component this={M.default} />
+        {@const Maintenance = M.default}
+            <Maintenance time={info?.maintenance_ends} />
         {/await}
     {/if}
 {/if}
