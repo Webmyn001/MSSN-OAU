@@ -2,6 +2,7 @@
     import {
         BookOpenText,
         Copy,
+        Clock,
         MapPinned,
         NotebookPen,
         Presentation,
@@ -25,6 +26,7 @@
     import BlogSection from '$lib/components/home/BlogSection.svelte';
     import Donate from '$lib/components/home/Donate.svelte';
     import SuggestionsSection from '$lib/components/home/SuggestionsSection.svelte';
+    import PrayerTimesSection from '$lib/components/home/PrayerTimesSection.svelte';
 
     let {data} = $props();
 
@@ -353,112 +355,8 @@
 <!-- End Events -->
 
 <!-- Prayer Times -->
-<div id="prayer-times" class="w-[80%] mx-auto space-y-8 mt-12">
-    <div class="w-full flex flex-row justify-between items-center my-4">
-        <div>
-            <h1 class="mx-auto font-primary font-bold text-2xl sm:text-3xl md:text-4xl">Prayer Times</h1>
-            <p class="text-primary-800 font-secondary hidden sm:block">For all mosques at OAU, Ile-Ife.</p>
-        </div>
-
-        <div class="font-secondary">
-            <p class="text-primary-800 font-tertiary hidden sm:block">{getFormattedDateVerbose()}</p>
-            <p class="text-primary-800 font-tertiary sm:hidden block">{getFormattedDateVerboseShort()}</p>
-            <p class="text-[#333333] font-tertiary font-semibold hidden sm:block">{hijrahDate}</p>
-            <p class="text-[#333333] font-tertiary font-semibold sm:hidden block">{shortHijrahDate}</p>
-        </div>
-    </div>
-    <div class="grid grid-rows-5 grid-cols-none sm:grid-cols-2 sm:grid-rows-none lg:grid-cols-5 gap-4 mt-8">
-
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 0 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/midnight.webp')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 0 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
-            <h2 class="z-10 font-primary font-bold {upcoming_solat === 0 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
-                Fajr</h2>
-
-            <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 0 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        {formatTime(solahTimes.subhi.adhan)} • {formatTime(solahTimes.subhi.iqamah)}
-                    </span>
-                </span>
-        </div>
-
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 1 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/noon.webp')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 1 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
-            <h2 class="z-10 {upcoming_solat === 1 ? 'text-white text-2xl' : 'text-primary-100 text-xl'} font-primary font-bold">
-                Dhuhr</h2>
-
-            <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 1 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        {formatTime(solahTimes.dhuhr.adhan)} • {formatTime(solahTimes.dhuhr.iqamah)}
-                    </span>
-                </span>
-        </div>
-
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full {upcoming_solat === 2 ? 'scale-110 shadow-xl' : ''} h-32 sm:aspect-square justify-center items-center gap-2 bg-[url('/images/evening.webp')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 2 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
-            <h2 class="z-10 font-primary font-bold {upcoming_solat === 2 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
-                'Asr</h2>
-
-            <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 2 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        {formatTime(solahTimes.asr.adhan)} • {formatTime(solahTimes.asr.iqamah)}
-                    </span>
-                </span>
-        </div>
-
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 3 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/late-evening.webp')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 3 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
-            <h2 class="z-10 font-primary font-bold {upcoming_solat === 3 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
-                Maghrib</h2>
-
-            <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 3 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        {formatTime(solahTimes.maghrib.adhan)} • {formatTime(solahTimes.maghrib.iqamah)}
-                    </span>
-                </span>
-        </div>
-
-        <div class="relative flex flex-col bg-white border shadow-sm rounded-xl w-full h-32 sm:aspect-square {upcoming_solat === 4 ? 'scale-110 shadow-xl' : ''} justify-center items-center gap-2 bg-[url('/images/night.webp')] bg-no-repeat bg-cover bg-center">
-            <div class="absolute inset-0 {upcoming_solat === 4 ? 'bg-gradient-to-r  from-transparent via-black/30' : 'bg-black/70'} blur-sm rounded-xl"></div>
-            <h2 class="z-10 font-primary font-bold {upcoming_solat === 4 ? 'text-white text-2xl' : 'text-primary-100 text-xl'}">
-                'Isha'h</h2>
-
-            <span
-                    class="z-10 inline-flex flex-nowrap items-center {upcoming_solat === 4 ? 'bg-white border-white' : 'bg-primary-100 border-primary-200'} border rounded-xl p-1 gap-1">
-    <Clock class="shrink-0 size-3 text-green-900"/>
-                    <span class="whitespace-nowrap font-medium text-green-900 text-xs">
-                        {formatTime(solahTimes.isha.adhan)} • {formatTime(solahTimes.isha.iqamah)}
-                    </span>
-                </span>
-        </div>
-
-    </div>
-
-    <div class="flex justify-center items-center w-full mt-8">
-        <span class="p-4 bg-primary-800 text-white rounded-md font-tertiary text-xs">Friday Sermon starts at 1:30 PM and Prayer commences at 2:00 PM</span>
-    </div>
-
-    <div class="flex gap-2 w-[80dvw] sm:mx-auto overflow-scroll scrollbar-hide">
-        {#each mosques as mosque}
-            <Badge class="cursor-pointer" variant="outline" onclick={() => {
-                    selectedMosque = mosque.id
-                    showMosqueModal = !showMosqueModal
-                }}>{mosque.label}</Badge>
-        {/each}
-    </div>
-
-    <div>
-    </div>
-</div>
+<PrayerTimesSection />
 <!-- End Prayer Times -->
-
 
 <!-- Upcoming Events Section -->
 <UpcomingEvents events={data?.events} />
