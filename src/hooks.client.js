@@ -96,7 +96,15 @@ function loadDeferredScripts() {
   // Delay non-critical scripts 
   deferScripts([
     // Preload any external scripts that will be needed later
-    { src: 'https://cdn.jsdelivr.net/npm/preline@2.0.0/dist/preline.min.js', options: { id: 'preline-js', async: true, defer: true } }
+    { 
+      src: 'https://cdn.jsdelivr.net/npm/preline@2.0.0/dist/preline.min.js', 
+      options: { 
+        id: 'preline-js', 
+        async: true, 
+        defer: true, 
+        nonce: typeof window !== 'undefined' ? window.APP_NONCE : undefined 
+      }
+    }
   ]);
 }
 

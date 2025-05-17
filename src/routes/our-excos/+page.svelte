@@ -161,37 +161,37 @@
 </script>
 
 <SEO
-    title="Our Executives"
+        title="Our Executives"
     description="Meet the executives of the Muslim Students Society of Nigeria, OAU Branch. Find contact information and committee details for various sessions."
     path="/our-excos"
     type="WebPage"
     images={[
         {
             url: data?.excos?.sessions?.find(s => s.session === selectedSession)?.executives?.[0]?.members?.[0]?.photo || 'https://mssnoau.sirv.com/og/og-excos.jpg',
-            width: 1200,
+        width: 1200,
             height: 630,
             alt: `MSSN OAU Executives ${selectedSession || ''}`
         }
     ]}
     schema={currentDisplaySessionData?.executives ? {
         "@context": "https://schema.org",
-        "@type": "WebPage",
+            "@type": "WebPage",
         "name": `Our Executives ${selectedSession ? `- ${selectedSession} Session` : ''} | MSSNOAU`,
         "description": `Meet the executives of the Muslim Students Society of Nigeria, OAU Branch for the ${selectedSession || 'current'} session.`,
         "url": `https://mssnoau.org/our-excos${selectedSession ? '?session=' + encodeURIComponent(selectedSession) : ''}`,
         "mainEntity": {
-            "@type": "Organization",
+                "@type": "Organization",
             "name": `MSSN OAU Executives - ${selectedSession || 'Current'} Session`,
             "member": currentDisplaySessionData.executives.flatMap(committee =>
-                committee.members.map(member => ({
-                    "@type": "Person",
-                    "name": member.name,
+            committee.members.map(member => ({
+                "@type": "Person",
+                "name": member.name,
                     "jobTitle": `${member.position}, ${committee.committee}`,
                     "image": member.photo,
                     "telephone": member.phone,
                     "email": member.email,
                     "worksFor": {
-                        "@type": "Organization",
+                    "@type": "Organization",
                         "name": "Muslim Students Society of Nigeria, OAU Branch"
                     }
                 }))

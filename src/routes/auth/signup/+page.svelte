@@ -112,7 +112,7 @@
         if (value && index < otpValues.length - 1) {
             if (browser) {
                 const nextInput = /** @type {HTMLInputElement | null} */ (document.getElementById(`otp-${index + 1}`));
-                if (nextInput) nextInput.focus();
+            if (nextInput) nextInput.focus();
             }
         }
         otpValues = [...otpValues];
@@ -126,7 +126,7 @@
         if (event.key === 'Backspace' && !otpValues[index] && index > 0) {
             if (browser) {
                 const prevInput = /** @type {HTMLInputElement | null} */ (document.getElementById(`otp-${index - 1}`));
-                if (prevInput) prevInput.focus();
+            if (prevInput) prevInput.focus();
             }
         }
     }
@@ -159,15 +159,15 @@
         if (parts.length > 0) cleaned = parts[0].substring(0, 3);
         if (parts.length > 1) cleaned += '/' + parts[1].substring(0, 4);
         if (parts.length > 2) cleaned += '/' + parts[2].substring(0, 3);
-        return cleaned;
+            return cleaned;
     }
-
+    
     /** @param {Event & {target: HTMLInputElement}} event */
     function handleMatricInput(event) {
         const target = event.target;
         matricNo = formatMatricNo(target.value);
     }
-
+    
     /** 
      * @param {string} value 
      * @returns {string} 
@@ -187,7 +187,7 @@
         isOtpLoading = true;
         otpError = null;
         setTimeout(() => {
-            isOtpLoading = false;
+        isOtpLoading = false;
             otpResent = true;
             toast.success("A new OTP has been sent to your email address.");
             setTimeout(() => otpResent = false, 5000);
@@ -233,21 +233,21 @@
     images={[
         {
             url: 'https://mssnoau.sirv.com/og/og-signup.jpg',
-            width: 1200,
+                width: 1200,
             height: 630,
             alt: 'MSSNOAU Signup Page'
         }
     ]}
     schema={{
         "@context": "https://schema.org",
-        "@type": "WebPage",
+    "@type": "WebPage",
         "name": "Create Account | MSSNOAU",
         "description": "Sign up for an account with the Muslim Students Society of Nigeria, OAU Branch.",
-        "publisher": {
-            "@type": "Organization",
+    "publisher": {
+        "@type": "Organization",
             "name": "MSSNOAU"
-        }
-    }}
+    }
+}}
     keywords={["create account mssnoau", "mssnoau signup", "join mssnoau", "muslim students oau account"]}
 />
 
@@ -271,12 +271,12 @@
                 {#if lastName && !isLastNameValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Last name is too short.</p>{/if}
             </div>
         </div>
-        <div>
+            <div>
             <Label for="email" class="">Email Address</Label>
             <Input id="email" type="email" bind:value={email} required aria-invalid={email && !isEmailValid ? true : undefined} placeholder="you@example.com" class=""/>
             {#if email && !isEmailValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Please enter a valid email.</p>{/if}
-        </div>
-        <div>
+            </div>
+            <div>
             <Label for="matricNo" class="">Matric No. <span class="text-xs text-gray-500">(Format: ABC/2020/123)</span></Label>
             <Input id="matricNo" type="text" bind:value={matricNo} oninput={handleMatricInput} aria-invalid={matricNo && !isMatricValid ? true : undefined} placeholder="Leave blank if not applicable" class=""/>
             {#if matricNo && !isMatricValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Invalid Matric No. format.</p>{/if}
@@ -288,8 +288,8 @@
         </div>
         {#if !matricNo && !referenceNo}
              <p class="text-orange-600 text-xs -mt-3 flex items-center"><Info class="w-3 h-3 mr-1 shrink-0" /> Please provide either a Matriculation Number or a Reference Number.</p>
-        {/if}
-        <div class="relative">
+                {/if}
+                <div class="relative">
             <Label for="password" class="">Password</Label>
             <Input id="password" type={showPassword ? 'text' : 'password'} bind:value={password} required aria-invalid={password && !isPasswordValid ? true : undefined} placeholder="Min. 8 characters" class=""/>
             <Button type="button" variant="ghost" size="icon" onclick={togglePasswordVisibility} class="absolute right-1 top-6 h-7 w-7 text-gray-500 hover:text-gray-700">
@@ -309,9 +309,9 @@
             {#if isLoading}<Loader2 class="mr-2 h-5 w-5 animate-spin" />{:else}<UserPlus class="mr-2 h-5 w-5" />Create Account{/if}
         </Button>
         <p class="text-sm text-center text-gray-600">
-            Already have an account? 
+                Already have an account?
             <a href="/auth/login" class="font-medium text-primary-600 hover:text-primary-700 hover:underline">Log in here</a>
-        </p>
+            </p>
     </form>
 </div>
 
@@ -336,8 +336,8 @@
                 <div class="space-y-4 pt-2">
                     <div class="grid grid-cols-6 gap-2 sm:gap-3">
                         {#each otpValues as value, i (i)}
-                            <Input 
-                                type="text" 
+                            <Input
+                                type="text"
                                 maxlength="1" 
                                 id={`otp-${i}`}
                                 bind:value={otpValues[i]} 
@@ -350,14 +350,14 @@
                                 inputmode="numeric"
                                 disabled={isOtpLoading}
                             />
-                        {/each}
+                            {/each}
                     </div>
                     {#if otpError}
                         <p class="text-red-600 text-sm flex items-center">
                             <AlertCircle class="w-4 h-4 mr-1.5 shrink-0" />
                             {otpError}
                         </p>
-                    {/if}
+                        {/if}
                     <p class="text-xs text-gray-500 text-center">
                         Didn't receive the code? 
                         <button 
@@ -368,7 +368,7 @@
                             {#if isOtpLoading && !otpResent}Resending...{:else if otpResent}Code Sent!{:else}Resend Code{/if}
                         </button>
                     </p>
-                </div>
+                    </div>
             {:else if signupError} <!-- This is the case for signupError and not success and not OTP -->
                 <div class="text-center py-4">
                     <AlertCircle class="h-12 w-12 text-red-500 mx-auto mb-3" />
@@ -384,7 +384,7 @@
                     <Button variant="outline" onclick={closeModalAndReset} disabled={isOtpLoading} class="w-full sm:w-auto">Cancel</Button>
                     <Button onclick={verifyOtp} disabled={!isOtpComplete || isOtpLoading} class="w-full sm:w-auto">
                         {#if isOtpLoading}<Loader2 class="mr-2 h-4 w-4 animate-spin" />{:else}Verify Email{/if}
-                    </Button>
+                        </Button>
                 {:else if signupError}
                     <Button onclick={closeModalAndReset} class="w-full">Close</Button>
                 {/if}

@@ -26,7 +26,7 @@ https://svelte.dev/e/js_parse_error -->
      * @property {Function} [footer] - Render function for the footer.
      */
     let {
-        open = $bindable(),
+        open = $bindable(false),
         title = '',
         description = '',
         side = 'bottom',
@@ -73,7 +73,7 @@ https://svelte.dev/e/js_parse_error -->
     <Sheet.Root bind:open={open} {onOpenChange} {closeOnEscape}>
         <Sheet.Content
             {side}
-            class="flex flex-col p-0 {contentClass}" 
+            class="flex flex-col p-0 max-h-[85dvh] {contentClass}" 
             portalProps={{ target: portalTarget }}
             aria-describedby={description ? 'sheet-description' : undefined}
             onInteractOutside={closeOnOutsideClick ? (e) => { e.preventDefault(); open = false; } : undefined}
@@ -95,7 +95,7 @@ https://svelte.dev/e/js_parse_error -->
                 </Sheet.Header>
             {/if}
 
-            <div class="flex-1 overflow-y-auto p-6">
+            <div class="flex-1 overflow-y-auto p-6 dialog-inner-content-scrollable">
                 {@render rest?.children?.()}
             </div>
 
@@ -109,7 +109,7 @@ https://svelte.dev/e/js_parse_error -->
 {:else}
     <Dialog.Root bind:open={open} {onOpenChange} {closeOnOutsideClick} {closeOnEscape}>
         <Dialog.Content
-            class="sm:max-w-md {contentClass}" 
+            class="sm:max-w-md flex flex-col {contentClass}" 
             portalProps={{ target: portalTarget }}
             aria-describedby={description ? 'dialog-description' : undefined}
         >
@@ -130,12 +130,12 @@ https://svelte.dev/e/js_parse_error -->
                 </Dialog.Close>
             {/if}
 
-            <div class="py-4">
+            <div class="flex-1 overflow-y-auto py-4 dialog-inner-content-scrollable">
                 {@render rest?.children?.()}
             </div>
 
             {#if rest?.footer}
-                <Dialog.Footer class="">
+                <Dialog.Footer class="mt-auto">
                     {@render rest?.footer?.()}
                 </Dialog.Footer>
             {/if}

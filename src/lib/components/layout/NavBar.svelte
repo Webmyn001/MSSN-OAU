@@ -11,6 +11,7 @@
     import {onMount} from 'svelte'
     import { Image } from '$lib/components/ui/image';
     import { browser } from '$app/environment';
+    import { toast } from 'svelte-sonner';
 
     let isOpen = $state(false);
     let isDropdownOpen = $state(false);
@@ -243,11 +244,17 @@
 
                                         <div class="flex flex-col space-y-1 mt-3 lg:mt-0">
                                             <div class="px-3 py-2 text-xs font-semibold text-primary-600 uppercase tracking-wider">Resources</div>
-                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="https://quiz.mssnoau.org">
+                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" 
+                                               href="#" 
+                                               onclick={(event) => { event.preventDefault(); toast.warning('Quiz feature is in development and is currently unavailable.'); }}
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
                                                 Quiz
                                             </a>
-                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="https://library.mssnoau.org">
+                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" 
+                                               href="#" 
+                                               onclick={(event) => { event.preventDefault(); toast.warning('E-Library feature is in development and is currently unavailable.'); }}
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
                                                 E-Library
                                             </a>

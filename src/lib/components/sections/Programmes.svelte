@@ -53,10 +53,10 @@
             const parentElement = activeTab.parentElement;
             if (parentElement) {
                 const parentRect = parentElement.getBoundingClientRect();
-                activeTabPosition.set({
-                    left: rect.left - parentRect.left,
-                    width: rect.width
-                });
+            activeTabPosition.set({
+                left: rect.left - parentRect.left,
+                width: rect.width
+            });
             }
         }
     }
@@ -116,6 +116,8 @@
 
                 <!-- Tab Navs with glassmorphism -->
                 <nav 
+                    role="tablist"
+                    aria-label="Programmes"
                     class="relative grid gap-4 mt-5 md:mt-10"
                     in:fly={{ y: 20, duration: 800, delay: 400 }}
                 >
@@ -129,6 +131,7 @@
                     {@const Icon = iconMap[programme.title] || BookOpenText}
                         <button 
                             type="button"
+                            role="tab"
                             onclick={() => {
                                 selectedEvent = programme.title;
                                 hoveredTab = null; // Reset hover state on click
@@ -182,7 +185,7 @@
                 >
                     <!-- Tab Content with enhanced transitions -->
                     <div>
-                        <div id="tabs-with-card-1" role="tabpanel" aria-labelledby="tabs-with-card-item-1">
+                        <div role="tabpanel" aria-labelledby={selectedEvent}>
                             <div class="relative overflow-hidden rounded-lg">
                                 {#key selectedImage}
                                     <div class="relative {imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} transition-all duration-700">

@@ -38,9 +38,8 @@
         <feDisplacementMap in="SourceGraphic" scale="30" />
     </filter>
 </svg>
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap');
-
+<style lang="postcss">
+    /* @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap'); */
 
     .scheherazade-new-semibold {
         font-family: "Scheherazade New", serif;

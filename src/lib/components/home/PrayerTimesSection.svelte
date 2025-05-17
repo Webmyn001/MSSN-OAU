@@ -37,7 +37,7 @@
     let shortHijrahDate = $state("");
 
         /** @type {PagePrayerTimes | undefined} */
-        const prayer_times_from_page_data = page.data.info?.prayer_times;
+        const prayer_times_from_page_data = page.data?.info?.prayer_times;
     
     // Get the upcoming prayer index for styling
     const upcoming_solat = $derived($upcomingPrayer === 'fajr' ? 0 : 
@@ -96,9 +96,23 @@
     // /** @type {Mosque[]} */
     // const mosques = mosquesData;
     const selectedMosqueObject = $derived($mosques.find(mosque => mosque.id === selectedMosque));
+
+    const handleBadgeClick = async (mosqueId) => {
+                        selectedMosque = mosqueId;
+                        if (!carouselLoadedForModal && $mosques.find(m => m.id === mosqueId)?.images?.length) {
+                            const carouselMod = await import('$lib/components/ui/carousel/index.js');
+                            Carousel = carouselMod;
+                            carouselLoadedForModal = true;
+                        }
+                        showMosqueModal = true;
+                    }
     
     // Carousel API instance
     let carouselAPI = $state();
+    
+    /** @type {import('$lib/components/ui/carousel/index.js') | null} */
+    let Carousel = $state(null);
+    let carouselLoadedForModal = $state(false);
     
     onMount(async () => {
         try {
@@ -129,44 +143,11 @@
         loaded = true;
     });
 
-        /** @type {import('$lib/components/ui/sheet/index.js') | null} */
-        let Sheet = $state(null);
-    /** @type {import('$lib/components/ui/carousel/index.js') | null} */
-    let Carousel = $state(null);
-    /** @type {import('$lib/components/ui/dialog/index.js') | null} */
-    let Dialog = $state(null);
-    let sheetAndCarouselLoaded = $state(false);
-    let dialogLoaded = $state(false);
-    let isLargeScreen = $state(false);
+    // Remove dynamic imports of Dialog and Sheet, and associated states (dialogLoaded, sheetAndCarouselLoaded, isLargeScreen)
+    // ResponsiveModal handles its own dynamic loading and screen size detection.
 
-    function checkScreen() {
-        isLargeScreen = window.matchMedia('(min-width: 640px)').matches;
-    }
-
-    onMount(() => {
-        checkScreen();
-        window.addEventListener('resize', checkScreen);
-        return () => window.removeEventListener('resize', checkScreen);
-    });
-
-    $effect(() => {
-        if (showMosqueModal) {
-            if (isLargeScreen && !dialogLoaded) {
-                import('$lib/components/ui/dialog/index.js').then((mod) => {
-                    Dialog = mod;
-                dialogLoaded = true;
-            });
-        } else if (!isLargeScreen && !sheetAndCarouselLoaded) {
-            Promise.all([
-                import('$lib/components/ui/sheet/index.js'),
-                import('$lib/components/ui/carousel/index.js')
-            ]).then(([sheetMod, carouselMod]) => {
-                Sheet = sheetMod;
-                Carousel = carouselMod;
-                sheetAndCarouselLoaded = true;
-            });
-        }
-    }});
+    // $effect for showMosqueModal is removed as ResponsiveModal handles its showing/hiding and dynamic parts.
+    // We only need to ensure Carousel is loaded when the modal is about to be shown.
 </script>
 
 <!-- Prayer Times Section with Glassmorphism -->
@@ -253,38 +234,13 @@
             
             <div class="flex flex-wrap gap-3 max-w-full overflow-x-auto py-2 scrollbar-hide">
                 {#each $mosques as mosque (mosque.id)} 
-                    {@const handleBadgeClick = async () => {
-                        selectedMosque = mosque.id;
-                        if (isLargeScreen) {
-                            if (!dialogLoaded) {
-                                const mod = await import('$lib/components/ui/dialog/index.js');
-                                Dialog = mod;
-                                dialogLoaded = true;
-                            }
-                            if (!Carousel) {
-                                const carouselMod = await import('$lib/components/ui/carousel/index.js');
-                                Carousel = carouselMod;
-                            }
-                        } else {
-                            if (!sheetAndCarouselLoaded) {
-                                const [sheetMod, carouselMod] = await Promise.all([
-                                    import('$lib/components/ui/sheet/index.js'),
-                                    import('$lib/components/ui/carousel/index.js')
-                                ]);
-                                Sheet = sheetMod;
-                                Carousel = carouselMod;
-                                sheetAndCarouselLoaded = true;
-                            }
-                        }
-                        showMosqueModal = true;
-                    }}
-                    <Badge
+                    <Badge 
                     href={undefined}
-                        class="cursor-pointer transition-all backdrop-blur-md bg-white/40 dark:bg-black/40 border border-white/30 dark:border-white/10 hover:bg-primary-100/80 hover:text-primary-900 px-4 py-2 text-sm"
+                        class="cursor-pointer transition-all backdrop-blur-md bg-white/40 dark:bg-black/40 border border-white/30 dark:border-white/10 hover:bg-primary-100/80 hover:text-primary-900 px-4 py-2 text-sm" 
                         variant="outline" 
                         role="button"
                         tabindex="0"
-                        onclick={handleBadgeClick}
+                        onclick={() => handleBadgeClick(mosque.id)}
                         onkeydown={/** @param {KeyboardEvent} e */ (e) => { if (e.key === 'Enter' || e.key === ' ') handleBadgeClick(); }}
                     >
                         {mosque.label}
@@ -292,234 +248,78 @@
                 {/each}
             </div>
         </div>
-    </div>
-    {/if}
 
-    <!-- Mosque Modal Implementation with Enhanced Design -->
 {#if showMosqueModal && selectedMosqueObject}
-{#if isLargeScreen && dialogLoaded && Carousel}
-    <Dialog.Root bind:open={showMosqueModal}>
-        <Dialog.Content class="sm:max-w-[650px] rounded-xl border border-primary-100 shadow-xl backdrop-blur-sm bg-white/95 p-0 overflow-hidden">
-            <!-- Header with gradient background -->
-            <div class="relative">
-                <!-- Background gradient overlay -->
-                <div class="absolute inset-0 bg-gradient-to-b from-primary-800/90 to-primary-700/90 h-24"></div>
-                
-                <Dialog.Header class="relative z-10 px-6 pt-6 pb-12">
-                    <Dialog.Title class="font-primary text-white text-2xl font-bold">{selectedMosqueObject.label}</Dialog.Title>
-                    <Dialog.Description class="font-tertiary text-white/90 text-sm flex items-center mt-1">
-                        <MapPin class="inline-block mr-1 h-3.5 w-3.5" />
-                        {selectedMosqueObject.address}
-                    </Dialog.Description>
-                </Dialog.Header>
+            {#await import('$lib/components/layout/ResponsiveModal.svelte') then module}
+                {@const ResponsiveModal = module.default}
+                <ResponsiveModal
+                    bind:open={showMosqueModal}
+                    modalTitle={selectedMosqueObject.name || selectedMosqueObject.label}
+                    modalDescription={selectedMosqueObject.address || 'Details for ' + (selectedMosqueObject.name || selectedMosqueObject.label)}
+                >
+                    {#snippet header()}
+                        <div class="flex flex-col gap-1.5 text-center sm:text-left border-b pb-4 mb-4">
+                            <h3 class="text-lg font-semibold leading-none tracking-tight">
+                                {selectedMosqueObject.name || selectedMosqueObject.label}
+                            </h3>
+                            {#if selectedMosqueObject.address}
+                                <p class="text-sm text-muted-foreground">
+                                    <MapPinned class="inline-block h-4 w-4 mr-1" /> {selectedMosqueObject.address}
+                                </p>
+                            {/if}
             </div>
-            
-            <!-- Carousel positioned to overlap the header -->
-            <div class="relative -mt-8 px-4">
-                <div class="rounded-xl overflow-hidden shadow-lg border border-white/20">
-                    <Carousel.Root
-                        bind:api={carouselAPI}
-                        plugins={[AutoplayModule({ delay: 5000 })]}
-                        class="w-full"
-                        opts={{ align: "center", loop: true }}
-                    >
-                        <Carousel.Content class="w-full">
-                            {#each selectedMosqueObject.images as image, i}
-                                <Carousel.Item class="basis-full">
-                                    <div class="relative group">
-                                        <img 
-                                            class="h-[40dvh] sm:h-[50dvh] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            src={image || "/placeholder.svg"}
-                                            alt={`${selectedMosqueObject.label} ${i + 1}`}
-                                            loading="lazy"
-                                        />
-                                        <!-- Image counter badge -->
-                                        <div class="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
-                                            {i + 1} / {selectedMosqueObject.images.length}
-                                        </div>
-                                    </div>
-                                </Carousel.Item>
-                            {/each}
-                        </Carousel.Content>
-                        
-                        <!-- Enhanced carousel controls -->
-                        <Carousel.Previous class="left-2 h-8 w-8 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-primary-700 transition-colors" />
-                        <Carousel.Next class="right-2 h-8 w-8 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-primary-700 transition-colors" />
-                        
-                        <!-- Carousel indicators -->
-                        <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1 z-10">
-                            {#each selectedMosqueObject.images as _, i}
-                                <button 
-                                    class="w-2 h-2 rounded-full transition-all duration-300 {carouselAPI?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
-                                    onclick={() => carouselAPI?.scrollTo(i)}
-                                    aria-label={`Go to slide ${i + 1}`}
-                                ></button>
-                            {/each}
-                        </div>
-                    </Carousel.Root>
-                </div>
-            </div>
-            
-            <!-- Additional mosque information -->
-            <div class="px-6 py-4">
-                {#if selectedMosqueObject.description}
-                    <p class="text-gray-700 text-sm leading-relaxed mb-4">{selectedMosqueObject.description}</p>
-                {/if}
-                
-                <!-- Prayer times if available -->
-                {#if selectedMosqueObject.prayerTimes}
-                    <div class="bg-primary-50/50 rounded-lg p-3 mb-4">
-                        <h3 class="text-sm font-medium text-primary-800 mb-2">Prayer Times</h3>
-                        <div class="grid grid-cols-5 gap-2 text-xs">
-                            {#each Object.entries(selectedMosqueObject.prayerTimes) as [prayer, time]}
-                                <div class="text-center">
-                                    <div class="font-medium text-primary-700">{prayer}</div>
-                                    <div class="text-gray-600">{time}</div>
-                                </div>
-                            {/each}
-                        </div>
-                    </div>
-                {/if}
-            </div>
-            
-            <Dialog.Footer class="flex justify-between items-center gap-3 px-6 py-4 border-t border-gray-100">
-                <div class="flex items-center text-xs text-gray-500">
-                    <Clock class="h-3.5 w-3.5 mr-1" />
-                    Open for all five daily prayers
-                </div>
-                
-                <div class="flex gap-2">
-                    <Dialog.Close class={buttonVariants({ variant: "outline", size: "sm" })}>
-                        Close
-                    </Dialog.Close>
-                    {#if selectedMosqueObject.url}
-                        <Button 
-                            class="bg-primary-800 hover:bg-primary-700 text-white transition-colors"
-                            size="sm"
-                            onclick={() => window.open(selectedMosqueObject.url, '_blank')}
-                        >
-                            <MapPinned class="size-4 mr-1.5" />
-                            View on Maps
-                        </Button>
-                    {/if}
-                </div>
-            </Dialog.Footer>
-        </Dialog.Content>
-    </Dialog.Root>
-{:else if !isLargeScreen && sheetAndCarouselLoaded}
-    <Sheet.Root bind:open={showMosqueModal}>
-        <Sheet.Content class="scrollbar-hide rounded-t-xl border-t border-primary-100 shadow-xl backdrop-blur-sm bg-white/95" onCloseAutoFocus={() => {}} side="bottom">
-            <!-- Pull indicator -->
-            <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4 mt-2"></div>
-            
-            <!-- Header with gradient background -->
-            <div class="relative">
-                <!-- Background gradient overlay -->
-                <div class="absolute inset-0 bg-gradient-to-r from-primary-800/90 to-primary-700/90 h-20 rounded-t-xl"></div>
-                
-                <Sheet.Header class="relative z-10 px-4 pt-4 pb-10">
-                    <Sheet.Title class="font-primary text-white text-xl font-bold">{selectedMosqueObject.label}</Sheet.Title>
-                    <Sheet.Description class="font-tertiary text-white/90 text-xs flex items-center mt-1">
-                        <MapPin class="inline-block mr-1 h-3.5 w-3.5" />
-                        {selectedMosqueObject.address}
-                    </Sheet.Description>
-                </Sheet.Header>
-            </div>
-            
-            <!-- Carousel positioned to overlap the header -->
-            <div class="relative -mt-6 px-4">
-                <div class="rounded-xl overflow-hidden shadow-lg border border-white/20">
-                    <Carousel.Root
-                        bind:api={carouselAPI}
-                        plugins={[AutoplayModule({ delay: 5000 })]}
-                        class="w-full"
-                        opts={{ align: "center", loop: true }}
-                    >
-                        <Carousel.Content class="w-full">
-                            {#each selectedMosqueObject.images as image, i}
-                                <Carousel.Item class="basis-full">
-                                    <div class="relative">
-                                        <img 
-                                            class="h-[35dvh] w-full object-cover"
-                                            src={image || "/placeholder.svg"}
-                                            alt={`${selectedMosqueObject.label} ${i + 1}`}
-                                            loading="lazy"
-                                        />
-                                        <!-- Image counter badge -->
-                                        <div class="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
-                                            {i + 1} / {selectedMosqueObject.images.length}
-                                        </div>
-                                    </div>
-                                </Carousel.Item>
-                            {/each}
-                        </Carousel.Content>
-                        
-                        <!-- Enhanced carousel controls -->
-                        <Carousel.Previous class="left-2 h-7 w-7 rounded-full bg-black/50 backdrop-blur-sm text-white" />
-                        <Carousel.Next class="right-2 h-7 w-7 rounded-full bg-black/50 backdrop-blur-sm text-white" />
-                        
-                        <!-- Carousel indicators -->
-                        <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1 z-10">
-                            {#each selectedMosqueObject.images as _, i}
-                                <button 
-                                    class="w-2 h-2 rounded-full transition-all duration-300 {carouselAPI?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
-                                    onclick={() => carouselAPI?.scrollTo(i)}
-                                    aria-label={`Go to slide ${i + 1}`}
-                                ></button>
-                            {/each}
-                        </div>
-                    </Carousel.Root>
-                </div>
-            </div>
-            
-            <!-- Additional mosque information -->
-            <div class="px-4 py-4">
-                {#if selectedMosqueObject.description}
-                    <p class="text-gray-700 text-sm leading-relaxed mb-4">{selectedMosqueObject.description}</p>
-                {/if}
-                
-                <!-- Prayer times if available -->
-                {#if selectedMosqueObject.prayerTimes}
-                    <div class="bg-primary-50/50 rounded-lg p-3 mb-4">
-                        <h3 class="text-sm font-medium text-primary-800 mb-2">Prayer Times</h3>
-                        <div class="grid grid-cols-5 gap-2 text-xs">
-                            {#each Object.entries(selectedMosqueObject.prayerTimes) as [prayer, time]}
-                                <div class="text-center">
-                                    <div class="font-medium text-primary-700">{prayer}</div>
-                                    <div class="text-gray-600">{time}</div>
-                                </div>
-                            {/each}
-                        </div>
-                    </div>
-                {/if}
-            </div>
-            
-            <Sheet.Footer class="flex-col gap-3 px-4 pb-8">
-                <div class="flex items-center text-xs text-gray-500 mb-3 justify-center">
-                    <Clock class="h-3.5 w-3.5 mr-1" />
-                    Open for all five daily prayers
-                </div>
-                
-                <div class="flex gap-2 w-full">
-                    <Sheet.Close class={buttonVariants({ variant: "outline", size: "default", class: "flex-1" })}>
-                        Close
-                    </Sheet.Close>
-                    {#if selectedMosqueObject.url}
-                        <Button 
-                            class="bg-primary-800 hover:bg-primary-700 text-white flex-1"
-                            onclick={() => window.open(selectedMosqueObject.url, '_blank')}
-                        >
-                            <MapPinned class="size-4 mr-1.5" />
-                            View on Maps
-                        </Button>
-                    {/if}
-                </div>
-            </Sheet.Footer>
-        </Sheet.Content>
-    </Sheet.Root>
-{/if}
-{/if}
+                    {/snippet}
 
+                    <!-- Default slot content -->
+                    <div class="py-2 space-y-4">
+                        {#if carouselLoadedForModal && Carousel && selectedMosqueObject.images && selectedMosqueObject.images.length > 0}
+                            <Carousel.Root plugins={[AutoplayModule({ delay: 3000, stopOnInteraction: true })]} class="w-full max-w-xl mx-auto rounded-lg overflow-hidden shadow-lg" bind:api={carouselAPI}>
+                                <Carousel.Content>
+                            {#each selectedMosqueObject.images as image, i}
+                                        <Carousel.Item>
+                                            <img src={image} alt={`${selectedMosqueObject.name || selectedMosqueObject.label} - Image ${i + 1}`} class="w-full h-64 object-cover" />
+                                </Carousel.Item>
+                            {/each}
+                        </Carousel.Content>
+                                {#if selectedMosqueObject.images.length > 1}
+                                    <Carousel.Previous class="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                                    <Carousel.Next class="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                                {/if}
+                    </Carousel.Root>
+                        {:else if selectedMosqueObject.images && selectedMosqueObject.images.length > 0}
+                            <p class="text-center text-muted-foreground">Loading images...</p>
+                        {/if}
+            
+                {#if selectedMosqueObject.description}
+                            <p class="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{selectedMosqueObject.description}</p>
+                {/if}
+                
+                        {#if selectedMosqueObject.prayerTimes && Object.keys(selectedMosqueObject.prayerTimes).length > 0}
+                            <div class="mt-4 pt-4 border-t">
+                                <h4 class="font-semibold mb-2 text-center">Prayer Times</h4>
+                                <ul class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                            {#each Object.entries(selectedMosqueObject.prayerTimes) as [prayer, time]}
+                                        <li class="flex justify-between">
+                                            <span class="capitalize font-medium">{prayer}:</span>
+                                            <span>{typeof time === 'string' ? formatTime(time) : time}</span>
+                                        </li>
+                            {/each}
+                                </ul>
+                    </div>
+                {/if}
+            </div>
+            
+                    {#snippet footer()}
+                        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 border-t pt-4 mt-4">
+                            <Button variant="outline" on:click={() => showMosqueModal = false}>Close</Button>
+                        </div>
+                    {/snippet}
+                </ResponsiveModal>
+            {/await}
+                {/if}
+                
+                    </div>
+                {/if}
 </section>
 
 <style>

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { page } from '$app/stores';
     import { Image } from '$lib/components/ui/image';
     
@@ -98,34 +98,14 @@
     </filter>
 </svg>
 
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap');
+<style lang="postcss">
+    :global(body.error-page) {
+        @apply bg-gradient-to-br from-primary-50 via-primary-100 to-secondary-100;
+    }
+    /* @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap'); */
 
     .scheherazade-new-semibold {
         font-family: "Scheherazade New", serif;
         font-weight: 600;
-        font-style: normal;
-    }
-
-    #paper {
-        position: relative;
-        display: flex;
-        width: 100%;
-        min-height: calc((1vw + 1vh) * 50);
-        margin: 0 auto;
-        padding: 4em 2em;
-        box-shadow: 2px 3px 20px rgba(0, 0, 0, 0.3), 0 0 60px rgba(13, 94, 53, 0.1) inset;
-        background: #fffef5;
-        filter: url(#wavy-error);
-    }
-    
-    /* Add subtle animation to the page number */
-    @keyframes pulse {
-        0%, 100% { opacity: 0.1; }
-        50% { opacity: 0.2; }
-    }
-    
-    .text-primary-700\/10 {
-        animation: pulse 4s ease-in-out infinite;
     }
 </style> 

@@ -34,17 +34,17 @@
                 </a>
                 
                 <p class="mt-6 text-gray-600 text-sm leading-relaxed">
-                    The Muslim Students' Society of Nigeria (MSSN) at Obafemi Awolowo University (OAU) is a vibrant student 
-                    organization dedicated to promoting Islamic values and fostering a sense of community.
+                    The Muslim Students' Society of Nigeria (MSSN) at Obafemi Awolowo University (Great Ìfẹ́) is a strong and vibrant student 
+                    organization dedicated to promoting Islamic values and strengthening the bonds of brotherhood and community.
                 </p>
             </div>
             <!-- End Col -->
 
             <div class="col-span-1">
-                <h4 class="font-semibold text-primary-700 font-primary mb-4 relative inline-block">
+                <h2 class="font-semibold text-primary-700 font-primary mb-4 relative inline-block">
                     About Us
                     <span class="absolute -bottom-1 left-0 w-8 h-0.5 bg-primary-700/70 rounded-full"></span>
-                </h4>
+                </h2>
 
                 <div class="mt-3 grid space-y-3 font-secondary">
                     <p>
@@ -67,10 +67,10 @@
             <!-- End Col -->
 
             <div class="col-span-1">
-                <h4 class="font-semibold text-primary-700 font-primary mb-4 relative inline-block">
+                <h2 class="font-semibold text-primary-700 font-primary mb-4 relative inline-block">
                     Quick Links
                     <span class="absolute -bottom-1 left-0 w-8 h-0.5 bg-primary-700/70 rounded-full"></span>
-                </h4>
+                </h2>
 
                 <div class="mt-3 grid space-y-3 font-secondary">
                     <p>
@@ -84,19 +84,23 @@
                            href="/#prayer-times">Prayer Times</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-                           href="/">Quiz</a></p>
+                           href="#" 
+                           onclick={(event) => { event.preventDefault(); toast.warning('Quiz feature is in development and is currently unavailable.'); }}
+                        >Quiz</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-                           href="/">E-Library</a></p>
+                           href="#" 
+                           onclick={(event) => { event.preventDefault(); toast.warning('E-Library feature is in development and is currently unavailable.'); }}
+                        >E-Library</a></p>
                 </div>
             </div>
             <!-- End Col -->
 
             <div class="col-span-2">
-                <h4 class="font-semibold text-primary-700 font-primary mb-4 relative inline-block">
+                <h2 class="font-semibold text-primary-700 font-primary mb-4 relative inline-block">
                     Join our Newsletter
                     <span class="absolute -bottom-1 left-0 w-8 h-0.5 bg-primary-700/70 rounded-full"></span>
-                </h4>
+                </h2>
 
                 <form>
                     <div class="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:gap-3 bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-sm border border-primary-100/50">

@@ -94,9 +94,9 @@
                                     alt={post.authors[0].name} 
                                 />
                                 <div>
-                                    <h5 class="text-sm text-gray-700 font-secondary">
+                                    <p class="text-sm text-gray-700 font-secondary">
                                         By {post.authors[0].name} {post.authors.length > 1 ? "and " + (post.authors.length - 1) + " others" : ""}
-                                    </h5>
+                                    </p>
                                 </div>
                             </div>
                             
@@ -121,6 +121,7 @@
             <a 
                 class="py-3 px-5 inline-flex items-center gap-x-2 text-sm font-medium font-secondary rounded-xl border border-primary-200 bg-primary-700 text-white shadow-sm hover:bg-primary-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 href="/blog"
+                aria-label="Read more from our blog"
             >
                 Read more
                 <ChevronRight class="size-4" />

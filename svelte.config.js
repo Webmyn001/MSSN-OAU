@@ -18,6 +18,7 @@ const config = {
 		},
 		csp: {
 			mode: 'auto',
+			useSvelteKitNonce: true,
 			directives: {
 				'default-src': ["'self'"],
 				'script-src': [

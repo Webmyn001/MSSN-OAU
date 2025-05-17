@@ -1,6 +1,6 @@
 <script>
 	import copyTextToClipboard from '$lib/utils/copy';
-    import { page } from '$app/state'; // Changed from $app/state for Svelte 5 reactivity
+    import { page } from '$app/state'; // Corrected import
 	import { toast } from 'svelte-sonner';
 	import { Copy } from '@lucide/svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
