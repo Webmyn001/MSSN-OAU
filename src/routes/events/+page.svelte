@@ -206,9 +206,9 @@
     let hoveredEvent = $state(null);
 
     /** @type {HTMLButtonElement | null} */
-    let filterButtonElement = null; 
+    let filterButtonElement = $state(null); 
     /** @type {HTMLDivElement | null} */
-    let filterPanelElement = null;  
+    let filterPanelElement = $state(null);  
 
     const categories = $derived(
         ["all", ...new Set((events || []).filter(e => e.category).map(e => /** @type {string} */ (e.category)))]
