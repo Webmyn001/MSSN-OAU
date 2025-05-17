@@ -2,6 +2,7 @@
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import SEO from "$lib/components/SEO.svelte";
     import { onMount } from "svelte";
+	import { toast } from "svelte-sonner";
     let { data } = $props();
     
     // Define the committees variable and showAll state
@@ -138,7 +139,9 @@
         </div>
                         {/if}
                         
-                        <a href="#" class="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-600">
+                        <a href="#"
+                        onclick={(event) => { event.preventDefault(); toast.warning('Committee feature is in development and is currently unavailable.'); }}
+                        class="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-600">
                             Join this committee
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

@@ -58,10 +58,13 @@
                            href="/our-advisors">Our Advisors</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-                           href="/contact">FAQs & Contact Us</a></p>
+                           href="/programmes">Programmes</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-                           href="https://mssnoau.betteruptime.com/">Status</a></p>
+                            href="/events">Events</a></p>
+                    <p>
+                        <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
+                           href="/contact">FAQs & Contact Us</a></p>
                 </div>
             </div>
             <!-- End Col -->
@@ -92,6 +95,9 @@
                            href="#" 
                            onclick={(event) => { event.preventDefault(); toast.warning('E-Library feature is in development and is currently unavailable.'); }}
                         >E-Library</a></p>
+                    <p>
+                        <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
+                           href="https://mssnoau.betteruptime.com/">Status</a></p>
                 </div>
             </div>
             <!-- End Col -->
