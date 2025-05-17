@@ -79,13 +79,13 @@
         
         setTimeout(() => {
             if (selectedProgramme) { // Ensure selectedProgramme is still valid
-                programmeDetails = {
+            programmeDetails = {
                     ...selectedProgramme,
                     description: selectedProgramme.description || selectedProgramme.text,
                     schedule: selectedProgramme.schedule || [],
                     coordinators: selectedProgramme.coordinators || [],
                     benefits: selectedProgramme.benefits || []
-                };
+            };
             }
             isLoading = false;
         }, 500);
@@ -103,17 +103,17 @@
 </script>
 
 <SEO
-    title="Our Programmes"
+        title="Our Programmes"
     description="Explore the diverse programmes and activities offered by MSSNOAU, designed to foster spiritual growth, academic excellence, and community engagement for Muslim students at OAU."
     path="/programmes"
     type="WebPage" 
     images={[
-        {
+      {
             url: 'https://i.ibb.co/zbWfh5B/home.webp', // Consider a more specific image for programmes
-            width: 1200,
-            height: 640,
+        width: 1200,
+        height: 640,
             alt: 'MSSNOAU Programmes'
-        }
+      }
     ]}
     keywords={["mssnoau programmes", "mssn oau events", "islamic activities oau", "muslim student programmes oau", "oau mssn activities"]}
 />
@@ -208,75 +208,75 @@
         >
             <!-- Default slot for main content -->
             <div class="py-6 px-1">
-                {#if isLoading}
-                    <div class="flex flex-col items-center justify-center py-12">
-                        <Loader2 class="size-12 text-primary-700 animate-spin mb-4" />
-                        <p class="text-gray-600">Loading programme details...</p>
-                    </div>
-                {:else if programmeDetails}
-                    <div class="space-y-6">
+            {#if isLoading}
+                <div class="flex flex-col items-center justify-center py-12">
+                    <Loader2 class="size-12 text-primary-700 animate-spin mb-4" />
+                    <p class="text-gray-600">Loading programme details...</p>
+                </div>
+            {:else if programmeDetails}
+                <div class="space-y-6">
                         <div class="flex justify-center my-4">
                             <div class="p-2 rounded-lg bg-primary-50 border border-primary-100 shadow-sm">
-                                <img 
+                            <img 
                                     src={programmeDetails.image || "/images/placeholder.webp"} 
-                                    alt={programmeDetails.title}
+                                alt={programmeDetails.title}
                                     class="h-28 w-28 object-contain rounded-md" 
-                                />
-                            </div>
+                            />
                         </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Description</h3>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Description</h3>
                             <div class="prose prose-sm max-w-none text-gray-700">{@html programmeDetails.description || 'No description available.'}</div>
-                        </div>
-                        
+                    </div>
+                    
                         {#if programmeDetails.schedule && programmeDetails.schedule.length > 0}
-                            <div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Schedule</h3>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Schedule</h3>
                                 <div class="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
                                     {#each programmeDetails.schedule as item (item.day + item.time) }
                                         <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-                                            <div>
-                                                <p class="font-medium text-gray-800">{item.day}</p>
+                                    <div>
+                                        <p class="font-medium text-gray-800">{item.day}</p>
                                                 <p class="text-xs text-gray-500">{item.time}</p>
-                                            </div>
+                                    </div>
                                             <p class="text-sm text-gray-600 sm:text-right">{item.venue || 'Online'}</p>
-                                        </div>
-                                    {/each}
                                 </div>
-                            </div>
+                            {/each}
+                        </div>
+                    </div>
                         {/if}
-
+                    
                         {#if programmeDetails.coordinators && programmeDetails.coordinators.length > 0}
-                            <div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Coordinators</h3>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Coordinators</h3>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {#each programmeDetails.coordinators as coordinator (coordinator.name)}
                                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                            <p class="font-medium text-gray-800">{coordinator.name}</p>
+                                        <p class="font-medium text-gray-800">{coordinator.name}</p>
                                             {#if coordinator.role}<p class="text-xs text-gray-500">{coordinator.role}</p>{/if}
                                             {#if coordinator.contact}<p class="text-xs text-primary-600 hover:underline"><a href="tel:{coordinator.contact}">{coordinator.contact}</a></p>{/if}
-                                        </div>
-                                    {/each}
                                 </div>
-                            </div>
+                            {/each}
+                        </div>
+                    </div>
                         {/if}
-
+                    
                         {#if programmeDetails.benefits && programmeDetails.benefits.length > 0}
-                            <div>
+                    <div>
                                 <h3 class="text-lg font-medium text-gray-900 mb-2">Benefits/Objectives</h3>
                                 <ul class="list-disc list-inside space-y-1.5 text-gray-700 pl-2">
                                     {#each programmeDetails.benefits as benefit (benefit)}
-                                        <li>{benefit}</li>
-                                    {/each}
-                                </ul>
-                            </div>
-                        {/if}
-
+                                <li>{benefit}</li>
+                            {/each}
+                        </ul>
+                </div>
+            {/if}
+            
                         {#if !programmeDetails.description && !(programmeDetails.schedule && programmeDetails.schedule.length > 0) && !(programmeDetails.coordinators && programmeDetails.coordinators.length > 0) && !(programmeDetails.benefits && programmeDetails.benefits.length > 0)}
                             <p class="text-center text-gray-500 py-8">More details coming soon for this programme.</p>
                         {/if}
-                    </div>
-                {/if}
+                </div>
+            {/if}
             </div>
 
             {#snippet footer()}

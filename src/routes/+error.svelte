@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { Image } from '$lib/components/ui/image';
     
     let { data } = $props();
     
-    let statusCode = $page.status;
-    let message = $state($page.error?.message || 'Something went wrong');
+    let statusCode = page.status;
+    let message = $state(page.error?.message || 'Something went wrong');
     
     // Handle common status codes with more friendly messages
     const statusMessages = {
@@ -100,7 +100,7 @@
 
 <style lang="postcss">
     :global(body.error-page) {
-        @apply bg-gradient-to-br from-primary-50 via-primary-100 to-secondary-100;
+        @apply bg-gradient-to-br from-primary-50 via-primary-100 to-primary-200;
     }
     /* @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap'); */
 

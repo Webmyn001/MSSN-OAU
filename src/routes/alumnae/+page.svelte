@@ -19,17 +19,17 @@
 </script>
 
 <SEO
-    title="Alumnae Reconnect"
+        title="Alumnae Reconnect"
     description="Reconnect with the Muslim Students Society of Nigeria, OAU Branch. Share how you can contribute to our growth and support current students."
     path="/alumnae"
     type="WebPage"
     images={[
-        {
-            url: 'https://i.ibb.co/4sznVXp/alumnae.webp',
-            width: 1200,
-            height: 640,
+      {
+        url: 'https://i.ibb.co/4sznVXp/alumnae.webp',
+        width: 1200,
+        height: 640,
             alt: 'MSSNOAU Alumnae Reconnect'
-        }
+      }
     ]}
     keywords={["mssnoau alumnae", "oau muslim alumnae", "mssn oau give back", "support mssnoau", "mssn oau alumni"]}
 />

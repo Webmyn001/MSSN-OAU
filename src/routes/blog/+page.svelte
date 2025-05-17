@@ -85,15 +85,15 @@
 </script>
 
 <SEO
-    title="Blog"
-    description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+        title="Blog"
+        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
     path="/blog" 
     type="WebPage"
     images={[
-        {
-            url: 'https://i.ibb.co/zbWfh5B/home.webp',
-            width: 1200,
-            height: 640,
+      {
+        url: 'https://i.ibb.co/zbWfh5B/home.webp',
+        width: 1200,
+        height: 640,
             alt: 'MSSNOAU Blog'
         }
     ]}

@@ -60,8 +60,8 @@
         setTimeout(() => {
             isLoading = false;
             if (email === "test@example.com" && password === "password123") {
-                showOtpScreen = true;
-                showModal = true; 
+            showOtpScreen = true;
+            showModal = true;
             } else if (email === "error@example.com") {
                 loginError = "This account has been suspended.";
                 showModal = true;
@@ -91,7 +91,7 @@
         if (value && index < otpValues.length - 1) {
             if (browser) {
                 const nextInput = /** @type {HTMLInputElement | null} */ (document.getElementById(`otp-${index + 1}`));
-                if (nextInput) nextInput.focus();
+            if (nextInput) nextInput.focus();
             }
         }
         otpValues = [...otpValues]; // Trigger reactivity for array mutation
@@ -105,7 +105,7 @@
         if (event.key === 'Backspace' && !otpValues[index] && index > 0) {
             if (browser) {
                 const prevInput = /** @type {HTMLInputElement | null} */ (document.getElementById(`otp-${index - 1}`));
-                if (prevInput) prevInput.focus();
+            if (prevInput) prevInput.focus();
             }
         }
     }
@@ -132,7 +132,7 @@
         isOtpLoading = true; 
         otpError = null;
         setTimeout(() => {
-            isOtpLoading = false;
+        isOtpLoading = false;
             otpResent = true;
             toast.success("A new OTP has been sent to your email.");
             setTimeout(() => otpResent = false, 5000);
@@ -178,21 +178,21 @@
     images={[
         {
             url: 'https://mssnoau.sirv.com/og/og-login.jpg',
-            width: 1200,
+                width: 1200,
             height: 630,
             alt: 'MSSNOAU Login Page'
-        }
+            }
     ]}
     schema={{
         "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Log In | MSSNOAU",
+    "@type": "WebPage",
+    "name": "Log In | MSSNOAU",
         "description": "Log in to your MSSNOAU account.",
-        "publisher": {
-            "@type": "Organization",
+    "publisher": {
+        "@type": "Organization",
             "name": "MSSNOAU"
-        }
-    }}
+    }
+}}
     keywords={["mssnoau login", "mssn oau login", "access mssnoau account", "muslim students oau login"]}
 />
 
@@ -258,9 +258,9 @@
                 Sign In
             {/if}
         </Button>
-
+        
         <div class="text-center text-sm text-gray-600">
-            Don't have an account? 
+                Don't have an account?
             <a href="/auth/signup" class="font-medium text-primary-600 hover:text-primary-700 hover:underline">Sign up here</a>
         </div>
     </form>
@@ -288,8 +288,8 @@
                 <div class="space-y-4 pt-2">
                     <div class="grid grid-cols-6 gap-2 sm:gap-3">
                         {#each otpValues as value, i (i)}
-                            <Input 
-                                type="text" 
+                            <Input
+                                type="text"
                                 maxlength="1" 
                                 id={`otp-${i}`}
                                 bind:value={otpValues[i]} 
@@ -302,22 +302,22 @@
                                 inputmode="numeric"
                                 disabled={isOtpLoading}
                             />
-                        {/each}
-                    </div>
-                    {#if otpError}
+                            {/each}
+                        </div>
+                        {#if otpError}
                         <p class="text-red-600 text-sm flex items-center">
                             <AlertCircle class="w-4 h-4 mr-1.5 shrink-0" />
                             {otpError}
                         </p>
-                    {/if}
-                </div>
+                        {/if}
+                    </div>
             {:else if loginError}
                 <div class="text-center py-6">
                     {#if connectionError}
                         <MailWarning class="h-16 w-16 text-destructive mx-auto mb-4" />
-                    {:else}
+                        {:else}
                         <AlertCircle class="h-16 w-16 text-destructive mx-auto mb-4" />
-                    {/if}
+                        {/if}
                     <p class="text-gray-700">{loginError || "An unexpected error occurred."}</p>
                 </div>
             {/if}
@@ -331,7 +331,7 @@
                     </Button>
                     <Button onclick={verifyOtp} disabled={isOtpLoading || !isOtpComplete} class="w-full sm:w-auto">
                         {#if isOtpLoading && !isOtpComplete} <Loader2 class="size-4 mr-2 animate-spin" /> {:else if isOtpLoading && isOtpComplete} <Loader2 class="size-4 mr-2 animate-spin" /> {/if}                        Verify OTP
-                    </Button>
+                        </Button>
                 {:else if loginError && !loginSuccess}
                     <Button onclick={closeModalAndReset} class="w-full">Close</Button>
                 {/if}

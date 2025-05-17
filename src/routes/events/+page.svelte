@@ -1,19 +1,20 @@
-<!-- @migration-task Error while migrating Svelte code: Unexpected token
-https://svelte.dev/e/js_parse_error -->
 <script>
     import {Button, buttonVariants} from "$lib/components/ui/button/index.js";
-    import {format, register} from 'timeago.js'
+    import {format, register} from 'timeago.js';
     import {toast} from "svelte-sonner";
     import {formatDate, isPastDate, months} from "$lib/utils/dates.js";
     import Seo from "$lib/components/SEO.svelte";
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import {onMount} from "svelte";
+    import {onMount, tick} from "svelte";
     import slugify from "$lib/utils/slugify.js";
     import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
     import * as Tabs from "$lib/components/ui/tabs/index.js";
     import { browser } from '$app/environment';
-    import { CalendarDays, MapPin, Ticket, ExternalLink, X, Info, UserCircle } from '@lucide/svelte';
-
+    import { 
+        CalendarDays, MapPin, Ticket, ExternalLink, X, Info, UserCircle, 
+        Calendar, Clock, Tag, Users, ChevronRight, Filter, Search
+    } from '@lucide/svelte';
+    import { fade, fly, scale } from 'svelte/transition';
 
     /** @type {{data: any}} */
     let { data } = $props(); 
@@ -171,14 +172,12 @@ https://svelte.dev/e/js_parse_error -->
         }
     }
 
-
     /** @type {ProcessedEvents} */
     let allEvents = $state({
         upcoming: [],
         past: [],
         excluded: [],
     });
-
 
     /**
      * Custom locale function for timeago
@@ -211,16 +210,56 @@ https://svelte.dev/e/js_parse_error -->
     let open = $state(false); // This will control the ResponsiveModal
 
     /** @type {'upcoming' | 'past'} */
-    let mode = $state("upcoming")
+    let mode = $state("upcoming");
 
     /** @type {Event[]} */
-    let events = $derived(allEvents[mode])
+    let events = $derived(allEvents[mode]);
 
     /** @type {Event | null} */
     let currentEvent = $state(null);
 
     /** @type {any[]} */
     let jsonLd = $state([]);
+
+    // Animation and UI state
+    let visible = $state(false);
+    let searchQuery = $state("");
+    let showFilters = $state(false);
+    let selectedCategory = $state("all");
+    let hoveredEvent = $state(null);
+
+    let filterButtonElement = null; // For binding - not $state
+    let filterPanelElement = null;  // For binding - not $state
+
+    const categories = $derived(
+        ["all", ...Array.from(new Set(events.filter(e => e.category).map(e => e.category)))]
+    );
+
+    // Filtered events
+    const filteredEvents = $derived(
+        (() => { // IIFE for multi-step derivation
+            let result = [...events];
+            
+            // TEMPORARILY COMMENTED OUT FOR DEBUGGING
+            // // Filter by search query
+            // if (searchQuery.trim()) {
+            //     const query = searchQuery.toLowerCase();
+            //     result = result.filter(event => 
+            //         event.title.toLowerCase().includes(query) || 
+            //         event.summary.toLowerCase().includes(query) ||
+            //         (event.venue && event.venue.toLowerCase().includes(query)) ||
+            //         (event.host && event.host.toLowerCase().includes(query))
+            //     );
+            // }
+            // 
+            // // Filter by category
+            // if (selectedCategory !== "all") {
+            //     result = result.filter(event => event.category === selectedCategory);
+            // }
+            console.log('[Derived] filteredEvents (DEBUG - NO FILTERING APPLIED):', $state.snapshot(result));
+            return result; // Return all events without filtering
+        })()
+    );
 
     /**
      * Opens the event details modal
@@ -242,12 +281,34 @@ https://svelte.dev/e/js_parse_error -->
         }, 300);
     }
 
-    onMount(() => {
+    /**
+     * Handles search form submission
+     * @param {Event} e
+     */
+    function handleSearch(e) {
+        e.preventDefault();
+        // Search is already handled via reactive statements
+    }
+
+    /**
+     * Resets all filters
+     */
+    function resetFilters() {
+        searchQuery = "";
+        selectedCategory = "all";
+    }
+
+    onMount(async () => {
         if (data?.events) {
            allEvents = processEvents(data.events);
+           console.log('[onMount] allEvents after processing:', $state.snapshot(allEvents)); // Use snapshot for cleaner log
+           if (allEvents.upcoming.length > 0) {
+               console.log('[onMount] First upcoming event (processed):', $state.snapshot(allEvents.upcoming[0])); // Log first event
+           }
         } else {
             allEvents = { upcoming: [], past: [], excluded: [] };
             toast.error("No event data loaded.");
+            console.log('[onMount] allEvents (no data loaded):', $state.snapshot(allEvents));
         }
         
         jsonLd = [
@@ -302,29 +363,67 @@ https://svelte.dev/e/js_parse_error -->
                 };
             })
         ];
+        
+        // Set visible after a small delay for animations
+        await tick();
+        visible = true;
+        console.log('[onMount] events derived state:', $state.snapshot(events)); // Use snapshot
+    });
+
+    $effect(() => {
+        if (showFilters) {
+            const handleClickOutside = (event) => {
+                if (
+                    filterButtonElement && !filterButtonElement.contains(event.target) &&
+                    filterPanelElement && !filterPanelElement.contains(event.target)
+                ) {
+                    showFilters = false;
+                }
+            };
+
+            // Add when the dropdown is open
+            document.addEventListener("mousedown", handleClickOutside);
+            
+            // Cleanup function
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }
     });
 </script>
 
 <PageHeader>
+    <div in:fly={{ y: -20, duration: 800, delay: 200 }}>
     Our Events
     <br/>
-    <Tabs.Root bind:value={mode} class="mt-4">
-        <Tabs.List class="grid w-full grid-cols-2 max-w-xs mx-auto">
-            <Tabs.Trigger value="upcoming" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Upcoming</Tabs.Trigger>
-            <Tabs.Trigger value="past" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Last 12 Months</Tabs.Trigger>
+        <Tabs.Root bind:value={mode} class="mt-4">
+            <Tabs.List class="grid w-full grid-cols-2 max-w-xs mx-auto bg-primary-50/50 backdrop-blur-sm rounded-lg p-1">
+                <Tabs.Trigger 
+                    value="upcoming" 
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-primary-800 data-[state=active]:shadow-sm"
+                >
+                    Upcoming
+                </Tabs.Trigger>
+                <Tabs.Trigger 
+                    value="past" 
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-primary-800 data-[state=active]:shadow-sm"
+                >
+                    Last 12 Months
+                </Tabs.Trigger>
         </Tabs.List>
     </Tabs.Root>
+    </div>
 </PageHeader>
 
 <Seo
         title="Our Events"
         titleTemplate="%s | MSSNOAU"
-        description="Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch. Join us for enriching experiences."
-        canonical="https://mssnoau.org/events"
+    description="Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch. Join us for enriching experiences."
+    canonical="https://mssnoau.org/events"
         openGraph={{
-            url: 'https://mssnoau.org/events',
+        url: 'https://mssnoau.org/events',
     title: 'Our Events | MSSNOAU',
-            description: 'Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch.',
+        description: 'Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch.',
     images: [
       {
                 url: data.events?.[0]?.image || 'https://mssnoau.sirv.com/og/og-events.jpg', // Fallback OG image
@@ -335,105 +434,251 @@ https://svelte.dev/e/js_parse_error -->
     ],
     siteName: 'MSSNOAU'
   }}
-        schema={jsonLd}
+    schema={jsonLd}
 />
 
-<div class="bg-white py-6 sm:py-8 lg:py-12">
-    <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
-        <!-- text - start -->
-        <div class="mb-10 md:mb-16">
-            <h2 class="mb-4 text-center text-2xl font-bold text-neutral-800 md:mb-6 lg:text-3xl font-primary">
-                {mode === "upcoming" ? "Upcoming Events" : "Past Events"}
-            </h2>
+<div class="relative py-12 overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
+    
+    <div class="container mx-auto px-4 md:px-8 relative z-10">
+        {#if visible}
+            <!-- Page Title -->
+            <div 
+                class="mb-10 md:mb-16"
+                in:fly={{ y: 30, duration: 800, delay: 400 }}
+            >
+                <h2 class="mb-4 text-center text-2xl font-bold text-primary-800 md:mb-6 lg:text-3xl font-primary">
+                    {mode === "upcoming" ? "Upcoming Events" : "Past Events"}
+                </h2>
 
-            <p class="mx-auto max-w-screen-md text-center text-neutral-600 md:text-lg font-secondary">
-                {mode === "upcoming" ? "Join us for our upcoming programmes and activities. We look forward to seeing you!" : "A look back at some of our memorable events from the past year."}
-            </p>
-        </div>
-        <!-- text - end -->
-
-        {#if events.length > 0}
-        <div class="grid gap-x-4 gap-y-8 sm:grid-cols-2 md:gap-x-6 lg:grid-cols-3 xl:grid-cols-4">
-            <!-- event - start -->
-            {#each events as event, i (event.title + event.date)}
-                {@const eventDateDetails = formatDate(event.date)} 
-                <div class="flex flex-col overflow-hidden rounded-lg border bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
-                    <button
-                            type="button"
-                            onclick={() => openEventDetails(event)}
-                            class="group relative block h-48 overflow-hidden bg-neutral-100 md:h-64 focus:outline-none"
-                    >
-                        <img
-                                src={event.image || "/images/placeholder-event.webp"}
-                                loading="lazy"
-                                alt={`Flyer for ${event.title}`}
-                                class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110"
-                        />
-                        {#if mode === "upcoming" && !isPastDate(event.date)}
-                        <div class="absolute bottom-2 right-2">
-                             <span class="rounded-full bg-primary-700/90 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold tracking-wider text-white">
-                                {format(event.date, 'my-locale')}
-                            </span>
-                        </div>
-                        {/if}
-                    </button>
-
-                    <div class="flex flex-1 flex-col p-4 sm:p-6">
-                        <h3 class="mb-2 text-lg font-semibold text-neutral-800 font-secondary">
-                            <button
-                                    type="button"
-                                    onclick={() => openEventDetails(event)}
-                                    class="transition duration-100 hover:text-primary-700 active:text-primary-800 text-left"
+                <p class="mx-auto max-w-screen-md text-center text-neutral-600 md:text-lg font-secondary">
+                    {mode === "upcoming" ? "Join us for our upcoming programmes and activities. We look forward to seeing you!" : "A look back at some of our memorable events from the past year."}
+                </p>
+                
+                <!-- Search and Filter -->
+                <div class="mt-8 max-w-2xl mx-auto">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <form class="relative flex-grow" onsubmit={handleSearch}>
+                            <input
+                                type="text"
+                                bind:value={searchQuery}
+                                placeholder="Search events..."
+                                class="w-full py-2 pl-4 pr-10 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            />
+                            <button 
+                                type="submit"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary-700"
                             >
-                            {event.title}
+                                <Search class="size-5" />
                             </button>
-                        </h3>
-
-                        <p class="mb-4 text-neutral-600 font-tertiary text-sm leading-relaxed">
-                            {event.summary || "More details coming soon."}
-                        </p>
-
-                        <div class="mt-auto flex items-end justify-between">
-                            <div class="flex items-center gap-2">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
-                                   <CalendarDays class="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <div class="text-xs font-semibold text-primary-700">{eventDateDetails?.weekday || ''}, {eventDateDetails?.month || ''} {eventDateDetails?.daySuffix || ''}</div>
-                                    <p class="text-xs text-neutral-600">{eventDateDetails?.year || ''} at {eventDateDetails?.time || ''}</p>
-                                </div>
+                        </form>
+                        
+                        <div class="relative">
+                            <Button 
+                                variant="outline" 
+                                class="flex items-center gap-2 w-full sm:w-auto"
+                                onclick={() => showFilters = !showFilters}
+                                bind:this={filterButtonElement}
+                            >
+                                <Filter class="size-4" />
+                                Filter
+                            </Button>
+                            
+                            {#if showFilters}
+                                <div 
+                                    class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-100 p-4 z-10"
+                                    transition:fade={{ duration: 200 }}
+                                    bind:this={filterPanelElement}
+                                >
+                                    <h3 class="font-medium text-gray-900 mb-2">Categories</h3>
+                                    <div class="space-y-2">
+                                        {#each categories as category}
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input 
+                                                    type="radio" 
+                                                    name="category" 
+                                                    value={category} 
+                                                    bind:group={selectedCategory}
+                                                    class="text-primary-600 focus:ring-primary-500"
+                                                />
+                                                <span class="text-sm text-gray-700 capitalize">{category}</span>
+                                            </label>
+                                        {/each}
+                                    </div>
+                                    
+                                    <div class="mt-4 flex justify-end">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm"
+                                            onclick={resetFilters}
+                                        >
+                                            Reset
+                                        </Button>
+                                    </div>
                             </div>
-
-                            {#if event.paid}
-                                <span class="rounded border px-2 py-1 text-sm text-neutral-600">{event.price || 'Paid Event'}</span>
-                            {:else}
-                                <span class="rounded border border-green-500 bg-green-50 px-2 py-1 text-sm text-green-700">Free</span>
-                                {/if}
+                            {/if}
                         </div>
                     </div>
-                </div>
-            {/each}
-            <!-- event - end -->
-        </div>
-        {:else}
-            <div class="text-center py-12 px-4">
-                 <div class="bg-gray-50 rounded-xl border border-gray-200 p-8 shadow-sm w-full max-w-md text-center mx-auto">
-                    <div class="mb-6 bg-primary-50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
-                        <Info class="size-10 text-primary-400" />
-                    </div>
-                    <h3 class="text-xl font-medium text-primary-800 mb-3">No {mode} Events</h3>
-                    <p class="text-gray-600 mb-6">
-                        There are currently no {mode} events scheduled or listed. Please check back later or contact us for more information.
-                    </p>
+                    
+                    {#if searchQuery || selectedCategory !== "all"}
+                        <div class="mt-4 flex items-center justify-between">
+                            <p class="text-sm text-gray-600">
+                                Showing {filteredEvents.length} of {events.length} events
+                            </p>
+                            
+                            <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onclick={resetFilters}
+                                class="text-sm"
+                            >
+                                Clear Filters
+                            </Button>
+                        </div>
+                    {/if}
                 </div>
             </div>
+
+            {#if filteredEvents.length > 0}
+                <div 
+                    class="grid gap-x-4 gap-y-8 sm:grid-cols-2 md:gap-x-6 lg:grid-cols-3 xl:grid-cols-4"
+                    in:fly={{ y: 30, duration: 800, delay: 600 }}
+                >
+                    {#each filteredEvents as event, i (event.title + event.date)}
+                        {@const eventDateDetails = formatDate(event.date)} 
+                                            {@const dateParts = [
+                                                eventDateDetails?.weekday,
+                                                (eventDateDetails?.month && eventDateDetails?.day && eventDateDetails?.daySuffix) ? `${eventDateDetails.month} ${eventDateDetails.day}${eventDateDetails.daySuffix}` : null
+                                            ]}
+                        <div 
+                            class="group flex flex-col overflow-hidden rounded-xl border bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all duration-300"
+                            in:scale={{ duration: 600, delay: 800 + (i * 100) }}
+                            onmouseenter={() => hoveredEvent = event.title}
+                            onmouseleave={() => hoveredEvent = null}
+                        >
+                            <button
+                                type="button"
+                                onclick={() => openEventDetails(event)}
+                                class="group relative block h-48 overflow-hidden bg-neutral-100 md:h-64 focus:outline-none"
+                            >
+                                <!-- Background gradient -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+                                
+                                <img
+                                    src={event.image || "/images/placeholder-event.webp"}
+                                    loading="lazy"
+                                    alt={`Flyer for ${event.title}`}
+                                    class="absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-110"
+                                />
+                                
+                                {#if mode === "upcoming" && !isPastDate(event.date)}
+                                    <div class="absolute top-3 right-3 z-20">
+                                        <span class="rounded-full bg-primary-700/90 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold tracking-wider text-white shadow-sm">
+                                            {format(event.date, 'my-locale')}
+                        </span>
+                                    </div>
+                                {/if}
+                                
+                                {#if event.category}
+                                    <div class="absolute bottom-3 left-3 z-20">
+                                        <span class="rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-medium text-primary-800 shadow-sm">
+                                            {event.category}
+                                        </span>
+                            </div>
+                                {/if}
+                            </button>
+
+                            <div class="flex flex-1 flex-col p-4 sm:p-6 relative z-10">
+                                <h3 class="mb-2 text-lg font-semibold text-primary-800 font-secondary group-hover:text-primary-700 transition-colors">
+                                    <button
+                                        type="button"
+                                        onclick={() => openEventDetails(event)}
+                                        class="transition duration-100 hover:text-primary-700 active:text-primary-800 text-left"
+                                    >
+                                        {event.title}
+                                    </button>
+                                </h3>
+
+                                <p class="mb-4 text-neutral-600 font-tertiary text-sm leading-relaxed line-clamp-3">
+                                    {event.summary || "More details coming soon."}
+                                </p>
+
+                                <div class="mt-auto flex items-end justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+                                           <CalendarDays class="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-semibold text-primary-700">
+                                                {dateParts.filter(Boolean).join(', ') || 'Date not available'}
+                                            </div>
+                                            <p class="text-xs text-neutral-600">
+                                                {(eventDateDetails?.year && eventDateDetails?.time) ? `${eventDateDetails.year} at ${eventDateDetails.time}` : (eventDateDetails?.year || eventDateDetails?.time || 'Time not available')}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {#if event.paid}
+                                        <span class="rounded-full border border-amber-500 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">{event.price || 'Paid Event'}</span>
+                                    {:else}
+                                        <span class="rounded-full border border-green-500 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">Free</span>
+                                {/if}
+                                </div>
+                                
+                                <!-- View Details Button (visible on hover) -->
+                                <div 
+                                    class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                                >
+                                    <button
+                                        type="button"
+                                        onclick={() => openEventDetails(event)}
+                                        class="pointer-events-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-700 text-white hover:bg-primary-800 transition-colors"
+                                    >
+                                        View Details
+                                        <ChevronRight class="size-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {:else}
+                <div 
+                    class="text-center py-12 px-4"
+                    in:fade={{ duration: 800, delay: 600 }}
+                >
+                    <div class="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-8 shadow-sm w-full max-w-md text-center mx-auto">
+                        <div class="mb-6 bg-primary-50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
+                            <Info class="size-10 text-primary-400" />
+                        </div>
+                        <h3 class="text-xl font-medium text-primary-800 mb-3">No Events Found</h3>
+                        <p class="text-gray-600 mb-6">
+                            {searchQuery || selectedCategory !== "all" 
+                                ? "No events match your current search or filter criteria. Try adjusting your filters or search terms."
+                                : `There are currently no ${mode} events scheduled or listed. Please check back later or contact us for more information.`
+                            }
+                        </p>
+                        
+                        {#if searchQuery || selectedCategory !== "all"}
+                            <Button 
+                                variant="outline"
+                                onclick={resetFilters}
+                                class="mt-2"
+                            >
+                                Clear Filters
+                            </Button>
+                        {/if}
+                    </div>
+        </div>
+            {/if}
         {/if}
     </div>
 </div>
 
-
 {#if currentEvent}
-{@const eventDateDetailsModal = formatDate(currentEvent.date)}
+    {@const eventDateDetailsModal = formatDate(currentEvent.date)}
     <ResponsiveModal
         bind:open={open}
         title={currentEvent.title}
@@ -443,56 +688,95 @@ https://svelte.dev/e/js_parse_error -->
         side="bottom"
     >
         {#if currentEvent.image}
-            <img src={currentEvent.image} alt={`Flyer for ${currentEvent.title}`} class="w-full rounded-lg object-cover aspect-[16/9] mb-4 border"/>
-        {/if}
-        
-        <p class="text-sm text-gray-700 leading-relaxed">
-            {@html currentEvent.summary || "Detailed information will be available soon."}
-        </p>
-
-        {#if currentEvent.additional_details}
-             <div class="prose prose-sm max-w-none text-gray-600">
-                {@html currentEvent.additional_details}
+            <div class="relative rounded-lg overflow-hidden mb-4 border border-gray-100 shadow-sm">
+                <img 
+                    src={currentEvent.image || "/placeholder.svg"} 
+                    alt={`Flyer for ${currentEvent.title}`} 
+                    class="w-full object-cover aspect-[16/9]"
+                />
+                
+                {#if currentEvent.category}
+                    <div class="absolute top-3 right-3">
+                        <span class="rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-medium text-primary-800 shadow-sm">
+                            {currentEvent.category}
+                    </span>
                 </div>
                 {/if}
+            </div>
+        {/if}
+        
+        <div class="bg-primary-50/50 backdrop-blur-sm rounded-lg p-4 mb-4">
+            <p class="text-sm text-gray-700 leading-relaxed">
+                {@html currentEvent.summary || "Detailed information will be available soon."}
+            </p>
+        </div>
 
-        <div class="space-y-3 text-sm mt-5">
+        {#if currentEvent.additional_details}
+            <div class="prose prose-sm max-w-none text-gray-600 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 mb-4">
+                {@html currentEvent.additional_details}
+            </div>
+        {/if}
+
+        <div class="space-y-3 text-sm mt-5 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100">
             <div class="flex items-start">
                 <CalendarDays class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
                 <span class="text-gray-700">
                     {eventDateDetailsModal?.fullDate || ''} at {eventDateDetailsModal?.time || ''}
                     {#if mode === "upcoming" && !isPastDate(currentEvent.date)}
-                    <span class="ml-2 text-xs font-medium text-green-700">({format(currentEvent.date, 'my-locale')})</span>
+                        <span class="ml-2 text-xs font-medium text-green-700">({format(currentEvent.date, 'my-locale')})</span>
                     {/if}
                 </span>
-        </div>
+                </div>
+
             <div class="flex items-start">
                 <MapPin class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
                 <span class="text-gray-700">{currentEvent.venue}</span>
-            </div>
+                </div>
+
             <div class="flex items-start">
                 <Ticket class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
                 <span class="text-gray-700">
                     {currentEvent.paid ? (currentEvent.price || "Paid Event - Check link for price") : "Free Admission"}
-                </span>
-            </div>
-            {#if currentEvent.contact}
-            <div class="flex items-start">
-                <UserCircle class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
-                <span class="text-gray-700">Contact: {currentEvent.contact}</span>
-            </div>
-            {/if}
-        </div>
+                            </span>
+                </div>
 
-            {#snippet footer()}
-            {#if currentEvent.url}
-            <Button as="a" href={currentEvent.url} target="_blank" class={buttonVariants({ class: "w-full" })}>
-                Register / View Details <ExternalLink class="ml-2 h-4 w-4" />
-            </Button>
-            {:else}
-            <Button onclick={closeEventDetails} variant="outline" class="w-full">Close</Button> 
+            {#if currentEvent.contact}
+                <div class="flex items-start">
+                    <UserCircle class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
+                    <span class="text-gray-700">Contact: {currentEvent.contact}</span>
+                </div>
             {/if}
-            {/snippet}
+            
+            {#if currentEvent.capacity}
+                <div class="flex items-start">
+                    <Users class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
+                    <span class="text-gray-700">Capacity: {currentEvent.capacity} attendees</span>
+                </div>
+            {/if}
+            
+            {#if currentEvent.tags && currentEvent.tags.length > 0}
+                <div class="flex items-start">
+                    <Tag class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
+                    <div class="flex flex-wrap gap-2">
+                        {#each currentEvent.tags as tag}
+                            <span class="inline-flex items-center rounded-full bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700">
+                                {tag}
+                        </span>
+                        {/each}
+                    </div>
+                </div>
+                {/if}
+        </div>
+        
+        {#snippet footer()}
+            {#if currentEvent.url}
+                <Button as="a" href={currentEvent.url} target="_blank" class={buttonVariants({ class: "w-full bg-primary-700 hover:bg-primary-800" })}>
+                    Register / View Details <ExternalLink class="ml-2 h-4 w-4" />
+                </Button>
+            {:else}
+                <Button onclick={closeEventDetails} variant="outline" class="w-full">Close</Button> 
+            {/if}
+        {/snippet}
     </ResponsiveModal>
 {/if}
 
@@ -506,4 +790,3 @@ https://svelte.dev/e/js_parse_error -->
         margin-bottom: 0.5em;
     }
 </style>
-
