@@ -39,9 +39,8 @@
      * @property {Programme[]} [programmes]
      */
 
-    /** @type {PageData} */
-    let data = $props();
-    
+    /** @type {{data: PageData}} */
+    let {data} = $props();
     /** @type {Programme[]} */
     let programmes = $derived(data?.programmes || []);
     let visible = $state(false);
@@ -123,7 +122,7 @@
                     class="relative mx-auto grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
                     in:fly={{ y: 30, duration: 800, delay: 200 }}
                 >
-                    {#each programmes as programme, i (programme.id)}
+                    {#each programmes as programme, i (programme.title)}
                         <!-- Enhanced Programme Card -->
                         <div 
                             role="button"

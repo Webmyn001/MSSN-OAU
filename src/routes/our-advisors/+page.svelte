@@ -3,41 +3,31 @@
     import { MessageCircle, Phone, Ellipsis, ChevronDown, Check, Mail, ExternalLink } from "@lucide/svelte";
     import { tick, onMount } from "svelte";
     import { useId } from "bits-ui";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+    import * as Popover from "$lib/components/ui/popover/index.js";
+    import * as Command from "$lib/components/ui/command/index.js";
     import SEO from '$lib/components/SEO.svelte';
     import { toast } from "svelte-sonner";
-    import { fly, fade, scale } from "svelte/transition";
-    import { spring } from "svelte/motion";
+    import { fly } from "svelte/transition";
 
-    let { data } = $props(); // Data from the load function
+    let { data } = $props();
 
-    // Custom dropdown state
-    let sessionDropdownOpen = $state(false);
     let sessions = $state([]);
     let selectedSessionLabel = $state(undefined);
     let initialized = false;
     let visible = $state(false);
     
-    // For animation and interaction
     let hoveredAdvisor = $state(null);
-    let hoveredSessionItem = $state(null);
 
+    let sessionSelectorOpen = $state(false); // For Popover
     const triggerId = useId();
 
     /**
      * JSDoc type for individual session data.
-     * Adjust path if your types are elsewhere or use SvelteKit's $types.
      * @type {import('$lib/types.js').AdvisorSessionData[]}
      */
 
     onMount(() => {
         visible = true;
-        document.addEventListener('click', handleClickOutside);
-        
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
     });
 
     $effect(() => {
@@ -50,7 +40,7 @@
                 selectedSessionLabel = undefined;
             }
             initialized = true;
-            }
+        }
         if (data && data.error) {
             console.error("Error loading advisor data:", data.error);
             toast.error(`Failed to load advisor data: ${data.error.substring(0, 100)}`);
@@ -63,18 +53,15 @@
             : undefined
     );
 
-    // Function to handle session selection
     function selectSession(sessionLabel) {
         selectedSessionLabel = sessionLabel;
-        sessionDropdownOpen = false;
     }
     
-    // Function to handle click outside dropdown
-    function handleClickOutside(event) {
-        const dropdown = document.getElementById('session-dropdown');
-        if (dropdown && !dropdown.contains(event.target) && !event.target.closest(`#${triggerId}`)) {
-            sessionDropdownOpen = false;
-        }
+    function closeAndFocusTrigger(idOfTrigger) {
+        sessionSelectorOpen = false;
+        tick().then(() => {
+            document.getElementById(idOfTrigger)?.focus();
+        });
     }
     
 </script>
@@ -136,60 +123,63 @@
     </div>
     <br/>
     
-    <!-- Custom Session Dropdown -->
     {#if sessions.length > 0 && visible}
-        <div in:fly={{ y: 30, duration: 800, delay: 400 }} class="relative">
-            <button 
-                id={triggerId}
-                class="group inline-flex items-center bg-white/20 hover:bg-white/30 border border-white/20 p-1 ps-4 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-primary-700 transition-all duration-300"
-                onclick={() => sessionDropdownOpen = !sessionDropdownOpen}
-            >
-                <span class="me-2 text-white text-sm font-medium">
-                        {selectedSessionLabel || "Choose Session"}
-                    </span>
-                <span class="group-hover:bg-white/30 py-1.5 px-2.5 flex justify-center items-center gap-x-2 rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300">
-                    <ChevronDown class="shrink-0 size-4 transition-transform duration-300 {sessionDropdownOpen ? 'rotate-180' : ''}" />
-                    </span>
-                </button>
-            
-            <!-- Custom dropdown menu -->
-            {#if sessionDropdownOpen}
-                <div 
-                    id="session-dropdown"
-                    class="absolute z-50 mt-2 w-[250px] rounded-xl bg-white shadow-lg border border-gray-100 py-2 left-1/2 transform -translate-x-1/2"
-                    in:fade={{ duration: 200 }}
-                    out:fade={{ duration: 150 }}
+        <div in:fly={{ y: 30, duration: 800, delay: 400 }} class="flex justify-center">
+            <Popover.Root bind:open={sessionSelectorOpen} preventScroll={true}>
+                <Popover.Trigger asChild>
+                    <button
+                        id={triggerId}
+                        class="group inline-flex items-center bg-white/20 hover:bg-white/30 border border-white/20 p-1 ps-4 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-primary-700 transition-all duration-300"
+                    >
+                        <span class="me-2 text-white text-sm font-medium">
+                            {selectedSessionLabel || "Choose Session"}
+                        </span>
+                        <span class="group-hover:bg-white/30 py-1.5 px-2.5 flex justify-center items-center gap-x-2 rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300">
+                            <ChevronDown class="shrink-0 size-4 transition-transform duration-300 {sessionSelectorOpen ? 'rotate-180' : ''}" />
+                        </span>
+                    </button>
+                </Popover.Trigger>
+                <Popover.Content 
+                    class="w-[250px] p-0 rounded-xl bg-white border border-primary-100 shadow-xl z-[9999] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2" 
+                    side="bottom" 
+                    align="center" 
+                    portalProps={{ target: 'body' }}
+                    sideOffset={5}
                 >
-                    <div class="px-3 py-2 text-sm text-gray-500 border-b border-gray-100">
-                        Choose Session
-            </div>
-                    <div class="max-h-[300px] overflow-y-auto py-1">
-                        {#each sessions as sessionItem (sessionItem.id)}
-                            <button
-                                class="w-full text-left px-4 py-2.5 text-sm hover:bg-primary-50 flex items-center justify-between {hoveredSessionItem === sessionItem.id ? 'bg-primary-50/50' : ''} {selectedSessionLabel === sessionItem.label ? 'text-primary-700 font-medium' : 'text-gray-700'}"
-                                onclick={() => selectSession(sessionItem.label)}
-                                onmouseenter={() => hoveredSessionItem = sessionItem.id}
-                                onmouseleave={() => hoveredSessionItem = null}
-                            >
-                                <span>{sessionItem.label}</span>
-                                {#if selectedSessionLabel === sessionItem.label}
-                                    <Check class="size-4 text-primary-600" />
-                                {/if}
-                            </button>
-                        {/each}
-                    </div>
-                </div>
-            {/if}
+                    <Command.Root class="rounded-xl overflow-hidden">
+                        <Command.Input placeholder="Search Session..." class="flex h-9 w-full rounded-md border-0 border-b border-primary-100 bg-transparent px-3 py-1.5 text-sm outline-none placeholder:text-gray-400 focus:border-b-2 focus:border-primary-500 focus:ring-0" />
+                        <Command.List class="max-h-[300px] overflow-y-auto overflow-x-hidden">
+                            <Command.Empty class="py-4 text-center text-sm text-gray-500">No sessions found.</Command.Empty>
+                            <Command.Group class="p-1.5" value="sessions_group"> 
+                                {#each sessions as sessionItem (sessionItem.id)}
+                                    <Command.Item
+                                        value={sessionItem.label}
+                                        class="relative flex cursor-pointer select-none items-center rounded-md px-2 py-1.5 text-sm text-gray-700 outline-none data-[highlighted]:bg-primary-50 data-[highlighted]:text-primary-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                                        onSelect={() => {
+                                            selectSession(sessionItem.label);
+                                            closeAndFocusTrigger(triggerId);
+                                        }}
+                                    >
+                                        <span class="flex-grow">{sessionItem.label}</span>
+                                        {#if selectedSessionLabel === sessionItem.label}
+                                            <Check class="ms-auto size-4 text-primary-600" />
+                                        {/if}
+                                    </Command.Item>
+                                {/each}
+                            </Command.Group>
+                        </Command.List>
+                    </Command.Root>
+                </Popover.Content>
+            </Popover.Root>
         </div>
     {/if}
 </PageHeader>
 
 <div class="py-12 relative overflow-hidden">
-    <!-- Decorative background elements -->
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
     <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
     
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10"> 
     {#if data && data.error && (!currentDisplaySessionAdvisors || currentDisplaySessionAdvisors.length === 0)}
             <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md">
                 <div class="flex items-center">
@@ -207,7 +197,6 @@
         {:else if currentDisplaySessionAdvisors && currentDisplaySessionAdvisors.length > 0}
             <div class="grid grid-cols-1 gap-8">
                 {#each currentDisplaySessionAdvisors as advisor, index (advisor.id)}
-                    <!-- Enhanced Advisor Card -->
                     <div 
                         class="mx-auto w-full max-w-3xl"
                         in:fly={{ y: 30, duration: 800, delay: 600 + (index * 200) }}
@@ -219,12 +208,10 @@
                             onmouseenter={() => hoveredAdvisor = advisor.id}
                             onmouseleave={() => hoveredAdvisor = null}
                         >
-                            <!-- Background gradient -->
                             <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             
                             <div class="relative z-10 p-6 sm:p-8">
                                 <div class="flex flex-col md:flex-row gap-6 items-start">
-                                    <!-- Advisor Photo -->
                                     {#if advisor.photo}
                                         <div class="relative mx-auto md:mx-0 mb-4 md:mb-0">
                                             <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500/20 to-primary-700/20 backdrop-blur-sm -z-10 transform scale-110"></div>
@@ -236,7 +223,6 @@
                                         </div>
                                     {/if}
                                     
-                                    <!-- Advisor Details -->
                                     <div class="flex-grow">
                                         <div class="flex justify-between items-start">
                                             <div>
@@ -253,14 +239,12 @@
                                             
                                         </div>
                                         
-                                        <!-- Advisor Summary -->
                                         <div class="mt-4">
                                             <p class="font-tertiary tracking-wide text-gray-700 leading-relaxed">
                                                 {advisor.summary}
                                             </p>
                                         </div>
                                         
-                                        <!-- Quick Contact Buttons -->
                                         <div class="mt-4 flex flex-wrap gap-2">
                                             {#if advisor.phone}
                                                 <a 
@@ -313,14 +297,13 @@
                                                     <svg class="w-3 h-3 fill-current" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
                                                     LinkedIn
                                                 </a>
-                    {/if}
-                </div>
+                                            {/if}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- End Enhanced Advisor Card -->
                 {/each}
             </div>
         {:else if selectedSessionLabel && (!currentDisplaySessionAdvisors || currentDisplaySessionAdvisors.length === 0) && !(data && data.error)}
@@ -339,7 +322,7 @@
                 <div class="inline-flex flex-col sm:flex-row gap-3">
                     <button 
                         class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-primary-300 bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors"
-                        onclick={() => sessionDropdownOpen = true}
+                        onclick={() => sessionSelectorOpen = true}
                     >
                         Select Different Session
                         <ChevronDown class="ml-2 size-4" />
@@ -382,7 +365,6 @@
 </div>
 
 <style>
-    /* Custom dropdown animation */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
