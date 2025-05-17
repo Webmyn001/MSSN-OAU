@@ -10,7 +10,7 @@
     import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
     import * as Tabs from "$lib/components/ui/tabs/index.js";
     import { browser } from '$app/environment';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { 
         CalendarDays, MapPin, Ticket, ExternalLink, X, Info, UserCircle, 
         Calendar, Clock, Tag, Users, ChevronRight, Filter, Search
@@ -257,7 +257,7 @@
 
     onMount(async () => {
         const generateJsonLd = () => {
-            const currentUrl = browser ? $page.url.href : 'https://mssnoau.org/events';
+            const currentUrl = browser ? page.url.href : 'https://mssnoau.org/events';
             /** @type {import('schema-dts').Event[]} */
             const schemaEvents = (allEvents.upcoming || []).map(event => {
                 const eventSlug = event.slug || slugify(event.title);
@@ -332,7 +332,7 @@
     $effect(() => {
       if (browser && (allEvents.upcoming.length > 0 || allEvents.past.length > 0)) {
             const generateJsonLd = () => {
-                const currentUrl = $page.url.href;
+                const currentUrl = page.url.href;
                 /** @type {import('schema-dts').Event[]} */
                 const schemaEvents = (allEvents.upcoming || []).map(event => {
                     const eventSlug = event.slug || slugify(event.title);
