@@ -81,6 +81,7 @@
         }
     })]
 
+    console.log(data.posts)
 
 </script>
 
@@ -140,24 +141,27 @@
                                 <!-- Date badge -->
                                 <div class="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full">
                                     <Calendar class="size-3.5" />
-                                    <span>{formatDate(post.date).date}</span>
+                                    <span>{formatDate(post.date).fullDate}</span>
                                 </div>
                             </div>
                             
                             <div class="flex flex-col p-5 relative justify-between h-full">
                                 <h1 class="text-xl font-semibold text-gray-800 group-hover:text-primary-700 transition-colors line-clamp-2">
-                                    {@html post.title.replace("&amp;", "&").replace("&quot;", '"').replace("&apos;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("&nbsp;", " ")}
+                                    {@html post.title.replace("&", "&").replace("'", "'").replace("<", "<").replace(">", ">").replace(" ", " ")}
                                 </h1>
-                                <p class="text-gray-700 py-3 line-clamp-2 flex-grow">{@html post.excerpt.replace("&amp;", "&").replace("&quot;", '"').replace("&apos;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("&nbsp;", " ").replace("&copy;", "©").replace("&reg;", "®").replaceAll('[…]', '...')}</p>
+                                <p class="text-gray-700 py-3 line-clamp-2 flex-grow">{@html post.excerpt.replace("&", "&").replace("'", "'").replace("<", "<").replace(">", ">").replace(" ", " ").replace("©", "©").replace("®", "®").replaceAll('[…]', '...')}</p>
                                 
                                 <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                                    <div class="flex items-center">
+                                    <div class="flex items-center gap-2">
                                         {#if post.authors && post.authors[0]}
                                             <img 
-                                                src={post.authors[0].avatar_urls ? post.authors[0].avatar_urls["48"] : "/placeholder.svg?height=48&width=48"} 
+                                                src={post.authors[0].avatar_urls ? post.authors[0]?.avatar_urls["48"] : `https://api.dicebear.com/9.x/lorelei/svg?seed=${post.authors[0].name}`} 
                                                 alt={post.authors[0].name}
                                                 class="size-8 rounded-full border-2 border-white shadow-sm"
                                             />
+                                            <span class="text-sm text-gray-600 group-hover:text-primary-600 transition-colors font-medium">
+                                                {post.authors[0].name}
+                                            </span>
                                         {/if}
                                     </div>
                                     
@@ -263,7 +267,7 @@
                         <h4 class="font-medium text-gray-700 mb-3">Subscribe to our newsletter</h4>
                         <form 
                             class="flex flex-col sm:flex-row gap-2"
-                            onsubmit={handleSubscribe(e)}
+                            onsubmit={handleSubscribe} 
                         >
                             <input 
                                 type="email"
