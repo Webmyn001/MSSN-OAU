@@ -164,9 +164,9 @@ async function cacheFirstStrategy(request) {
     log(`Cache hit for: ${request.url}`);
     // Attempt to update cache in background
     fetch(request).then(networkResponse => {
-      if (networkResponse.ok) {
+        if (networkResponse.ok) {
         caches.open(CACHE).then(cache => cache.put(request, networkResponse));
-      }
+        }
     }).catch(fetchErr => log(`Background cache update failed for ${request.url}:`, fetchErr));
     return cachedResponse;
   }
@@ -195,7 +195,7 @@ async function staleWhileRevalidateStrategy(request) {
   const cachedResponse = await cache.match(request);
   
   const fetchPromise = fetch(request).then(networkResponse => {
-    if (networkResponse.ok) {
+        if (networkResponse.ok) {
       log(`SWR: Updating cache for: ${request.url}`);
       cache.put(request, networkResponse.clone());
     }
