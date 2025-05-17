@@ -1,11 +1,11 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { MessageCircle, Phone, Ellipsis, ChevronDown, Check, Mail, ExternalLink } from "lucide-svelte";
+    import { MessageCircle, Phone, Ellipsis, ChevronDown, Check, Mail, ExternalLink } from "@lucide/svelte";
     import { tick, onMount } from "svelte";
     import { useId } from "bits-ui";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
-    import { MetaTags, JsonLd } from "svelte-meta-tags";
+    import SEO from '$lib/components/SEO.svelte';
     import { toast } from "svelte-sonner";
     import { fly, fade, scale } from "svelte/transition";
     import { spring } from "svelte/motion";
@@ -79,58 +79,51 @@
     
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-        title="Our Advisors"
-        titleTemplate="%s | MSSNOAU"
-        description="Meet the esteemed advisors of the Muslim Students Society of Nigeria, Obafemi Awolowo University (OAU) Branch. Find their profiles, departments, and contact information."
-        canonical="https://mssnoau-frontend.vercel.app/our-advisors"
-        openGraph={{
-            url: 'https://mssnoau-frontend.vercel.app/our-advisors',
-            title: 'Our Advisors | MSSNOAU',
-            description: 'Meet the esteemed advisors of the Muslim Students Society of Nigeria, Obafemi Awolowo University (OAU) Branch.',
-            images: [
-              {
-                url: 'https://i.ibb.co/HqK7S8Z/our-advisors.webp', // Keep your image
-                width: 1200,
-                height: 640,
-                alt: 'MSSN OAU Advisors Page'
-              }
-            ],
-            siteName: 'MSSNOAU'
-        }}
-/>
-<JsonLd schema={{
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Our Advisors | MSSNOAU",
-    "description": "Profiles of the advisors for the Muslim Students Society of Nigeria, Obafemi Awolowo University Branch, across various academic sessions.",
-    "url": "https://mssnoau-frontend.vercel.app/our-advisors",
-    "publisher": {
-        "@type": "Organization",
-        "name": "MSSN Obafemi Awolowo University Branch",
-        "logo": {
-            "@type": "ImageObject",
-            "url": "https://mssnoau-frontend.vercel.app/logo.png"
+<SEO
+    title="Our Advisors"
+    description="Meet the esteemed advisors of the Muslim Students Society of Nigeria, OAU Branch. Find their profiles, departments, and contact information for various academic sessions."
+    path="/our-advisors"
+    type="CollectionPage"
+    images={[
+        {
+            url: 'https://i.ibb.co/HqK7S8Z/our-advisors.webp',
+            width: 1200,
+            height: 640,
+            alt: 'MSSN OAU Advisors Page'
         }
-    },
-    "hasPart": currentDisplaySessionAdvisors && currentDisplaySessionAdvisors.length > 0 ? {
-        "@type": "ItemList",
-        "itemListElement": currentDisplaySessionAdvisors.map((advisor, idx) => ({
-            "@type": "Person",
-            "name": `${advisor.title ? advisor.title + ' ' : ''}${advisor.name}`,
-            "jobTitle": advisor.position,
-            "worksFor": {
-                "@type": "Organization",
-                "name": "Obafemi Awolowo University"
-            },
-            ...(advisor.department ? { "department": advisor.department } : {}),
-            ...(advisor.email ? { "email": advisor.email } : {}),
-            ...(advisor.photo ? { "image": advisor.photo } : {})
-        }))
-    } : undefined
-}} />
-<!-- End Meta Tags -->
+    ]}
+    schema={{
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Our Advisors | MSSNOAU",
+        "description": "Profiles of the advisors for the Muslim Students Society of Nigeria, Obafemi Awolowo University Branch, across various academic sessions.",
+        "url": "https://mssnoau.org/our-advisors", 
+        "publisher": {
+            "@type": "Organization",
+            "name": "MSSN Obafemi Awolowo University Branch",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://mssnoau.org/mssn-logo.png"
+            }
+        },
+        "hasPart": currentDisplaySessionAdvisors && currentDisplaySessionAdvisors.length > 0 ? {
+            "@type": "ItemList",
+            "itemListElement": currentDisplaySessionAdvisors.map((advisor, idx) => ({
+                "@type": "Person",
+                "name": `${advisor.title ? advisor.title + ' ' : ''}${advisor.name}`,
+                "jobTitle": advisor.position,
+                "worksFor": {
+                    "@type": "Organization",
+                    "name": "Obafemi Awolowo University"
+                },
+                ...(advisor.department ? { "department": advisor.department } : {}),
+                ...(advisor.email ? { "email": advisor.email } : {}),
+                ...(advisor.photo ? { "image": advisor.photo } : {})
+            }))
+        } : undefined
+    }}
+    keywords={["mssn oau advisors", "mssnoau advisors", "oau muslim advisors", "mssn oau patrons", "islamic guidance oau"]}
+/>
 
 <PageHeader>
     <div class="relative">
@@ -289,7 +282,7 @@
                                                 {#if advisor.socials?.whatsapp}
                                                     <a 
                                                         href={`https://wa.me/${advisor.socials.whatsapp.replace(/\+/g, '')}`}
-                                                        class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors duration-300"
+                                                        class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors duration-300"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >

@@ -1,11 +1,11 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import {MetaTags} from "svelte-meta-tags";
+    import SEO from '$lib/components/SEO.svelte';
     import ContactForm from "$lib/components/forms/ContactForm.svelte";
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
     import { Image } from '$lib/components/ui/image'
-    import { ArrowRight } from 'lucide-svelte'
+    import { ArrowRight } from '@lucide/svelte'
 	import { PUBLIC_ALUMNAE_FORM } from "$env/static/public";
 
     let visible = $state(false);
@@ -18,28 +18,21 @@
     })
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-        title="Alumnae Reconnect"
-        titleTemplate="%s | MSSNOAU"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/alumnae"
-        openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/alumnae',
-    title: 'Alumnae Reconnect | MSSNOAU',
-    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
-    images: [
-      {
-        url: 'https://i.ibb.co/4sznVXp/alumnae.webp',
-        width: 1200,
-        height: 640,
-        alt: 'Website screenshot'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
+<SEO
+    title="Alumnae Reconnect"
+    description="Reconnect with the Muslim Students Society of Nigeria, OAU Branch. Share how you can contribute to our growth and support current students."
+    path="/alumnae"
+    type="WebPage"
+    images={[
+        {
+            url: 'https://i.ibb.co/4sznVXp/alumnae.webp',
+            width: 1200,
+            height: 640,
+            alt: 'MSSNOAU Alumnae Reconnect'
+        }
+    ]}
+    keywords={["mssnoau alumnae", "oau muslim alumnae", "mssn oau give back", "support mssnoau", "mssn oau alumni"]}
 />
-<!-- End Meta Tags -->
 
 <PageHeader>
     Reconnect with MSSNOAU

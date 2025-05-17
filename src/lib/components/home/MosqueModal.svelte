@@ -3,21 +3,27 @@
     import * as Sheet from '$lib/components/ui/sheet';
     import * as Carousel from '$lib/components/ui/carousel';
     import { Button } from '$lib/components/ui/button';
-    import { MapPinned } from 'lucide-svelte';
+    import { MapPinned } from '@lucide/svelte';
     
-    export let mosque = {
+    
+    /**
+     * @typedef {Object} Props
+     * @property {any} [mosque]
+     * @property {boolean} [isOpen]
+     * @property {any} [onClose]
+     */
+
+    /** @type {Props} */
+    let { mosque = {
         id: "",
         label: "",
         url: "",
         images: [""],
         address: ""
-    };
-    
-    export let isOpen = false;
-    export let onClose = () => {};
+    }, isOpen = $bindable(false), onClose = () => {} } = $props();
     
     // For Carousel autoplay
-    let Autoplay;
+    let Autoplay = $state();
     
     onMount(async () => {
         const autoplayModule = await import('embla-carousel-autoplay');

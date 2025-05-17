@@ -1,14 +1,31 @@
 <script>
-    export let src = '';
-    export let alt = '';
-    export let width = undefined;
-    export let height = undefined;
-    export let loading = 'lazy';
-    export let decoding = 'async';
-    export let fetchpriority = 'auto'; // high, low, auto
-    export let className = '';
-    export let sizes = undefined;
-    export let onload = undefined;
+    /**
+     * @typedef {Object} Props
+     * @property {string} [src]
+     * @property {string} [alt]
+     * @property {any} [width]
+     * @property {any} [height]
+     * @property {string} [loading]
+     * @property {string} [decoding]
+     * @property {string} [fetchpriority] - high, low, auto
+     * @property {string} [className]
+     * @property {any} [sizes]
+     * @property {any} [onload]
+     */
+
+    /** @type {Props} */
+    let {
+        src = '',
+        alt = '',
+        width = undefined,
+        height = undefined,
+        loading = 'lazy',
+        decoding = 'async',
+        fetchpriority = 'auto',
+        className = '',
+        sizes = undefined,
+        onload = undefined
+    } = $props();
     
     // TypeScript type assertions
     const loadingAttr = /** @type {'lazy' | 'eager' | null} */ (loading);
@@ -16,7 +33,7 @@
     const fetchPriorityAttr = /** @type {'auto' | 'high' | 'low' | null} */ (fetchpriority);
     
     // Generate srcset for responsive images
-    let srcSet = undefined;
+    let srcSet = $state(undefined);
     
     if (src && src.startsWith('/')) {
         // For local images, we can generate srcset
@@ -46,5 +63,5 @@
     fetchpriority={fetchPriorityAttr}
     srcset={srcSet}
     {sizes}
-    on:load={handleLoad}
+    onload={handleLoad}
 /> 

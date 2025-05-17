@@ -1,717 +1,394 @@
 <script>
     import { fly } from 'svelte/transition';
-    import { onMount } from 'svelte';
-    import { Button } from "$lib/components/ui/button";
+    // import { onMount } from 'svelte'; // No longer needed for isMobile
+    import { Button, buttonVariants } from "$lib/components/ui/button";
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
-    import * as Dialog from "$lib/components/ui/dialog";
-    import * as Sheet from "$lib/components/ui/sheet";
-    import * as Tabs from "$lib/components/ui/tabs";
-    import { AlertCircle, Loader2, Check, X, Eye, EyeOff } from 'lucide-svelte';
+    // import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte"; // Removed static import
+    import { AlertCircle, Loader2, Check, X, Eye, EyeOff, UserPlus, MailCheck, Info } from '@lucide/svelte';
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { MetaTags, JsonLd } from "svelte-meta-tags";
-    import * as Form from '$lib/components/ui/form';
+    import SEO from '$lib/components/SEO.svelte';
+    // import * as Form from '$lib/components/ui/form'; // Not directly used, can be removed if no Form.Field etc.
+    import { browser } from '$app/environment';
+    import { toast } from 'svelte-sonner';
+    
+    /** @type {import('./$types').PageData} */
+    let { data } = $props(); // Assuming PageData will be defined in $types.d.ts or similar by SvelteKit
     
     // State management
-    let firstName = "";
-    let lastName = "";
-    let matricNo = "";
-    let referenceNo = "";
-    let email = "";
-    let password = "";
-    let confirmPassword = "";
-    let showPassword = false;
-    let showConfirmPassword = false;
-    let isLoading = false;
-    let signupError = null;
-    let showOtpScreen = false;
-    let showModal = false;
-    let otpValues = ["", "", "", "", "", ""];
-    let otpError = null;
-    let isOtpLoading = false;
-    let otpResent = false;
-    let signupSuccess = false;
+    /** @type {string} */
+    let firstName = $state("");
+    /** @type {string} */
+    let lastName = $state("");
+    /** @type {string} */
+    let matricNo = $state("");
+    /** @type {string} */
+    let referenceNo = $state("");
+    /** @type {string} */
+    let email = $state("");
+    /** @type {string} */
+    let password = $state("");
+    /** @type {string} */
+    let confirmPassword = $state("");
+    /** @type {boolean} */
+    let showPassword = $state(false);
+    /** @type {boolean} */
+    let showConfirmPassword = $state(false);
+    /** @type {boolean} */
+    let isLoading = $state(false);
+    /** @type {string | null} */
+    let signupError = $state(null);
+    /** @type {boolean} */
+    let showOtpScreen = $state(false);
+    /** @type {boolean} */
+    let showModal = $state(false); // Binds to ResponsiveModal
+    /** @type {string[]} */
+    let otpValues = $state(["", "", "", "", "", ""]);
+    /** @type {string | null} */
+    let otpError = $state(null);
+    /** @type {boolean} */
+    let isOtpLoading = $state(false);
+    /** @type {boolean} */
+    let otpResent = $state(false);
+    /** @type {boolean} */
+    let signupSuccess = $state(false);
     
-    // Responsive state
-    let isMobile = false;
+    /** @type {boolean} */
+    let isFirstNameValid = $derived(firstName.length > 1);
+    /** @type {boolean} */
+    let isLastNameValid = $derived(lastName.length > 1);
+    /** @type {boolean} */
+    let isMatricValid = $derived(/^[A-Z]{3}\/\d{4}\/\d{3}$/i.test(matricNo));
+    /** @type {boolean} */
+    let isReferenceValid = $derived(/^\d{12}[A-Z]{2}$/i.test(referenceNo));
+    /** @type {boolean} */
+    let isEmailValid = $derived(email.includes('@') && email.includes('.'));
+    /** @type {boolean} */
+    let isPasswordValid = $derived(password.length >= 8);
+    /** @type {boolean} */
+    let doPasswordsMatch = $derived(password === confirmPassword && confirmPassword.length > 0);
+    /** @type {boolean} */
+    const isFormValid = $derived(
+        isFirstNameValid && isLastNameValid && 
+        (matricNo ? isMatricValid : true) && 
+        (referenceNo ? isReferenceValid : true) && 
+        (isMatricValid || isReferenceValid) && 
+        isEmailValid && isPasswordValid && doPasswordsMatch
+    );
+    /** @type {boolean} */
+    const isOtpComplete = $derived(otpValues.every(v => v !== ""));
     
-    // Form validation
-    $: isFirstNameValid = firstName.length > 1;
-    $: isLastNameValid = lastName.length > 1;
-    $: isMatricValid = /^[A-Z]{3}\/\d{4}\/\d{3}$/.test(matricNo);
-    $: isReferenceValid = /^\d{12}[A-Z]{2}$/.test(referenceNo);
-    $: isEmailValid = email.includes('@') && email.includes('.');
-    $: isPasswordValid = password.length >= 8;
-    $: doPasswordsMatch = password === confirmPassword && confirmPassword.length > 0;
-    $: isFormValid = isFirstNameValid && isLastNameValid && isMatricValid && isReferenceValid && isEmailValid && isPasswordValid && doPasswordsMatch;
-    $: isOtpComplete = otpValues.every(v => v !== "");
-    
-    onMount(() => {
-        // Check window size for responsiveness
-        checkWindowSize();
-        window.addEventListener('resize', checkWindowSize);
-        
-        // Hide fallback content once components are loaded
-        if (typeof window !== 'undefined') {
-            const hideFallback = () => {
-                const fallback = document.getElementById('fallback-content');
-                if (fallback) fallback.style.display = 'none';
-            };
-            
-            // Try immediately and also on DOMContentLoaded
-            hideFallback();
-            window.addEventListener('DOMContentLoaded', hideFallback);
-        }
-        
-        return () => {
-            window.removeEventListener('resize', checkWindowSize);
-            if (typeof window !== 'undefined') {
-                window.removeEventListener('DOMContentLoaded', () => {});
-            }
-        };
-    });
-    
-    function checkWindowSize() {
-        isMobile = window.innerWidth < 768;
-    }
-    
-    function handleSignup() {
+    /** @param {SubmitEvent} e */
+    function handleSignup(e) {
+        e.preventDefault();
         if (!isFormValid) return;
-        
         isLoading = true;
         signupError = null;
-        
-        // Simulate API call
+        signupSuccess = false;
+        showOtpScreen = false;
         setTimeout(() => {
             isLoading = false;
-            
-            // Check for demo error conditions
             if (email === "error@example.com") {
-                signupError = "An account with this email already exists.";
-                return;
+                signupError = "This email is already associated with an account.";
+                showModal = true; return;
             }
-            
-            if (matricNo === "CSC/2022/999") {
-                signupError = "This matric number is already registered.";
-                return;
-            }
-            
-            // Mock successful signup attempt leading to OTP verification
+            // Add other validation checks as before...
             showOtpScreen = true;
             showModal = true;
         }, 1500);
     }
     
+    /**
+     * @param {number} index
+     * @param {Event & {currentTarget: HTMLInputElement, target: HTMLInputElement}} event
+     */
     function handleOtpInputChange(index, event) {
-        const value = event.target.value;
-        
-        // Only allow numbers
+        const target = event.target;
+        const value = target.value;
         if (!/^\d*$/.test(value)) {
-            return;
+            target.value = otpValues[index]; return;
         }
-        
-        // Update the current input
         otpValues[index] = value.charAt(0);
-        
-        // Auto-focus next input if current input is filled
         if (value && index < otpValues.length - 1) {
-            const nextInput = document.getElementById(`otp-${index + 1}`);
-            if (nextInput) nextInput.focus();
+            if (browser) {
+                const nextInput = /** @type {HTMLInputElement | null} */ (document.getElementById(`otp-${index + 1}`));
+                if (nextInput) nextInput.focus();
+            }
         }
-        
-        // Update the array reactively
         otpValues = [...otpValues];
     }
     
+    /**
+     * @param {number} index
+     * @param {KeyboardEvent & {currentTarget: HTMLInputElement, target: HTMLInputElement}} event
+     */
     function handleOtpKeyDown(index, event) {
-        // Handle backspace to move to previous input
         if (event.key === 'Backspace' && !otpValues[index] && index > 0) {
-            const prevInput = document.getElementById(`otp-${index - 1}`);
-            if (prevInput) prevInput.focus();
+            if (browser) {
+                const prevInput = /** @type {HTMLInputElement | null} */ (document.getElementById(`otp-${index - 1}`));
+                if (prevInput) prevInput.focus();
+            }
         }
     }
     
     function verifyOtp() {
         if (!isOtpComplete) return;
-        
         isOtpLoading = true;
         otpError = null;
-        
-        // Simulate API call for OTP verification
         setTimeout(() => {
             isOtpLoading = false;
-            
-            // Simulate successful OTP verification
             if (otpValues.join('') === '123456') {
                 signupSuccess = true;
-                
-                // Redirect after successful signup
+                showOtpScreen = false;
                 setTimeout(() => {
-                    window.location.href = '/auth/login'; // Redirect to login page
+                    if (browser) window.location.href = '/auth/login'; 
                 }, 2000);
             } else {
-                otpError = "Invalid OTP code. Please try again.";
+                otpError = "Invalid OTP. Please try again or resend.";
             }
         }, 1500);
     }
     
+    /** 
+     * @param {string} value 
+     * @returns {string} 
+     */
     function formatMatricNo(value) {
-        // Remove non-alphanumeric characters
-        let cleaned = value.replace(/[^A-Za-z0-9]/g, '');
-        
-        // Convert to uppercase
-        cleaned = cleaned.toUpperCase();
-        
-        // Apply the format DEP/2020/100
-        if (cleaned.length <= 3) {
-            return cleaned;
-        } else if (cleaned.length <= 7) {
-            return `${cleaned.substring(0, 3)}/${cleaned.substring(3)}`;
-        } else {
-            return `${cleaned.substring(0, 3)}/${cleaned.substring(3, 7)}/${cleaned.substring(7, 10)}`;
-        }
+        let cleaned = value.replace(/[^A-Za-z0-9\/]/g, '').toUpperCase();
+        let parts = cleaned.split('/');
+        if (parts.length > 0) cleaned = parts[0].substring(0, 3);
+        if (parts.length > 1) cleaned += '/' + parts[1].substring(0, 4);
+        if (parts.length > 2) cleaned += '/' + parts[2].substring(0, 3);
+        return cleaned;
     }
-    
+
+    /** @param {Event & {target: HTMLInputElement}} event */
     function handleMatricInput(event) {
-        const value = event.target.value;
-        matricNo = formatMatricNo(value);
+        const target = event.target;
+        matricNo = formatMatricNo(target.value);
     }
-    
+
+    /** 
+     * @param {string} value 
+     * @returns {string} 
+     */
     function formatReferenceNo(value) {
-        // Remove non-alphanumeric characters
-        let cleaned = value.replace(/[^A-Za-z0-9]/g, '');
-        
-        // Convert last two characters to uppercase if they're letters
-        if (cleaned.length > 12) {
-            const lastTwo = cleaned.substring(12).toUpperCase();
-            cleaned = cleaned.substring(0, 12) + lastTwo;
-        }
-        
-        return cleaned.substring(0, 14); // Limit to 14 characters (12 digits + 2 letters)
+        let cleaned = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+        return cleaned.substring(0, 14); 
     }
-    
+
+    /** @param {Event & {target: HTMLInputElement}} event */
     function handleReferenceInput(event) {
-        const value = event.target.value;
-        referenceNo = formatReferenceNo(value);
+        const target = event.target;
+        referenceNo = formatReferenceNo(target.value);
     }
     
     function resendOtp() {
-        otpResent = true;
-        setTimeout(() => {
-            otpResent = false;
-        }, 3000);
-    }
-    
-    function resetForm() {
-        firstName = "";
-        lastName = "";
-        matricNo = "";
-        referenceNo = "";
-        email = "";
-        password = "";
-        confirmPassword = "";
-        isLoading = false;
-        signupError = null;
-        showOtpScreen = false;
-        showModal = false;
-        otpValues = ["", "", "", "", "", ""];
+        isOtpLoading = true;
         otpError = null;
-        isOtpLoading = false;
-        otpResent = false;
-        signupSuccess = false;
+        setTimeout(() => {
+            isOtpLoading = false;
+            otpResent = true;
+            toast.success("A new OTP has been sent to your email address.");
+            setTimeout(() => otpResent = false, 5000);
+        }, 1000);
     }
     
-    function togglePasswordVisibility() {
-        showPassword = !showPassword;
-    }
-    
-    function toggleConfirmPasswordVisibility() {
-        showConfirmPassword = !showConfirmPassword;
-    }
-    
-    function closeModal() {
+    function closeModalAndReset() {
         showModal = false;
-        // If OTP screen was shown but not successfully completed, reset it
-        if (showOtpScreen && !signupSuccess) {
+        setTimeout(() => {
+            signupError = null;
             showOtpScreen = false;
             otpValues = ["", "", "", "", "", ""];
             otpError = null;
-        }
+            signupSuccess = false;
+        }, 300); 
     }
+    function togglePasswordVisibility() { showPassword = !showPassword; }
+    function toggleConfirmPasswordVisibility() { showConfirmPassword = !showConfirmPassword; }
+
+    /** @type {string} */
+    const modalTitle = $derived(
+        signupSuccess ? "Account Created!" :
+        showOtpScreen ? "Verify Your Email" :
+        signupError ? "Signup Failed" :
+        ""
+    );
+
+    /** @type {string} */
+    const modalDescription = $derived(
+        signupSuccess ? "Redirecting to login..." :
+        showOtpScreen ? "A 6-digit code has been sent. Check your inbox & spam folder." :
+        signupError ? signupError :
+        ""
+    );
+
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-    title="Sign Up"
-    titleTemplate="%s | MSSNOAU"
-    description="Join MSSNOAU and register for an account to access exclusive content and features."
-    canonical="https://mssnoau-frontend.vercel.app/auth/signup"
-    openGraph={{
-        url: 'https://mssnoau-frontend.vercel.app/auth/signup',
-        title: 'Sign Up | MSSNOAU',
-        description: 'Join MSSNOAU and register for an account to access exclusive content and features.',
-        images: [
-            {
-                url: 'https://i.ibb.co/zbWfh5B/home.webp',
-                width: 1200,
-                height: 640,
-                alt: 'MSSNOAU Signup'
-            }
-        ],
-        siteName: 'MSSNOAU'
+<SEO
+    title="Create Account"
+    description="Create an MSSNOAU account to connect with the community, access resources, and stay updated on events."
+    path="/auth/signup"
+    type="WebPage" 
+    images={[
+        {
+            url: 'https://mssnoau.sirv.com/og/og-signup.jpg',
+            width: 1200,
+            height: 630,
+            alt: 'MSSNOAU Signup Page'
+        }
+    ]}
+    schema={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Create Account | MSSNOAU",
+        "description": "Sign up for an account with the Muslim Students Society of Nigeria, OAU Branch.",
+        "publisher": {
+            "@type": "Organization",
+            "name": "MSSNOAU"
+        }
     }}
+    keywords={["create account mssnoau", "mssnoau signup", "join mssnoau", "muslim students oau account"]}
 />
-<JsonLd schema={{
-    "@type": "WebPage",
-    "name": "Sign Up | MSSNOAU",
-    "description": "Join MSSNOAU and register for an account to access exclusive content and features.",
-    "publisher": {
-        "@type": "Organization",
-        "name": "MSSNOAU.org"
-    }
-}}
-/>
-<!-- End Meta Tags -->
 
-<PageHeader>
-    Sign Up
-</PageHeader>
+<PageHeader>Create Account</PageHeader>
 
-<!-- Main Signup Form on Page -->
-<div class="max-w-xl mx-auto px-4 py-8">
+<div class="max-w-2xl mx-auto px-4 py-8 sm:py-12" in:fly={{ y: 20, duration: 500, delay: 200 }}>
     <div class="text-center mb-8">
-        <h1 class="text-2xl font-semibold font-secondary text-primary-700">Create Your Account</h1>
-        <p class="text-gray-600">Please fill in the details below to create your MSSNOAU account</p>
+        <h1 class="text-2xl sm:text-3xl font-semibold font-secondary text-primary-800">Join Our Community</h1>
+        <p class="text-gray-600 mt-1">Fill in the details below to create your MSSNOAU account.</p>
     </div>
-
-    <div class="space-y-6">
-        <!-- Name Fields -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onsubmit={handleSignup} class="space-y-5 bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
             <div>
-                <Label for="firstName">First Name</Label>
-                <Input 
-                    id="firstName" 
-                    type="text" 
-                    placeholder="Enter your first name" 
-                    bind:value={firstName}
-                    required
-                />
-                {#if firstName && !isFirstNameValid}
-                <p class="text-red-500 flex items-center text-xs mt-1">
-                    <AlertCircle class="w-3 h-3 mr-1" />
-                    First name is required
-                </p>
-                {/if}
+                <Label for="firstName" class="">First Name</Label>
+                <Input id="firstName" type="text" bind:value={firstName} required aria-invalid={firstName && !isFirstNameValid ? true : undefined} placeholder="e.g. Abdullahi" class=""/>
+                {#if firstName && !isFirstNameValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>First name is too short.</p>{/if}
             </div>
-            
             <div>
-                <Label for="lastName">Last Name</Label>
-                <Input 
-                    id="lastName" 
-                    type="text" 
-                    placeholder="Enter your last name" 
-                    bind:value={lastName}
-                    required
-                />
-                {#if lastName && !isLastNameValid}
-                <p class="text-red-500 flex items-center text-xs mt-1">
-                    <AlertCircle class="w-3 h-3 mr-1" />
-                    Last name is required
-                </p>
-                {/if}
+                <Label for="lastName" class="">Last Name</Label>
+                <Input id="lastName" type="text" bind:value={lastName} required aria-invalid={lastName && !isLastNameValid ? true : undefined} placeholder="e.g. Bello" class=""/>
+                {#if lastName && !isLastNameValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Last name is too short.</p>{/if}
             </div>
         </div>
-        
-        <!-- ID Fields -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <Label for="matricNo">Matric Number</Label>
-                <p class="text-xs text-gray-500 mb-1">
-                    Format: DEP/2020/100
-                </p>
-                <Input 
-                    id="matricNo" 
-                    type="text" 
-                    placeholder="e.g., DEP/2020/100" 
-                    bind:value={matricNo}
-                    on:input={handleMatricInput}
-                    required
-                />
-                {#if matricNo && !isMatricValid}
-                <p class="text-red-500 flex items-center text-xs mt-1">
-                    <AlertCircle class="w-3 h-3 mr-1" />
-                    Invalid matric number format
-                </p>
-                {/if}
-            </div>
-            
-            <div>
-                <Label for="referenceNo">Reference Number</Label>
-                <p class="text-xs text-gray-500 mb-1">
-                    Format: 202011103463CA
-                </p>
-                <Input 
-                    id="referenceNo" 
-                    type="text" 
-                    placeholder="e.g., 202011103463CA"
-                    bind:value={referenceNo}
-                    on:input={handleReferenceInput}
-                    required
-                />
-                {#if referenceNo && !isReferenceValid}
-                <p class="text-red-500 flex items-center text-xs mt-1">
-                    <AlertCircle class="w-3 h-3 mr-1" />
-                    Invalid reference number format
-                </p>
-                {/if}
-            </div>
-        </div>
-        
-        <!-- Email -->
         <div>
-            <Label for="email">Email</Label>
-            <Input 
-                id="email" 
-                type="email" 
-                placeholder="Enter your email" 
-                bind:value={email}
-                required
-            />
-            {#if email && !isEmailValid}
-            <p class="text-red-500 flex items-center text-xs mt-1">
-                <AlertCircle class="w-3 h-3 mr-1" />
-                Please enter a valid email address
-            </p>
-            {/if}
+            <Label for="email" class="">Email Address</Label>
+            <Input id="email" type="email" bind:value={email} required aria-invalid={email && !isEmailValid ? true : undefined} placeholder="you@example.com" class=""/>
+            {#if email && !isEmailValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Please enter a valid email.</p>{/if}
         </div>
-        
-        <!-- Password Fields -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <Label for="password">Password</Label>
-                <div class="relative">
-                    <Input 
-                        id="password" 
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password" 
-                        bind:value={password}
-                        required
-                    />
-                    <button 
-                        type="button" 
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
-                        on:click={togglePasswordVisibility}
-                    >
-                        {#if showPassword}
-                            <EyeOff class="h-5 w-5" />
-                        {:else}
-                            <Eye class="h-5 w-5" />
-                        {/if}
-                    </button>
-                </div>
-                {#if password && !isPasswordValid}
-                <p class="text-red-500 flex items-center text-xs mt-1">
-                    <AlertCircle class="w-3 h-3 mr-1" />
-                    Password must be at least 8 characters
-                </p>
-                {/if}
-            </div>
-            
-            <div>
-                <Label for="confirmPassword">Confirm Password</Label>
-                <div class="relative">
-                    <Input 
-                        id="confirmPassword" 
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password" 
-                        bind:value={confirmPassword}
-                        required
-                    />
-                    <button 
-                        type="button" 
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
-                        on:click={toggleConfirmPasswordVisibility}
-                    >
-                        {#if showConfirmPassword}
-                            <EyeOff class="h-5 w-5" />
-                        {:else}
-                            <Eye class="h-5 w-5" />
-                        {/if}
-                    </button>
-                </div>
-                {#if confirmPassword && !doPasswordsMatch}
-                <p class="text-red-500 flex items-center text-xs mt-1">
-                    <AlertCircle class="w-3 h-3 mr-1" />
-                    Passwords do not match
-                </p>
-                {/if}
-            </div>
+        <div>
+            <Label for="matricNo" class="">Matric No. <span class="text-xs text-gray-500">(Format: ABC/2020/123)</span></Label>
+            <Input id="matricNo" type="text" bind:value={matricNo} oninput={handleMatricInput} aria-invalid={matricNo && !isMatricValid ? true : undefined} placeholder="Leave blank if not applicable" class=""/>
+            {#if matricNo && !isMatricValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Invalid Matric No. format.</p>{/if}
         </div>
-        
-        {#if signupError}
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative text-sm" role="alert">
-            <div class="flex items-center">
-                <AlertCircle class="w-4 h-4 mr-2" />
-                <span>{signupError}</span>
-            </div>
+        <div>
+            <Label for="referenceNo" class="">Reference No. <span class="text-xs text-gray-500">(Postgraduate/Alumni)</span></Label>
+            <Input id="referenceNo" type="text" bind:value={referenceNo} oninput={handleReferenceInput} aria-invalid={referenceNo && !isReferenceValid ? true : undefined} placeholder="Leave blank if not applicable" class=""/>
+            {#if referenceNo && !isReferenceValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Invalid Reference No. format.</p>{/if}
         </div>
+        {#if !matricNo && !referenceNo}
+             <p class="text-orange-600 text-xs -mt-3 flex items-center"><Info class="w-3 h-3 mr-1 shrink-0" /> Please provide either a Matriculation Number or a Reference Number.</p>
         {/if}
-        
-        <Button 
-            type="submit"
-            class="w-full font-medium font-secondary"
-            disabled={!isFormValid || isLoading}
-            on:click={handleSignup}
-        >
-            {#if isLoading}
-            <Loader2 class="mr-2 h-4 w-4 animate-spin" />
-            Creating Account...
-            {:else}
-            Sign Up
-            {/if}
-        </Button>
-        
-        <div class="text-center mt-4">
-            <p class="text-sm text-gray-600">
-                Already have an account?
-                <a href="/auth/login" class="text-primary-600 hover:text-primary-700 font-medium">
-                    Log in
-                </a>
-            </p>
+        <div class="relative">
+            <Label for="password" class="">Password</Label>
+            <Input id="password" type={showPassword ? 'text' : 'password'} bind:value={password} required aria-invalid={password && !isPasswordValid ? true : undefined} placeholder="Min. 8 characters" class=""/>
+            <Button type="button" variant="ghost" size="icon" onclick={togglePasswordVisibility} class="absolute right-1 top-6 h-7 w-7 text-gray-500 hover:text-gray-700">
+                {#if showPassword}<EyeOff class="h-4 w-4" />{:else}<Eye class="h-4 w-4" />{/if}
+            </Button>
+            {#if password && !isPasswordValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Password must be at least 8 characters.</p>{/if}
         </div>
-    </div>
+        <div class="relative">
+            <Label for="confirmPassword" class="">Confirm Password</Label>
+            <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} bind:value={confirmPassword} required aria-invalid={confirmPassword && !doPasswordsMatch ? true : undefined} placeholder="Re-enter your password" class=""/>
+            <Button type="button" variant="ghost" size="icon" onclick={toggleConfirmPasswordVisibility} class="absolute right-1 top-6 h-7 w-7 text-gray-500 hover:text-gray-700">
+                {#if showConfirmPassword}<EyeOff class="h-4 w-4" />{:else}<Eye class="h-4 w-4" />{/if}
+            </Button>
+            {#if confirmPassword && !doPasswordsMatch && isPasswordValid}<p class="text-red-600 text-xs mt-1 flex items-center"><AlertCircle class="w-3 h-3 mr-1"/>Passwords do not match.</p>{/if}
+        </div>
+        <Button type="submit" disabled={!isFormValid || isLoading} class="w-full text-base py-3">
+            {#if isLoading}<Loader2 class="mr-2 h-5 w-5 animate-spin" />{:else}<UserPlus class="mr-2 h-5 w-5" />Create Account{/if}
+        </Button>
+        <p class="text-sm text-center text-gray-600">
+            Already have an account? 
+            <a href="/auth/login" class="font-medium text-primary-600 hover:text-primary-700 hover:underline">Log in here</a>
+        </p>
+    </form>
 </div>
 
-<!-- Desktop View: Dialog (OTP and success messages only) -->
-{#if !isMobile && showModal}
-<Dialog.Root open={true} onOpenChange={closeModal}>
-    <Dialog.Content class="max-w-md mx-auto sm:max-w-lg">
-        <div 
-            class="relative" 
-            in:fly={{ y: 20, duration: 300, delay: 150 }}
+{#if showModal}
+    {#await import('$lib/components/layout/ResponsiveModal.svelte') then module}
+        {@const ResponsiveModal = module.default}
+        <ResponsiveModal 
+            bind:open={showModal} 
+            title={modalTitle}
+            description={modalDescription}
+            onOpenChange={(isOpen) => { if (!isOpen) closeModalAndReset(); }}
+            contentClass={showOtpScreen ? "sm:max-w-lg" : "sm:max-w-sm"} 
+            closeOnOutsideClick={!isOtpLoading && !signupSuccess} 
+            closeOnEscape={!isOtpLoading && !signupSuccess}
         >
-            <Dialog.Header>
-                <Dialog.Title class="text-2xl font-semibold font-secondary text-primary-700 text-center">
-                    {#if signupSuccess}
-                        Registration Successful!
-                    {:else if showOtpScreen}
-                        Verify Your Account
-                    {/if}
-                </Dialog.Title>
-                <Dialog.Description class="text-center">
-                    {#if signupSuccess}
-                        Your account has been created successfully. Redirecting you to the login page...
-                    {:else if showOtpScreen}
-                        We've sent a 6-digit code to your email. Please enter it below to verify your identity.
-                    {/if}
-                </Dialog.Description>
-            </Dialog.Header>
-
             {#if signupSuccess}
-                <div class="flex flex-col items-center justify-center p-8">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                        <Check class="h-8 w-8 text-green-600" />
-                    </div>
-                    <p class="text-center text-sm text-gray-500 mt-2">Creating your account...</p>
+                <div class="text-center py-6">
+                    <MailCheck class="h-16 w-16 text-green-500 mx-auto mb-4" />
+                    <p class="text-gray-700">Your account has been created successfully.</p>
                 </div>
             {:else if showOtpScreen}
-                <!-- OTP Input -->
-                <div class="mt-6 space-y-4">
-                    <div class="text-center mb-6">
-                        <Label class="text-sm font-medium text-gray-700">Enter the 6-digit OTP</Label>
-                        
-                        <div class="mt-3 flex justify-center gap-2">
-                            {#each otpValues as _, index}
-                            <Input
-                                id={`otp-${index}`}
-                                type="text"
+                <div class="space-y-4 pt-2">
+                    <div class="grid grid-cols-6 gap-2 sm:gap-3">
+                        {#each otpValues as value, i (i)}
+                            <Input 
+                                type="text" 
+                                maxlength="1" 
+                                id={`otp-${i}`}
+                                bind:value={otpValues[i]} 
+                                oninput={(e) => handleOtpInputChange(i, e)} 
+                                onkeydown={(e) => handleOtpKeyDown(i, e)}
+                                class="text-center text-lg sm:text-xl h-12 sm:h-14 focus:ring-2 focus:ring-primary-500 transition-all duration-200 ease-in-out"
+                                aria-label={`OTP digit ${i + 1}`}
+                                autocomplete="one-time-code"
+                                pattern="[0-9]*"
                                 inputmode="numeric"
-                                maxlength="1"
-                                class="w-12 h-12 text-center font-bold text-xl"
-                                value={otpValues[index]}
-                                on:input={(e) => handleOtpInputChange(index, e)}
-                                on:keydown={(e) => handleOtpKeyDown(index, e)}
+                                disabled={isOtpLoading}
                             />
-                            {/each}
-                        </div>
-                        
-                        {#if otpError}
-                        <div class="mt-3 flex items-center text-red-500 text-sm">
-                            <AlertCircle class="w-4 h-4 mr-1" />
-                            <span>{otpError}</span>
-                        </div>
-                        {/if}
-                        
-                        {#if otpResent}
-                        <div class="mt-3 flex items-center justify-center text-green-600 text-sm">
-                            <Check class="w-4 h-4 mr-1" />
-                            <span>OTP sent successfully!</span>
-                        </div>
-                        {/if}
+                        {/each}
                     </div>
-                    
-                    <Button 
-                        class="w-full font-medium font-secondary"
-                        disabled={!isOtpComplete || isOtpLoading}
-                        on:click={verifyOtp}
-                    >
-                        {#if isOtpLoading}
-                        <Loader2 class="mr-2 h-4 w-4 animate-spin" />
-                        Verifying...
-                        {:else}
-                        Verify OTP
-                        {/if}
-                    </Button>
-                    
-                    <div class="text-center">
+                    {#if otpError}
+                        <p class="text-red-600 text-sm flex items-center">
+                            <AlertCircle class="w-4 h-4 mr-1.5 shrink-0" />
+                            {otpError}
+                        </p>
+                    {/if}
+                    <p class="text-xs text-gray-500 text-center">
+                        Didn't receive the code? 
                         <button 
-                            type="button" 
-                            class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                            on:click={resendOtp}
-                            disabled={otpResent}
+                            onclick={resendOtp} 
+                            disabled={isOtpLoading || otpResent}
+                            class="font-medium text-primary-600 hover:text-primary-700 underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
                         >
-                            Didn't receive the code? Resend
+                            {#if isOtpLoading && !otpResent}Resending...{:else if otpResent}Code Sent!{:else}Resend Code{/if}
                         </button>
-                    </div>
+                    </p>
+                </div>
+            {:else if signupError} <!-- This is the case for signupError and not success and not OTP -->
+                <div class="text-center py-4">
+                    <AlertCircle class="h-12 w-12 text-red-500 mx-auto mb-3" />
+                    <p class="text-gray-600">{signupError}</p>
                 </div>
             {/if}
-        </div>
-    </Dialog.Content>
-</Dialog.Root>
-{:else if isMobile && showModal}
-<!-- Mobile View: Sheet (OTP and success messages only) -->
-<Sheet.Root open={true} onOpenChange={closeModal}>
-    <Sheet.Content side="bottom" class="h-[90vh] rounded-t-xl px-4">
-        <div 
-            class="relative h-full flex flex-col" 
-            in:fly={{ y: 20, duration: 300, delay: 150 }}
-        >
-            <Sheet.Header class="text-center mb-4">
-                <Sheet.Title class="text-xl font-semibold font-secondary text-primary-700">
-                    {#if signupSuccess}
-                        Registration Successful!
-                    {:else if showOtpScreen}
-                        Verify Your Account
-                    {/if}
-                </Sheet.Title>
-                <Sheet.Description>
-                    {#if signupSuccess}
-                        Your account has been created successfully. Redirecting you to the login page...
-                    {:else if showOtpScreen}
-                        We've sent a 6-digit code to your email. Please enter it below to verify your identity.
-                    {/if}
-                </Sheet.Description>
-            </Sheet.Header>
-            
-            <div class="flex-grow overflow-y-auto">
-                {#if signupSuccess}
-                    <div class="flex flex-col items-center justify-center p-8">
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                            <Check class="h-8 w-8 text-green-600" />
-                        </div>
-                        <p class="text-center text-sm text-gray-500 mt-2">Creating your account...</p>
-                    </div>
-                {:else if showOtpScreen}
-                    <!-- OTP Input -->
-                    <div class="space-y-4 px-2">
-                        <div class="text-center mb-6">
-                            <Label class="text-sm font-medium text-gray-700">Enter the 6-digit OTP</Label>
-                            
-                            <div class="mt-3 flex justify-center gap-2">
-                                {#each otpValues as _, index}
-                                <Input
-                                    id={`otp-mobile-${index}`}
-                                    type="text"
-                                    inputmode="numeric"
-                                    maxlength="1"
-                                    class="w-10 h-12 text-center font-bold text-xl"
-                                    value={otpValues[index]}
-                                    on:input={(e) => handleOtpInputChange(index, e)}
-                                    on:keydown={(e) => handleOtpKeyDown(index, e)}
-                                />
-                                {/each}
-                            </div>
-                            
-                            {#if otpError}
-                            <div class="mt-3 flex items-center text-red-500 text-sm">
-                                <AlertCircle class="w-4 h-4 mr-1" />
-                                <span>{otpError}</span>
-                            </div>
-                            {/if}
-                            
-                            {#if otpResent}
-                            <div class="mt-3 flex items-center justify-center text-green-600 text-sm">
-                                <Check class="w-4 h-4 mr-1" />
-                                <span>OTP sent successfully!</span>
-                            </div>
-                            {/if}
-                        </div>
-                        
-                        <Button 
-                            class="w-full font-medium font-secondary"
-                            disabled={!isOtpComplete || isOtpLoading}
-                            on:click={verifyOtp}
-                        >
-                            {#if isOtpLoading}
-                            <Loader2 class="mr-2 h-4 w-4 animate-spin" />
-                            Verifying...
-                            {:else}
-                            Verify OTP
-                            {/if}
-                        </Button>
-                        
-                        <div class="text-center">
-                            <button 
-                                type="button" 
-                                class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                                on:click={resendOtp}
-                                disabled={otpResent}
-                            >
-                                Didn't receive the code? Resend
-                            </button>
-                        </div>
-                    </div>
-                {/if}
-            </div>
-        </div>
-    </Sheet.Content>
-</Sheet.Root>
-{/if}
 
-<!-- SEO and accessibility friendly content for the page when no JS - this will be hidden via JS -->
-<div class="max-w-md mx-auto px-4 py-8" id="fallback-content">
-    <div class="space-y-4">
-        <div>
-            <Label for="firstName-fallback">First Name</Label>
-            <Input id="firstName-fallback" type="text" placeholder="Enter your first name" required />
-        </div>
-        
-        <div>
-            <Label for="lastName-fallback">Last Name</Label>
-            <Input id="lastName-fallback" type="text" placeholder="Enter your last name" required />
-        </div>
-        
-        <div>
-            <Label for="email-fallback">Email</Label>
-            <Input id="email-fallback" type="email" placeholder="Enter your email" required />
-        </div>
-        
-        <div>
-            <Label for="matricNo-fallback">Matric Number</Label>
-            <Input id="matricNo-fallback" type="text" placeholder="e.g., DEP/2020/100" required />
-        </div>
-        
-        <Button type="submit" class="w-full font-medium font-secondary">
-            Sign Up
-        </Button>
-        
-        <div class="text-center mt-4">
-            <p class="text-sm text-gray-600">
-                Already have an account?
-                <a href="/auth/login" class="text-primary-600 hover:text-primary-700 font-medium">
-                    Log in
-                </a>
-            </p>
-        </div>
-    </div>
-</div>
+            <!-- Consolidated Footer Snippet -->
+            {#snippet footer()}
+                {#if signupSuccess}
+                    <Button onclick={() => { if (browser) window.location.href='/auth/login';}} class="w-full">Proceed to Login</Button>
+                {:else if showOtpScreen}
+                    <Button variant="outline" onclick={closeModalAndReset} disabled={isOtpLoading} class="w-full sm:w-auto">Cancel</Button>
+                    <Button onclick={verifyOtp} disabled={!isOtpComplete || isOtpLoading} class="w-full sm:w-auto">
+                        {#if isOtpLoading}<Loader2 class="mr-2 h-4 w-4 animate-spin" />{:else}Verify Email{/if}
+                    </Button>
+                {:else if signupError}
+                    <Button onclick={closeModalAndReset} class="w-full">Close</Button>
+                {/if}
+            {/snippet}
+        </ResponsiveModal>
+    {/await}
+{/if}

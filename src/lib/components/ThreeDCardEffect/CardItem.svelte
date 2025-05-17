@@ -1,18 +1,26 @@
 <script>
     import { cn } from '$lib/utils/cn.js';
 
-    export let className = undefined;
-    export let translateX= 0;
-    export let translateY= 0;
-    export let translateZ= 0;
-    export let rotateX= 0;
-    export let rotateY= 0;
-    export let rotateZ= 0;
-    export let isMouseEntered = false;
+    let { children,
+        className = undefined,
+        translateX = 0,
+        translateY = 0,
+        translateZ = 0,
+        rotateX = 0,
+        rotateY = 0,
+        rotateZ = 0,
+        isMouseEntered = false,
+        ...restProps // Capture other props if any, though typically used for component props not HTML attributes
+    } = $props();
 
     let ref;
 
-    $: isMouseEntered, handleAnimations();
+    $effect(() => {
+        // Ensure ref is available and props are defined before running animations
+        if (ref && typeof translateX === 'number') { // Check one prop as a proxy for all being ready
+            handleAnimations();
+        }
+    });
 
     const handleAnimations = () => {
         if (!ref) return;
@@ -25,9 +33,9 @@
 </script>
 
 <div
-        bind:this={ref}
-        class={cn('w-fit transition duration-200 ease-linear', className)}
-        {...$$props}
+    bind:this={ref}
+    class={cn('w-fit transition duration-200 ease-linear', className)}
+    {...restProps}
 >
-    <slot />
+    {@render children?.()}
 </div>

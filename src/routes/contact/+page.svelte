@@ -1,29 +1,95 @@
 <script>
-    import PageHeader from "$lib/components/PageHeader.svelte";
-    import ContactForm from "$lib/components/ContactForm.svelte";
-    import SEO from "$lib/components/SEO.svelte";
+    import PageHeader from "$lib/components/layout/PageHeader.svelte";
+    import ContactForm from "$lib/components/forms/ContactForm.svelte";
+    import { fly, fade, scale } from 'svelte/transition'
+    import { onMount } from 'svelte'
+    import * as Accordion from '$lib/components/ui/accordion'
+    import { MapPin, Mail, CircleHelp, ChevronDown, Phone, ExternalLink } from '@lucide/svelte'
+    import { page } from '$app/state'
     import { ORGANIZATION } from "$lib/config";
+	import Seo from "$lib/components/SEO.svelte";
 
-    export let data;
-
-    const info = data.info;
-    const faqs = info.faqs;
-</script>
-
-<SEO
-    title="Contact Us"
-    path="/contact"
-    description="Get in touch with the Muslim Students Society of Nigeria, OAU Branch. Contact our team for inquiries, feedback, or to join our community. Find our location, phone numbers, and email addresses."
-    images={[
-        {
-            url: 'https://mssnoau.sirv.com/contact-page.jpg',
-            width: 1200,
-            height: 630,
-            alt: 'Contact MSSNOAU'
+    // Data provided in the user query
+    const pageJsonData = {
+        "status": true,
+        "data": {
+            "info": {
+            "maintenance": false,
+            "maintenance_ends": null,
+            "faqs": [
+                {
+                "question": "What is MSSN OAU, and what does it stand for?",
+                "answer": "<strong class='text-primary-800'>MSSN OAU</strong> stands for the <strong  class='text-primary-800'>Muslim Students' Society of Nigeria, Ọbáfẹ́mi Awólọ́wọ̀ University Branch</strong>. It is a student-run Islamic organization aimed at fostering spiritual growth, academic excellence, and community service among Muslim students on campus."
+                },
+                {
+                "question": "Who can join MSSN OAU?",
+                "answer": "<strong  class='text-primary-800'>MSSN OAU</strong> is open to all Muslim students at <strong  class='text-primary-800'>Ọbáfẹ́mi Awólọ́wọ̀ University, Ilé-Ifẹ̀</strong>."
+                },
+                {
+                "question": "Where is the MSSN Secretariat located on campus?",
+                "answer": "The <strong  class='text-primary-800'>MSSN OAU Secretariat</strong> is located inside <a href='https://maps.app.goo.gl/r4T4g5NCUW36dGeZ7' class='text-primary-800'>Fájúyì Hall, Ọbáfẹ́mi Awólọ́wọ̀ University, Ilé-Ifẹ̀</a>."
+                },
+                {
+                "question": "How can I register for MSSN OAU events?",
+                "answer": "You can register for <strong  class='text-primary-800'>MSSNOAU</strong> events through our <a  class='text-primary-800 underline hover:text-primary-700' href='/events'>events section</a> or by visiting the Secretariat inside <strong  class='text-primary-800'>Fájúyì Hall</strong>. Event registration details will be announced through our communication channels and on the website."
+                },
+                {
+                "question": "Can I make donations to MSSN OAU? How?",
+                "answer": "Yes, donations to <strong  class='text-primary-800'>MSSN OAU</strong> are welcome! You can make donations directly at the Secretariat or through our official bank account, which can be found <a  class='text-primary-800 underline hover:text-primary-700' href='/#donate'>here</a>."
+                },
+                {
+                "question": "How do I pay my annual dues?",
+                "answer": "Annual dues can be paid at the <strong  class='text-primary-800'>Secretariat</strong> or via our <a  class='text-primary-800 underline hover:text-primary-700' href='/annual-dues'>online payment platform</a>."
+                },
+                {
+                "question": "How are the funds utilized by MSSN OAU?",
+                "answer": "Funds are used to support <strong  class='text-primary-800'>MSSN OAU</strong> activities, including organizing events, maintaining the Secretariat, providing resources for members, and running community service projects."
+                },
+                {
+                "question": "What resources are available in the MSSN E-library?",
+                "answer": "The <strong  class='text-primary-800'>MSSN E-library</strong> offers a wide range of Islamic books, scholarly articles, lecture notes, and multimedia resources to support spiritual and academic development. Members can access these materials through our <a  class='text-primary-800 underline hover:text-primary-700' href='https://library.mssnoau.org'>e-library platform</a> or at designated times from the Secretariat."
+                }
+            ],
+            "map_link": "https://maps.app.goo.gl/r4T4g5NCUW36dGeZ7",
+            "address": "MSSN OAU Secretariat, Inside Fájúyì Hall",
+            "email": "info@mssnoau.org",
+            "account": {
+                "number": "0217023039",
+                "bank": "GTBank",
+                "name": "Muslim Students' Society Of Nigeria, OAU"
+            },
+            "prayer_times": { /* ... prayer times data ... */ }
+            }
         }
-    ]}
-    keywords="contact MSSNOAU, MSSN contact, Muslim students contact, OAU Islamic society contact, MSSN OAU location, MSSN feedback, join MSSN OAU"
-    schema={{
+    };
+
+    const info = pageJsonData.data.info || {};
+    const faqs = pageJsonData.data.info.faqs || [];
+
+    // Add JSDoc type for info to clarify its structure, making phone optional
+    /**
+     * @typedef {object} ContactInfo
+     * @property {boolean} [maintenance]
+     * @property {null|string} [maintenance_ends]
+     * @property {Array<{question: string, answer: string}>} [faqs]
+     * @property {string} [map_link]
+     * @property {string} [address]
+     * @property {string} [email]
+     * @property {string} [phone] // Added as optional
+     * @property {{number: string, bank: string, name: string}} [account]
+     * @property {object} [prayer_times] // Simplified for brevity
+     */
+    /** @type {ContactInfo} */
+    const typedInfo = info;
+
+    let visible = $state(false);
+
+    onMount(() => {
+        visible = true;
+    });
+
+    // Prepare Schemas
+    const contactPageSchema = {
         "@type": "ContactPage",
         "name": "Contact MSSNOAU",
         "description": "Get in touch with the Muslim Students Society of Nigeria, OAU Branch. Contact our team for inquiries, feedback, or to join our community.",
@@ -41,13 +107,45 @@
         },
         "contactPoint": {
             "@type": "ContactPoint",
-            "telephone": "+234-000-0000-000",
+            "telephone": typedInfo.phone || "+234-000-0000-000",
             "contactType": "customer service",
-            "email": ORGANIZATION.email,
+            "email": typedInfo.email || ORGANIZATION.email,
             "areaServed": "NG",
             "availableLanguage": ["English"]
         }
-    }}
+    };
+
+    const faqPageSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqs.map(faq => ({
+            "@type": "Question",
+            "name": faq.question,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.answer
+            }
+        }))
+    };
+
+    const combinedSchema = [contactPageSchema, faqPageSchema];
+
+</script>
+
+<Seo
+    title="Contact Us"
+    path="/contact"
+    description="Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus."
+    images={[
+        {
+            url: 'https://mssnoau.sirv.com/contact-page.jpg',
+            width: 1200,
+            height: 630,
+            alt: 'Contact MSSNOAU'
+        }
+    ]}
+    keywords="contact MSSNOAU, MSSN contact, Muslim students contact, OAU Islamic society contact, MSSN OAU location, MSSN feedback, join MSSN OAU"
+    schema={combinedSchema}
 />
 
 <PageHeader>
@@ -81,7 +179,7 @@
                     <p class="mb-4 text-gray-600">
                         Send us an email and we'll get back to you within 48 hours.
                     </p>
-                    <a href="mailto:salam@mssnoau.org" class="text-primary-700 font-semibold">salam@mssnoau.org</a>
+                    <a href={`mailto:${typedInfo.email || ORGANIZATION.email}`} class="text-primary-700 font-semibold">{typedInfo.email || ORGANIZATION.email}</a>
                 </div>
             </div>
             <div class="mb-8 flex flex-col gap-6 overflow-hidden md:flex-row">
@@ -109,7 +207,11 @@
                     <p class="mb-4 text-gray-600">
                         Available Monday to Saturday from 9am to 5pm.
                     </p>
-                    <a href="tel:+2340000000000" class="text-primary-700 font-semibold">+234-000-0000-000</a>
+                    {#if typedInfo.phone}
+                        <a href={`tel:${typedInfo.phone}`} class="text-primary-700 font-semibold">{typedInfo.phone}</a>
+                    {:else}
+                        <p class="text-primary-700 font-semibold">Phone number not available</p>
+                    {/if}
                 </div>
             </div>
         </div>
@@ -127,7 +229,7 @@
         <div class="flex flex-wrap">
             <div class="w-full px-4">
                 <div class="mx-auto mb-[60px] max-w-[520px] text-center">
-                    <span class="mb-2 block text-lg font-semibold text-primary-700">FAQ</span>
+                    <span class="mb-2 block text-lg font-semibold text-primary-700"><CircleHelp class="inline-block h-6 w-6 mr-2 align-text-bottom" />FAQ</span>
                     <h2 class="mb-3 text-3xl font-bold leading-tight text-gray-900 sm:text-4xl md:text-[40px]">
                         Frequently Asked Questions
                     </h2>
@@ -138,53 +240,26 @@
             </div>
         </div>
 
-        <div class="flex flex-wrap">
-            <div class="w-full px-4">
-                <div class="w-full overflow-hidden rounded-xl bg-white shadow-xl">
-                    <div class="-mx-4 flex flex-wrap">
-                        <div class="w-full px-4 lg:w-1/2">
-                            <div class="overflow-hidden rounded-md border border-slate-200/60 p-5 shadow-md hover:shadow-lg sm:p-8">
-                                <h3 class="mb-4 text-lg font-semibold text-gray-900">
-                                    How can I become a member of MSSNOAU?
-                                </h3>
-                                <p class="text-base text-gray-600">
-                                    Any Muslim student of Obafemi Awolowo University can become a member. Simply reach out to us through our contact form, visit our secretariat, or attend any of our programs to register.
-                                </p>
+        {#if faqs.length > 0}
+        <div class="mx-auto max-w-3xl">
+            <Accordion.Root class="w-full space-y-3" type="multiple">
+                {#each faqs as faq, i (faq.question)}
+                    <Accordion.Item value={`item-${i}`} class="border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 ease-in-out bg-white">
+                        <Accordion.Trigger class="flex w-full items-center justify-between p-4 sm:p-5 text-left font-medium text-gray-700 hover:bg-gray-50 rounded-t-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-colors">
+                            <span class="text-base sm:text-lg">{faq.question}</span>
+                            <!-- Chevron will be handled by Accordion.Trigger or add one if needed -->
+                        </Accordion.Trigger>
+                        <Accordion.Content class="overflow-hidden text-sm text-gray-600 transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                            <div class="p-4 sm:p-5 pt-0 prose prose-sm max-w-none">
+                                {@html faq.answer}
                             </div>
-                        </div>
-                        <div class="w-full px-4 lg:w-1/2">
-                            <div class="overflow-hidden rounded-md border border-slate-200/60 p-5 shadow-md hover:shadow-lg sm:p-8">
-                                <h3 class="mb-4 text-lg font-semibold text-gray-900">
-                                    What activities does MSSNOAU organize?
-                                </h3>
-                                <p class="text-base text-gray-600">
-                                    We organize a variety of activities including Islamic lectures, tutorials, community service, sports events, and social gatherings. Our major programs include Jihad Week, MSSN Week, and various educational workshops.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="w-full px-4 lg:w-1/2">
-                            <div class="overflow-hidden rounded-md border border-slate-200/60 p-5 shadow-md hover:shadow-lg sm:p-8">
-                                <h3 class="mb-4 text-lg font-semibold text-gray-900">
-                                    Where are your prayer locations on campus?
-                                </h3>
-                                <p class="text-base text-gray-600">
-                                    We have prayer locations across the campus, including the Central Mosque, as well as prayer spaces in most faculties and halls of residence. Check our Prayer Times section for specific locations.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="w-full px-4 lg:w-1/2">
-                            <div class="overflow-hidden rounded-md border border-slate-200/60 p-5 shadow-md hover:shadow-lg sm:p-8">
-                                <h3 class="mb-4 text-lg font-semibold text-gray-900">
-                                    How can I contribute to MSSNOAU?
-                                </h3>
-                                <p class="text-base text-gray-600">
-                                    You can contribute by volunteering for our committees, participating in our programs, making donations, or sharing your skills and expertise. We welcome all forms of positive contributions.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </Accordion.Content>
+                    </Accordion.Item>
+                {/each}
+            </Accordion.Root>
         </div>
+        {:else}
+            <p class="text-center text-gray-500">No FAQs available at the moment.</p>
+        {/if}
     </div>
 </section>

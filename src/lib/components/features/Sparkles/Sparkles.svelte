@@ -3,12 +3,25 @@
     import { onMount } from 'svelte';
     let randomMove = () => Math.random() * 4 - 2;
 
-    export let minSize = 0.6;
-    export let maxSize = 1.5;
-    export let speed = 5;
-    export let particleColor = '#ffffff';
-    export let particleDensity = 200;
-    export let className = undefined;
+    /**
+     * @typedef {Object} Props
+     * @property {number} [minSize]
+     * @property {number} [maxSize]
+     * @property {number} [speed]
+     * @property {string} [particleColor]
+     * @property {number} [particleDensity]
+     * @property {any} [className]
+     */
+
+    /** @type {Props} */
+    let {
+        minSize = 0.6,
+        maxSize = 1.5,
+        speed = 5,
+        particleColor = '#ffffff',
+        particleDensity = 200,
+        className = undefined
+    } = $props();
 
     function getRandomValue() {
         return minSize + Math.random() * (maxSize - minSize);

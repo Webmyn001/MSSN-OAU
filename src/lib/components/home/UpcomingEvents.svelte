@@ -1,14 +1,13 @@
 <script>
     import { Button } from '$lib/components/ui/button';
     import * as Card from '$lib/components/ui/card';
-    import { Check, BookUser, CalendarDays, Clock, MapPin } from 'lucide-svelte';
+    import { Check, BookUser, CalendarDays, Clock, MapPin } from '@lucide/svelte';
     import { goto } from '$app/navigation';
     import slugify from "$lib/utils/slugify.js";
     import { fly, fade, scale } from 'svelte/transition';
     import { onMount } from 'svelte';
     import { Image } from '$lib/components/ui/image';
     
-    // Define the event type structure to fix type errors
     /**
      * @typedef {Object} Event
      * @property {string} title - Event title
@@ -17,16 +16,11 @@
      * @property {string} summary - Event description
      * @property {boolean} [paid] - Whether the event is paid
      * @property {string} [price] - Price of the event if paid
+     * @property {string} [time] - Event time
+     * @property {string} [location] - Event location
      */
     
-    /** @type {{events: Array<{
-        title: string;
-        date: string;
-        image: string;
-        summary: string;
-        paid?: boolean;
-        price?: string;
-    }>}} */
+    /** @type {{events: Array<Event>}} */
     let {
         events = [
         {
@@ -34,7 +28,7 @@
             date: "Every Sunday",
             time: "2:00 PM",
             location: "Computer Building",
-            description: "Join us for our weekly Ta'leem sessions where we discuss topics related to Islam and spirituality.",
+            summary: "Join us for our weekly Ta'leem sessions where we discuss topics related to Islam and spirituality.",
             image: "https://plus.unsplash.com/premium_photo-1677621879478-fe161e8c9362?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZnJpZGF5JTIwbXVzbGltfGVufDB8fDB8fHww"
         },
         {
@@ -42,15 +36,15 @@
             date: "Last Saturday of every month",
             time: "10:00 PM",
             location: "Central Mosque",
-            description: "Join us for our monthly Quran recitation as we engage in recitation, dhikr, and spiritual reflection.",
+            summary: "Join us for our monthly Quran recitation as we engage in recitation, dhikr, and spiritual reflection.",
             image: "https://images.unsplash.com/photo-1728294087366-d57768c7e0ec?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fG11c2xpbSUyMGNpcmNsZXxlbnwwfHwwfHx8MA%3D%3D"
         },
         {
             title: "Annual Ramadan Planning",
-            date: "February 28th",
+            date: "February 28th", // This will be formatted nicely
             time: "4:00 PM",
             location: "Central Mosque",
-            description: "Join the planning committee for Ramadan activities and programs.",
+            summary: "Join the planning committee for Ramadan activities and programs.",
             image: "https://images.unsplash.com/photo-1633677491383-b1769a69f157?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHJhbWFkYW58ZW58MHx8MHx8fDA%3D"
         }
     ]
@@ -60,11 +54,41 @@
     let visible = $state(false);
     
     // For hover effects
-    let hoveredCard = $state(null);
+    /** @type {string | null} */
+    let hoveredCard = $state(/** @type {string | null} */ (null));
     
     onMount(() => {
         visible = true;
     });
+
+    /**
+     * Formats a date string for display.
+     * If the string is a known human-readable pattern or not a valid date, it's returned as is.
+     * Otherwise, it's formatted to a long date format.
+     * @param {string} dateString
+     * @returns {string}
+     */
+    function formatDisplayDate(dateString) {
+        if (!dateString) return '';
+        
+        // Check for common human-readable patterns that shouldn't be parsed
+        const knownPatterns = [/every/i, /last .* of every month/i, /first .* of every month/i];
+        if (knownPatterns.some(pattern => pattern.test(dateString))) {
+            return dateString;
+        }
+
+        const dateObj = new Date(dateString);
+        if (!isNaN(dateObj.getTime())) {
+            // Check if the original string was just a month and day (e.g., "February 28th")
+            // If so, new Date() might pick current year. Formatting it will show the year.
+            return dateObj.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            });
+        }
+        return dateString; // Fallback to original string if not parsable and not a known pattern
+    }
 </script>
 
 
@@ -121,7 +145,7 @@
                 <a 
                     in:fly={{ y: 20, duration: 800, delay: 800 + (i * 200) }}
                     class="group flex flex-col h-full focus:outline-none rounded-xl overflow-hidden backdrop-blur-sm bg-white/30 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
-                    href={`/events#${slugify(event.title + " " + event.date)}`}
+                    href={`/events/${slugify(event.title)}`}
                     onmouseenter={() => hoveredCard = event.title}
                     onmouseleave={() => hoveredCard = null}
                 >
@@ -154,7 +178,7 @@
                         <div class="mt-3 space-y-2">
                             <div class="flex items-center gap-2">
                                 <CalendarDays class="shrink-0 size-4 text-primary-700/70" />
-                                <span class="text-sm text-gray-600">{event.date}</span>
+                                <span class="text-sm text-gray-600">{formatDisplayDate(event.date)}</span>
                             </div>
                             
                             {#if event.time}
@@ -178,7 +202,7 @@
                         
                         <div class="mt-auto pt-4">
                             <button 
-                                onclick={() => goto(`/events#${slugify(event.title + " " + event.date)}`)}
+                                onclick={() => goto(`/events/${slugify(event.title)}`)}
                                 class="inline-flex items-center gap-x-1 text-sm text-primary-700 font-medium font-secondary group-hover:text-primary-800 transition-colors duration-300"
                             >
                                 <span class="relative">

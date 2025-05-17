@@ -1,11 +1,17 @@
 <script>
 	import copyTextToClipboard from '$lib/utils/copy';
-    import { page } from '$app/state';
+    import { page } from '$app/state'; // Changed from $app/state for Svelte 5 reactivity
 	import { toast } from 'svelte-sonner';
-	import { Copy } from 'lucide-svelte';
+	import { Copy } from '@lucide/svelte';
+	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
+
+    /** @type {import('$app/forms').PageData["info"]["info"]["account"] | undefined} */
+    const account = $derived(page.data?.info?.info?.account);
+    let openModal = $state(false);
 
      const copyAccNumber = async () => {
-        const copy = await copyTextToClipboard(page.data.info.account.number)
+        if (!account) return;
+        const copy = await copyTextToClipboard(account.number)
         if (copy) {
             toast.success("Account Number Copied!")
         } else {
@@ -14,14 +20,17 @@
     }
 
     const copyAccDetails = async () => {
-        const copy = await copyTextToClipboard(`Bank Name: ${page.data.info.account.bank}\nAccount Name: ${page.data.info.account.name}\nAccount Number: ${page.data.info.account.number}`)
+        if (!account) return;
+        const copy = await copyTextToClipboard(`Bank Name: ${account.bank}\nAccount Name: ${account.name}\nAccount Number: ${account.number}`)
         if (copy) {
-            toast.success("Account Details Copied!")
+            toast.success("Account Details Copied!");
+            openModal = false;
         } else {
             toast.error("Failed to copy Account Details!")
         }
     }
 </script>
+
 <!-- Donation CTA -->
 <div id="donate" class="bg-white py-6 sm:py-8 lg:py-12">
     <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
@@ -32,73 +41,47 @@
                     and
                     collective efforts, both in cash and kind.</p>
             </div>
-            {#await import('$lib/components/ui/alert-dialog/index.js') then AlertDialog}
-            <AlertDialog.Root>
-                <AlertDialog.Trigger>
-                    <button type="button"
-                            class="inline-block font-secondary rounded-xl bg-primary-700 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-primary-300 transition duration-100 hover:bg-primary-800 focus-visible:ring active:bg-primary-800 md:text-base">
-                        Donate
-                    </button>
 
-                </AlertDialog.Trigger>
-                <AlertDialog.Content class="scrollbar-hide lg:max-w-[60dvw] overflow-y-scroll max-h-screen">
-                    <AlertDialog.Header>
-                        <AlertDialog.Title class="font-primary text-primary-800">Donate
-                        </AlertDialog.Title>
-                    </AlertDialog.Header>
-                    <!-- List -->
-                    <div class="space-y-3">
-                        <dl class="flex flex-col sm:flex-row gap-1">
-                            <dt class="min-w-40">
-                                <span class="block text-sm text-gray-500 ">Account Name:</span>
-                            </dt>
-                            <dd>
-                                <ul>
-                                    <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800">
-                                        {page.data.info.account.name}
-                                    </li>
-                                </ul>
-                            </dd>
-                        </dl>
+            {#if account}
+                <Button variant="default" size="lg" onclick={() => openModal = true} class="">Donate</Button>
 
-                        <dl class="flex flex-col sm:flex-row gap-1">
-                            <dt class="min-w-40">
-                                <span class="block text-sm text-gray-500 ">Bank Name:</span>
-                            </dt>
-                            <dd>
-                                <ul>
-                                    <li class="me-1 after:content-[','] inline-flex items-center text-sm text-neutral-800">
-                                        {page.data.info.account.bank}
-                                    </li>
-                                </ul>
-                            </dd>
-                        </dl>
+                {#if openModal} 
+                    {#await import('$lib/components/layout/ResponsiveModal.svelte') then module}
+                        {@const ResponsiveModal = module.default}
+                        <ResponsiveModal bind:open={openModal} title="Donate" description="Support MSSN OAU. Your contributions make a difference.">
+                            
+                            <div class="space-y-3 px-4 py-2 lg:px-0 lg:py-0">
+                                <dl class="flex flex-col gap-1">
+                                    <dt class="text-sm text-gray-500">Account Name:</dt>
+                                    <dd class="text-sm text-neutral-800">{account.name}</dd>
+                                </dl>
+                                <dl class="flex flex-col gap-1">
+                                    <dt class="text-sm text-gray-500">Bank Name:</dt>
+                                    <dd class="text-sm text-neutral-800">{account.bank}</dd>
+                                </dl>
+                                <dl class="flex flex-col gap-1">
+                                    <dt class="text-sm text-gray-500">Account Number:</dt>
+                                    <dd class="flex items-center text-sm text-neutral-800">
+                                        {account.number}
+                                        <Button variant="ghost" size="icon" onclick={copyAccNumber} class="ml-2 h-7 w-7">
+                                            <Copy class="size-4 text-primary-700" />
+                                        </Button>
+                                    </dd>
+                                </dl>
+                            </div>
 
-                        <dl class="flex flex-col sm:flex-row gap-1">
-                            <dt class="min-w-40">
-                                <span class="block text-sm text-gray-500">Account Number:</span>
-                            </dt>
-                            <dd>
-                                <ul>
-                                    <li class="me-1 inline-flex items-center text-sm text-neutral-800">
-                                        {page.data.info.account.number}
-                                        <Copy onclick={copyAccNumber}
-                                              class="size-4 text-primary-700 cursor-pointer ml-4"/>
-                                    </li>
-                                </ul>
-                            </dd>
-                        </dl>
-                    </div>
-                    <!-- End List -->
-                    <AlertDialog.Footer>
-                        <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-                        <AlertDialog.Action class="bg-primary-800 text-white bg-primary-800/90"
-                                            onclick={copyAccDetails}>Copy
-                        </AlertDialog.Action>
-                    </AlertDialog.Footer>
-                </AlertDialog.Content>
-            </AlertDialog.Root>
-                {/await}
+                            {#snippet footer()}
+                                <Button variant="outline" onclick={() => openModal = false} class="w-full sm:w-auto">Cancel</Button>
+                                <Button onclick={copyAccDetails} class="w-full sm:w-auto bg-primary-800 text-white hover:bg-primary-800/90">
+                                    Copy Details
+                                </Button>
+                            {/snippet}
+                        </ResponsiveModal>
+                    {/await}
+                {/if}
+            {:else}
+                 <Button variant="default" size="lg" disabled class="">Donate (Unavailable)</Button>
+            {/if}
         </div>
     </div>
 </div>

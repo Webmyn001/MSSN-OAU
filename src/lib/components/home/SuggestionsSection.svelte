@@ -1,6 +1,6 @@
 <script>
     import { Image } from '$lib/components/ui/image'
-    import { ArrowRight } from 'lucide-svelte'
+    import { ArrowRight } from '@lucide/svelte'
     import { fly, fade } from 'svelte/transition'
     import { onMount } from 'svelte'
     

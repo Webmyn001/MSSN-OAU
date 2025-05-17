@@ -1,42 +1,43 @@
-<script lang="ts">
+<script>
     import { onMount } from 'svelte';
     import { prayerTimes as solahTimes, upcomingPrayer, formatTime } from '$lib/stores/prayerTimes';
     import { Badge } from '$lib/components/ui/badge';
-    import { Clock, MapPin, Calendar, Moon, MapPinned } from 'lucide-svelte';
+    import { Clock, MapPin, Calendar, Moon, MapPinned } from '@lucide/svelte';
     import { mosques } from '$lib/stores/mosques';
     import PrayerTimeCard from './PrayerTimeCard.svelte';
     import { fade, fly } from 'svelte/transition';
     import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
     import AutoplayModule from 'embla-carousel-autoplay';
+    import { getFormattedDateVerbose, getFormattedDateVerboseShort } from '$lib/utils/dateFormatting.js';
+	import { page } from '$app/state';
     
-    // For date formatting
-    function getFormattedDateVerbose() {
-        const now = new Date();
-        const day = now.getDate();
-        const month = now.toLocaleString('default', {month: 'long'});
-        const year = now.getFullYear();
-        
-        const suffix =
-            day % 10 === 1 && day !== 11 ? 'st' :
-            day % 10 === 2 && day !== 12 ? 'nd' :
-            day % 10 === 3 && day !== 13 ? 'rd' :
-            'th';
-            
-        return `${day}${suffix} ${month}, ${year}`;
-    }
-    
-    function getFormattedDateVerboseShort() {
-        const now = new Date();
-        const day = now.getDate();
-        const month = now.toLocaleString('default', {month: 'short'});
-        const year = now.getFullYear();
-        
-        return `${day} ${month}, ${year}`;
-    }
+        /** @typedef {{ adhan: string, iqamah: string }} PrayerTimeEntry */
+    /** @typedef {{ subhi?: PrayerTimeEntry, dhuhr?: PrayerTimeEntry, asr?: PrayerTimeEntry, maghrib?: PrayerTimeEntry, isha?: PrayerTimeEntry, jumuah?: PrayerTimeEntry }} PagePrayerTimes */
+
+    /**
+     * @typedef {Object} MosquePrayerTimes
+     * @property {string} [fajr]
+     * // ... other prayers
+     */
+
+    /**
+     * @typedef {Object} Mosque
+     * @property {string} id
+     * @property {string} label // Ensure this matches your $mosques store items
+     * @property {string} [name]
+     * @property {string} [address]
+     * @property {string[]} [images]
+     * @property {string} [url]
+     * @property {string} [description]
+     * @property {MosquePrayerTimes | Record<string, string>} [prayerTimes]
+     */
     
     // Hijri date state
     let hijrahDate = $state("");
     let shortHijrahDate = $state("");
+
+        /** @type {PagePrayerTimes | undefined} */
+        const prayer_times_from_page_data = page.data.info?.prayer_times;
     
     // Get the upcoming prayer index for styling
     const upcoming_solat = $derived($upcomingPrayer === 'fajr' ? 0 : 
@@ -50,35 +51,35 @@
         { 
             name: 'Fajr', 
             background: '/images/midnight.webp', 
-            times: () => $solahTimes.subhi,
+            times: () => prayer_times_from_page_data?.subhi || $solahTimes.subhi,
             color: 'from-indigo-500/80 to-purple-600/80',
             icon: '🌅'
         },
         { 
             name: 'Dhuhr', 
             background: '/images/noon.webp', 
-            times: () => $solahTimes.dhuhr,
+            times: () => prayer_times_from_page_data?.dhuhr || $solahTimes.dhuhr,
             color: 'from-amber-500/80 to-orange-600/80',
             icon: '☀️'
         },
         { 
             name: 'Asr', 
             background: '/images/evening.webp', 
-            times: () => $solahTimes.asr,
+            times: () => prayer_times_from_page_data?.asr || $solahTimes.asr,
             color: 'from-orange-400/80 to-rose-600/80',
             icon: '🌇'
         },
         { 
             name: 'Maghrib', 
             background: '/images/late-evening.webp', 
-            times: () => $solahTimes.maghrib,
+            times: () => prayer_times_from_page_data?.maghrib || $solahTimes.maghrib,
             color: 'from-rose-500/80 to-purple-700/80',
             icon: '🌆'
         },
         { 
             name: 'Isha', 
             background: '/images/night.webp', 
-            times: () => $solahTimes.isha,
+            times: () => prayer_times_from_page_data?.isha || $solahTimes.isha,
             color: 'from-blue-600/80 to-indigo-900/80',
             icon: '🌙'
         }
@@ -90,7 +91,14 @@
     let loaded = $state(false);
     
     // Get the selected mosque object
+     // Make sure $mosques store provides items typed as Mosque[]
+    // For example, if mosquesData is the raw array from the store:
+    // /** @type {Mosque[]} */
+    // const mosques = mosquesData;
     const selectedMosqueObject = $derived($mosques.find(mosque => mosque.id === selectedMosque));
+    
+    // Carousel API instance
+    let carouselAPI = $state();
     
     onMount(async () => {
         try {
@@ -99,7 +107,6 @@
             const month = String(now.getMonth() + 1).padStart(2, '0'); 
             const year = now.getFullYear();
             
-            // Format the date as DD-MM-YYYY for API
             const formattedDate = `${day}-${month}-${year}`;
             
             const req = await fetch(`https://api.aladhan.com/v1/gToH/${formattedDate}`);
@@ -113,8 +120,8 @@
             hijrahDate = `${res.data.hijri.day} ${res.data.hijri.month.en}, ${res.data.hijri.year}${res.data.hijri.designation.abbreviated}`;
             shortHijrahDate = res.data.hijri.date.replaceAll("-", "/") + res.data.hijri.designation.abbreviated;
         } catch (e) {
-            console.error("Error retrieving Hijrah Date:", e?.message);
-            // Fallback values
+            const error = e instanceof Error ? e : new Error(String(e));
+            console.error("Error retrieving Hijrah Date:", error.message);
             hijrahDate = "Hijri date unavailable";
             shortHijrahDate = "Hijri date unavailable";
         }
@@ -122,12 +129,15 @@
         loaded = true;
     });
 
-    let Sheet = null;
-    let Carousel = null;
-    let Dialog = null;
-    let sheetAndCarouselLoaded = false;
-    let dialogLoaded = false;
-    let isLargeScreen = false;
+        /** @type {import('$lib/components/ui/sheet/index.js') | null} */
+        let Sheet = $state(null);
+    /** @type {import('$lib/components/ui/carousel/index.js') | null} */
+    let Carousel = $state(null);
+    /** @type {import('$lib/components/ui/dialog/index.js') | null} */
+    let Dialog = $state(null);
+    let sheetAndCarouselLoaded = $state(false);
+    let dialogLoaded = $state(false);
+    let isLargeScreen = $state(false);
 
     function checkScreen() {
         isLargeScreen = window.matchMedia('(min-width: 640px)').matches;
@@ -228,7 +238,8 @@
                     <div class="bg-white/20 p-2 rounded-full">
                         <Clock class="h-5 w-5" />
                     </div>
-                    <span>Friday Sermon starts at 1:30 PM and Prayer commences at 2:00 PM</span>
+                    <span>Jumu'ah: Khutbah {prayer_times_from_page_data?.jumuah?.adhan ? formatTime(prayer_times_from_page_data.jumuah.adhan) : '1:30 PM'},
+                        Solah {prayer_times_from_page_data?.jumuah?.iqamah ? formatTime(prayer_times_from_page_data.jumuah.iqamah) : '2:00 PM'}</span>
                 </div>
             </div>
         </div>
@@ -241,35 +252,40 @@
             </div>
             
             <div class="flex flex-wrap gap-3 max-w-full overflow-x-auto py-2 scrollbar-hide">
-                {#each $mosques as mosque}
-                    <Badge 
-                        class="cursor-pointer transition-all backdrop-blur-md bg-white/40 dark:bg-black/40 border border-white/30 dark:border-white/10 hover:bg-primary-100/80 hover:text-primary-900 px-4 py-2 text-sm" 
-                        variant="outline" 
-                        onclick={async () => {
-                            selectedMosque = mosque.id;
-                            if (isLargeScreen) {
-                                if (!dialogLoaded) {
-                                    const mod = await import('$lib/components/ui/dialog/index.js');
-                                    Dialog = mod;
-                                    dialogLoaded = true;
-                                }
-                                if (!Carousel) {
-                                    const carouselMod = await import('$lib/components/ui/carousel/index.js');
-                                    Carousel = carouselMod;
-                                }
-                            } else {
-                                if (!sheetAndCarouselLoaded) {
-                                    const [sheetMod, carouselMod] = await Promise.all([
-                                        import('$lib/components/ui/sheet/index.js'),
-                                        import('$lib/components/ui/carousel/index.js')
-                                    ]);
-                                    Sheet = sheetMod;
-                                    Carousel = carouselMod;
-                                    sheetAndCarouselLoaded = true;
-                                }
+                {#each $mosques as mosque (mosque.id)} 
+                    {@const handleBadgeClick = async () => {
+                        selectedMosque = mosque.id;
+                        if (isLargeScreen) {
+                            if (!dialogLoaded) {
+                                const mod = await import('$lib/components/ui/dialog/index.js');
+                                Dialog = mod;
+                                dialogLoaded = true;
                             }
-                            showMosqueModal = true;
-                        }}
+                            if (!Carousel) {
+                                const carouselMod = await import('$lib/components/ui/carousel/index.js');
+                                Carousel = carouselMod;
+                            }
+                        } else {
+                            if (!sheetAndCarouselLoaded) {
+                                const [sheetMod, carouselMod] = await Promise.all([
+                                    import('$lib/components/ui/sheet/index.js'),
+                                    import('$lib/components/ui/carousel/index.js')
+                                ]);
+                                Sheet = sheetMod;
+                                Carousel = carouselMod;
+                                sheetAndCarouselLoaded = true;
+                            }
+                        }
+                        showMosqueModal = true;
+                    }}
+                    <Badge
+                    href={undefined}
+                        class="cursor-pointer transition-all backdrop-blur-md bg-white/40 dark:bg-black/40 border border-white/30 dark:border-white/10 hover:bg-primary-100/80 hover:text-primary-900 px-4 py-2 text-sm"
+                        variant="outline" 
+                        role="button"
+                        tabindex="0"
+                        onclick={handleBadgeClick}
+                        onkeydown={/** @param {KeyboardEvent} e */ (e) => { if (e.key === 'Enter' || e.key === ' ') handleBadgeClick(); }}
                     >
                         {mosque.label}
                     </Badge>
@@ -302,6 +318,7 @@
             <div class="relative -mt-8 px-4">
                 <div class="rounded-xl overflow-hidden shadow-lg border border-white/20">
                     <Carousel.Root
+                        bind:api={carouselAPI}
                         plugins={[AutoplayModule({ delay: 5000 })]}
                         class="w-full"
                         opts={{ align: "center", loop: true }}
@@ -333,8 +350,8 @@
                         <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1 z-10">
                             {#each selectedMosqueObject.images as _, i}
                                 <button 
-                                    class="w-2 h-2 rounded-full transition-all duration-300 {Carousel.api?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
-                                    on:click={() => Carousel.api?.scrollTo(i)}
+                                    class="w-2 h-2 rounded-full transition-all duration-300 {carouselAPI?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
+                                    onclick={() => carouselAPI?.scrollTo(i)}
                                     aria-label={`Go to slide ${i + 1}`}
                                 ></button>
                             {/each}
@@ -413,6 +430,7 @@
             <div class="relative -mt-6 px-4">
                 <div class="rounded-xl overflow-hidden shadow-lg border border-white/20">
                     <Carousel.Root
+                        bind:api={carouselAPI}
                         plugins={[AutoplayModule({ delay: 5000 })]}
                         class="w-full"
                         opts={{ align: "center", loop: true }}
@@ -444,8 +462,8 @@
                         <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1 z-10">
                             {#each selectedMosqueObject.images as _, i}
                                 <button 
-                                    class="w-2 h-2 rounded-full transition-all duration-300 {Carousel.api?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
-                                    on:click={() => Carousel.api?.scrollTo(i)}
+                                    class="w-2 h-2 rounded-full transition-all duration-300 {carouselAPI?.selectedScrollSnap() === i ? 'bg-white w-4' : 'bg-white/50'}"
+                                    onclick={() => carouselAPI?.scrollTo(i)}
                                     aria-label={`Go to slide ${i + 1}`}
                                 ></button>
                             {/each}

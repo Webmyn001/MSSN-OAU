@@ -78,7 +78,7 @@
     });
 </script>
 
-<div class={cn('relative h-48 overflow-hidden', className)}>
+<div class={cn('relative h-48 overflow-hidden select-none', className)}>
     <div class="absolute inset-0">
         {#each particles as particle, i (`cell-${i}`)}
             <div

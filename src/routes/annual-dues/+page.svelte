@@ -3,14 +3,15 @@
     import * as Alert from "$lib/components/ui/alert/index.js"
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
-    import { Copy, CircleAlert, MapPinned, Phone, MessageCircle } from 'lucide-svelte';
+    import { Copy, CircleAlert, MapPinned, Phone, MessageCircle } from '@lucide/svelte';
     import copyTextToClipboard from "$lib/utils/copy.js";
     import {toast} from "svelte-sonner";
     import {MetaTags} from "svelte-meta-tags";
+    import SEO from '$lib/components/SEO.svelte';
 
-    export let data;
+    let { data } = $props();
 
-    let visible = false
+    let visible = $state(false)
     
     onMount(() => {
         visible = true
@@ -37,28 +38,32 @@
     const finsec_no = "+2348146851394"
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-        title="Pay Annual Dues"
-        titleTemplate="%s | MSSNOAU"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/"
-        openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/',
-    title: 'Pay Annual Dues | MSSNOAU',
-    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
-    images: [
-      {
-        url: 'https://i.ibb.co/zbWfh5B/home.webp',
-        width: 1200,
-        height: 640,
-        alt: 'Website screenshot'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
+<SEO
+    title="Pay Annual Dues"
+    description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+    path="/annual-dues"
+    type="WebPage"
+    images={[
+        {
+            url: 'https://i.ibb.co/zbWfh5B/home.webp',
+            width: 1200,
+            height: 640,
+            alt: 'MSSNOAU Annual Dues Page'
+        }
+    ]}
+    schema={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Pay Annual Dues | MSSNOAU",
+        "description": "Contribute to the Muslim Students Society of Nigeria, OAU Branch by paying your annual dues. Support our activities and community initiatives.",
+        "url": "https://mssnoau.org/annual-dues",
+        "publisher": {
+            "@type": "Organization",
+            "name": "MSSNOAU"
+        }
+    }}
+    keywords={["mssnoau annual dues", "pay mssn oau dues", "support mssnoau", "muslim students oau finance", "oau mssn contribution"]}
 />
-<!-- End Meta Tags -->
 
 <section class="py-24 relative overflow-hidden">
     <!-- Decorative background elements -->
@@ -177,7 +182,7 @@
                                             <li class="me-1 inline-flex items-center text-sm font-medium text-primary-800">
                                                 {data.info.account.number}
                                                 <button 
-                                                    on:click={copyAccNumber}
+                                                    onclick={copyAccNumber}
                                                     class="ml-4 p-1.5 rounded-full bg-gray-100 hover:bg-primary-100 transition-colors"
                                                 >
                                                     <Copy class="size-3.5 text-primary-700"/>
@@ -196,7 +201,7 @@
                                             <li class="me-1 inline-flex items-center text-sm font-medium text-primary-800">
                                                 {finsec_no}
                                                 <button 
-                                                    on:click={() => copyTextToClipboard(finsec_no)}
+                                                    onclick={() => copyTextToClipboard(finsec_no)}
                                                     class="ml-4 p-1.5 rounded-full bg-gray-100 hover:bg-primary-100 transition-colors"
                                                 >
                                                     <Copy class="size-3.5 text-primary-700"/>

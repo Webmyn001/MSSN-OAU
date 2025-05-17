@@ -1,15 +1,49 @@
+// @ts-nocheck
+// Sentry Fetch Proxy - Should be at the very top
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  if (originalFetch) {
+      // Using bracket notation to assign to window to potentially bypass some linter checks
+      // for undeclared properties on the window object in a .js file.
+      window['_sentryFetchProxy'] = function(...args) { // Use rest parameters
+          // 'arguments' can be used here, but ensure Sentry's own full SDK,
+          // when/if you enable it, handles fetch wrapping correctly.
+          // This basic proxy might not be fully robust for all fetch use cases
+          // or Sentry's deeper integrations.
+          return originalFetch.apply(this, args); // Pass args array
+      };
+      window.fetch = function(...args) { // Use rest parameters
+          return window['_sentryFetchProxy'].apply(this, args); // Pass args array
+      };
+  }
+}
+
 // Temporarily commented out Sentry for build testing
-// import { handleErrorWithSentry, replayIntegration, feedbackIntegration } from "@sentry/sveltekit";
-// import * as Sentry from '@sentry/sveltekit';
+import { replayIntegration, feedbackIntegration } from "@sentry/sveltekit"; // handleErrorWithSentry removed
+import * as Sentry from '@sentry/sveltekit';
 import { deferScripts } from '$lib/utils/scriptLoader';
 
 // Temporarily commented out Sentry initialization
-/* 
+
 Sentry.init({
   dsn: 'https://8a6c37d91d61d59f93315969a077bace@o4508522730946560.ingest.us.sentry.io/4508522732519424',
 
   beforeSend(event) {
     // Check if it is an exception, and if so, show the report dialog
+    console.log(event.exception?.values);
+
+    // Check for ServiceWorker registration errors
+    if (event.exception && event.exception.values) {
+      const hasServiceWorkerError = event.exception.values.some(
+        (ex) => ex.type === 'TypeError' && ex.value && ex.value.includes('ServiceWorker script') && ex.value.includes('threw an exception during script evaluation')
+      );
+
+      if (hasServiceWorkerError) {
+        console.log('ServiceWorker registration error detected. Suppressing Sentry dialog.');
+        return null; // Don't send this error to Sentry or show dialog
+      }
+    }
+
     if (event.exception && event.event_id) {
       Sentry.showReportDialog({
         eventId: event.event_id,
@@ -44,7 +78,6 @@ Sentry.init({
     })
   ],
 });
-*/
 
 // Constants for resource optimization
 const RESOURCE_HINTS = {

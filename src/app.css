@@ -104,12 +104,7 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Hide scrollbar for all elements */
-html, body {
-    overflow: hidden;
-}
-
-/* Optional: If you want to allow scrolling but just hide the scrollbar */
+/* Allow scrolling but hide the scrollbar */
 html, body {
     overflow: auto; /* or overflow-y: scroll; for vertical scroll only */
     scrollbar-width: none; /* Firefox */

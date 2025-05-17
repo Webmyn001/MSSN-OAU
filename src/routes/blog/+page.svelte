@@ -1,10 +1,10 @@
 <script>
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
-    import { Calendar, ChevronRight, Mail, Send, ExternalLink } from 'lucide-svelte'
+    import { Calendar, ChevronRight, Mail, Send, ExternalLink } from '@lucide/svelte'
     import { toast } from 'svelte-sonner'
     import { formatDate } from "$lib/utils/dates.js"
-	import { JsonLd, MetaTags } from 'svelte-meta-tags';
+	import SEO from '$lib/components/SEO.svelte';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
     
     let { data } = $props()
@@ -27,7 +27,8 @@
         }
     })
     
-    const handleSubscribe = () => {
+    const handleSubscribe = (e) => {
+        e.preventDefault()
         if (!email) {
             toast.error("Please enter your email address")
             return
@@ -83,34 +84,22 @@
 
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-        title="Blog"
-        titleTemplate="%s | MSSNOAU"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/"
-        openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/',
-    title: 'Blog | MSSNOAU',
-    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
-    images: [
-      {
-        url: 'https://i.ibb.co/zbWfh5B/home.webp',
-        width: 1200,
-        height: 640,
-        alt: 'Website screenshot'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
+<SEO
+    title="Blog"
+    description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+    path="/blog" 
+    type="WebPage"
+    images={[
+        {
+            url: 'https://i.ibb.co/zbWfh5B/home.webp',
+            width: 1200,
+            height: 640,
+            alt: 'MSSNOAU Blog'
+        }
+    ]}
+    schema={jsonLd} 
+    keywords={["mssnoau blog", "an-nuur press", "islamic articles", "muslim students oau blog", "oau mssn articles"]}
 />
-{#if jsonLd}
-<JsonLd
-        schema={[...jsonLd]}
-/>
-    {/if}
-<!-- End Meta Tags -->
-
 
 <PageHeader>
     Our Blog
@@ -137,8 +126,8 @@
                             target="_blank"
                             class="flex flex-col bg-white/80 backdrop-blur-sm group border border-primary-100 hover:border-primary-200 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full"
                             in:fly={{ y: 30, duration: 800, delay: 200 + (i * 150) }}
-                            on:mouseenter={() => hoveredPost = post.title}
-                            on:mouseleave={() => hoveredPost = null}
+                            onmouseenter={() => hoveredPost = post.title}
+                            onmouseleave={() => hoveredPost = null}
                         >
                             <div class="relative overflow-hidden bg-gray-200">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
@@ -157,9 +146,9 @@
                             
                             <div class="flex flex-col p-5 relative justify-between h-full">
                                 <h1 class="text-xl font-semibold text-gray-800 group-hover:text-primary-700 transition-colors line-clamp-2">
-                                    {@html post.title}
+                                    {@html post.title.replace("&amp;", "&").replace("&quot;", '"').replace("&apos;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("&nbsp;", " ")}
                                 </h1>
-                                <p class="text-gray-700 py-3 line-clamp-2 flex-grow">{@html post.excerpt}</p>
+                                <p class="text-gray-700 py-3 line-clamp-2 flex-grow">{@html post.excerpt.replace("&amp;", "&").replace("&quot;", '"').replace("&apos;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("&nbsp;", " ").replace("&copy;", "©").replace("&reg;", "®").replaceAll('[…]', '...')}</p>
                                 
                                 <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <div class="flex items-center">
@@ -205,7 +194,7 @@
                             
                             <form 
                                 class="w-full flex flex-col sm:items-center sm:flex-row lg:flex-col gap-y-3 gap-x-4 mt-4"
-                                on:submit|preventDefault={handleSubscribe}
+                                onsubmit={handleSubscribe}
                             >
                                 <input 
                                     type="email"
@@ -274,7 +263,7 @@
                         <h4 class="font-medium text-gray-700 mb-3">Subscribe to our newsletter</h4>
                         <form 
                             class="flex flex-col sm:flex-row gap-2"
-                            on:submit|preventDefault={handleSubscribe}
+                            onsubmit={handleSubscribe(e)}
                         >
                             <input 
                                 type="email"

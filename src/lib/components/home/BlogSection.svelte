@@ -1,5 +1,5 @@
 <script>
-    import { SquareArrowOutUpRight, ChevronRight, Calendar, User, Clock } from 'lucide-svelte'
+    import { SquareArrowOutUpRight, ChevronRight, Calendar, User, Clock } from '@lucide/svelte'
     import { Image } from '$lib/components/ui/image'
     import { Button } from "$lib/components/ui/button"
     import { fly, fade, scale } from 'svelte/transition'
