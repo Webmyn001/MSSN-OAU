@@ -1,11 +1,23 @@
 <script>
     import { cn } from '$lib/utils/cn.js';
 
-    export let className = undefined;
-    export let containerClassName = undefined;
-    export let isMouseEntered = false;
+    /**
+     * @typedef {Object} Props
+     * @property {any} [className]
+     * @property {any} [containerClassName]
+     * @property {boolean} [isMouseEntered]
+     * @property {import('svelte').Snippet} [children]
+     */
 
-    let containerRef;
+    /** @type {Props} */
+    let {
+        className = undefined,
+        containerClassName = undefined,
+        isMouseEntered = $bindable(false),
+        children
+    } = $props();
+
+    let containerRef = $state();
 
     const handleMouseMove = (e) => {
         if (!containerRef) return;
@@ -42,6 +54,6 @@
 		)}
             style="transform-style: preserve-3d;"
     >
-        <slot />
+        {@render children?.()}
     </div>
 </div>

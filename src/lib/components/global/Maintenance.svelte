@@ -1,6 +1,6 @@
 <script>
     import { format } from 'timeago.js';
-    export let time = new Date().setHours(new Date().getHours() + 1);
+    let { time = new Date().setHours(new Date().getHours() + 1) } = $props();
 
 
 </script>

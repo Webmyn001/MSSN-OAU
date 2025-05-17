@@ -1,12 +1,12 @@
 <script>
 	import copyTextToClipboard from '$lib/utils/copy';
-    import { page } from '$app/stores'; // Changed from $app/state for Svelte 5 reactivity
+    import { page } from '$app/state'; // Changed from $app/state for Svelte 5 reactivity
 	import { toast } from 'svelte-sonner';
 	import { Copy } from '@lucide/svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 
     /** @type {import('$app/forms').PageData["info"]["info"]["account"] | undefined} */
-    const account = $derived($page.data?.info?.info?.account);
+    const account = $derived(page.data?.info?.info?.account);
     let openModal = $state(false);
 
      const copyAccNumber = async () => {

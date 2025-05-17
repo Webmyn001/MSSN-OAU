@@ -1,7 +1,7 @@
 <script>
     import { cn } from '$lib/utils/cn';
 
-    let {className} = $props();
+    let { children,className} = $props();
 </script>
 
 <div
@@ -10,5 +10,5 @@
 		className
 	)}
 >
-    <slot />
+    {@render children?.()}
 </div>

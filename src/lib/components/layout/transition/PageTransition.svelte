@@ -9,17 +9,20 @@
   /**
    * @type {boolean} Whether the component is mounted and visible
    */
-  let mounted = false;
+  let mounted = $state(false);
+  
+  
+  
   
   /**
-   * @type {number} Transition duration in ms
+   * @typedef {Object} Props
+   * @property {number} [duration]
+   * @property {number} [delay]
+   * @property {import('svelte').Snippet} [children]
    */
-  export let duration = 200;
-  
-  /**
-   * @type {number} Delay before transition starts in ms
-   */
-  export let delay = 0;
+
+  /** @type {Props} */
+  let { duration = 200, delay = 0, children } = $props();
   
   /**
    * @type {DOMRect|null} Dimensions of the content before transition
@@ -29,7 +32,7 @@
   /**
    * @type {HTMLDivElement|null} Reference to the container element
    */
-  let containerEl = null;
+  let containerEl = $state(null);
   
   // Set mounted to true after component mounts
   onMount(() => {
@@ -76,7 +79,7 @@
       class="page-transition-content"
       transition:fade={{ duration, delay }}
     >
-      <slot />
+      {@render children?.()}
     </div>
   {/if}
 </div>

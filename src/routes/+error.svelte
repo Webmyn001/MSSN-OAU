@@ -2,10 +2,10 @@
     import { page } from '$app/stores';
     import { Image } from '$lib/components/ui/image';
     
-    export let data;
+    let { data } = $props();
     
     let statusCode = $page.status;
-    let message = $page.error?.message || 'Something went wrong';
+    let message = $state($page.error?.message || 'Something went wrong');
     
     // Handle common status codes with more friendly messages
     const statusMessages = {

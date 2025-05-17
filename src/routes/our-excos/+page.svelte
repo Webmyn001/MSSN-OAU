@@ -342,7 +342,7 @@
                     </p>
                 </div>
             </div>
-        {:else if isLoaded && sessions.length === 0 && !data?.error } <!-- Loaded but no sessions and no explicit error -->
+        {:else if isLoaded && sessions.length === 0 && !data?.error} <!-- Loaded but no sessions and no explicit error -->
             <div class="text-center py-12 px-4">
                  <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
                     <div class="flex items-center">

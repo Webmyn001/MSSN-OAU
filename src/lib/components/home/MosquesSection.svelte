@@ -4,10 +4,10 @@
     import MosqueCard from './MosqueCard.svelte';
     import MosqueModal from './MosqueModal.svelte';
     
-    let selectedMosqueId = "";
-    let showMosqueModal = false;
+    let selectedMosqueId = $state("");
+    let showMosqueModal = $state(false);
     
-    $: selectedMosque = $mosques.find(mosque => mosque.id === selectedMosqueId);
+    let selectedMosque = $derived($mosques.find(mosque => mosque.id === selectedMosqueId));
     
     function toggleMosqueModal(id) {
         selectedMosqueId = id;

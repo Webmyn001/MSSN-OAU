@@ -1,15 +1,14 @@
 <script>
     import { Badge } from "$lib/components/ui/badge";
     
-    export let mosque = {
+    
+    let { mosque = {
         id: "",
         label: "",
         url: "",
         images: [""],
         address: ""
-    };
-    
-    export let onClick = () => {};
+    }, onClick = () => {} } = $props();
 </script>
 
 <Badge 

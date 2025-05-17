@@ -4,21 +4,26 @@
   performance for content not currently in the viewport
 -->
 <script>
-  /**
-   * @type {string} The CSS content-visibility value
-   */
-  export let visibility = 'auto';
+  
+  
+  
+  
   
   /**
-   * @type {string} Additional CSS classes
+   * @typedef {Object} Props
+   * @property {string} [visibility]
+   * @property {string} [className]
+   * @property {number} [estimatedHeight]
+   * @property {import('svelte').Snippet} [children]
    */
-  export let className = '';
-  
-  /**
-   * @type {number} The contain-intrinsic-size height in pixels
-   * This helps browsers allocate the right amount of space before actual rendering
-   */
-  export let estimatedHeight = 400;
+
+  /** @type {Props} */
+  let {
+    visibility = 'auto',
+    className = '',
+    estimatedHeight = 400,
+    children
+  } = $props();
 </script>
 
 <div 
@@ -26,7 +31,7 @@
   style="content-visibility: {visibility}; 
          contain-intrinsic-size: 0 {estimatedHeight}px"
 >
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

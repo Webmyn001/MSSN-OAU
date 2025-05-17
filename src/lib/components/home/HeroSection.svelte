@@ -6,7 +6,7 @@
     import { spring } from 'svelte/motion';
     
     // For animated text reveal
-    let visible = false;
+    let visible = $state(false);
     let imagesLoaded = false;
     
     // For image loading tracking

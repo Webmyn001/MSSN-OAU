@@ -9,9 +9,9 @@
     import {MetaTags} from "svelte-meta-tags";
     import SEO from '$lib/components/SEO.svelte';
 
-    export let data;
+    let { data } = $props();
 
-    let visible = false
+    let visible = $state(false)
     
     onMount(() => {
         visible = true
