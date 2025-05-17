@@ -20,6 +20,7 @@
     import slugify from "$lib/utils/slugify.js"
     import SEO from '$lib/components/SEO.svelte';
     import { programmes } from '$lib/data/programmes';
+    import { browser } from '$app/environment';
 
     // Home section components
     import UpcomingEvents from '$lib/components/home/UpcomingEvents.svelte';
@@ -29,8 +30,17 @@
     import PrayerTimesSection from '$lib/components/home/PrayerTimesSection.svelte';
 	import HeroSection from '$lib/components/home/HeroSection.svelte';
 	import Programmes from '$lib/components/sections/Programmes.svelte';
+    import Footer from '$lib/components/layout/Footer.svelte';
+
+    // if (browser) {
+    //     // console.log('homepage', data)
+    // }
+
 
     let {data} = $props();
+    
+    const pageData = data.page;
+    const info = data.info;
 
     const copyAccNumber = async () => {
         if (!data.info || !data.info.account) return;
@@ -71,7 +81,6 @@
             })
         }
     })
-    console.log('homepage', data)
 </script>
 
 <SEO 

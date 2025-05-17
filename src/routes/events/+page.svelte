@@ -10,13 +10,14 @@
     import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
     import * as Tabs from "$lib/components/ui/tabs/index.js";
     import { browser } from '$app/environment';
+    import { page } from '$app/stores';
     import { 
         CalendarDays, MapPin, Ticket, ExternalLink, X, Info, UserCircle, 
         Calendar, Clock, Tag, Users, ChevronRight, Filter, Search
     } from '@lucide/svelte';
     import { fade, fly, scale } from 'svelte/transition';
 
-    /** @type {{data: any}} */
+    /** @type {{data: { events: Event[] | undefined }}} */
     let { data } = $props(); 
 
     /**
@@ -38,6 +39,7 @@
      * @property {number} [capacity]
      * @property {string} [registration_deadline]
      * @property {string} [additional_details]
+     * @property {string} [slug]
      */
 
     /**
@@ -49,14 +51,12 @@
 
     /**
      * Processes and categorizes events into upcoming, past, and excluded events
-     * @param {Event[]} events
+     * @param {Event[] | undefined} eventsArray
      * @returns {ProcessedEvents}
      */
-    function processEvents(events) {
-        // Input validation
-        if (!Array.isArray(events)) {
-            // Instead of throwing, handle gracefully or log error
-            console.error('Events must be an array, received:', events);
+    function processEvents(eventsArray) {
+        if (!Array.isArray(eventsArray)) {
+            console.error('Events must be an array, received:', eventsArray);
             return { upcoming: [], past: [], excluded: [] };
         }
 
@@ -64,75 +64,59 @@
         const twelveMonthsAgo = new Date(now);
         twelveMonthsAgo.setMonth(now.getMonth() - 12);
 
-        // Cache Date objects to avoid repeated creation
         const dateCache = new Map();
         
         /**
-         * Gets cached date for an event
          * @param {Event} event
          * @returns {Date}
          */
         const getEventDate = (event) => {
-            if (!dateCache.has(event)) {
-                dateCache.set(event, new Date(event.date));
+            if (!dateCache.has(event.date)) {
+                dateCache.set(event.date, new Date(event.date));
             }
-            return dateCache.get(event);
+            return dateCache.get(event.date);
         };
 
-        /**
-         * Adjusts periodical events to their next occurrence
-         * @param {Event} event
-         * @returns {Event}
-         */
+        /** @param {Event} event */
         function adjustPeriodicalEvent(event) {
             if (!event.periodical) return event;
 
-            const eventDate = new Date(event.date); // Create a new Date object to avoid modifying the original
             const {periodical, day} = event;
 
-            // Validate periodical parameters
             if (!['weekly', 'monthly'].includes(periodical)) {
                  console.error(`Invalid periodical type: ${periodical}`);
-                 return event; // Return original event if type is invalid
+                 return event;
             }
             if (typeof day !== 'number' || day < 0 ||
                 (periodical === 'weekly' && day > 6) ||
                 (periodical === 'monthly' && day > 31)) {
                 console.error(`Invalid day value: ${day} for ${periodical} event`);
-                return event; // Return original event if day is invalid
+                return event;
             }
             
             const newEvent = { ...event, date: new Date(event.date).toISOString() };
             const newEventDate = new Date(newEvent.date);
 
 
-            // Adjust date based on periodical type
             if (periodical === 'weekly') {
                 const currentDay = newEventDate.getDay();
                 const daysToAdd = (day - currentDay + 7) % 7;
                 newEventDate.setDate(newEventDate.getDate() + daysToAdd);
-
-                // If date is in the past, add weeks until it's in the future
                 while (newEventDate < now) {
                     newEventDate.setDate(newEventDate.getDate() + 7);
                 }
             } else if (periodical === 'monthly') {
-                newEventDate.setDate(day); // Set to the specified day of the month
-                 // If this makes the date go to the past month (e.g. Feb 30 -> Mar 2 for current month Jan)
-                // or if the date is simply in the past, advance month by month
+                newEventDate.setDate(day);
                 while (newEventDate < now || (newEventDate.getMonth() === now.getMonth() && newEventDate.getFullYear() === now.getFullYear() && newEventDate.getDate() < day && newEventDate < now )) {
                     newEventDate.setMonth(newEventDate.getMonth() + 1);
-                     // Ensure the day is still correct after month change (e.g. Jan 31 + 1 month = Feb 28/29)
                     newEventDate.setDate(day);
-                    // If setting the day made it roll over to the next month (e.g. Feb 30 -> Mar 2), fix it.
                     if (newEventDate.getDate() !== day) {
-                        newEventDate.setDate(0); // Go to last day of previous month
-                        newEventDate.setDate(day); // Then set the correct day
-                         if (newEventDate < now) { // If still in past, advance one more month
+                        newEventDate.setDate(0);
+                        newEventDate.setDate(day);
+                         if (newEventDate < now) {
                              newEventDate.setMonth(newEventDate.getMonth() + 1);
                              newEventDate.setDate(day);
                          }
-
                     }
                 }
             }
@@ -141,9 +125,10 @@
         }
 
         try {
-            // Process all events at once
-            const categorizedEvents = events.reduce((acc, event) => {
-                if (!event || typeof event.date !== 'string') { // Basic validation for event object
+            /** @type {ProcessedEvents} */
+            const initialAccumulator = { upcoming: [], past: [], excluded: [] };
+            const categorizedEvents = eventsArray.reduce((acc, event) => {
+                if (!event || typeof event.date !== 'string') { 
                     console.warn('Skipping invalid event object:', event);
                     return acc;
                 }
@@ -158,35 +143,33 @@
                     acc.excluded.push(adjustedEvent);
                 }
                 return acc;
-            }, {upcoming: [], past: [], excluded: []});
+            }, initialAccumulator);
 
-            // Sort the arrays
             categorizedEvents.upcoming.sort((a, b) => getEventDate(a).getTime() - getEventDate(b).getTime());
             categorizedEvents.past.sort((a, b) => getEventDate(b).getTime() - getEventDate(a).getTime());
 
             return categorizedEvents;
         } catch (error) {
             console.error('Error processing events:', error);
-            // Instead of re-throwing, return empty/default state or handle as appropriate
             return { upcoming: [], past: [], excluded: [] };
         }
     }
 
     /** @type {ProcessedEvents} */
-    let allEvents = $state({
-        upcoming: [],
-        past: [],
-        excluded: [],
-    });
+    let allEvents = $state(processEvents(data?.events));
 
+    $effect(() => {
+        allEvents = processEvents(data?.events);
+    });
+    
     /**
      * Custom locale function for timeago
-     * @param {number} number The timeago/timein number
+     * @param {number} _number The timeago/timein number (unused)
      * @param {number} index The index in the locale array
-     * @returns {[string, string]} Tuple of [past, future] strings
+     * @returns {[string, string] | undefined} Tuple of [past, future] strings or undefined if index is out of bounds
      */
-    const localeFunc = (number, index) => {
-        return [
+    const localeFunc = (_number, index) => {
+        const locales = [
             ['just now', 'happening right now'],
             ['%s seconds ago', 'in %s seconds'],
             ['1 minute ago', 'in 1 minute'],
@@ -201,190 +184,235 @@
             ['%s months ago', 'in %s months'],
             ['1 year ago', 'in 1 year'],
             ['%s years ago', 'in %s years']
-        ][index];
+        ];
+        return locales[index];
     };
 
     register('my-locale', localeFunc);
 
-    /** @type {boolean} */
-    let open = $state(false); // This will control the ResponsiveModal
-
-    /** @type {'upcoming' | 'past'} */
+    let open = $state(false);
     let mode = $state("upcoming");
-
-    /** @type {Event[]} */
     let events = $derived(allEvents[mode]);
-
     /** @type {Event | null} */
     let currentEvent = $state(null);
+    /** @type {import('schema-dts').Graph | undefined} */
+    let jsonLd = $state(undefined);
 
-    /** @type {any[]} */
-    let jsonLd = $state([]);
-
-    // Animation and UI state
     let visible = $state(false);
     let searchQuery = $state("");
     let showFilters = $state(false);
     let selectedCategory = $state("all");
+    /** @type {string | null} */
     let hoveredEvent = $state(null);
 
-    let filterButtonElement = null; // For binding - not $state
-    let filterPanelElement = null;  // For binding - not $state
+    /** @type {HTMLButtonElement | null} */
+    let filterButtonElement = null; 
+    /** @type {HTMLDivElement | null} */
+    let filterPanelElement = null;  
 
     const categories = $derived(
-        ["all", ...Array.from(new Set(events.filter(e => e.category).map(e => e.category)))]
+        ["all", ...new Set((events || []).filter(e => e.category).map(e => /** @type {string} */ (e.category)))]
     );
 
-    // Filtered events
     const filteredEvents = $derived(
-        (() => { // IIFE for multi-step derivation
-            let result = [...events];
-            
-            // TEMPORARILY COMMENTED OUT FOR DEBUGGING
-            // // Filter by search query
-            // if (searchQuery.trim()) {
-            //     const query = searchQuery.toLowerCase();
-            //     result = result.filter(event => 
-            //         event.title.toLowerCase().includes(query) || 
-            //         event.summary.toLowerCase().includes(query) ||
-            //         (event.venue && event.venue.toLowerCase().includes(query)) ||
-            //         (event.host && event.host.toLowerCase().includes(query))
-            //     );
-            // }
-            // 
-            // // Filter by category
-            // if (selectedCategory !== "all") {
-            //     result = result.filter(event => event.category === selectedCategory);
-            // }
-            console.log('[Derived] filteredEvents (DEBUG - NO FILTERING APPLIED):', $state.snapshot(result));
-            return result; // Return all events without filtering
+        (() => {
+            let result = [...(events || [])];
+            if (searchQuery.trim()) {
+                const query = searchQuery.toLowerCase();
+                result = result.filter(event => 
+                    event.title.toLowerCase().includes(query) || 
+                    event.summary.toLowerCase().includes(query) ||
+                    (event.tags && event.tags.some(tag => tag.toLowerCase().includes(query)))
+                );
+            }
+            if (selectedCategory !== "all") {
+                result = result.filter(event => event.category === selectedCategory);
+            }
+            return result;
         })()
     );
 
-    /**
-     * Opens the event details modal
-     * @param {Event} event
-     */
+    /** @param {Event} event */
     function openEventDetails(event) {
         currentEvent = event;
         open = true;
     }
 
-    /**
-     * Closes the event details modal
-     */
     function closeEventDetails() {
         open = false;
-        // Optional: Delay clearing currentEvent to allow for outro transitions
         setTimeout(() => {
             if (!open) currentEvent = null;
         }, 300);
     }
 
-    /**
-     * Handles search form submission
-     * @param {Event} e
-     */
+    /** @param {SubmitEvent} e */
     function handleSearch(e) {
         e.preventDefault();
-        // Search is already handled via reactive statements
     }
 
-    /**
-     * Resets all filters
-     */
     function resetFilters() {
         searchQuery = "";
         selectedCategory = "all";
     }
 
     onMount(async () => {
-        if (data?.events) {
-           allEvents = processEvents(data.events);
-           console.log('[onMount] allEvents after processing:', $state.snapshot(allEvents)); // Use snapshot for cleaner log
-           if (allEvents.upcoming.length > 0) {
-               console.log('[onMount] First upcoming event (processed):', $state.snapshot(allEvents.upcoming[0])); // Log first event
-           }
-        } else {
-            allEvents = { upcoming: [], past: [], excluded: [] };
-            toast.error("No event data loaded.");
-            console.log('[onMount] allEvents (no data loaded):', $state.snapshot(allEvents));
-        }
-        
-        jsonLd = [
-            {
-                "@context": "http://schema.org",
-                "@type": "WebPage",
-                "name": "Events",
-                "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
-                "publisher": {
-                    "@type": "NonProfitOrganization",
-                    "name": "MSSNOAU.org"
+        const generateJsonLd = () => {
+            const currentUrl = browser ? $page.url.href : 'https://mssnoau.org/events';
+            /** @type {import('schema-dts').Event[]} */
+            const schemaEvents = (allEvents.upcoming || []).map(event => {
+                const eventSlug = event.slug || slugify(event.title);
+                let schemaEventUrl = `https://mssnoau.org/events/${eventSlug}`;
+                if (event.url && (event.url.startsWith('http://') || event.url.startsWith('https://'))) {
+                    schemaEventUrl = event.url;
                 }
-            },
-            ...allEvents.upcoming.map(event => {
-                const eventDateFormatted = formatDate(event.date);
-                return {
+
+                /** @type {import('schema-dts').Event} */
+                const schemaEvent = {
                     "@type": "Event",
-                    "name": event.title,
-                    "url": `https://events.mssnoau.org/${eventDateFormatted?.date || slugify(event.title)}/${slugify(event.title)}`,
-                    "description": event.summary,
-                    "startDate": event.date, // Use ISO string directly
-                    "endDate": event.date,   // Use ISO string directly
-                    "location": {
+                    name: event.title,
+                    startDate: event.date, 
+                    endDate: event.date, 
+                    url: schemaEventUrl,
+                    description: event.summary,
+                    eventStatus: isPastDate(event.date) ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+                    location: {
                         "@type": "Place",
-                        "name": event.venue || "Obafemi Awolowo University",
-                        "address": {
+                        name: event.venue || "Obafemi Awolowo University",
+                        address: {
                             "@type": "PostalAddress",
-                            "streetAddress": "Obafemi Awolowo University",
-                            "addressLocality": "Ile-Ife",
-                            "addressRegion": "Osun",
-                            "postalCode": "200211",
-                            "addressCountry": "NG"
+                            streetAddress: "Obafemi Awolowo University",
+                            addressLocality: "Ile-Ife",
+                            addressRegion: "Osun",
+                            postalCode: "200211",
+                            addressCountry: "NG"
                         }
                     },
-                    ...(event.image && { "image": event.image }),
-                     organizer: {
+                    organizer: {
                         "@type": "Organization",
                         name: event.host || "MSSN OAU"
                     },
-                    eventStatus: isPastDate(event.date) ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled", // Simplified status
-                    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode", // Assuming most are offline
-                     ...(event.paid && event.price && {
-                        offers: {
-                            "@type": "Offer",
-                            price: event.price,
-                            priceCurrency: "NGN", // Assuming Naira, adjust if needed
-                            url: event.url || `https://events.mssnoau.org/${eventDateFormatted?.date || slugify(event.title)}/${slugify(event.title)}`,
-                            availability: "https://schema.org/InStock",
-                            validFrom: new Date().toISOString() // Or a more specific registration start date
-                        }
-                    })
+                    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
                 };
-            })
-        ];
+                if (event.image) {
+                    schemaEvent.image = [event.image];
+                }
+                if (event.paid && event.price) {
+                    schemaEvent.offers = {
+                        "@type": "Offer",
+                        price: event.price,
+                        priceCurrency: "NGN",
+                        url: schemaEventUrl,
+                        availability: "https://schema.org/InStock",
+                        validFrom: event.registration_deadline || new Date().toISOString() 
+                    };
+                }
+                return schemaEvent;
+            });
+
+            jsonLd = {
+                "@context": "https://schema.org",
+                "@graph": [
+                    {
+                        "@type": "WebPage",
+                        name: "MSSN OAU Events",
+                        description: "Upcoming and past events organized by MSSN OAU.",
+                        url: currentUrl
+                    },
+                    ...schemaEvents
+                ]
+            };
+        };
+
+        generateJsonLd();
         
-        // Set visible after a small delay for animations
         await tick();
         visible = true;
-        console.log('[onMount] events derived state:', $state.snapshot(events)); // Use snapshot
     });
 
     $effect(() => {
-        if (showFilters) {
+      if (browser && (allEvents.upcoming.length > 0 || allEvents.past.length > 0)) {
+            const generateJsonLd = () => {
+                const currentUrl = $page.url.href;
+                /** @type {import('schema-dts').Event[]} */
+                const schemaEvents = (allEvents.upcoming || []).map(event => {
+                    const eventSlug = event.slug || slugify(event.title);
+                    let schemaEventUrl = `https://mssnoau.org/events/${eventSlug}`;
+                    if (event.url && (event.url.startsWith('http://') || event.url.startsWith('https://'))) {
+                        schemaEventUrl = event.url;
+                    }
+                    /** @type {import('schema-dts').Event} */
+                    const schemaEvent = {
+                        "@type": "Event",
+                        name: event.title,
+                        startDate: event.date, 
+                        endDate: event.date, 
+                        url: schemaEventUrl,
+                        description: event.summary,
+                        eventStatus: isPastDate(event.date) ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+                        location: {
+                            "@type": "Place",
+                            name: event.venue || "Obafemi Awolowo University",
+                            address: {
+                                "@type": "PostalAddress",
+                                streetAddress: "Obafemi Awolowo University",
+                                addressLocality: "Ile-Ife",
+                                addressRegion: "Osun",
+                                postalCode: "200211",
+                                addressCountry: "NG"
+                            }
+                        },
+                        organizer: {
+                            "@type": "Organization",
+                            name: event.host || "MSSN OAU"
+                        },
+                        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+                    };
+                     if (event.image) {
+                        schemaEvent.image = [event.image];
+                    }
+                    if (event.paid && event.price) {
+                        schemaEvent.offers = {
+                            "@type": "Offer",
+                            price: event.price,
+                            priceCurrency: "NGN",
+                            url: schemaEventUrl,
+                            availability: "https://schema.org/InStock",
+                            validFrom: event.registration_deadline || new Date().toISOString()
+                        };
+                    }
+                    return schemaEvent;
+                });
+
+                jsonLd = {
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        {
+                            "@type": "WebPage",
+                            name: "MSSN OAU Events",
+                            description: "Upcoming and past events organized by MSSN OAU.",
+                            url: currentUrl
+                        },
+                        ...schemaEvents
+                    ]
+                };
+            };
+            generateJsonLd();
+        }
+    });
+
+
+    $effect(() => {
+        if (showFilters && browser) {
+            /** @param {MouseEvent} event */
             const handleClickOutside = (event) => {
                 if (
-                    filterButtonElement && !filterButtonElement.contains(event.target) &&
-                    filterPanelElement && !filterPanelElement.contains(event.target)
+                    filterButtonElement && !filterButtonElement.contains(/** @type {Node} */ (event.target)) &&
+                    filterPanelElement && !filterPanelElement.contains(/** @type {Node} */ (event.target))
                 ) {
                     showFilters = false;
                 }
             };
-
-            // Add when the dropdown is open
             document.addEventListener("mousedown", handleClickOutside);
-            
-            // Cleanup function
             return () => {
                 document.removeEventListener("mousedown", handleClickOutside);
             };
@@ -416,24 +444,24 @@
 </PageHeader>
 
 <Seo
-        title="Our Events"
-        titleTemplate="%s | MSSNOAU"
-    description="Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch. Join us for enriching experiences."
+    title="Our Events"
+    titleTemplate="%s | MSSNOAU"
+    description="Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus."
     canonical="https://mssnoau.org/events"
-        openGraph={{
+    openGraph={{
         url: 'https://mssnoau.org/events',
-    title: 'Our Events | MSSNOAU',
+        title: 'Our Events | MSSNOAU',
         description: 'Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch.',
-    images: [
-      {
-                url: data.events?.[0]?.image || 'https://mssnoau.sirv.com/og/og-events.jpg', // Fallback OG image
-        width: 1200,
-                height: 630,
-                alt: 'MSSNOAU Events'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
+        images: [
+          {
+            url: data.events?.[0]?.image || 'https://mssnoau.sirv.com/og/og-events.jpg', 
+            width: 1200,
+            height: 630,
+            alt: 'MSSNOAU Events'
+          }
+        ],
+        siteName: 'MSSNOAU'
+    }}
     schema={jsonLd}
 />
 
@@ -513,6 +541,7 @@
                                             variant="ghost" 
                                             size="sm"
                                             onclick={resetFilters}
+                                            class=""
                                         >
                                             Reset
                                         </Button>
@@ -683,7 +712,7 @@
         bind:open={open}
         title={currentEvent.title}
         description={currentEvent.host ? `Hosted by: ${currentEvent.host}` : undefined}
-        onOpenChange={(val) => { if (!val) closeEventDetails(); }}
+        onOpenChange={(/** @type {boolean} */ val) => { if (!val) closeEventDetails(); }}
         contentClass="max-h-[90dvh]"
         side="bottom"
     >

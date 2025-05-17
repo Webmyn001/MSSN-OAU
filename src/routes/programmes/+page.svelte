@@ -37,14 +37,13 @@
     /**
      * @typedef {Object} PageData
      * @property {Programme[]} [programmes]
-     * @property {any} [props] // For $props()
      */
 
     /** @type {PageData} */
-    let { data } = $props();
+    let data = $props();
     
     /** @type {Programme[]} */
-    let programmes = $state([]);
+    let programmes = $derived(data?.programmes || []);
     let visible = $state(false);
     /** @type {Programme | null} */
     let hoveredProgramme = $state(null);
@@ -57,17 +56,6 @@
     
     $effect(() => {
         visible = true;
-        // Check if data.programmes is available
-        if (data?.programmes && data.programmes.length > 0) {
-            programmes = data.programmes;
-            console.log('Using API data:', programmes.length, 'programmes loaded');
-        } else {
-            // No fallback data, just keep programmes empty
-            console.warn('API data not available, showing empty state');
-            programmes = [];
-        }
-        
-        console.log('Final programmes data:', programmes);
     });
 
     /** @param {Programme} programme */
@@ -104,7 +92,7 @@
 
 <SEO
         title="Our Programmes"
-    description="Explore the diverse programmes and activities offered by MSSNOAU, designed to foster spiritual growth, academic excellence, and community engagement for Muslim students at OAU."
+    description="Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus."
     path="/programmes"
     type="WebPage" 
     images={[
@@ -203,7 +191,7 @@
             bind:open={modalOpen} 
             title={selectedProgramme.title}
             description={`Detailed information about the ${selectedProgramme.title} programme.`}
-            onOpenChange={(isOpen) => { if (!isOpen) closeProgrammeDetails(); }}
+            onOpenChange={(/** @type {boolean} */ isOpen) => { if (!isOpen) closeProgrammeDetails(); }}
             contentClass="sm:max-w-[600px]"
         >
             <!-- Default slot for main content -->

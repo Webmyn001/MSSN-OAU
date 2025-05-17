@@ -8,7 +8,7 @@
     import {toast} from "svelte-sonner";
     import {MetaTags} from "svelte-meta-tags";
     import SEO from '$lib/components/SEO.svelte';
-
+    import { PUBLIC_FINSEC_NUMBER } from '$env/static/public';
     let { data } = $props();
 
     let visible = $state(false)
@@ -35,7 +35,7 @@
         }
     }
 
-    const finsec_no = "+2348146851394"
+    const finsec_no = PUBLIC_FINSEC_NUMBER
 </script>
 
 <SEO
