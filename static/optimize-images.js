@@ -10,6 +10,14 @@ import fs from 'fs/promises';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const staticDir = join(__dirname, '..', 'static');
+const outputDir = join(staticDir, 'optimized'); // All optimized images go here
+const assetsDir = join(__dirname, '..', 'assets'); // Source for logo and icons
+
+const quality = 80;
+const logoWidth = 300; 
+const iconSizes = [192, 512];
+
 async function ensureDirectoryExists(directory) {
   try {
     await fs.access(directory);
@@ -21,60 +29,67 @@ async function ensureDirectoryExists(directory) {
   }
 }
 
+async function optimizeLogo() {
+  const logoInputPath = join(assetsDir, 'images', 'logo.png'); 
+  const logoOutputDir = join(outputDir, 'assets', 'images');
+  const logoOutputPathWebP = join(logoOutputDir, 'logo.webp');
+
+  if (!await ensureDirectoryExists(logoOutputDir)) return;
+
+  if (await fs.access(logoInputPath) === 'ok') {
+    try {
+      await sharp(logoInputPath)
+        .resize(logoWidth)
+        .webp({ quality: quality + 10 > 100 ? 100 : quality + 10 })
+        .toFile(logoOutputPathWebP);
+      // Optionally, save an optimized PNG version as well if needed for fallback
+      // const logoOutputPathPng = path.join(logoOutputDir, 'logo.png');
+      // await sharp(logoInputPath)
+      //     .resize(logoWidth)
+      //     .png({ quality, progressive: true })
+      //     .toFile(logoOutputPathPng);
+    } catch (error) {
+      console.error('Error optimizing logo:', error);
+    }
+  }
+}
+
+async function optimizeIcons() {
+  const iconInputPath = join(assetsDir, 'icons', 'icon.png'); // Assuming a base icon.png
+  const iconOutputDir = join(outputDir, 'assets', 'icons');
+
+  if (!await ensureDirectoryExists(iconOutputDir)) return;
+
+  if (await fs.access(iconInputPath) === 'ok') {
+    try {
+      for (const size of iconSizes) {
+        const iconOutputPath = join(iconOutputDir, `icon-${size}x${size}.png`);
+        await sharp(iconInputPath)
+          .resize(size, size)
+          .png({ quality, progressive: true })
+          .toFile(iconOutputPath);
+        
+        // Optionally create WebP versions of icons too
+        // const iconOutputPathWebP = path.join(iconOutputDir, `icon-${size}x${size}.webp`);
+        // await sharp(iconInputPath)
+        //     .resize(size, size)
+        //     .webp({ quality })
+        //     .toFile(iconOutputPathWebP);
+      }
+    } catch (error) {
+      console.error('Error optimizing icons:', error);
+    }
+  }
+}
+
 async function optimizeImages() {
   console.log('Starting image optimization...');
   
   // Make sure the optimized directory exists
-  const optimizedDir = join(__dirname, 'images', 'optimized');
-  await ensureDirectoryExists(optimizedDir);
+  await ensureDirectoryExists(outputDir);
   
-  // Optimize logo
-  try {
-    // Create WebP version of the logo
-    await sharp(join(__dirname, 'mssn-logo.png'))
-      .resize({
-        width: 240, // Half the original size
-        height: 45,
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 }
-      })
-      .webp({ quality: 80, effort: 6 })
-      .toFile(join(__dirname, 'mssn-logo.webp'));
-    
-    // Create a 2x version for high-DPI screens
-    await sharp(join(__dirname, 'mssn-logo.png'))
-      .resize({
-        width: 480,
-        height: 90,
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 }
-      })
-      .webp({ quality: 80, effort: 6 })
-      .toFile(join(__dirname, 'mssn-logo@2x.webp'));
-    
-    console.log('Logo optimized and converted to WebP');
-    
-    // Optimize favicons and other icons
-    await sharp(join(__dirname, 'android-chrome-512x512.png'))
-      .resize({ width: 512, height: 512 })
-      .png({ quality: 80, compressionLevel: 9, palette: true })
-      .toFile(join(__dirname, 'android-chrome-512x512-optimized.png'));
-    
-    await sharp(join(__dirname, 'android-chrome-192x192.png'))
-      .resize({ width: 192, height: 192 })
-      .png({ quality: 80, compressionLevel: 9, palette: true })
-      .toFile(join(__dirname, 'android-chrome-192x192-optimized.png'));
-    
-    await sharp(join(__dirname, 'apple-touch-icon.png'))
-      .resize({ width: 180, height: 180 })
-      .png({ quality: 80, compressionLevel: 9, palette: true })
-      .toFile(join(__dirname, 'apple-touch-icon-optimized.png'));
-    
-    console.log('Icons optimized');
-    
-  } catch (error) {
-    console.error('Error optimizing images:', error);
-  }
+  await optimizeLogo();
+  await optimizeIcons();
 }
 
 optimizeImages(); 

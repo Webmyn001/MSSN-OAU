@@ -12,112 +12,90 @@ import { pipeline } from 'stream/promises';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-async function ensureDirectoryExists(directory) {
-  try {
-    await fs.access(directory);
-  } catch (error) {
-    // Log the error and create the directory
-    console.log(`Directory ${directory} does not exist:`, error.code);
-    await fs.mkdir(directory, { recursive: true });
-    console.log(`Created directory: ${directory}`);
-  }
-}
+const staticDir = join(__dirname, '..', 'static');
+const inputDir = staticDir; // Process images directly in /static
+const outputDir = join(staticDir, 'optimized');
+const quality = 80;
+const maxWidth = 1200; // Max width for general images
+const logoWidth = 300;   // Max width for logos
 
-async function processImage(filePath, outputPath) {
-  const ext = extname(filePath).toLowerCase();
-  
-  try {
-    if (['.jpg', '.jpeg'].includes(ext)) {
-      await sharp(filePath)
-        .jpeg({ quality: 80, mozjpeg: true })
-        .toFile(outputPath);
-    } else if (ext === '.png') {
-      await sharp(filePath)
-        .png({ quality: 80, compressionLevel: 9, palette: true })
-        .toFile(outputPath);
-    } else if (ext === '.webp') {
-      await sharp(filePath)
-        .webp({ quality: 85, effort: 6 })
-        .toFile(outputPath);
-    } else if (ext === '.svg') {
-      // For SVG files, we'll use a simple copy for now
-      await pipeline(
-        createReadStream(filePath),
-        createWriteStream(outputPath)
-      );
-    } else if (ext === '.gif') {
-      // GIF optimization is limited with sharp
-      await pipeline(
-        createReadStream(filePath),
-        createWriteStream(outputPath)
-      );
-    } else if (ext === '.avif') {
-      await sharp(filePath)
-        .avif({ quality: 80, effort: 9 })
-        .toFile(outputPath);
-    } else {
-      console.log(`Skipping unsupported file type: ${ext}`);
-      return false;
+// Ensure output directory exists
+function ensureDirectoryExistence(filePath) {
+    const directory = dirname(filePath);
+    if (fs.existsSync(directory)) {
+        return true;
+    }
+    try {
+        fs.mkdirSync(directory, { recursive: true });
+    } catch (error) { 
+        // console.error(`Failed to create directory ${directory}:`, error); // Optionally log critical errors
+        return false;
     }
     return true;
-  } catch (error) {
-    console.error(`Error processing ${filePath}:`, error);
-    return false;
-  }
 }
 
-async function walkDir(dir, optimizedDir, originalBaseDir) {
-  try {
-    const files = await fs.readdir(dir, { withFileTypes: true });
-    
-    for (const file of files) {
-      const filePath = join(dir, file.name);
-      
-      // Skip optimized directory to avoid recursive processing
-      if (file.isDirectory() && file.name === 'optimized') {
-        console.log(`Skipping optimized directory: ${filePath}`);
-        continue;
-      }
-      
-      // Create relative path from originalBaseDir
-      const relPath = filePath.substring(originalBaseDir.length);
-      const destPath = join(optimizedDir, relPath);
-      
-      if (file.isDirectory()) {
-        // Create the corresponding directory in optimized folder
-        await ensureDirectoryExists(destPath);
-        await walkDir(filePath, optimizedDir, originalBaseDir);
-      } else {
-        // Skip already optimized files and non-image files
-        const ext = extname(file.name).toLowerCase();
-        const validExts = ['.jpg', '.jpeg', '.png', '.webp', '.svg', '.gif', '.avif'];
-        
-        if (validExts.includes(ext)) {
-          console.log(`Optimizing: ${relPath}`);
-          await ensureDirectoryExists(dirname(destPath));
-          const success = await processImage(filePath, destPath);
-          if (success) {
-            console.log(`Optimized: ${relPath}`);
-          }
-        }
-      }
+async function optimizeImage(filePath, relativePath) {
+    const outputPath = join(outputDir, relativePath);
+    if (!ensureDirectoryExistence(outputPath)) {
+        // console.error(`Could not ensure directory for ${outputPath}. Skipping optimization.`); // Optionally log
+        return;
     }
-  } catch (err) {
-    console.error('Error walking directory:', err);
-  }
+
+    const ext = extname(filePath).toLowerCase();
+    let image = sharp(filePath);
+    const metadata = await image.metadata();
+
+    let currentWidth = metadata.width;
+    const effectiveMaxWidth = relativePath.includes('logo') ? logoWidth : maxWidth;
+
+    if (currentWidth > effectiveMaxWidth) {
+        image = image.resize({ width: effectiveMaxWidth });
+    }
+
+    try {
+        if (ext === '.png') {
+            await image.webp({ quality: quality + 5 > 100 ? 100 : quality + 5 }).toFile(outputPath.replace(/\.png$/i, '.webp'));
+        } else if (ext === '.jpg' || ext === '.jpeg') {
+            await image.jpeg({ quality, progressive: true, mozjpeg: true }).toFile(outputPath);
+        } else if (ext === '.gif') {
+            await image.webp({ quality }).toFile(outputPath.replace(/\.gif$/i, '.webp')); 
+        } else {
+            return;
+        }
+    } catch (err) {
+        console.error(`Error optimizing ${relativePath}: ${err.message}`);
+    }
+}
+
+async function processDirectory(directory, baseDir = directory) {
+    const entries = await fs.promises.readdir(directory, { withFileTypes: true });
+    for (const entry of entries) {
+        const fullPath = join(directory, entry.name);
+        const relativePath = join(baseDir, fullPath).substring(baseDir.length + 1);
+
+        if (entry.isDirectory()) {
+            if (fullPath === outputDir) {
+                continue;
+            }
+            await processDirectory(fullPath, baseDir);
+        } else if (['.png', '.jpg', '.jpeg', '.gif'].includes(extname(entry.name).toLowerCase())) {
+            try {
+                await optimizeImage(fullPath, relativePath);
+            } catch (err) {
+                console.error(`Failed to process ${relativePath}: ${err.message}`);
+            }
+        }
+    }
 }
 
 async function optimizeAllImages() {
   console.log('Starting optimization of all images...');
   
-  const staticDir = __dirname;
-  const optimizedDir = join(staticDir, 'optimized');
-  
   // Ensure optimized directory exists
-  await ensureDirectoryExists(optimizedDir);
+  ensureDirectoryExistence(outputDir);
   
   // Start walking through directories
-  await walkDir(staticDir, optimizedDir, staticDir);
+  await processDirectory(inputDir);
   
   console.log('Image optimization complete. Optimized images are in the /static/optimized directory.');
 }

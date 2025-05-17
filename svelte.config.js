@@ -1,7 +1,9 @@
 import adapter from '@sveltejs/adapter-vercel';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
+	preprocess: vitePreprocess(),
 	kit: {
 		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
 		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
@@ -14,7 +16,8 @@ const config = {
 			split: false
 		}),
 		alias: {
-			"@/*": "./path/to/lib/*",
+			'$lib': './src/lib',
+			'$components': './src/lib/components'
 		},
 		csp: {
 			mode: 'auto',
@@ -27,14 +30,24 @@ const config = {
 					'https://va.vercel-scripts.com',
 					'https://randomuser.me',
 					'https://vercel.live',
-					'https://*.sentry.io',
-					'https://sentry.io',
+					// Removed Sentry domains
+					"'unsafe-inline'"
+					// "'unsafe-eval'" // REMOVING 'unsafe-eval'
+				],
+				'style-src': [
+					"'self'",
 					"'unsafe-inline'",
-					"'unsafe-eval'"
+					'https://cdn.jsdelivr.net',
+					'https://fonts.googleapis.com'
 				],
 				'img-src': [
 					"'self'",
 					'data:',
+					'blob:',
+					'https://*.googleusercontent.com',
+					'https://lh3.googleusercontent.com',
+					'https://www.gravatar.com',
+					'https://api.dicebear.com',
 					'https://images.unsplash.com',
 					'https://*.unsplash.com',
 					'https://annuurpress.org.ng',
@@ -47,30 +60,44 @@ const config = {
 					'https://mssnoau.sirv.com', // Added for Sirv images
 					'https://fonts.gstatic.com'
 				],
-				'style-src': [
+				'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net'],
+				'connect-src': [
 					"'self'",
 					'https://cdn.jsdelivr.net',
 					'https://fonts.googleapis.com',
-					"'unsafe-inline'"
-				],
-				'font-src': [
-					"'self'",
-					'https://cdn.jsdelivr.net',
-					'https://fonts.gstatic.com'
-				],
-				'connect-src': [
-					"'self'",
+					"'unsafe-inline'",					
 					'https://api.mssnoau.com',
 					'https://api.aladhan.com',
-					'https://va.vercel-scripts.com',
-					'https://*.sentry.io' // Added for Sentry event submission
+					'https://va.vercel-scripts.com'
+					// Removed Sentry domain
 				],
 				// Recommended default directives for better security:
 				'object-src': ["'none'"],
 				'base-uri': ["'self'"],
 				'form-action': ["'self'"],
-				'frame-ancestors': ["'none'"]
+				'frame-ancestors': ["'none'"],
+				'upgrade-insecure-requests': true
 			}
+		},
+		prerender: {
+			concurrency: 10,
+			crawl: true,
+			origin: 'https://mssnoau.org',
+			// Removed Sentry related entries
+			handleHttpError: ({ path, referrer, message }) => {
+				if (
+					path === '/404' || 
+					path.startsWith('/api/') || 
+					path.includes('sitemap.xml') ||
+					path.startsWith('/_app/')
+				) {
+					// ignore
+					return;
+				}
+				console.warn(`HTTP error: ${path} (referrer: ${referrer}) Message: ${message}`);
+				// throw new Error(message); // Optionally re-throw to fail the build
+			},
+			handleMissingId: 'warn' // 'fail', 'ignore'
 		}
 	}
 };
