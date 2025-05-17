@@ -1,3 +1,5 @@
+<!-- @migration-task Error while migrating Svelte code: Unexpected token
+https://svelte.dev/e/js_parse_error -->
 <script>
     import {Button, buttonVariants} from "$lib/components/ui/button/index.js";
     import {format, register} from 'timeago.js'
@@ -436,7 +438,7 @@
         bind:open={open}
         title={currentEvent.title}
         description={currentEvent.host ? `Hosted by: ${currentEvent.host}` : undefined}
-        onOpenChange={(val: boolean) => { if (!val) closeEventDetails(); }}
+        onOpenChange={(val) => { if (!val) closeEventDetails(); }}
         contentClass="max-h-[90dvh]"
         side="bottom"
     >

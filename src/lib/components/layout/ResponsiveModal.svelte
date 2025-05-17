@@ -1,3 +1,6 @@
+<!-- @migration-task Error while migrating Svelte code: Unexpected token
+https://svelte.dev/e/js_parse_error -->
+
 <script>
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';
@@ -5,39 +8,46 @@
     import * as Sheet from '$lib/components/ui/sheet/index.js';
     import { X } from '@lucide/svelte';
     // import { Button } from '$lib/components/ui/button/index.js'; // Not directly used in this component's script
-
+    
+    /**
+     * @typedef {Object} ResponsiveModalProps
+     * @property {boolean} open - Whether the modal is open.
+     * @property {string} [title] - Optional title for the modal.
+     * @property {string} [description] - Optional description for the modal.
+     * @property {('top'|'bottom'|'left'|'right')} [side='bottom'] - Side from which the sheet slides in (mobile only).
+     * @property {string} [contentClass] - Additional CSS class for the modal content.
+     * @property {Function} [onOpenChange] - Callback when the open state changes.
+     * @property {boolean} [closeOnOutsideClick=true] - Whether to close the modal when clicking outside.
+     * @property {boolean} [closeOnEscape=true] - Whether to close the modal when pressing Escape.
+     * @property {string} [portalTarget='#modal-portal'] - Target element for the portal.
+     * @property {Function} [trigger] - Render function for the trigger element.
+     * @property {Function} [header] - Render function for the header.
+     * @property {Function} [children] - Render function for the main content.
+     * @property {Function} [footer] - Render function for the footer.
+     */
     let {
-        open = $bindable(), // Made bindable
+        open = $bindable(),
         title = '',
         description = '',
         side = 'bottom',
-        contentClass = '', // Corrected: regular prop for additional class
-        onOpenChange, // Prop for parent to listen to open changes
+        contentClass = '',
+        onOpenChange,
         closeOnOutsideClick = true,
         closeOnEscape = true,
         portalTarget = '#modal-portal',
         ...rest
-    } = $props<{
-        open: boolean;
-        title?: string;
-        description?: string;
-        side?: 'top' | 'bottom' | 'left' | 'right';
-        contentClass?: string; // Optional prop for content class
-        onOpenChange?: (isOpen: boolean) => void; // Matched with bits-ui type
-        closeOnOutsideClick?: boolean;
-        closeOnEscape?: boolean;
-        portalTarget?: string;
-        // Slots are implicitly defined by <slot name="..."> and checked by $$slots
-        // Update: Slots are passed via ...rest in this version of the component
-        trigger?: () => any; // Type for a renderable snippet
-        header?: () => any;
-        children?: () => any; // Main content slot
-        footer?: () => any;
-    }>();
+    } = $props();
 
+    /** @type {boolean} */
     let isMobile = $state(false);
+    
+    /** @type {number} */
     let windowWidth = $state(0);
 
+    /**
+     * Updates the isMobile state based on the current window width.
+     * Sets isMobile to true if the window width is less than 768px.
+     */
     function updateIsMobile() {
         if (browser) {
             windowWidth = window.innerWidth;
@@ -53,8 +63,6 @@
         };
     });
 
-    // Removed unused handleOpenChange function as bind:open and onOpenChange on Root components handle this.
-
 </script>
 
 {#if rest?.trigger}
@@ -68,7 +76,7 @@
             class="flex flex-col p-0 {contentClass}" 
             portalProps={{ target: portalTarget }}
             aria-describedby={description ? 'sheet-description' : undefined}
-            onInteractOutside={closeOnOutsideClick ? (e: PointerEvent) => { e.preventDefault(); open = false; } : undefined}
+            onInteractOutside={closeOnOutsideClick ? (e) => { e.preventDefault(); open = false; } : undefined}
         >
             {#if rest?.header}
                  {@render rest?.header?.()}
