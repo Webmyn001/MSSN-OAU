@@ -1,5 +1,6 @@
 // @ts-nocheck
 // Sentry Fetch Proxy - Should be at the very top
+/*
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch;
   if (originalFetch) {
@@ -17,67 +18,17 @@ if (typeof window !== 'undefined') {
       };
   }
 }
+*/
 
 // Temporarily commented out Sentry for build testing
-import { replayIntegration, feedbackIntegration } from "@sentry/sveltekit"; // handleErrorWithSentry removed
-import * as Sentry from '@sentry/sveltekit';
+// import * as Sentry from '@sentry/sveltekit'; // REMOVING Sentry import
 import { deferScripts } from '$lib/utils/scriptLoader';
+// import { PUBLIC_SENTRY_DSN } from '$env/static/public'; // REMOVING Sentry DSN import
+// import { BrowserTracing } from "@sentry/tracing"; // Removed this import
+// import { 평균색 } from '$lib/utils/dominant-color.js'; // Already commented out
+// import { dev } from '$app/environment'; // REMOVING dev import if only used by Sentry
 
 // Temporarily commented out Sentry initialization
-
-Sentry.init({
-  dsn: 'https://8a6c37d91d61d59f93315969a077bace@o4508522730946560.ingest.us.sentry.io/4508522732519424',
-
-  beforeSend(event) {
-    // Check if it is an exception, and if so, show the report dialog
-    console.log(event.exception?.values);
-
-    // Check for ServiceWorker registration errors
-    if (event.exception && event.exception.values) {
-      const hasServiceWorkerError = event.exception.values.some(
-        (ex) => ex.type === 'TypeError' && ex.value && ex.value.includes('ServiceWorker script') && ex.value.includes('threw an exception during script evaluation')
-      );
-
-      if (hasServiceWorkerError) {
-        console.log('ServiceWorker registration error detected. Suppressing Sentry dialog.');
-        return null; // Don't send this error to Sentry or show dialog
-      }
-    }
-
-    if (event.exception && event.event_id) {
-      Sentry.showReportDialog({
-        eventId: event.event_id,
-        title: "Assalamu aleikum!",
-        subtitle: "It looks like we're having issues (probably a bug).",
-        subtitle2: "Our dev team has been notified. Could you perhaps provide us more info on what happened?",
-        successMessage: "We've received your feedback. JazakumuLlahu Khayran!"
-      });
-    }
-    return event;
-  },
-
-  tracesSampleRate: 1.0,
-
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
-
-  // If the entire session is not sampled, use the below sample rate to sample
-  // sessions when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
-
-  // If you don't want to use Session Replay, just remove the line below:
-  integrations: [replayIntegration(
-      {
-        blockAllMedia: true
-      }
-  ),
-    feedbackIntegration({
-      // Additional SDK configuration goes in here, for example:
-      colorScheme: "light",
-    })
-  ],
-});
 
 // Constants for resource optimization
 const RESOURCE_HINTS = {
@@ -228,12 +179,82 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Temporary error handler
-export const handleError = ({ error }) => {
-  console.error('Application error:', error);
-  // Return an object with message property
+// Temporary error handler - Simplifying this as Sentry is removed
+export async function handleError({ error, event }) {
+  console.error("An unexpected error occurred:", error, "Event:", event);
   return {
-    message: 'An unexpected error occurred.'
-    // Remove custom code property since it's not supported in the error type
+    message: 'An unexpected error occurred. Please try again later.',
+    // Optionally, add more details or a tracking ID if you have a different logging system
   };
-};
+}
+
+// Function to extract the dominant color from an image
+/*
+async function getDominantColor(imageSrc) {
+    try {
+        const color = await 평균색(imageSrc);
+        return color;
+    } catch (error) {
+        // console.error(`Error extracting dominant color for ${imageSrc}:`, error);
+        return '#cccccc'; // Fallback color
+    }
+}
+*/
+
+// Custom event for theme color changes
+/*
+async function updateThemeColor(event) {
+    const imageElement = event.target;
+    if (imageElement && imageElement.tagName === 'IMG') {
+        const dominantColor = await getDominantColor(imageElement.src);
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute('content', dominantColor);
+        }
+    }
+}
+*/
+
+// Apply the theme color logic to images with a specific class
+/*
+function applyDynamicThemeColor() {
+    const themedImages = document.querySelectorAll('.themed-image');
+    themedImages.forEach(img => {
+        if (img.complete) {
+            updateThemeColor({ target: img });
+        } else {
+            img.addEventListener('load', updateThemeColor);
+        }
+    });
+}
+*/
+
+// Performance logging (example)
+function logPerformanceMetrics() {
+    if (typeof window !== "undefined" && window.performance) {
+        const navigationEntry = performance.getEntriesByType("navigation")[0];
+        if (navigationEntry) {
+            // const pageLoadTime = Math.round(navigationEntry.duration); // Commented out unused variable
+            // const domReadyTime = Math.round(navigationEntry.domContentLoadedEventEnd - navigationEntry.startTime); // Commented out unused variable
+            // console.log(`[Performance] Page load time: ${pageLoadTime}ms`);
+            // console.log(`[Performance] DOM ready time: ${domReadyTime}ms`);
+        }
+    }
+}
+
+// Call on mount or after page navigation
+if (typeof window !== "undefined") {
+    // Using requestIdleCallback to defer non-critical tasks
+    if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(() => {
+            // applyDynamicThemeColor(); // Removed call
+            logPerformanceMetrics();
+        });
+    } else {
+        // Fallback for browsers that don't support requestIdleCallback
+        setTimeout(() => {
+            // applyDynamicThemeColor(); // Removed call
+            logPerformanceMetrics();
+        }, 2000); 
+    }
+}
