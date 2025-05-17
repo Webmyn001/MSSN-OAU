@@ -12,7 +12,7 @@ https://svelte.dev/e/js_parse_error -->
     import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
     import * as Tabs from "$lib/components/ui/tabs/index.js";
     import { browser } from '$app/environment';
-    import { CalendarDays, MapPin, Ticket, ExternalLink, X, Info, UserCircle } from '@lucide-svelte';
+    import { CalendarDays, MapPin, Ticket, ExternalLink, X, Info, UserCircle } from '@lucide/svelte';
 
 
     /** @type {{data: any}} */
