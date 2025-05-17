@@ -2,7 +2,7 @@
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import { fly, fade, scale } from 'svelte/transition';
     // import { onMount } from 'svelte'; // To be replaced by $effect
-    import { MetaTags } from "svelte-meta-tags";
+    import SEO from '$lib/components/SEO.svelte';
     import { Button } from '$lib/components/ui/button';
     import { Loader2, X, ChevronRight, Info } from '@lucide/svelte';
     import ResponsiveModal from '$lib/components/layout/ResponsiveModal.svelte';
@@ -102,28 +102,21 @@
     $inspect(programmes, selectedProgramme, programmeDetails)
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-        title="Our Programmes"
-        titleTemplate="%s | MSSNOAU"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/programmes/"
-        openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/programmes/',
-    title: 'Our Programmes | MSSNOAU',
-    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
-    images: [
-      {
-        url: 'https://i.ibb.co/zbWfh5B/home.webp',
-        width: 1200,
-        height: 640,
-        alt: 'MSSNOAU Programmes'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
+<SEO
+    title="Our Programmes"
+    description="Explore the diverse programmes and activities offered by MSSNOAU, designed to foster spiritual growth, academic excellence, and community engagement for Muslim students at OAU."
+    path="/programmes"
+    type="WebPage" 
+    images={[
+        {
+            url: 'https://i.ibb.co/zbWfh5B/home.webp', // Consider a more specific image for programmes
+            width: 1200,
+            height: 640,
+            alt: 'MSSNOAU Programmes'
+        }
+    ]}
+    keywords={["mssnoau programmes", "mssn oau events", "islamic activities oau", "muslim student programmes oau", "oau mssn activities"]}
 />
-<!-- End Meta Tags -->
 
 <PageHeader>
     Our Programmes

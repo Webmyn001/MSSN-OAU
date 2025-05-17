@@ -1,7 +1,7 @@
-<script lang="ts">
+<script>
     import { cn } from '$lib/utils/cn';
 
-    export let className;
+    let {className} = $props();
 </script>
 
 <div

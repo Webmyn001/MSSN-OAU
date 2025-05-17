@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import {Button, buttonVariants} from "$lib/components/ui/button/index.js";
     import {format, register} from 'timeago.js'
     import {toast} from "svelte-sonner";
@@ -10,44 +10,46 @@
     import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
     import * as Tabs from "$lib/components/ui/tabs/index.js";
     import { browser } from '$app/environment';
-    import { CalendarDays, MapPin, Ticket, ExternalLink, X, Info, UserCircle } from '@lucide/svelte';
+    import { CalendarDays, MapPin, Ticket, ExternalLink, X, Info, UserCircle } from '@lucide-svelte';
 
 
-    let { data }: { data: any } = $props(); 
+    /** @type {{data: any}} */
+    let { data } = $props(); 
 
-    interface Event {
-        title: string;
-        image?: string;
-        summary: string;
-        paid: boolean;
-        price?: string;
-        date: string;
-        venue: string;
-        url?: string;
-        periodical?: 'weekly' | 'monthly';
-        day?: number; // day of the week (0-6) or day of the month (1-31)
-        host?: string;
-        contact?: string;
-        category?: string;
-        tags?: string[];
-        capacity?: number;
-        registration_deadline?: string;
-        additional_details?: string;
-        // Add other event properties as needed
-    }
+    /**
+     * @typedef {Object} Event
+     * @property {string} title
+     * @property {string} [image]
+     * @property {string} summary
+     * @property {boolean} paid
+     * @property {string} [price]
+     * @property {string} date
+     * @property {string} venue
+     * @property {string} [url]
+     * @property {'weekly' | 'monthly'} [periodical]
+     * @property {number} [day] Day of week (0-6) or day of month (1-31)
+     * @property {string} [host]
+     * @property {string} [contact]
+     * @property {string} [category]
+     * @property {string[]} [tags]
+     * @property {number} [capacity]
+     * @property {string} [registration_deadline]
+     * @property {string} [additional_details]
+     */
 
-    interface ProcessedEvents {
-        upcoming: Event[];
-        past: Event[];
-        excluded: Event[];
-    }
+    /**
+     * @typedef {Object} ProcessedEvents
+     * @property {Event[]} upcoming
+     * @property {Event[]} past
+     * @property {Event[]} excluded
+     */
 
     /**
      * Processes and categorizes events into upcoming, past, and excluded events
      * @param {Event[]} events
      * @returns {ProcessedEvents}
      */
-    function processEvents(events: Event[]): ProcessedEvents {
+    function processEvents(events) {
         // Input validation
         if (!Array.isArray(events)) {
             // Instead of throwing, handle gracefully or log error
@@ -60,12 +62,18 @@
         twelveMonthsAgo.setMonth(now.getMonth() - 12);
 
         // Cache Date objects to avoid repeated creation
-        const dateCache = new Map<Event, Date>();
-        const getEventDate = (event: Event): Date => {
+        const dateCache = new Map();
+        
+        /**
+         * Gets cached date for an event
+         * @param {Event} event
+         * @returns {Date}
+         */
+        const getEventDate = (event) => {
             if (!dateCache.has(event)) {
                 dateCache.set(event, new Date(event.date));
             }
-            return dateCache.get(event)!;
+            return dateCache.get(event);
         };
 
         /**
@@ -73,7 +81,7 @@
          * @param {Event} event
          * @returns {Event}
          */
-        function adjustPeriodicalEvent(event: Event): Event {
+        function adjustPeriodicalEvent(event) {
             if (!event.periodical) return event;
 
             const eventDate = new Date(event.date); // Create a new Date object to avoid modifying the original
@@ -131,7 +139,7 @@
 
         try {
             // Process all events at once
-            const categorizedEvents: ProcessedEvents = events.reduce((acc, event) => {
+            const categorizedEvents = events.reduce((acc, event) => {
                 if (!event || typeof event.date !== 'string') { // Basic validation for event object
                     console.warn('Skipping invalid event object:', event);
                     return acc;
@@ -147,7 +155,7 @@
                     acc.excluded.push(adjustedEvent);
                 }
                 return acc;
-            }, {upcoming: [], past: [], excluded: []} as ProcessedEvents);
+            }, {upcoming: [], past: [], excluded: []});
 
             // Sort the arrays
             categorizedEvents.upcoming.sort((a, b) => getEventDate(a).getTime() - getEventDate(b).getTime());
@@ -162,10 +170,8 @@
     }
 
 
-    /**
-     * @type {ProcessedEvents}
-     */
-    let allEvents: ProcessedEvents = $state({
+    /** @type {ProcessedEvents} */
+    let allEvents = $state({
         upcoming: [],
         past: [],
         excluded: [],
@@ -173,15 +179,12 @@
 
 
     /**
-     *
-     * @param {number} number
-     * @param {number} index
-     * @returns {[string, string]}
+     * Custom locale function for timeago
+     * @param {number} number The timeago/timein number
+     * @param {number} index The index in the locale array
+     * @returns {[string, string]} Tuple of [past, future] strings
      */
-    const localeFunc = (number: number, index: number): [string, string] => {
-        // number: the timeago / timein number;
-        // index: the index of array below;
-        // totalSec: total seconds between date to be formatted and today's date;
+    const localeFunc = (number, index) => {
         return [
             ['just now', 'happening right now'],
             ['%s seconds ago', 'in %s seconds'],
@@ -197,35 +200,38 @@
             ['%s months ago', 'in %s months'],
             ['1 year ago', 'in 1 year'],
             ['%s years ago', 'in %s years']
-        ][index] as [string, string];
+        ][index];
     };
 
     register('my-locale', localeFunc);
 
+    /** @type {boolean} */
     let open = $state(false); // This will control the ResponsiveModal
 
-    /**
-     * @type {'upcoming' | 'past'}
-     */
-    let mode: 'upcoming' | 'past' = $state("upcoming")
+    /** @type {'upcoming' | 'past'} */
+    let mode = $state("upcoming")
+
+    /** @type {Event[]} */
+    let events = $derived(allEvents[mode])
+
+    /** @type {Event | null} */
+    let currentEvent = $state(null);
+
+    /** @type {any[]} */
+    let jsonLd = $state([]);
 
     /**
-     * @type {Event[]}
+     * Opens the event details modal
+     * @param {Event} event
      */
-    let events: Event[] = $derived(allEvents[mode])
-
-    /**
-     * @type {Event | null}
-     */
-    let currentEvent: Event | null = $state(null);
-
-    let jsonLd: any[] = $state([]);
-
-    function openEventDetails(event: Event) {
+    function openEventDetails(event) {
         currentEvent = event;
         open = true;
     }
 
+    /**
+     * Closes the event details modal
+     */
     function closeEventDetails() {
         open = false;
         // Optional: Delay clearing currentEvent to allow for outro transitions

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';
     import * as Dialog from '$lib/components/ui/dialog/index.js';

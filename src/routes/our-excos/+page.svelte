@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown, MessageCircle, X, Info, MessageSquareText, Smartphone } from "@lucide/svelte";
     import copyTextToClipboard from "$lib/utils/copy.js";
@@ -8,7 +8,7 @@
     import * as Popover from "$lib/components/ui/popover/index.js";
     import * as Command from "$lib/components/ui/command/index.js";
     import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
-    import { JsonLd, MetaTags } from "svelte-meta-tags";
+    import SEO from '$lib/components/SEO.svelte';
     import { fly, fade, scale } from "svelte/transition";
     import { Image } from '$lib/components/ui/image';
     import { browser } from '$app/environment';
@@ -160,55 +160,46 @@
     }
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-        title="Our Executives"
-        titleTemplate="%s | MSSNOAU"
-        description="Meet the executives of the Muslim Students Society of Nigeria, OAU Branch. Find contact information and committee details for various sessions."
-        canonical="https://mssnoau.org/our-excos"
-        openGraph={{
-            url: 'https://mssnoau.org/our-excos',
-    title: 'Our Executives | MSSNOAU',
-            description: 'Meet the executives of MSSN OAU. Committee members, positions, and contact details.',
-    images: [
-      {
-                url: data?.excos?.sessions?.find(s => s.session === selectedSession)?.executives?.[0]?.members?.[0]?.photo || 'https://mssnoau.sirv.com/og/og-excos.jpg',
-        width: 1200,
-                height: 630,
-                alt: `MSSN OAU Executives ${selectedSession || ''}`
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
+<SEO
+    title="Our Executives"
+    description="Meet the executives of the Muslim Students Society of Nigeria, OAU Branch. Find contact information and committee details for various sessions."
+    path="/our-excos"
+    type="WebPage"
+    images={[
+        {
+            url: data?.excos?.sessions?.find(s => s.session === selectedSession)?.executives?.[0]?.members?.[0]?.photo || 'https://mssnoau.sirv.com/og/og-excos.jpg',
+            width: 1200,
+            height: 630,
+            alt: `MSSN OAU Executives ${selectedSession || ''}`
+        }
+    ]}
+    schema={currentDisplaySessionData?.executives ? {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": `Our Executives ${selectedSession ? `- ${selectedSession} Session` : ''} | MSSNOAU`,
+        "description": `Meet the executives of the Muslim Students Society of Nigeria, OAU Branch for the ${selectedSession || 'current'} session.`,
+        "url": `https://mssnoau.org/our-excos${selectedSession ? '?session=' + encodeURIComponent(selectedSession) : ''}`,
+        "mainEntity": {
+            "@type": "Organization",
+            "name": `MSSN OAU Executives - ${selectedSession || 'Current'} Session`,
+            "member": currentDisplaySessionData.executives.flatMap(committee =>
+                committee.members.map(member => ({
+                    "@type": "Person",
+                    "name": member.name,
+                    "jobTitle": `${member.position}, ${committee.committee}`,
+                    "image": member.photo,
+                    "telephone": member.phone,
+                    "email": member.email,
+                    "worksFor": {
+                        "@type": "Organization",
+                        "name": "Muslim Students Society of Nigeria, OAU Branch"
+                    }
+                }))
+            )
+        }
+    } : null} 
+    keywords={["mssn oau executives", "mssnoau excos", "muslim students oau leaders", "mssn oau committees", "oau mssn leadership"]}
 />
-{#if currentDisplaySessionData?.executives}
-<JsonLd schema={{
-    "@context": "https://schema.org",
-            "@type": "WebPage",
-    "name": `Our Executives ${selectedSession ? `- ${selectedSession} Session` : ''} | MSSNOAU`,
-    "description": `Meet the executives of the Muslim Students Society of Nigeria, OAU Branch for the ${selectedSession || 'current'} session.`,
-    "url": `https://mssnoau.org/our-excos${selectedSession ? '?session=' + encodeURIComponent(selectedSession) : ''}`,
-    "mainEntity": {
-                "@type": "Organization",
-        "name": `MSSN OAU Executives - ${selectedSession || 'Current'} Session`,
-        "member": currentDisplaySessionData.executives.flatMap(committee =>
-            committee.members.map(member => ({
-                "@type": "Person",
-                "name": member.name,
-                "jobTitle": `${member.position}, ${committee.committee}`,
-                "image": member.photo,
-                "telephone": member.phone,
-                "email": member.email,
-                "worksFor": {
-                    "@type": "Organization",
-                    "name": "Muslim Students Society of Nigeria, OAU Branch"
-                }
-            }))
-        )
-    }
-}}/>
-{/if}
-<!-- End Meta Tags -->
 
 <PageHeader>
     <div class="relative">

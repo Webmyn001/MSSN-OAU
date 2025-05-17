@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import { fly } from 'svelte/transition';
     // import { onMount } from 'svelte'; // No longer needed for isMobile
     import { Button, buttonVariants } from "$lib/components/ui/button";
@@ -7,7 +7,7 @@
     // import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte"; // Removed static import
     import { AlertCircle, Loader2, Check, X, Eye, EyeOff, UserPlus, MailCheck, Info } from '@lucide/svelte';
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { MetaTags, JsonLd } from "svelte-meta-tags";
+    import SEO from '$lib/components/SEO.svelte';
     // import * as Form from '$lib/components/ui/form'; // Not directly used, can be removed if no Form.Field etc.
     import { browser } from '$app/environment';
     import { toast } from 'svelte-sonner';
@@ -225,36 +225,30 @@
 
 </script>
 
-<MetaTags 
-    title="Create Account" 
-    titleTemplate="%s | MSSNOAU" 
+<SEO
+    title="Create Account"
     description="Create an MSSNOAU account to connect with the community, access resources, and stay updated on events."
-    canonical="https://mssnoau.org/auth/signup"
-    openGraph={{
-        url: 'https://mssnoau.org/auth/signup',
-        title: 'Create Account | MSSNOAU',
-        description: 'Join the MSSNOAU community by creating your account today.',
-        images: [
-            {
-                url: 'https://mssnoau.sirv.com/og/og-signup.jpg',
-                width: 1200,
-                height: 630,
-                alt: 'MSSNOAU Signup Page'
-            }
-        ],
-        siteName: 'MSSNOAU'
+    path="/auth/signup"
+    type="WebPage" 
+    images={[
+        {
+            url: 'https://mssnoau.sirv.com/og/og-signup.jpg',
+            width: 1200,
+            height: 630,
+            alt: 'MSSNOAU Signup Page'
+        }
+    ]}
+    schema={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Create Account | MSSNOAU",
+        "description": "Sign up for an account with the Muslim Students Society of Nigeria, OAU Branch.",
+        "publisher": {
+            "@type": "Organization",
+            "name": "MSSNOAU"
+        }
     }}
-/>
-<JsonLd schema={{
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Create Account | MSSNOAU",
-    "description": "Sign up for an account with the Muslim Students Society of Nigeria, OAU Branch.",
-    "publisher": {
-        "@type": "Organization",
-        "name": "MSSNOAU"
-    }
-}}
+    keywords={["create account mssnoau", "mssnoau signup", "join mssnoau", "muslim students oau account"]}
 />
 
 <PageHeader>Create Account</PageHeader>

@@ -4,7 +4,7 @@
     import { Calendar, ChevronRight, Mail, Send, ExternalLink } from '@lucide/svelte'
     import { toast } from 'svelte-sonner'
     import { formatDate } from "$lib/utils/dates.js"
-	import { JsonLd, MetaTags } from 'svelte-meta-tags';
+	import SEO from '$lib/components/SEO.svelte';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
     
     let { data } = $props()
@@ -84,34 +84,22 @@
 
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-        title="Blog"
-        titleTemplate="%s | MSSNOAU"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/"
-        openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/',
-    title: 'Blog | MSSNOAU',
-    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
-    images: [
-      {
-        url: 'https://i.ibb.co/zbWfh5B/home.webp',
-        width: 1200,
-        height: 640,
-        alt: 'Website screenshot'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
+<SEO
+    title="Blog"
+    description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+    path="/blog" 
+    type="WebPage"
+    images={[
+        {
+            url: 'https://i.ibb.co/zbWfh5B/home.webp',
+            width: 1200,
+            height: 640,
+            alt: 'MSSNOAU Blog'
+        }
+    ]}
+    schema={jsonLd} 
+    keywords={["mssnoau blog", "an-nuur press", "islamic articles", "muslim students oau blog", "oau mssn articles"]}
 />
-{#if jsonLd}
-<JsonLd
-        schema={[...jsonLd]}
-/>
-    {/if}
-<!-- End Meta Tags -->
-
 
 <PageHeader>
     Our Blog

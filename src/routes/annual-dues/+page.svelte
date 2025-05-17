@@ -7,6 +7,7 @@
     import copyTextToClipboard from "$lib/utils/copy.js";
     import {toast} from "svelte-sonner";
     import {MetaTags} from "svelte-meta-tags";
+    import SEO from '$lib/components/SEO.svelte';
 
     export let data;
 
@@ -37,28 +38,32 @@
     const finsec_no = "+2348146851394"
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
-        title="Pay Annual Dues"
-        titleTemplate="%s | MSSNOAU"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-        canonical="https://mssnoau-frontend.vercel.app/"
-        openGraph={{
-    url: 'https://mssnoau-frontend.vercel.app/',
-    title: 'Pay Annual Dues | MSSNOAU',
-    description: 'Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.',
-    images: [
-      {
-        url: 'https://i.ibb.co/zbWfh5B/home.webp',
-        width: 1200,
-        height: 640,
-        alt: 'Website screenshot'
-      }
-    ],
-    siteName: 'MSSNOAU'
-  }}
+<SEO
+    title="Pay Annual Dues"
+    description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+    path="/annual-dues"
+    type="WebPage"
+    images={[
+        {
+            url: 'https://i.ibb.co/zbWfh5B/home.webp',
+            width: 1200,
+            height: 640,
+            alt: 'MSSNOAU Annual Dues Page'
+        }
+    ]}
+    schema={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Pay Annual Dues | MSSNOAU",
+        "description": "Contribute to the Muslim Students Society of Nigeria, OAU Branch by paying your annual dues. Support our activities and community initiatives.",
+        "url": "https://mssnoau.org/annual-dues",
+        "publisher": {
+            "@type": "Organization",
+            "name": "MSSNOAU"
+        }
+    }}
+    keywords={["mssnoau annual dues", "pay mssn oau dues", "support mssnoau", "muslim students oau finance", "oau mssn contribution"]}
 />
-<!-- End Meta Tags -->
 
 <section class="py-24 relative overflow-hidden">
     <!-- Decorative background elements -->

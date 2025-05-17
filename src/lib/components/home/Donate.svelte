@@ -1,4 +1,4 @@
-<script lang="js">
+<script>
 	import copyTextToClipboard from '$lib/utils/copy';
     import { page } from '$app/stores'; // Changed from $app/state for Svelte 5 reactivity
 	import { toast } from 'svelte-sonner';

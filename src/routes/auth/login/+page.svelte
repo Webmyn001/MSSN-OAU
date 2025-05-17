@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import { fly } from 'svelte/transition';
     import { onMount } from 'svelte';
     import { Button, buttonVariants } from "$lib/components/ui/button";
@@ -6,7 +6,7 @@
     import { Label } from "$lib/components/ui/label";
     import { AlertCircle, Loader2, Check, X, ShieldCheck, MailWarning, Info } from '@lucide/svelte';
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { MetaTags, JsonLd } from "svelte-meta-tags";
+    import SEO from '$lib/components/SEO.svelte';
     import * as Form from '$lib/components/ui/form';
     import { browser } from '$app/environment';
     import { toast } from 'svelte-sonner';
@@ -170,39 +170,31 @@
 
 </script>
 
-<!-- Meta Tags -->
-<MetaTags
+<SEO
     title="Log In"
-    titleTemplate="%s | MSSNOAU"
     description="Log in to your MSSNOAU account to access exclusive content and features."
-    canonical="https://mssnoau.org/auth/login"
-    openGraph={{
-        url: 'https://mssnoau.org/auth/login',
-        title: 'Log In | MSSNOAU',
-        description: 'Access your MSSNOAU account.',
-        images: [
-            {
-                url: 'https://mssnoau.sirv.com/og/og-login.jpg',
-                width: 1200,
-                height: 630,
-                alt: 'MSSNOAU Login Page'
-            }
-        ],
-        siteName: 'MSSNOAU'
+    path="/auth/login"
+    type="WebPage"
+    images={[
+        {
+            url: 'https://mssnoau.sirv.com/og/og-login.jpg',
+            width: 1200,
+            height: 630,
+            alt: 'MSSNOAU Login Page'
+        }
+    ]}
+    schema={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Log In | MSSNOAU",
+        "description": "Log in to your MSSNOAU account.",
+        "publisher": {
+            "@type": "Organization",
+            "name": "MSSNOAU"
+        }
     }}
+    keywords={["mssnoau login", "mssn oau login", "access mssnoau account", "muslim students oau login"]}
 />
-<JsonLd schema={{
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Log In | MSSNOAU",
-    "description": "Log in to your MSSNOAU account.",
-    "publisher": {
-        "@type": "Organization",
-        "name": "MSSNOAU"
-    }
-}}
-/>
-<!-- End Meta Tags -->
 
 <PageHeader>
     Log In
