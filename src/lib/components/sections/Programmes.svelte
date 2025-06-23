@@ -4,7 +4,6 @@
 	import { Image } from '$lib/components/ui/image';
 	import { slide, fade, fly } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-    import { spring } from 'svelte/motion';
     import { onMount } from 'svelte';
 	import { page } from "$app/state";
 
@@ -22,7 +21,7 @@
      } = $props();
     
     let selectedEvent = $state(programmes[0]?.title ?? '');
-    const selectedImage = $derived(programmes.find(p => p.title === selectedEvent)?.image);
+    const selectedImage = $derived(programmes.find((/** @type {any} */ p) => p.title === selectedEvent)?.image);
     
     // For tab hover effects
     let hoveredTab = $state(null);
@@ -30,12 +29,16 @@
     // For image animation
     let imageLoaded = $state(false);
     let imageVisible = $state(false);
+    let isTransitioning = $state(false);
+    let currentDisplayedImage = $state(selectedImage);
     
     // For parallax effect
+    /** @type {HTMLElement | undefined} */
     let containerEl;
     let mouseX = $state(0);
     let mouseY = $state(0);
     
+    /** @param {MouseEvent} e */
     function handleMouseMove(e) {
         if (!containerEl) return;
         const rect = containerEl.getBoundingClientRect();
@@ -43,52 +46,42 @@
         mouseY = (e.clientY - rect.top) / rect.height;
     }
     
-    // For tab indicator animation
-    let activeTabPosition = spring({ left: 0, width: 0 });
-    
-    function updateActiveTabPosition() {
-        const activeTab = document.getElementById(selectedEvent);
-        if (activeTab) {
-            const rect = activeTab.getBoundingClientRect();
-            const parentElement = activeTab.parentElement;
-            if (parentElement) {
-                const parentRect = parentElement.getBoundingClientRect();
-            activeTabPosition.set({
-                left: rect.left - parentRect.left,
-                width: rect.width
-            });
-            }
-        }
-    }
-    
     // Handle image load
     function handleImageLoad() {
         imageLoaded = true;
         setTimeout(() => {
             imageVisible = true;
-        }, 100);
+            isTransitioning = false;
+        }, 50);
     }
     
-    onMount(() => {
-        updateActiveTabPosition();
-    });
-    
     $effect(() => {
-        if (selectedEvent) {
+        if (selectedImage !== currentDisplayedImage) {
+            isTransitioning = true;
             imageVisible = false;
+            imageLoaded = false;
+            
+            // Wait for fade out, then change image
             setTimeout(() => {
-                updateActiveTabPosition();
-            }, 50);
+                currentDisplayedImage = selectedImage;
+            }, 300);
         }
     });
     
     // Icon mapping for programmes
+    /** @type {Record<string, any>} */
     const iconMap = {
         "Tutorials": BookOpenText,
         "Madrasah": NotebookPen,
         "Al-Usrah": Presentation,
         "Sisters' Circle": UsersRound
     };
+    
+    // Function to get the correct icon for a programme
+    /** @param {string} title */
+    function getIcon(title) {
+        return iconMap[title] || BookOpenText;
+    }
 </script>
 
 <div 
@@ -114,31 +107,25 @@
                     <span class="absolute -bottom-2 left-0 w-1/2 h-1 bg-primary-700 rounded-full"></span>
                 </h2>
 
-                <!-- Tab Navs with glassmorphism -->
+                <!-- Tab Navs -->
                 <nav 
                     role="tablist"
                     aria-label="Programmes"
                     class="relative grid gap-4 mt-5 md:mt-10"
                     in:fly={{ y: 20, duration: 800, delay: 400 }}
                 >
-                    <!-- Animated active tab indicator -->
-                    <div 
-                        class="absolute z-0 bg-white rounded-xl shadow-lg transition-all duration-300 backdrop-blur-sm border border-white/20"
-                        style="left: {$activeTabPosition.left}px; width: {$activeTabPosition.width}px; top: 0; height: calc(3.5rem + 1.25rem);"
-                    ></div>
-
                     {#each programmes as programme, i}
-                    {@const Icon = iconMap[programme.title] || BookOpenText}
+                    {@const Icon = getIcon(programme.title)}
                         <button 
                             type="button"
                             role="tab"
                             onclick={() => {
                                 selectedEvent = programme.title;
-                                hoveredTab = null; // Reset hover state on click
+                                hoveredTab = null;
                             }}
                             onmouseenter={() => hoveredTab = programme.title}
                             onmouseleave={() => hoveredTab = null}
-                            class="relative z-10 text-start hover:bg-white/50 focus:outline-none focus:bg-white/50 p-4 md:p-5 rounded-xl transition-all duration-300 backdrop-blur-sm {selectedEvent === programme.title ? 'shadow-md' : 'bg-transparent'}"
+                            class="relative text-start hover:bg-white/50 focus:outline-none focus:bg-white/50 p-4 md:p-5 rounded-xl transition-all duration-300 {selectedEvent === programme.title ? 'bg-white shadow-sm border border-gray-100' : 'bg-transparent'}"
                             id={programme.title} 
                             aria-selected={selectedEvent === programme.title}
                             in:fly={{ y: 20, duration: 800, delay: 400 + (i * 100) }}
@@ -162,7 +149,7 @@
                         onclick={() => {
                             goto('/programmes');
                         }}
-                        class="relative z-10 text-start hover:bg-white/50 focus:outline-none focus:bg-white/50 p-4 md:p-5 rounded-xl transition-all duration-300 backdrop-blur-sm group"
+                        class="relative text-start hover:bg-white/50 focus:outline-none focus:bg-white/50 p-4 md:p-5 rounded-xl transition-all duration-300 group"
                         in:fly={{ y: 20, duration: 800, delay: 400 + (programmes.length * 100) }}
                     >
                         <span class="flex gap-x-6">
@@ -187,15 +174,15 @@
                     <div>
                         <div role="tabpanel" aria-labelledby={selectedEvent}>
                             <div class="relative overflow-hidden rounded-lg">
-                                {#key selectedImage}
-                                    <div class="relative {imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} transition-all duration-700">
+                                {#key currentDisplayedImage}
+                                    <div class="relative {imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} transition-all duration-500">
                                         <Image 
                                             loading="lazy" 
                                             className="rounded-lg shadow-lg transform transition-transform duration-700 hover:scale-105"
                                             width={800}
                                             height={500}
                                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 800px"
-                                            src={selectedImage || "/placeholder.svg"}
+                                            src={currentDisplayedImage || "/placeholder.svg"}
                                             alt={selectedEvent}
                                             onload={handleImageLoad}
                                         />
@@ -210,7 +197,7 @@
                                 {/key}
                                 
                                 <!-- Loading indicator -->
-                                {#if !imageLoaded}
+                                {#if !imageLoaded || isTransitioning}
                                     <div class="absolute inset-0 flex items-center justify-center bg-gray-100/50 backdrop-blur-sm rounded-lg">
                                         <div class="w-10 h-10 border-4 border-primary-700/30 border-t-primary-700 rounded-full animate-spin"></div>
                                     </div>
