@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { SITE_URL } from '$lib/config';
 
 const baseManifest = {
     name: "MSSN OAU",
@@ -29,21 +30,21 @@ const shortcuts = [
     {
         name: "Home",
         short_name: "Home",
-        url: "https://mssnoau.org",
+        url: SITE_URL,
         description: "View Homepage",
         icons: [{ src: "/images/shortcuts/home.png", type: "image/png", purpose: "any", sizes: "192x192" }]
     },
     {
         name: "Events",
         short_name: "Events",
-        url: "https://mssnoau.org/events",
+        url: `${SITE_URL}/events`,
         description: "View upcoming events",
         icons: [{ src: "/images/shortcuts/calendar.png", type: "image/png", purpose: "any", sizes: "192x192" }]
     },
     {
         name: "Account",
         short_name: "Join Us",
-        url: "https://mssnoau.org/account",
+        url: `${SITE_URL}/account`,
         description: "Become a member of MSSN OAU",
         icons: [{ src: "/images/shortcuts/account.png", type: "image/png", purpose: "any", sizes: "192x192" }]
     },
@@ -57,7 +58,7 @@ const shortcuts = [
     {
         name: "Donate",
         short_name: "Support",
-        url: "https://mssnoau.org#donate",
+        url: `${SITE_URL}#donate`,
         description: "Support our cause",
         icons: [{ src: "/images/shortcuts/donate.png", type: "image/png", purpose: "any", sizes: "192x192" }]
     }

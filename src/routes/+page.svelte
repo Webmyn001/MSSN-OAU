@@ -21,6 +21,7 @@
     import SEO from '$lib/components/SEO.svelte';
     import { programmes } from '$lib/data/programmes';
     import { browser } from '$app/environment';
+    import { SITE_URL } from '$lib/config';
 
     // Home section components
     import UpcomingEvents from '$lib/components/home/UpcomingEvents.svelte';
@@ -98,14 +99,14 @@
     keywords="MSSN, MSSNOAU, Muslim Students Society, Obafemi Awolowo University, OAU, Islamic organization, Muslim community, prayer times, Islamic events, donate to MSSN, Great Ife"
     schema={{
         "@type": "WebPage",
-        "@id": "https://mssnoau.org/#webpage",
-        "url": "https://mssnoau.org/",
+        "@id": `${SITE_URL}/#webpage`,
+        "url": `${SITE_URL}/`,
         "name": "Muslim Students Society of Nigeria, OAU Branch | MSSNOAU",
         "isPartOf": {
-            "@id": "https://mssnoau.org/#website"
+            "@id": `${SITE_URL}/#website`
         },
         "about": {
-            "@id": "https://mssnoau.org/#organization"
+            "@id": `${SITE_URL}/#organization`
         },
         "primaryImageOfPage": {
             "@type": "ImageObject",

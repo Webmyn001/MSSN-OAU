@@ -9,6 +9,7 @@
     import {MetaTags} from "svelte-meta-tags";
     import SEO from '$lib/components/SEO.svelte';
     import { PUBLIC_FINSEC_NUMBER } from '$env/static/public';
+    import { SITE_URL } from '$lib/config';
     let { data } = $props();
 
     let visible = $state(false)
@@ -56,7 +57,7 @@
         "@type": "WebPage",
         "name": "Pay Annual Dues | MSSNOAU",
         "description": "Contribute to the Muslim Students Society of Nigeria, OAU Branch by paying your annual dues. Support our activities and community initiatives.",
-        "url": "https://mssnoau.org/annual-dues",
+        "url": `${SITE_URL}/annual-dues`,
         "publisher": {
             "@type": "Organization",
             "name": "MSSNOAU"
