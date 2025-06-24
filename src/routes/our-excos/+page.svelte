@@ -12,6 +12,7 @@
     import { fly, fade, scale } from "svelte/transition";
     import { Image } from '$lib/components/ui/image';
     import { browser } from '$app/environment';
+    import { SITE_URL } from '$lib/config';
     // import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
 
     /**
@@ -178,7 +179,7 @@
             "@type": "WebPage",
         "name": `Our Executives ${selectedSession ? `- ${selectedSession} Session` : ''} | MSSNOAU`,
         "description": `Meet the executives of the Muslim Students Society of Nigeria, OAU Branch for the ${selectedSession || 'current'} session.`,
-        "url": `https://mssnoau.org/our-excos${selectedSession ? '?session=' + encodeURIComponent(selectedSession) : ''}`,
+        "url": `${SITE_URL}/our-excos${selectedSession ? '?session=' + encodeURIComponent(selectedSession) : ''}`,
         "mainEntity": {
                 "@type": "Organization",
             "name": `MSSN OAU Executives - ${selectedSession || 'Current'} Session`,

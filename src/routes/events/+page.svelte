@@ -16,6 +16,7 @@
         Calendar, Clock, Tag, Users, ChevronRight, Filter, Search
     } from '@lucide/svelte';
     import { fade, fly, scale } from 'svelte/transition';
+    import { SITE_URL } from '$lib/config';
 
     /** @type {{data: { events: Event[] | undefined }}} */
     let { data } = $props(); 
@@ -257,11 +258,11 @@
 
     onMount(async () => {
         const generateJsonLd = () => {
-            const currentUrl = browser ? page.url.href : 'https://mssnoau.org/events';
+            const currentUrl = browser ? page.url.href : `${SITE_URL}/events`;
             /** @type {import('schema-dts').Event[]} */
             const schemaEvents = (allEvents.upcoming || []).map(event => {
                 const eventSlug = event.slug || slugify(event.title);
-                let schemaEventUrl = `https://mssnoau.org/events/${eventSlug}`;
+                let schemaEventUrl = `${SITE_URL}/events/${eventSlug}`;
                 if (event.url && (event.url.startsWith('http://') || event.url.startsWith('https://'))) {
                     schemaEventUrl = event.url;
                 }
@@ -336,7 +337,7 @@
                 /** @type {import('schema-dts').Event[]} */
                 const schemaEvents = (allEvents.upcoming || []).map(event => {
                     const eventSlug = event.slug || slugify(event.title);
-                    let schemaEventUrl = `https://mssnoau.org/events/${eventSlug}`;
+                    let schemaEventUrl = `${SITE_URL}/events/${eventSlug}`;
                     if (event.url && (event.url.startsWith('http://') || event.url.startsWith('https://'))) {
                         schemaEventUrl = event.url;
                     }
@@ -447,9 +448,9 @@
     title="Our Events"
     titleTemplate="%s | MSSNOAU"
     description="Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus."
-    canonical="https://mssnoau.org/events"
+    canonical={`${SITE_URL}/events`}
     openGraph={{
-        url: 'https://mssnoau.org/events',
+        url: `${SITE_URL}/events`,
         title: 'Our Events | MSSNOAU',
         description: 'Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch.',
         images: [

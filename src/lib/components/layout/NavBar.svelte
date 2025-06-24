@@ -90,8 +90,6 @@
 </script>
 
 <header class="flex flex-wrap lg:justify-start lg:flex-nowrap z-50 w-full py-3 lg:py-0 border-b bg-gradient-to-r from-white via-white to-primary-50 shadow-md">
-    <!-- Decorative Islamic pattern - top border -->
-    <div class="absolute top-0 left-0 w-full h-1 bg-primary-600"></div>
     
     <nav class="max-w-[85rem] w-full mx-auto px-4 md:px-6 lg:px-8">
         <div class="relative lg:flex lg:items-center">
@@ -314,7 +312,5 @@
             {/if}
         </div>
     </nav>
-    <!-- Decorative Islamic pattern - bottom border -->
-    <div class="absolute bottom-0 left-0 w-full h-[3px] bg-gradient-to-r from-primary-500 via-primary-400 to-primary-500"></div>
 </header>
 

@@ -50,7 +50,7 @@
             "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
             "publisher": {
                 "@type": "Organization",
-                "name": "MSSNOAU.org"
+                "name": "MSSNOAU"
             }
         },
         ...data?.posts.map(post => {

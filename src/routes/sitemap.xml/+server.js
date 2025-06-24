@@ -1,5 +1,4 @@
-// Define constants for the sitemap
-const SITE_URL = "https://mssnoau.org";
+import { SITE_URL } from '$lib/config';
 
 /**
  * @type {import('@sveltejs/kit').RequestHandler}
