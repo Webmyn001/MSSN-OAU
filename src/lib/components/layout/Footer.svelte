@@ -97,7 +97,7 @@
                         >E-Library</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-                           href="https://mssnoau.betteruptime.com/">Status</a></p>
+                           href="https://status.mssnoau.org/">Status</a></p>
                 </div>
             </div>
             <!-- End Col -->
