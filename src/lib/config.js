@@ -4,7 +4,7 @@
 
 // Site-wide constants
 export const SITE_NAME = "MSSNOAU";
-export const SITE_URL = "https://mssnoau-frontend.vercel.app";
+export const SITE_URL = "https://mssnoau.org";
 export const DEFAULT_DESCRIPTION = "Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus.";
 export const DEFAULT_OG_IMAGE = "https://mssnoau.sirv.com/mssn-logo.png";
 export const TWITTER_HANDLE = "@Mssngreatife1";
@@ -15,7 +15,7 @@ export const ORGANIZATION = {
     name: "Muslim Students' Society of Nigeria, OAU Branch",
     shortName: "MSSNOAU",
     foundingYear: "1954",
-    email: "salam@mssnoau.org",
+    email: "info@mssnoau.org",
     address: {
         street: "MSSN OAU Secretariat, Inside Fajuyi Hall, Obafemi Awolowo University",
         city: "Ile-Ife",

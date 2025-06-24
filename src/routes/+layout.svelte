@@ -7,19 +7,12 @@
     import PageTransition from "$lib/components/layout/transition/PageTransition.svelte";
     import ViewportContainer from "$lib/components/layout/ViewportContainer.svelte";
 	import { page } from '$app/state';
-
+    import { ORGANIZATION } from "$lib/config";
     let {children, data} = $props();
 
     const info = $state(data.info)
     
     // Define website-wide SEO constants
-    const SITE_NAME = "MSSNOAU"; 
-    const SITE_URL = "https://mssnoau.org";
-    const DEFAULT_DESCRIPTION = "Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus.";
-    const DEFAULT_OG_IMAGE = "https://mssnoau.sirv.com/mssn-logo.png";
-    const TWITTER_HANDLE = "@Mssngreatife1";
-    const KEYWORDS = "MSSN, MSSNOAU, Muslim Students Society, Obafemi Awolowo University, OAU, Islamic organization, Students society, Nigerian Muslim students, Great Ife";
-
 </script>
 
 <JsonLd
@@ -27,31 +20,31 @@
             {
                 "@context": "https://schema.org",
                 "@type": "NonProfitOrganization",
-                "@id": SITE_URL + '#organization',
-                "name": "Muslim Students' Society of Nigeria, OAU Branch",
-                "alternateName": "MSSNOAU",
-                "url": SITE_URL,
-                "logo": "https://mssnoau.sirv.com/mssn-logo.png",
-                "image": "https://mssnoau.sirv.com/mssn-logo.png",
-                "description": "The Muslim Students' Society of Nigeria (MSSN) at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus. Established in 1954, MSSN has grown into a significant presence in Nigerian universities, with the OAU branch playing a pivotal role in the university's spiritual and social life.",
+                "@id": ORGANIZATION.url + '#organization',
+                "name": ORGANIZATION.name,
+                "alternateName": ORGANIZATION.shortName,
+                "url": ORGANIZATION.url,
+                "logo": ORGANIZATION.logo,
+                "image": ORGANIZATION.ogImage,
+                "description": ORGANIZATION.description,
                 "address": {
                     "@type": "PostalAddress",
-                    "streetAddress": "MSSN OAU Secretariat, Inside Fajuyi Hall, Obafemi Awolowo University.",
-                    "addressLocality": "Ile-Ife",
-                    "addressRegion": "Osun",
-                    "postalCode": "220282",
-                    "addressCountry": "Nigeria"
+                    "streetAddress": ORGANIZATION.address.street,
+                    "addressLocality": ORGANIZATION.address.city,
+                    "addressRegion": ORGANIZATION.address.state,
+                    "postalCode": ORGANIZATION.address.postalCode,
+                    "addressCountry": ORGANIZATION.address.country
                 },
                 "geo": {
                     "@type": "GeoCoordinates",
-                    "latitude": "7.5171491",
-                    "longitude": "4.51768994109481"
+                    "latitude": ORGANIZATION.coordinates.latitude,
+                    "longitude": ORGANIZATION.coordinates.longitude
                 },
-                "hasMap": "https://maps.app.goo.gl/r4T4g5NCUW36dGeZ7",
+                "hasMap": ORGANIZATION.map,
                 "contactPoint": [
                     {
                         "@type": "ContactPoint",
-                        "email": "salam@mssnoau.org",
+                        "email": ORGANIZATION.email,
                         "contactType": "General Enquiry",
                         "areaServed": "NG",
                         "availableLanguage": ["en", "yo"]
@@ -66,11 +59,9 @@
                 ],
                 "openingHours": "Mo 09:00-17:00 Tu 09:00-17:00 We 09:00-17:00 Th 09:00-17:00 Fr 09:00-17:00 Sa 09:00-17:00 Su Closed",
                 "sameAs": [
-                    "https://facebook.com/mssnoau",
-                    "https://x.com/Mssngreatife1",
-                    "https://www.instagram.com/mssn_oau"
+                    ORGANIZATION.socialMedia.facebook
                 ],
-                "foundingDate": "1954",
+                "foundingDate": ORGANIZATION.foundingYear,
                 "founder": {
                     "@type": "Organization",
                     "name": "Muslim Students' Society of Nigeria"
@@ -84,35 +75,35 @@
                     "roleName": "Member"
                 },
                 "department": [
-                    { "@type": "Organization", "name": "Programmes and Events", "url": SITE_URL + "/programmes" },
-                    { "@type": "Organization", "name": "Executive Council", "url": SITE_URL + "/our-excos" },
-                    { "@type": "Organization", "name": "Advisory Board", "url": SITE_URL + "/our-advisors" },
-                    { "@type": "Organization", "name": "Alumnae Relations", "url": SITE_URL + "/alumnae" }
+                    { "@type": "Organization", "name": "Programmes and Events", "url": ORGANIZATION.url + "/programmes" },
+                    { "@type": "Organization", "name": "Executive Council", "url": ORGANIZATION.url + "/our-excos" },
+                    { "@type": "Organization", "name": "Advisory Board", "url": ORGANIZATION.url + "/our-advisors" },
+                    { "@type": "Organization", "name": "Alumnae Relations", "url": ORGANIZATION.url + "/alumnae" }
                 ],
                 "knowsAbout": ["Islam", "Student Development", "Community Service", "Islamic Education", "Spiritual Growth", "Academic Excellence"],
                 "mainEntityOfPage": {
                     "@type": "WebPage",
-                    "@id": SITE_URL
+                    "@id": ORGANIZATION.url
                 }
             },
             {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
-                "@id": SITE_URL + '#website',
-                "name": "MSSNOAU",
-                "url": SITE_URL,
+                "@id": ORGANIZATION.url + '#website',
+                "name": ORGANIZATION.name,
+                "url": ORGANIZATION.url,
                 "publisher": {
-                    "@id": SITE_URL + '#organization'
+                    "@id": ORGANIZATION.url + '#organization'
                 },
                 "inLanguage": "en-NG",
                 "about": {
-                    "@id": SITE_URL + '#organization'
+                    "@id": ORGANIZATION.url + '#organization'
                 },
                 "potentialAction": {
                     "@type": "SearchAction",
                     "target": {
                         "@type": "EntryPoint",
-                        "urlTemplate": SITE_URL + "/search?q={search_term_string}"
+                        "urlTemplate": ORGANIZATION.url + "/search?q={search_term_string}"
                     },
                     "query-input": "required name=search_term_string"
                 }
@@ -125,7 +116,7 @@
                         "@type": "ListItem",
                         "position": 1,
                         "name": "Home",
-                        "item": SITE_URL
+                        "item": ORGANIZATION.url
                     }
                 ]
             }
