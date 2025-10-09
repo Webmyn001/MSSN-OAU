@@ -4,16 +4,24 @@ export const load = async ({ fetch }) => {
 	const infoReq = await fetch('/api/v1/info');
 	const programmeReq = await fetch('/api/v1/programmes');
 
-	const blogRes = await blogReq.json();
-	const eventRes = await eventsReq.json();
-	const infoRes = await infoReq.json();
-	const programmeRes = await programmeReq.json();
+	const safeJson = async (res) => {
+		try {
+			return await res.json();
+		} catch (_) {
+			return null;
+		}
+	};
+
+	const blogRes = await safeJson(blogReq);
+	const eventRes = await safeJson(eventsReq);
+	const infoRes = await safeJson(infoReq);
+	const programmeRes = await safeJson(programmeReq);
 
 	return {
-		posts: (blogRes?.data?.posts ?? []).slice(0, 3),
-		events: eventRes.data.events.slice(0, 3),
-		programmes: programmeRes.data.programmes.splice(0, 4),
-		info: infoRes.data || {
+		posts: Array.isArray(blogRes?.data?.posts) ? blogRes.data.posts.slice(0, 3) : [],
+		events: Array.isArray(eventRes?.data?.events) ? eventRes.data.events.slice(0, 3) : [],
+		programmes: Array.isArray(programmeRes?.data?.programmes) ? programmeRes.data.programmes.slice(0, 4) : [],
+		info: (infoRes && infoRes.data) || {
 			account: {
 				name: 'MSSN OAU',
 				bank: 'Access Bank',
