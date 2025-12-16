@@ -2,14 +2,17 @@ import { sequence } from "@sveltejs/kit/hooks";
 import { handleErrorWithSentry, sentryHandle } from "@sentry/sveltekit";
 import * as Sentry from '@sentry/sveltekit';
 
-Sentry.init({
-    dsn: 'https://8a6c37d91d61d59f93315969a077bace@o4508522730946560.ingest.us.sentry.io/4508522732519424',
-
-    tracesSampleRate: 1.0,
-
-    // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-    // spotlight: import.meta.env.DEV,
-});
+// * Only initialize Sentry if not in Docker (check for Vercel environment)
+// * In Docker, Sentry causes CSP violations with inline scripts
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+if (isVercel) {
+    Sentry.init({
+        dsn: 'https://8a6c37d91d61d59f93315969a077bace@o4508522730946560.ingest.us.sentry.io/4508522732519424',
+        tracesSampleRate: 1.0,
+        // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+        // spotlight: import.meta.env.DEV,
+    });
+}
 
 // Custom handler for caching static assets
 const cachingHandle = async ({ event, resolve }) => {
@@ -99,8 +102,11 @@ const errorFilterHandle = async ({ event, resolve }) => {
     return await resolve(event);
 };
 
-// Sequence handlers: error filter first, then Sentry, then caching
-export const handle = sequence(errorFilterHandle, sentryHandle(), cachingHandle);
+// * Create conditional Sentry handle (only on Vercel)
+const conditionalSentryHandle = isVercel ? sentryHandle() : async ({ event, resolve }) => await resolve(event);
+
+// Sequence handlers: error filter first, then conditional Sentry, then caching
+export const handle = sequence(errorFilterHandle, conditionalSentryHandle, cachingHandle);
 
 // * Custom error handler that filters bot requests from Sentry
 export const handleError = ({ error, event }) => {
@@ -111,6 +117,8 @@ export const handleError = ({ error, event }) => {
         return;
     }
 
-    // * Use Sentry's error handler for legitimate errors
-    handleErrorWithSentry({ error, event });
+    // * Only use Sentry's error handler on Vercel
+    if (isVercel) {
+        handleErrorWithSentry({ error, event });
+    }
 };
