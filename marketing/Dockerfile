@@ -52,8 +52,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # * Start server
-# * adapter-node creates build/index.js as entry point
-# * adapter-node serves on port 3000 by default
+# * adapter-node creates build/index.js as the server entry point
+# * With "type": "module" in package.json, we need to specify the .js extension
 ENV PORT=3000
 ENV HOST=0.0.0.0
 ENV NODE_ENV=production
