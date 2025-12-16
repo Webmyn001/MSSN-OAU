@@ -89,19 +89,35 @@
                         
                         <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
                             <div class="flex items-center gap-x-3">
-                                <Image 
-                                    className="size-8 rounded-full shadow-sm border border-white" 
-                                    loading="lazy" 
-                                    width={48} 
-                                    height={48} 
-                                    src={post.authors[0].avatar_urls["48"] || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23e5e7eb'/%3E%3Ccircle cx='24' cy='20' r='8' fill='%239ca3af'/%3E%3Cpath d='M8 40c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%239ca3af'/%3E%3C/svg%3E"}
-                                    alt={post.authors[0].name} 
-                                />
-                                <div>
-                                    <p class="text-sm text-gray-700 font-secondary">
-                                        By {post.authors[0].name} {post.authors.length > 1 ? "and " + (post.authors.length - 1) + " others" : ""}
-                                    </p>
-                                </div>
+                                {#if post.authors && post.authors.length > 0 && post.authors[0]}
+                                    <Image 
+                                        className="size-8 rounded-full shadow-sm border border-white" 
+                                        loading="lazy" 
+                                        width={48} 
+                                        height={48} 
+                                        src={post.authors[0].avatar_urls?.["48"] || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23e5e7eb'/%3E%3Ccircle cx='24' cy='20' r='8' fill='%239ca3af'/%3E%3Cpath d='M8 40c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%239ca3af'/%3E%3C/svg%3E"}
+                                        alt={post.authors[0].name || "Author"} 
+                                    />
+                                    <div>
+                                        <p class="text-sm text-gray-700 font-secondary">
+                                            By {post.authors[0].name} {post.authors.length > 1 ? "and " + (post.authors.length - 1) + " others" : ""}
+                                        </p>
+                                    </div>
+                                {:else if post.author}
+                                    <Image 
+                                        className="size-8 rounded-full shadow-sm border border-white" 
+                                        loading="lazy" 
+                                        width={48} 
+                                        height={48} 
+                                        src={post.author.picture || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23e5e7eb'/%3E%3Ccircle cx='24' cy='20' r='8' fill='%239ca3af'/%3E%3Cpath d='M8 40c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%239ca3af'/%3E%3C/svg%3E"}
+                                        alt={post.author.name || "Author"} 
+                                    />
+                                    <div>
+                                        <p class="text-sm text-gray-700 font-secondary">
+                                            By {post.author.name}
+                                        </p>
+                                    </div>
+                                {/if}
                             </div>
                             
                             <span class="inline-flex items-center justify-center size-8 rounded-full bg-primary-50 text-primary-700 group-hover:bg-primary-100 transition-colors">

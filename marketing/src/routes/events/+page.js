@@ -1,13 +1,6 @@
-export const load = async ({ fetch }) => {
-    const postsReq = await fetch("/api/v1/events")
+// * Use mocked data directly (no server-side fetching)
+import { mockEvents } from "$lib/mocks/data.js";
 
-    if (postsReq.ok) {
-        /**
-         * @type {PostRes[]}
-         */
-        const res = await postsReq.json()
-        if (res && res.data.events) {
-            return res.data
-        }
-    }
+export const load = async () => {
+    return mockEvents;
 }

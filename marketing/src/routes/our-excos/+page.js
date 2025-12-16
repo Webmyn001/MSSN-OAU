@@ -48,60 +48,13 @@
  */
 
 
+// * Use mocked data directly (no server-side fetching)
+import { mockExcos } from "$lib/mocks/data.js";
+
 /**
  * Loads the executive data for the page.
- * @param {object} params
- * @param {typeof fetch} params.fetch - The fetch function provided by SvelteKit.
- * @returns {Promise<ExcosPayload | { error: string }>} The executive data or an error object.
+ * @returns {Promise<ExcosPayload>} The executive data.
  */
-export const load = async ({ fetch }) => {
-    try {
-        const response = await fetch("/api/v1/excos");
-
-        if (!response.ok) {
-            // Handle HTTP errors (e.g., 404, 500 from the API endpoint itself)
-            const errorText = await response.text(); // Try to get more error info
-            console.error(`API request failed with status ${response.status}: ${errorText}`);
-            // For SvelteKit, throwing an error here is usually handled by an error page.
-            // If you want to return data for the page to display an error:
-            return { 
-                error: `Failed to load executive data. Status: ${response.status}. ${errorText || response.statusText}`.trim(),
-                excos: { sessions: [] } // Provide a default empty structure
-            };
-            // Or, more typically in SvelteKit, throw to use the nearest +error.svelte:
-            // import { error } from '@sveltejs/kit';
-            // throw error(response.status, `Failed to load executive data: ${errorText || response.statusText}`);
-        }
-
-        /** @type {ApiEnvelope<ExcosPayload>} */
-        const apiResult = await response.json();
-
-        if (apiResult.status && apiResult.data && apiResult.data.excos) {
-            // Successfully fetched and API reported success
-            return apiResult.data; // This will be { excos: { sessions: [...] } }
-        } else {
-            // API reported failure (e.g., status: false) or data is malformed
-            const message = apiResult.message || "Executive data not available or invalid.";
-            console.error(`API returned unsuccessful status or invalid data: ${message}`);
-            return { 
-                error: message,
-                excos: { sessions: [] } // Provide a default empty structure
-            };
-            // Or throw:
-            // import { error } from '@sveltejs/kit';
-            // throw error(500, `Failed to process executive data: ${message}`);
-        }
-
-    } catch (e) {
-        // Handle network errors or other unexpected issues during fetch/JSON parsing
-        console.error("Error in load function while fetching excos:", e);
-        const errorMessage = e instanceof Error ? e.message : "An unknown error occurred while fetching data.";
-        return { 
-            error: `Could not retrieve executive data: ${errorMessage}`,
-            excos: { sessions: [] } // Provide a default empty structure
-        };
-        // Or throw:
-        // import { error } from '@sveltejs/kit';
-        // throw error(500, `Could not retrieve executive data: ${errorMessage}`);
-    }
+export const load = async () => {
+    return mockExcos;
 };

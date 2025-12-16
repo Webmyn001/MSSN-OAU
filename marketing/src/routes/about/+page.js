@@ -1,13 +1,6 @@
-export const load = async ({ fetch }) => {
-    const committeesReq = await fetch("/api/v1/committees")
+// * Use mocked data directly (no server-side fetching)
+import { mockCommittees } from "$lib/mocks/data.js";
 
-    if (committeesReq.ok) {
-        const res = await committeesReq.json()
-        if (res && res.data.committees) {
-            return res.data
-        }
-    }
-    
-    // Return an empty array as fallback if API fails
-    return { committees: [] }
+export const load = async () => {
+    return mockCommittees;
 } 

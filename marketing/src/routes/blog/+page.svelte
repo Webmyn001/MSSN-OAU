@@ -53,7 +53,7 @@
                 "name": "MSSNOAU"
             }
         },
-        ...data?.posts.map(post => {
+        ...(data?.posts || []).map(post => {
         return {
             '@type': 'Article',
             mainEntityOfPage: {
@@ -68,7 +68,7 @@
             dateModified: post.date,
             author: {
                 '@type': 'Person',
-                name: post.authors[0].name
+                name: post.authors?.[0]?.name || post.author?.name || 'MSSN OAU'
             },
             publisher: {
                 '@type': 'Organization',
@@ -153,7 +153,7 @@
                                 
                                 <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <div class="flex items-center gap-2">
-                                        {#if post.authors && post.authors[0]}
+                                        {#if post.authors && post.authors.length > 0 && post.authors[0]}
                                             <img 
                                                 src={post.authors[0].avatar_urls ? post.authors[0]?.avatar_urls["48"] : `https://api.dicebear.com/9.x/lorelei/svg?seed=${post.authors[0].name}`} 
                                                 alt={post.authors[0].name}
@@ -161,6 +161,15 @@
                                             />
                                             <span class="text-sm text-gray-600 group-hover:text-primary-600 transition-colors font-medium">
                                                 {post.authors[0].name}
+                                            </span>
+                                        {:else if post.author}
+                                            <img 
+                                                src={post.author.picture || `https://api.dicebear.com/9.x/lorelei/svg?seed=${post.author.name}`} 
+                                                alt={post.author.name}
+                                                class="size-8 rounded-full border-2 border-white shadow-sm"
+                                            />
+                                            <span class="text-sm text-gray-600 group-hover:text-primary-600 transition-colors font-medium">
+                                                {post.author.name}
                                             </span>
                                         {/if}
                                     </div>
