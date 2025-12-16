@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-vercel';
+import adapter from '@sveltejs/adapter-node';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -65,7 +65,7 @@ const config = {
 					"'self'",
 					'https://cdn.jsdelivr.net',
 					'https://fonts.googleapis.com',
-					"'unsafe-inline'",					
+					"'unsafe-inline'",
 					'https://api.mssnoau.com',
 					'https://api.aladhan.com',
 					'https://va.vercel-scripts.com'
@@ -86,8 +86,8 @@ const config = {
 			// Removed Sentry related entries
 			handleHttpError: ({ path, referrer, message }) => {
 				if (
-					path === '/404' || 
-					path.startsWith('/api/') || 
+					path === '/404' ||
+					path.startsWith('/api/') ||
 					path.includes('sitemap.xml') ||
 					path.startsWith('/_app/')
 				) {
