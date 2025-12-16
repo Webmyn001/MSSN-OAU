@@ -6,13 +6,10 @@ WORKDIR /app
 
 # * Install dependencies stage
 FROM base AS deps
-COPY package.json package-lock.json* bun.lock* ./
-# * Try npm first, fallback to bun if package-lock.json doesn't exist
+COPY package.json package-lock.json* ./
+# * Use npm for dependency installation (Node.js build environment)
+# * npm will work with package.json even if bun.lock exists
 RUN if [ -f package-lock.json ]; then npm ci --ignore-scripts; \
-    elif [ -f bun.lock ]; then \
-        apk add --no-cache curl unzip && \
-        curl -fsSL https://bun.sh/install | bash && \
-        /root/.bun/bin/bun install --frozen-lockfile; \
     else npm install --ignore-scripts; fi
 
 # * Build stage

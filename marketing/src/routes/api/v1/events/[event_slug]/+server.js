@@ -27,13 +27,12 @@ export const GET = async ({ params }) => {
         });
     }
 
-    // * Return null if event not found
+    // * Return 404 if event not found
     return json({
-        status: true,
-        data: {
-            event: null
-        }
+        status: false,
+        error: "Event not found",
+        message: `No event found with slug: ${event_slug}`
     }, {
-        status: 200
+        status: 404
     });
 }; 
