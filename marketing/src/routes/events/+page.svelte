@@ -597,7 +597,7 @@
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                                 
                                 <img
-                                    src={event.image || "/images/placeholder-event.webp"}
+                                    src={event.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23f3f4f6' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='18'%3ENo Image%3C/text%3E%3C/svg%3E"}
                                     loading="lazy"
                                     alt={`Flyer for ${event.title}`}
                                     class="absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-110"
@@ -720,7 +720,7 @@
         {#if currentEvent.image}
             <div class="relative rounded-lg overflow-hidden mb-4 border border-gray-100 shadow-sm">
                 <img 
-                    src={currentEvent.image || "/placeholder.svg"} 
+                    src={currentEvent.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect fill='%23f3f4f6' width='800' height='400'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='24'%3ENo Image Available%3C/text%3E%3C/svg%3E"} 
                     alt={`Flyer for ${currentEvent.title}`} 
                     class="w-full object-cover aspect-[16/9]"
                 />

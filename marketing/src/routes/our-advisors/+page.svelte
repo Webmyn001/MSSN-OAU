@@ -216,7 +216,7 @@
                                         <div class="relative mx-auto md:mx-0 mb-4 md:mb-0">
                                             <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500/20 to-primary-700/20 backdrop-blur-sm -z-10 transform scale-110"></div>
                                             <img 
-                                                src={advisor.photo || "/placeholder.svg"} 
+                                                src={advisor.photo || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='100' cy='100' r='100' fill='%23e5e7eb'/%3E%3Ccircle cx='100' cy='80' r='30' fill='%239ca3af'/%3E%3Cpath d='M30 180c0-38.7 31.3-70 70-70s70 31.3 70 70' fill='%239ca3af'/%3E%3C/svg%3E"} 
                                                 alt="Photo of {advisor.title} {advisor.name}" 
                                                 class="w-32 h-32 rounded-full object-cover border-2 border-white shadow-md transition-transform duration-500 group-hover:scale-105"
                                             >
