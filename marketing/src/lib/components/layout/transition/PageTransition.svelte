@@ -18,7 +18,7 @@
    * @typedef {Object} Props
    * @property {number} [duration]
    * @property {number} [delay]
-   * @property {import('svelte').Snippet} [children]
+   * @property {import('svelte').Snippet} children
    */
 
   /** @type {Props} */
@@ -34,17 +34,15 @@
    */
   let containerEl = $state(null);
   
-  // Set mounted to true after component mounts
+  // Set mounted to true immediately on mount
   onMount(() => {
     // Capture initial dimensions to prevent layout shifts
     if (containerEl) {
       initialDimensions = containerEl.getBoundingClientRect();
     }
     
-    // Small delay to ensure content is rendered first
-    setTimeout(() => {
-      mounted = true;
-    }, 10);
+    // Set mounted immediately - transition will handle the fade-in
+    mounted = true;
     
     return () => {
       mounted = false;
@@ -74,14 +72,12 @@
   bind:this={containerEl}
   use:preventLayoutShift
 >
-  {#if mounted}
-    <div 
-      class="page-transition-content"
-      transition:fade={{ duration, delay }}
-    >
-      {@render children?.()}
-    </div>
-  {/if}
+  <div 
+    class="page-transition-content"
+    transition:fade={{ duration, delay }}
+  >
+    {@render children()}
+  </div>
 </div>
 
 <style>
