@@ -1,103 +1,141 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="theme-color" content="#003a1c">
-		<link rel="icon" href="%sveltekit.assets%/favicon.ico" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content="Muslim Students Society of Nigeria, Obafemi Awolowo University Branch">
-		
-		<!-- Cache Control -->
-		<meta http-equiv="Cache-Control" content="max-age=86400" />
-		
-		<!-- Security Headers - X-Content-Type-Options is managed by SvelteKit's CSP or hosting headers -->
-		<!-- The static CSP meta tag has been removed in favor of svelte.config.js CSP -->
-		<meta http-equiv="X-Content-Type-Options" content="nosniff" />
-		
-		<!-- Performance Optimizations -->
-		<meta name="color-scheme" content="light dark">
-		<!-- Font preloads and preconnects should ideally be handled by svelte.config.js or dynamically via hooks if complex -->
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-		<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
-		<link rel="preconnect" href="https://annuurpress.org.ng" crossorigin>
-		<link rel="preconnect" href="https://api.aladhan.com" crossorigin>
-		<link rel="preconnect" href="https://va.vercel-scripts.com" crossorigin>
-		
-		<link rel="preload" href="%sveltekit.assets%/mssn-logo.webp" as="image" fetchpriority="high" />
-		<link rel="preload" href="%sveltekit.assets%/images/pattern.svg" as="image" fetchpriority="auto" />
-		<!-- Preload and asynchronously load Scheherazade New font CSS -->
-		<link rel="preload" href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap" as="style" />
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap" media="print" onload="this.media='all'; this.onload=null;">
-		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap"></noscript>
-		
-		<!-- PWA Support -->
-		<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.webp" />
-		<link rel="manifest" href="/app.webmanifest" />
-		
-		<!-- Critical CSS for initial render -->
-		<style>
-			:root {
-				--background: 0 0% 100%;
-				--foreground: 0 0% 3.9%;
-				--primary: 0 0% 9%;
-				--primary-foreground: 0 0% 98%;
-			}
-			body {
-				margin: 0;
-				font-family: 'Mulish Variable', system-ui, -apple-system, sans-serif;
-				background-color: hsl(var(--background));
-				color: hsl(var(--foreground));
-				text-rendering: optimizeSpeed;
-				-webkit-font-smoothing: antialiased;
-			}
-			html {
-				scroll-behavior: smooth;
-			}
-			.container {
-				width: 100%;
-				margin-left: auto;
-				margin-right: auto;
-				padding-left: 1rem;
-				padding-right: 1rem;
-				box-sizing: border-box;
-			}
-			@media (min-width: 640px) { .container { max-width: 640px; } }
-			@media (min-width: 768px) { .container { max-width: 768px; } }
-			@media (min-width: 1024px) { .container { max-width: 1024px; } }
-			@media (min-width: 1280px) { .container { max-width: 1280px; } }
-			@font-face {
-				font-family: 'Mulish Variable';
-				font-style: normal;
-				font-display: swap;
-				font-weight: 200 1000;
-				src: url(https://cdn.jsdelivr.net/fontsource/fonts/mulish:vf@latest/latin-wght-normal.woff2) format('woff2-variations');
-				unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-			}
-			.content-placeholder {
-				opacity: 0;
-				animation: fadeIn 0.5s ease-in-out forwards;
-				animation-delay: 0.1s;
-			}
-			@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-		</style>
 
-		<!-- Sentry Meta Tags -->
-		<meta name="sentry-trace" content="ecfd9c2bcd2df0ec4729f2cd9468623c-1d3b2227cc96377a-1"/>
-		<meta name="baggage" content="sentry-environment=production,sentry-public_key=8a6c37d91d61d59f93315969a077bace,sentry-trace_id=ecfd9c2bcd2df0ec4729f2cd9468623c,sentry-sample_rate=1,sentry-transaction=GET%20%2Fcontact%2F,sentry-sampled=true"/>
-		
-		<script nonce="%sveltekit.nonce%">
-		  // Make the nonce available to client-side scripts if needed
-		  // SvelteKit's CSP nonce should ideally be automatically applied to scripts it knows about.
-		  // This is a fallback or for scripts loaded entirely outside SvelteKit's direct control via hooks.
-		  window.APP_NONCE = '%sveltekit.nonce%';
-		</script>
-		
-		%sveltekit.head%
-	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div style="display: contents" class="content-placeholder">%sveltekit.body%</div>
-		<!-- No render-blocking scripts here -->
-	</body>
+<head>
+	<meta charset="utf-8" />
+	<meta name="theme-color" content="#003a1c">
+	<link rel="icon" href="%sveltekit.assets%/favicon.ico" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="Muslim Students Society of Nigeria, Obafemi Awolowo University Branch">
+
+	<!-- Cache Control -->
+	<meta http-equiv="Cache-Control" content="max-age=86400" />
+
+	<!-- Security Headers - X-Content-Type-Options is managed by SvelteKit's CSP or hosting headers -->
+	<!-- The static CSP meta tag has been removed in favor of svelte.config.js CSP -->
+	<meta http-equiv="X-Content-Type-Options" content="nosniff" />
+
+	<!-- Performance Optimizations -->
+	<meta name="color-scheme" content="light dark">
+	<!-- Font preloads and preconnects should ideally be handled by svelte.config.js or dynamically via hooks if complex -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+	<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+	<link rel="preconnect" href="https://annuurpress.org.ng" crossorigin>
+	<link rel="preconnect" href="https://api.aladhan.com" crossorigin>
+	<link rel="preconnect" href="https://va.vercel-scripts.com" crossorigin>
+
+	<link rel="preload" href="%sveltekit.assets%/mssn-logo.webp" as="image" fetchpriority="high" />
+	<link rel="preload" href="%sveltekit.assets%/images/pattern.svg" as="image" fetchpriority="auto" />
+	<!-- Preload and asynchronously load Scheherazade New font CSS -->
+	<link rel="preload" href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap"
+		as="style" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@600&display=swap">
+
+	<!-- PWA Support -->
+	<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.webp" />
+	<link rel="manifest" href="/app.webmanifest" />
+
+	<!-- Critical CSS for initial render -->
+	<style nonce="%sveltekit.nonce%">
+		:root {
+			--background: 0 0% 100%;
+			--foreground: 0 0% 3.9%;
+			--primary: 0 0% 9%;
+			--primary-foreground: 0 0% 98%;
+		}
+
+		body {
+			margin: 0;
+			font-family: 'Mulish Variable', system-ui, -apple-system, sans-serif;
+			background-color: hsl(var(--background));
+			color: hsl(var(--foreground));
+			text-rendering: optimizeSpeed;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		html {
+			scroll-behavior: smooth;
+		}
+
+		.container {
+			width: 100%;
+			margin-left: auto;
+			margin-right: auto;
+			padding-left: 1rem;
+			padding-right: 1rem;
+			box-sizing: border-box;
+		}
+
+		@media (min-width: 640px) {
+			.container {
+				max-width: 640px;
+			}
+		}
+
+		@media (min-width: 768px) {
+			.container {
+				max-width: 768px;
+			}
+		}
+
+		@media (min-width: 1024px) {
+			.container {
+				max-width: 1024px;
+			}
+		}
+
+		@media (min-width: 1280px) {
+			.container {
+				max-width: 1280px;
+			}
+		}
+
+		@font-face {
+			font-family: 'Mulish Variable';
+			font-style: normal;
+			font-display: swap;
+			font-weight: 200 1000;
+			src: url(https://cdn.jsdelivr.net/fontsource/fonts/mulish:vf@latest/latin-wght-normal.woff2) format('woff2-variations');
+			unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+		}
+
+		.content-placeholder {
+			opacity: 0;
+			animation: fadeIn 0.5s ease-in-out forwards;
+			animation-delay: 0.1s;
+		}
+
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+			}
+
+			to {
+				opacity: 1;
+			}
+		}
+	</style>
+
+	<!-- Sentry Meta Tags -->
+	<meta name="sentry-trace" content="ecfd9c2bcd2df0ec4729f2cd9468623c-1d3b2227cc96377a-1" />
+	<meta name="baggage"
+		content="sentry-environment=production,sentry-public_key=8a6c37d91d61d59f93315969a077bace,sentry-trace_id=ecfd9c2bcd2df0ec4729f2cd9468623c,sentry-sample_rate=1,sentry-transaction=GET%20%2Fcontact%2F,sentry-sampled=true" />
+
+	<script nonce="%sveltekit.nonce%">
+		// Make the nonce available to client-side scripts if needed
+		// SvelteKit's CSP nonce should ideally be automatically applied to scripts it knows about.
+		// This is a fallback or for scripts loaded entirely outside SvelteKit's direct control via hooks.
+		window.APP_NONCE = '%sveltekit.nonce%';
+	</script>
+
+	%sveltekit.head%
+</head>
+
+<body data-sveltekit-preload-data="hover">
+	<div style="display: contents" class="content-placeholder">%sveltekit.body%</div>
+	<!-- No render-blocking scripts here -->
+</body>
+
 </html>

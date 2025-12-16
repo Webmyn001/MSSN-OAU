@@ -30,9 +30,11 @@ const config = {
 					'https://va.vercel-scripts.com',
 					'https://randomuser.me',
 					'https://vercel.live',
-					// Removed Sentry domains
-					"'unsafe-inline'"
-					// "'unsafe-eval'" // REMOVING 'unsafe-eval'
+					// * Allow inline scripts with nonces (SvelteKit handles this)
+					// * 'unsafe-hashes' needed for event handlers (onclick, onload, etc.)
+					"'unsafe-hashes'",
+					// * Sentry injects scripts that need to be allowed
+					"'sha256-y2WkUILyE4eycy7x+pC0z99aZjTZlWfVwgUAfNc1sY8='"
 				],
 				'style-src': [
 					"'self'",
