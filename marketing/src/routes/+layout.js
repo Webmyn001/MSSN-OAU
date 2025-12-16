@@ -99,13 +99,18 @@ async function loadClientSideTools() {
             ((cb) => setTimeout(cb, 1));
 
         requestIdleCallback(() => {
-            // Wrap in a Promise.all to load tools in parallel when needed
-            // but don't wait for them to complete
-            Promise.all([
-                import('@vercel/speed-insights/sveltekit')
-                    .then(module => module.injectSpeedInsights())
-                    .catch(error => console.error('Failed to load Speed Insights:', error))
-            ]);
+            // * Only load Vercel Speed Insights on Vercel (not in Docker)
+            // * Check if we're on Vercel by looking for Vercel-specific environment
+            if (import.meta.env.VERCEL || window.location.hostname.includes('vercel.app')) {
+                Promise.all([
+                    import('@vercel/speed-insights/sveltekit')
+                        .then(module => module.injectSpeedInsights())
+                        .catch(error => {
+                            // * Silently fail - not critical for functionality
+                            console.debug('Speed Insights not available (expected in Docker):', error.message);
+                        })
+                ]);
+            }
         });
 
         // Register service worker for improved caching

@@ -42,7 +42,7 @@
     }
     
     // Set mounted immediately - transition will handle the fade-in
-    mounted = true;
+      mounted = true;
     
     return () => {
       mounted = false;
@@ -72,12 +72,12 @@
   bind:this={containerEl}
   use:preventLayoutShift
 >
-  <div 
-    class="page-transition-content"
-    transition:fade={{ duration, delay }}
-  >
+    <div 
+      class="page-transition-content"
+      transition:fade={{ duration, delay }}
+    >
     {@render children()}
-  </div>
+    </div>
 </div>
 
 <style>

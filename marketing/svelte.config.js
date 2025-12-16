@@ -31,8 +31,8 @@ const config = {
 					'https://randomuser.me',
 					'https://vercel.live',
 					// Removed Sentry domains
-					"'unsafe-inline'"
-					// "'unsafe-eval'" // REMOVING 'unsafe-eval'
+					// * Note: 'unsafe-inline' is ignored when nonces are present
+					// * SvelteKit automatically adds nonces to scripts, so we don't need 'unsafe-inline'
 				],
 				'style-src': [
 					"'self'",
