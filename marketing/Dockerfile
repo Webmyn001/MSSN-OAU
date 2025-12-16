@@ -37,9 +37,13 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 sveltekit
 
 # * Copy built application and production dependencies
+# * adapter-node outputs: build/index.js, build/client/, build/server/
+# * Static files are included in build/client/ by adapter-node
 COPY --from=builder --chown=sveltekit:nodejs /app/build ./build
 COPY --from=builder --chown=sveltekit:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=sveltekit:nodejs /app/node_modules ./node_modules
+# * Ensure static directory is available if adapter-node needs it
+# * (adapter-node should handle this, but including for safety)
 
 # * Switch to non-root user
 USER sveltekit
