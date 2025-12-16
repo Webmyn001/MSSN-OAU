@@ -6,7 +6,9 @@
     import { onMount } from 'svelte'
     import { Image } from '$lib/components/ui/image'
     import { ArrowRight } from '@lucide/svelte'
+	// * Import with fallback for missing environment variable
 	import { PUBLIC_ALUMNAE_FORM } from "$env/static/public";
+	const alumnaeFormUrl = PUBLIC_ALUMNAE_FORM || "#";
 
     let visible = $state(false);
     let hoveredImage = $state(null);
@@ -60,8 +62,9 @@
                     </p>
                     <a 
                         class="cursor-pointer py-3 px-8 w-60 bg-primary-700 text-white text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 rounded-xl hover:bg-primary-800 hover:-translate-y-1 hover:shadow-lg mx-auto lg:mx-0"
-                        href={PUBLIC_ALUMNAE_FORM}
-                        target="_blank"
+                        href={alumnaeFormUrl}
+                        target={alumnaeFormUrl !== "#" ? "_blank" : undefined}
+                        rel={alumnaeFormUrl !== "#" ? "noopener noreferrer" : undefined}
                     >
                         Fill the form
                         <ArrowRight class="size-4" />

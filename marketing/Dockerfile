@@ -14,6 +14,10 @@ RUN if [ -f package-lock.json ]; then npm ci --ignore-scripts; \
 
 # * Build stage
 FROM base AS builder
+# * Build arguments for public environment variables
+# * Set default to "#" if not provided (will be handled in code)
+ARG PUBLIC_ALUMNAE_FORM="#"
+ENV PUBLIC_ALUMNAE_FORM=${PUBLIC_ALUMNAE_FORM}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # * Build the SvelteKit app
