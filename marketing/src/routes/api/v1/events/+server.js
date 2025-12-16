@@ -20,7 +20,14 @@ export const GET = async ({ setHeaders }) => {
             })
         }
 
-        const req = await getPantry("events")
+        // * Try to fetch from Pantry, but don't fail if it's unavailable
+        let req = null;
+        try {
+            req = await getPantry("events");
+        } catch (error) {
+            console.error("Error fetching events from Pantry:", error);
+        }
+
         if (req && req.events) {
             let ttl = 60;
             try { ttl = await redis.ttl("events") } catch { }
@@ -29,16 +36,20 @@ export const GET = async ({ setHeaders }) => {
             });
             try { await redis.set("events", JSON.stringify(req), "EX", 300) } catch { }
         }
+        
+        // * Return empty array instead of example data when API fails
         return json({
             status: true,
             data: {
-                events: (req && req.events) ? req.events : exampleEvents.events
+                events: (req && req.events) ? req.events : []
             }
         })
     } catch (e) {
+        console.error("Error in events API endpoint:", e);
+        // * Return empty array instead of example data when all APIs fail
         return json({
             status: true,
-            data: { events: exampleEvents.events }
+            data: { events: [] }
         }, { status: 200 })
     }
 }

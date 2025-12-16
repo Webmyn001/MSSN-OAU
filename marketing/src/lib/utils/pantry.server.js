@@ -12,8 +12,20 @@ const pantryClient = new Pantry(PANTRY_ID)
  * @param {PantryName} type
  * @returns {Promise<Object>}
  */
+/**
+ * * Fetches data from Pantry API with graceful error handling.
+ * * Returns null if the API fails, allowing the app to continue without external dependencies.
+ * @param {PantryName} type
+ * @returns {Promise<Object | null>}
+ */
 const getPantry = async (type) => {
-    return await pantryClient.basket.get(type, { parseJSON: true })
+    try {
+        return await pantryClient.basket.get(type, { parseJSON: true })
+    } catch (error) {
+        console.error(`Pantry API error for ${type}:`, error);
+        // * Return null instead of throwing to allow graceful degradation
+        return null;
+    }
 }
 
 /**

@@ -35,11 +35,13 @@ export const GET = async ({ setHeaders }) => {
             }
         })
     } catch (e) {
+        console.error("Error in programmes API endpoint:", e);
+        // * Return empty array instead of error when API fails
         return json({
-            status: false,
-            message: e?.message ?? "Something went wrong"
-        }, {
-            status: 500
-        })
+            status: true,
+            data: {
+                programmes: []
+            }
+        }, { status: 200 })
     }
 }

@@ -9,11 +9,15 @@
     let visible = $state(false);
     let hoveredPost = $state(null);
     
+    // * Hide section if no posts available
+    const hasPosts = $derived(Array.isArray(posts) && posts.length > 0);
+    
     onMount(() => {
         visible = true
     })
 </script>
 
+{#if hasPosts}
 <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto relative overflow-hidden">
     <!-- Decorative background elements -->
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
@@ -60,7 +64,7 @@
                                 width={600}
                                 height={337}
                                 fetchpriority="low"
-                                src={post.featured_image || "/placeholder.svg"}
+                                src={post.featured_image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='337'%3E%3Crect fill='%23f3f4f6' width='600' height='337'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='18'%3ENo Image%3C/text%3E%3C/svg%3E"}
                                 alt={post.title}
                             />
                         </div>
@@ -90,7 +94,7 @@
                                     loading="lazy" 
                                     width={48} 
                                     height={48} 
-                                    src={post.authors[0].avatar_urls["48"] || "/placeholder.svg"}
+                                    src={post.authors[0].avatar_urls["48"] || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23e5e7eb'/%3E%3Ccircle cx='24' cy='20' r='8' fill='%239ca3af'/%3E%3Cpath d='M8 40c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%239ca3af'/%3E%3C/svg%3E"}
                                     alt={post.authors[0].name} 
                                 />
                                 <div>
@@ -137,3 +141,4 @@
     {/if}
     <!-- End Call to action -->
 </div>
+{/if}

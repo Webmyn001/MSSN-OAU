@@ -43,23 +43,24 @@ export const GET = async ({ setHeaders }) => {
                 data: { sessions: pantryResponse.advisors.sessions } // Return the sessions array directly
             });
         } else {
+            // * Return empty array instead of error when API fails
             console.error("Pantry returned invalid or empty data for advisors:", pantryResponse);
             return json({
-                status: false,
-                message: "Failed to retrieve valid advisor data from the source."
+                status: true,
+                data: { sessions: [] }
             }, { 
-                status: 502 // Bad Gateway
+                status: 200
             });
         }
 
     } catch (e) {
         console.error("Error in /api/v1/advisors endpoint:", e);
-        const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred.";
+        // * Return empty array instead of error when all APIs fail
         return json({
-            status: false,
-            message: errorMessage
+            status: true,
+            data: { sessions: [] }
         }, {
-            status: 500 // Internal Server Error
+            status: 200
         });
     }
 };

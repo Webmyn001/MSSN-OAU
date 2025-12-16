@@ -54,27 +54,43 @@ export const GET = async ({ params }) => {
         if (cached) {
             allEventsData = JSON.parse(cached);
         } else {
-            /** @type {PantryEventsData | undefined} */
-            const pantryData = /** @type {PantryEventsData | undefined} */ (await getPantry("events"));
+            // * Try to fetch from Pantry, but don't fail if it's unavailable
+            let pantryData = null;
+            try {
+                pantryData = await getPantry("events");
+            } catch (error) {
+                console.error("Error fetching events from Pantry:", error);
+            }
+            
             if (pantryData && pantryData.events) {
                 allEventsData = pantryData;
-                redis.set(cacheKey, JSON.stringify(allEventsData), "EX", 300); // Cache for 5 minutes
+                try {
+                    await redis.set(cacheKey, JSON.stringify(allEventsData), "EX", 300); // Cache for 5 minutes
+                } catch (error) {
+                    console.error("Error caching events:", error);
+                }
             } else {
+                // * Return empty structure instead of error when API fails
                 return json({
-                    status: false,
-                    message: "No events found in pantry."
+                    status: true,
+                    data: {
+                        event: null
+                    }
                 }, {
-                    status: 404,
+                    status: 200,
                 });
             }
         }
 
         if (!allEventsData || !allEventsData.events) {
-             return json({
-                status: false,
-                message: "Events data is not in the expected format."
+            // * Return empty structure instead of error when data is invalid
+            return json({
+                status: true,
+                data: {
+                    event: null
+                }
             }, {
-                status: 500,
+                status: 200,
             });
         }
 
@@ -91,21 +107,26 @@ export const GET = async ({ params }) => {
                 }
             });
         } else {
+            // * Return empty structure instead of error when event not found
             return json({
-                status: false,
-                message: "Event not found."
+                status: true,
+                data: {
+                    event: null
+                }
             }, {
-                status: 404,
+                status: 200,
             });
         }
     } catch (e) {
         console.error("Error fetching event:", e);
-        const message = e instanceof Error ? e.message : "Something went wrong fetching the event.";
+        // * Return empty structure instead of error when all APIs fail
         return json({
-            status: false,
-            message: message
+            status: true,
+            data: {
+                event: null
+            }
         }, {
-            status: 500,
+            status: 200,
         });
     }
 }; 
