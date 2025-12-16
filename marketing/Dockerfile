@@ -1,0 +1,54 @@
+# * Multi-stage build for Marketing SvelteKit app
+FROM node:20-alpine AS base
+
+# * Set working directory
+WORKDIR /app
+
+# * Install dependencies stage
+FROM base AS deps
+COPY package.json package-lock.json* bun.lock* ./
+# * Try npm first, fallback to bun if package-lock.json doesn't exist
+RUN if [ -f package-lock.json ]; then npm ci --ignore-scripts; \
+    elif [ -f bun.lock ]; then \
+        apk add --no-cache curl unzip && \
+        curl -fsSL https://bun.sh/install | bash && \
+        /root/.bun/bin/bun install --frozen-lockfile; \
+    else npm install --ignore-scripts; fi
+
+# * Build stage
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+# * Build the SvelteKit app
+# * Note: This requires adapter-node for Docker deployment
+RUN npm run build
+
+# * Production stage
+FROM base AS runner
+WORKDIR /app
+
+# * Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 sveltekit
+
+# * Copy built application
+COPY --from=builder --chown=sveltekit:nodejs /app/build ./build
+COPY --from=builder --chown=sveltekit:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=sveltekit:nodejs /app/node_modules ./node_modules
+
+# * Switch to non-root user
+USER sveltekit
+
+# * Expose port
+EXPOSE 3000
+
+# * Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# * Start server
+# * adapter-node serves on port 3000 by default
+ENV PORT=3000
+ENV HOST=0.0.0.0
+CMD ["node", "build"]
+

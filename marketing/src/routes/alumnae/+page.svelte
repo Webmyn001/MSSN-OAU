@@ -92,7 +92,7 @@
                             >
                                 <div class="absolute inset-0 bg-primary-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <img 
-                                    src={img.src || "/placeholder.svg"} 
+                                    src={img.src || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='100' cy='100' r='100' fill='%23e5e7eb'/%3E%3Ccircle cx='100' cy='80' r='30' fill='%239ca3af'/%3E%3Cpath d='M30 180c0-38.7 31.3-70 70-70s70 31.3 70 70' fill='%239ca3af'/%3E%3C/svg%3E"} 
                                     alt={img.alt}
                                     class="w-44 h-56 rounded-2xl object-cover shadow-md border border-white/20 transition-all duration-500 {img.class} {hoveredImage === i ? 'scale-105 shadow-xl' : ''}"
                                 />

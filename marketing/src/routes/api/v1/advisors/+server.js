@@ -1,67 +1,19 @@
-// src/routes/api/v1/advisors/+server.js
 import { json } from "@sveltejs/kit";
-import { getPantry } from "$lib/utils/pantry.server.js"; // Adjust path if needed
-import { redis } from "$lib/utils/redis.server.js";   // Adjust path if needed
+import { mockAdvisors } from "$lib/mocks/data.js";
 
-const CACHE_KEY = "mssn_advisors_data";
-const CACHE_TTL_SECONDS = 300; // 5 minutes
-
-/** @type {import('./$types').RequestHandler} */
+/**
+ * * Returns mocked advisors (client-side data, no external APIs)
+ * @type {import('./$types').RequestHandler}
+ */
 export const GET = async ({ setHeaders }) => {
-    try {
-        const cachedData = await redis.get(CACHE_KEY);
-        if (cachedData) {
-            console.log("Serving advisors from cache");
-            /** @type {PantryAdvisorsResponse} */ // Assuming types are in $lib/types.js
-            const parsedCache = JSON.parse(cachedData);
-            
-            setHeaders({
-                "cache-control": `public, max-age=${await redis.ttl(CACHE_KEY) || CACHE_TTL_SECONDS}`,
-                "X-Cache": "HIT"
-            });
-            // The API should return the { sessions: [...] } part directly under `data`
-            return json({
-                status: true,
-                data: { sessions: parsedCache.advisors.sessions }
-            });
-        }
+	setHeaders({
+		"cache-control": "public, max-age=3600",
+	});
 
-        console.log("Fetching advisors from pantry");
-        /** @type {PantryAdvisorsResponse | null} */
-        const pantryResponse = await getPantry("advisors");
-
-        if (pantryResponse && pantryResponse.advisors && Array.isArray(pantryResponse.advisors.sessions)) {
-            await redis.set(CACHE_KEY, JSON.stringify(pantryResponse), "EX", CACHE_TTL_SECONDS);
-            
-            setHeaders({
-                "cache-control": `public, max-age=${CACHE_TTL_SECONDS}`,
-                "X-Cache": "MISS"
-            });
-
-            return json({
-                status: true,
-                data: { sessions: pantryResponse.advisors.sessions } // Return the sessions array directly
-            });
-        } else {
-            console.error("Pantry returned invalid or empty data for advisors:", pantryResponse);
-            return json({
-                status: false,
-                message: "Failed to retrieve valid advisor data from the source."
-            }, { 
-                status: 502 // Bad Gateway
-            });
-        }
-
-    } catch (e) {
-        console.error("Error in /api/v1/advisors endpoint:", e);
-        const errorMessage = e instanceof Error ? e.message : "An unexpected error occurred.";
-        return json({
-            status: false,
-            message: errorMessage
-        }, {
-            status: 500 // Internal Server Error
-        });
-    }
+	return json({
+		status: true,
+		data: { sessions: mockAdvisors.advisors.sessions }
+	});
 };
 
 /**

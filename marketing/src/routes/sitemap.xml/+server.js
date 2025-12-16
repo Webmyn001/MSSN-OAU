@@ -1,18 +1,14 @@
 import { SITE_URL } from '$lib/config';
+import { mockBlog, mockEvents } from '$lib/mocks/data.js';
 
 /**
+ * * Returns sitemap using mocked data (no server-side fetching)
  * @type {import('@sveltejs/kit').RequestHandler}
  */
-export async function GET({ fetch }) {
-  // Fetch blog posts
-  const blogRes = await fetch('/api/v1/blog');
-  const blogData = await blogRes.json();
-  const posts = blogData?.data?.posts || [];
-  
-  // Fetch events
-  const eventsRes = await fetch('/api/v1/events');
-  const eventsData = await eventsRes.json();
-  const events = eventsData?.data?.events || [];
+export async function GET() {
+  // * Use mocked data directly
+  const posts = mockBlog.posts || [];
+  const events = mockEvents.events || [];
 
   // Base URLs that are always present
   const staticPages = [

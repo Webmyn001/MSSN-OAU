@@ -22,33 +22,11 @@
     
     /** @type {{events: Array<Event>}} */
     let {
-        events = [
-        {
-            title: "Weekly Ta'leem",
-            date: "Every Sunday",
-            time: "2:00 PM",
-            location: "Computer Building",
-            summary: "Join us for our weekly Ta'leem sessions where we discuss topics related to Islam and spirituality.",
-            image: "https://plus.unsplash.com/premium_photo-1677621879478-fe161e8c9362?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZnJpZGF5JTIwbXVzbGltfGVufDB8fDB8fHww"
-        },
-        {
-            title: "Monthly Quran Recitation",
-            date: "Last Saturday of every month",
-            time: "10:00 PM",
-            location: "Central Mosque",
-            summary: "Join us for our monthly Quran recitation as we engage in recitation, dhikr, and spiritual reflection.",
-            image: "https://images.unsplash.com/photo-1728294087366-d57768c7e0ec?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fG11c2xpbSUyMGNpcmNsZXxlbnwwfHwwfHx8MA%3D%3D"
-        },
-        {
-            title: "Annual Ramadan Planning",
-            date: "February 28th", // This will be formatted nicely
-            time: "4:00 PM",
-            location: "Central Mosque",
-            summary: "Join the planning committee for Ramadan activities and programs.",
-            image: "https://images.unsplash.com/photo-1633677491383-b1769a69f157?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHJhbWFkYW58ZW58MHx8MHx8fDA%3D"
-        }
-    ]
+        events = []
     } = $props();
+    
+    // * Hide section if no events available
+    const hasEvents = $derived(Array.isArray(events) && events.length > 0);
     
     // For staggered animations
     let visible = $state(false);
@@ -92,6 +70,7 @@
 </script>
 
 
+{#if hasEvents}
 <!-- Upcoming Events Section -->
 <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto relative overflow-hidden">
     <!-- Decorative background elements -->
@@ -265,4 +244,5 @@
     </div>
     <!-- End Grid -->
 </div>
+{/if}
 <!-- End Upcoming Events -->

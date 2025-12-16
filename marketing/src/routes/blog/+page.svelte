@@ -53,7 +53,7 @@
                 "name": "MSSNOAU"
             }
         },
-        ...data?.posts.map(post => {
+        ...(data?.posts || []).map(post => {
         return {
             '@type': 'Article',
             mainEntityOfPage: {
@@ -68,7 +68,7 @@
             dateModified: post.date,
             author: {
                 '@type': 'Person',
-                name: post.authors[0].name
+                name: post.authors?.[0]?.name || post.author?.name || 'MSSN OAU'
             },
             publisher: {
                 '@type': 'Organization',
@@ -133,7 +133,7 @@
                             <div class="relative overflow-hidden bg-gray-200">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
                                 <img 
-                                    src={post.featured_image || "/placeholder.svg"}
+                                    src={post.featured_image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='337'%3E%3Crect fill='%23f3f4f6' width='600' height='337'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='18'%3ENo Image%3C/text%3E%3C/svg%3E"}
                                     class="aspect-[4/2.8] w-full object-cover transition-transform duration-700 group-hover:scale-110" 
                                     alt={post.title}
                                 />
@@ -153,7 +153,7 @@
                                 
                                 <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <div class="flex items-center gap-2">
-                                        {#if post.authors && post.authors[0]}
+                                        {#if post.authors && post.authors.length > 0 && post.authors[0]}
                                             <img 
                                                 src={post.authors[0].avatar_urls ? post.authors[0]?.avatar_urls["48"] : `https://api.dicebear.com/9.x/lorelei/svg?seed=${post.authors[0].name}`} 
                                                 alt={post.authors[0].name}
@@ -161,6 +161,15 @@
                                             />
                                             <span class="text-sm text-gray-600 group-hover:text-primary-600 transition-colors font-medium">
                                                 {post.authors[0].name}
+                                            </span>
+                                        {:else if post.author}
+                                            <img 
+                                                src={post.author.picture || `https://api.dicebear.com/9.x/lorelei/svg?seed=${post.author.name}`} 
+                                                alt={post.author.name}
+                                                class="size-8 rounded-full border-2 border-white shadow-sm"
+                                            />
+                                            <span class="text-sm text-gray-600 group-hover:text-primary-600 transition-colors font-medium">
+                                                {post.author.name}
                                             </span>
                                         {/if}
                                     </div>

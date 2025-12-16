@@ -192,7 +192,7 @@
                         
                         <div class="rounded-xl overflow-hidden border border-primary-100 shadow-lg" in:fly={{ y: 20, duration: 600, delay: 200 }}>
                             <img 
-                                src={eventData.image || "/placeholder.svg?height=400&width=800"} 
+                                src={eventData.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect fill='%23f3f4f6' width='800' height='400'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='24'%3ENo Image Available%3C/text%3E%3C/svg%3E"} 
                                 alt={eventData.title}
                                 class="w-full h-auto object-cover aspect-video"
                             />
