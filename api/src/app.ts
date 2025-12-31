@@ -10,6 +10,14 @@ const app = new Hono<{
 	Variables: {
 		// * Variables that can be set via c.set() and accessed via c.get()
 		// * Add custom variables here as needed
+		user?: {
+			id: string
+			email: string
+			username: string
+			fullName: string
+			role: 'MEMBER' | 'EXCO'
+			has2FA: boolean
+		}
 	}
 }>()
 
@@ -74,5 +82,20 @@ app.get('/health', (c: Context) => {
 		timestamp: new Date().toISOString()
 	})
 })
+
+// * Register route handlers
+import authRoutes from './routes/auth.js'
+import usersRoutes from './routes/users.js'
+import excosRoutes from './routes/excos.js'
+import sessionsRoutes from './routes/sessions.js'
+import alumnaeRoutes from './routes/alumnae.js'
+import webhooksRoutes from './routes/webhooks.js'
+
+app.route('/auth', authRoutes)
+app.route('/users', usersRoutes)
+app.route('/excos', excosRoutes)
+app.route('/sessions', sessionsRoutes)
+app.route('/alumnae', alumnaeRoutes)
+app.route('/webhooks', webhooksRoutes)
 
 export default app
