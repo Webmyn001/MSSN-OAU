@@ -1,13 +1,19 @@
 ## Monorepo Overview
 
-This repository contains the **marketing SvelteKit frontend** under the `marketing/` directory.
+This repository contains the **MSSN Website** project with multiple services:
 
-- **App directory**: `marketing/`
-  - SvelteKit app entrypoint and routes
-  - Local `package.json`, tooling config, and scripts
-- **Root**:
-  - Shared configuration (e.g. `.gitignore`, `CHANGELOG.md`)
-  - Git metadata and repository-level settings
+- **Marketing Site** (`marketing/`): SvelteKit frontend for public-facing pages
+- **API Service** (`api/`): Hono-based API service (Bun runtime)
+- **Dashboard** (`dashboard/`): SvelteKit dashboard for Exco members
+
+### Documentation
+
+- **[API Specification](./API_SPECIFICATION.md)**: Complete API endpoint documentation based on PRD requirements
+- **Project Structure**:
+  - `marketing/`: SvelteKit app entrypoint and routes
+  - `api/`: Hono API service with Bun runtime
+  - `dashboard/`: Exco dashboard application
+  - **Root**: Shared configuration (e.g. `.gitignore`, `CHANGELOG.md`, `API_SPECIFICATION.md`)
 
 ### Development
 
