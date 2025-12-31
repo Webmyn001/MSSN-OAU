@@ -1,6 +1,8 @@
 // * Export all schema definitions from this file
 export * from './users.js'
 export * from './sessions.js'
+export * from './auth-sessions.js'
+export * from './password-reset-tokens.js'
 export * from './dues.js'
 export * from './excos.js'
 export * from './advisors.js'
