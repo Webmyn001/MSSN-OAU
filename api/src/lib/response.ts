@@ -49,7 +49,7 @@ export function errorResponse(
 	c: Context,
 	error: string,
 	code?: string,
-	status: 400 | 401 | 403 | 404 | 409 | 500 = 400,
+	status: 400 | 401 | 403 | 404 | 409 | 500 | 501 = 400,
 	details?: unknown
 ) {
 	const response: ErrorResponse = {
