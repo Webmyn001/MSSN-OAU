@@ -1,8 +1,7 @@
-// * Use mocked data directly (no server-side fetching)
-import { mockBlog } from "$lib/mocks/data.js";
-
+// * Return empty posts - will be fetched client-side
+// * This allows static site generation while still fetching WordPress posts
 export const load = async () => {
 	return {
-		posts: mockBlog.posts.slice(0, 11)
+		posts: []
 	};
 }

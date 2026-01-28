@@ -33,5 +33,30 @@
  * @property {Advisor[]} advisors
  */
 
+/**
+ * @typedef {Object} WordPressAuthor
+ * @property {string} name
+ * @property {Object<string, string>} avatar_urls
+ */
+
+/**
+ * @typedef {Object} WordPressPost
+ * @property {number} id
+ * @property {string} title
+ * @property {string} excerpt
+ * @property {string} content
+ * @property {string} link
+ * @property {string} slug
+ * @property {string} date
+ * @property {string} modified
+ * @property {string} featured_image
+ * @property {string[]} categories
+ * @property {string[]} tags
+ * @property {WordPressAuthor[]} authors
+ * @property {Object|null} author
+ * @property {string} [author.name]
+ * @property {string} [author.picture]
+ */
+
 export {};
 
