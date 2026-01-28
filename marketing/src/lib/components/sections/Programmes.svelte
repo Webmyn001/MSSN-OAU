@@ -55,6 +55,30 @@
         }, 50);
     }
     
+    // Handle image error
+    function handleImageError() {
+        // * If image fails to load, still show it (fallback will display)
+        imageLoaded = true;
+        imageVisible = true;
+        isTransitioning = false;
+    }
+    
+    // Initialize image state on mount - fallback for cached images
+    onMount(() => {
+        if (currentDisplayedImage) {
+            // * Fallback: if image doesn't load within 500ms (e.g., cached images that fire onload before handler attaches),
+            // * assume it's loaded or show it anyway to prevent infinite spinner
+            const timeout = setTimeout(() => {
+                if (!imageLoaded) {
+                    imageLoaded = true;
+                    imageVisible = true;
+                }
+            }, 500);
+            
+            return () => clearTimeout(timeout);
+        }
+    });
+    
     $effect(() => {
         if (selectedImage !== currentDisplayedImage) {
             isTransitioning = true;
@@ -177,7 +201,7 @@
                                 {#key currentDisplayedImage}
                                     <div class="relative {imageVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} transition-all duration-500">
                                         <Image 
-                                            loading="lazy" 
+                                            loading="eager" 
                                             className="rounded-lg shadow-lg transform transition-transform duration-700 hover:scale-105"
                                             width={800}
                                             height={500}
@@ -185,6 +209,7 @@
                                             src={currentDisplayedImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23f3f4f6' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='18'%3ENo Image%3C/text%3E%3C/svg%3E"}
                                             alt={selectedEvent}
                                             onload={handleImageLoad}
+                                            onerror={handleImageError}
                                         />
                                         
                                         <!-- Glassmorphism overlay -->

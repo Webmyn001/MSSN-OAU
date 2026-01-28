@@ -11,6 +11,7 @@
      * @property {string} [className]
      * @property {any} [sizes]
      * @property {any} [onload]
+     * @property {any} [onerror]
      */
 
     /** @type {Props} */
@@ -24,7 +25,8 @@
         fetchpriority = 'auto',
         className = '',
         sizes = undefined,
-        onload = undefined
+        onload = undefined,
+        onerror = undefined
     } = $props();
     
     // TypeScript type assertions
@@ -50,6 +52,10 @@
     function handleLoad(event) {
         if (onload) onload(event);
     }
+    
+    function handleError(event) {
+        if (onerror) onerror(event);
+    }
 </script>
 
 <img
@@ -64,4 +70,5 @@
     srcset={srcSet}
     {sizes}
     onload={handleLoad}
+    onerror={handleError}
 /> 
