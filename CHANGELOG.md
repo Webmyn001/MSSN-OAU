@@ -8,3 +8,11 @@
 
 ## 2026-01-28 (marketing-content-refresh)
 - marketing: refreshed events, excos/advisors pages, SEO/layout; removed auth routes; added flyers and public contact lines.
+
+## [Unreleased] - Added paid events registration guide page
+- Added "/events/how-to-register-paid-events-online" help page explaining how to register for paid MSSN events via the website.
+
+## 2026-01-28 (marketing-static-site)
+- marketing: switched marketing build to static `adapter-static` output (SPA-style) with Cloudflare Pages `_redirects` deep-link support.
+- marketing: blog now fetches latest posts from An-Nuur Press WordPress REST API client-side (typed, with loading skeletons) on homepage and /blog.
+- marketing: fixed programmes hero image spinner getting stuck on first load and improved image error handling.

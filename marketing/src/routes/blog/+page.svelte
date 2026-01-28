@@ -1,29 +1,67 @@
 <script>
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
+    import { browser } from '$app/environment'
     import { Calendar, ChevronRight, Mail, Send, ExternalLink } from '@lucide/svelte'
     import { toast } from 'svelte-sonner'
     import { formatDate } from "$lib/utils/dates.js"
 	import SEO from '$lib/components/SEO.svelte';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
+    import { fetchPosts } from '$lib/utils/wordpress.js'
+
+    /**
+     * @typedef {import('$lib/types.js').WordPressPost} WordPressPost
+     */
     
     let { data } = $props()
     
     let visible = $state(false)
     let hoveredPost = $state(null)
     let email = $state("")
+    let posts = $state(/** @type {WordPressPost[]} */ ([]))
+    let loading = $state(false)
+    let error = $state(false)
 
-    onMount(() => {
+    onMount(async () => {
         visible = true
         
-        if (data.posts && data.posts.length === 0) {
-            toast.error("Blog server is temporarily unavailable.", {
-                duration: Number.POSITIVE_INFINITY,
-                action: {
-                    label: "Go to blog",
-                    onClick: () => window.open("https://annuurpress.org.ng")
+        // * Initialize posts from data if available (fallback)
+        if (data.posts && data.posts.length > 0 && posts.length === 0) {
+            posts = data.posts;
+        }
+        
+        // * Fetch WordPress posts client-side
+        if (browser) {
+            loading = true;
+            error = false;
+            
+            try {
+                const fetchedPosts = await fetchPosts({ per_page: 11 });
+                if (fetchedPosts && fetchedPosts.length > 0) {
+                    posts = fetchedPosts;
+                } else {
+                    error = true;
+                    toast.error("Blog server is temporarily unavailable.", {
+                        duration: Number.POSITIVE_INFINITY,
+                        action: {
+                            label: "Go to blog",
+                            onClick: () => window.open("https://annuurpress.org.ng")
+                        }
+                    })
                 }
-            })
+            } catch (err) {
+                console.error('Error fetching blog posts:', err);
+                error = true;
+                toast.error("Blog server is temporarily unavailable.", {
+                    duration: Number.POSITIVE_INFINITY,
+                    action: {
+                        label: "Go to blog",
+                        onClick: () => window.open("https://annuurpress.org.ng")
+                    }
+                })
+            } finally {
+                loading = false;
+            }
         }
     })
     
@@ -43,7 +81,8 @@
         email = ""
     }
 
-    const jsonLd = [
+    // * Generate JSON-LD schema from posts (reactive)
+    const jsonLd = $derived([
         {
             "@type": "WebPage",
             "name": "Our Blog | MSSNOAU",
@@ -53,8 +92,7 @@
                 "name": "MSSNOAU"
             }
         },
-        ...(data?.posts || []).map(post => {
-        return {
+        ...(posts || []).map(post => ({
             '@type': 'Article',
             mainEntityOfPage: {
                 '@type': 'WebPage',
@@ -78,10 +116,9 @@
                     url: 'https://mssnoau.sirv.com/mssn-logo.png'
                 }
             }
-        }
-    })]
+        }))
+    ])
 
-    console.log(data.posts)
 
 </script>
 
@@ -118,9 +155,27 @@
     
     <div class="max-w-7xl mx-auto px-5 sm:px-10 md:px-12 lg:px-5 space-y-14 relative z-10">
         {#if visible}
-            {#if data.posts && Array.isArray(data.posts) && data.posts.length > 0}
+            {#if loading}
+                <!-- Loading state -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 rounded-t-lg">
-                    {#each data.posts as post, i}
+                    {#each Array(6) as _, i}
+                        <div class="flex flex-col bg-white/80 backdrop-blur-sm border border-primary-100 rounded-xl overflow-hidden shadow-sm animate-pulse">
+                            <div class="h-48 bg-gray-200"></div>
+                            <div class="flex flex-col p-5 space-y-3">
+                                <div class="h-6 bg-gray-200 rounded"></div>
+                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div class="h-4 bg-gray-200 rounded"></div>
+                                <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
+                                    <div class="size-8 bg-gray-200 rounded-full"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-24"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {:else if posts && Array.isArray(posts) && posts.length > 0}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 rounded-t-lg">
+                    {#each posts as post, i}
                         <!-- Enhanced Post Card -->
                         <a 
                             href={post.link}

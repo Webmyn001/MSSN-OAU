@@ -4,16 +4,46 @@
     import { Button } from "$lib/components/ui/button"
     import { fly, fade, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
+    import { browser } from '$app/environment'
+    import { fetchPosts } from '$lib/utils/wordpress.js'
 
-    let { posts = [] } = $props()
+    /**
+     * @typedef {import('$lib/types.js').WordPressPost} WordPressPost
+     */
+    
+    let { posts: initialPosts = [] } = $props()
+    
     let visible = $state(false);
     let hoveredPost = $state(null);
+    let posts = $state(/** @type {WordPressPost[]} */ (initialPosts));
+    let loading = $state(false);
+    let error = $state(false);
     
     // * Hide section if no posts available
     const hasPosts = $derived(Array.isArray(posts) && posts.length > 0);
     
-    onMount(() => {
+    onMount(async () => {
         visible = true
+        
+        // * Fetch WordPress posts client-side if we don't have any
+        if (browser && (!posts || posts.length === 0)) {
+            loading = true;
+            error = false;
+            
+            try {
+                const fetchedPosts = await fetchPosts({ per_page: 3 });
+                if (fetchedPosts && fetchedPosts.length > 0) {
+                    posts = fetchedPosts;
+                } else {
+                    error = true;
+                }
+            } catch (err) {
+                console.error('Error fetching blog posts:', err);
+                error = true;
+            } finally {
+                loading = false;
+            }
+        }
     })
 </script>
 
@@ -46,7 +76,20 @@
     <!-- Grid with staggered animation -->
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
         {#if visible}
-            {#each posts as post, i}
+            {#if loading}
+                <!-- Loading state -->
+                {#each Array(3) as _, i}
+                    <div class="flex flex-col h-full backdrop-blur-sm bg-white/80 border border-primary-200 rounded-xl overflow-hidden animate-pulse">
+                        <div class="h-[210px] bg-gray-200"></div>
+                        <div class="flex-1 p-5 space-y-3">
+                            <div class="h-6 bg-gray-200 rounded"></div>
+                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div class="h-4 bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                {/each}
+            {:else if hasPosts}
+                {#each posts as post, i}
                 <!-- Enhanced Card with glassmorphism -->
                 <a 
                     in:fly={{ y: 30, duration: 800, delay: 600 + (i * 200) }}
@@ -127,7 +170,10 @@
                     </div>
                 </a>
                 <!-- End Card -->
-            {/each}
+                {/each}
+            {:else}
+                <!-- Empty/Error state - hidden by hasPosts check, but kept for structure -->
+            {/if}
         {/if}
     </div>
     <!-- End Grid -->

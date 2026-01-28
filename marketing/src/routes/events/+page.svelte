@@ -475,7 +475,7 @@
         {#if visible}
             <!-- Page Title -->
             <div 
-                class="mb-10 md:mb-16"
+                class="mb-10 md:mb-16 space-y-4"
                 in:fly={{ y: 30, duration: 800, delay: 400 }}
             >
                 <h2 class="mb-4 text-center text-2xl font-bold text-primary-800 md:mb-6 lg:text-3xl font-primary">
@@ -485,6 +485,21 @@
                 <p class="mx-auto max-w-screen-md text-center text-neutral-600 md:text-lg font-secondary">
                     {mode === "upcoming" ? "Join us for our upcoming programmes and activities. We look forward to seeing you!" : "A look back at some of our memorable events from the past year."}
                 </p>
+
+                {#if mode === "upcoming"}
+                    <div class="mx-auto max-w-2xl bg-primary-50 border border-primary-100 rounded-xl px-4 py-3 text-sm text-primary-900 font-tertiary flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
+                        <div>
+                            <span class="font-semibold">New to online registration?</span>
+                            <span class="ml-1">Read our step-by-step guide on how to register for paid MSSN events via the website.</span>
+                        </div>
+                        <a
+                          href="/events/how-to-register-paid-events-online"
+                          class="inline-flex items-center text-primary-700 hover:text-primary-800 font-semibold underline decoration-primary-300 text-xs sm:text-sm"
+                        >
+                            How to register for paid events
+                        </a>
+                    </div>
+                {/if}
                 
                 <!-- Search and Filter -->
                 <div class="mt-8 max-w-2xl mx-auto">

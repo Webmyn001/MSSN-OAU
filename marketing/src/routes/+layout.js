@@ -1,7 +1,5 @@
 import { browser } from '$app/environment';
 
-// Define which data to load from the server
-// export const prerender = true;
 export const trailingSlash = 'always';
 export const ssr = true;
 export const csr = true; // Enable client-side rendering for hydration
