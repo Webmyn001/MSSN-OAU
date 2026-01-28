@@ -8,3 +8,6 @@
 
 ## 2026-01-28 (marketing-content-refresh)
 - marketing: refreshed events, excos/advisors pages, SEO/layout; removed auth routes; added flyers and public contact lines.
+
+## [Unreleased] - Added paid events registration guide page
+- Added "/events/how-to-register-paid-events-online" help page explaining how to register for paid MSSN events via the website.

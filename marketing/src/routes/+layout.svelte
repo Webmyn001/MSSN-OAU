@@ -10,7 +10,7 @@
     import { ORGANIZATION } from "$lib/config";
     let {children, data} = $props();
 
-    const info = $state(data.info)
+    const info = $derived(data?.info)
     
     // Define website-wide SEO constants
 </script>

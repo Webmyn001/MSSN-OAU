@@ -14,6 +14,7 @@ export const DEFAULT_KEYWORDS = "MSSN, MSSNOAU, Muslim Students Society, Obafemi
 export const ORGANIZATION = {
     name: "Muslim Students' Society of Nigeria, OAU Branch",
     shortName: "MSSNOAU",
+    url: SITE_URL,
     description: "Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus.",
     logo: "https://mssnoau.sirv.com/mssn-logo.png",
     twitterHandle: "@Mssngreatife1",
@@ -28,6 +29,7 @@ export const ORGANIZATION = {
         postalCode: "220282",
         country: "Nigeria"
     },
+    map: "https://maps.app.goo.gl/r4T4g5NCUW36dGeZ7",
     coordinates: {
         latitude: "7.5171491",
         longitude: "4.51768994109481"

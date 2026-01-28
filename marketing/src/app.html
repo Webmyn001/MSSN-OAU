@@ -123,11 +123,10 @@
 	<meta name="baggage"
 		content="sentry-environment=production,sentry-public_key=8a6c37d91d61d59f93315969a077bace,sentry-trace_id=ecfd9c2bcd2df0ec4729f2cd9468623c,sentry-sample_rate=1,sentry-transaction=GET%20%2Fcontact%2F,sentry-sampled=true" />
 
-	<script nonce="%sveltekit.nonce%">
-		// Make the nonce available to client-side scripts if needed
-		// SvelteKit's CSP nonce should ideally be automatically applied to scripts it knows about.
-		// This is a fallback or for scripts loaded entirely outside SvelteKit's direct control via hooks.
-		window.APP_NONCE = '%sveltekit.nonce%';
+	<script>
+		// * Exposes a nonce placeholder for legacy client-side script injection.
+		// * When prerendering with CSP mode 'auto', SvelteKit uses hashes (not nonces) for inline scripts.
+		window.APP_NONCE = '';
 	</script>
 
 	%sveltekit.head%
