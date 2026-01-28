@@ -63,6 +63,22 @@
             document.getElementById(idOfTrigger)?.focus();
         });
     }
+
+    /**
+     * * Returns a gender-based placeholder image path for advisors without photos.
+     * @param {any} advisor
+     * @returns {string}
+     */
+    function getAdvisorPlaceholder(advisor) {
+        const gender = String(advisor?.gender || "").toLowerCase();
+        if (gender === "female") return "/images/user/female.jpg";
+        if (gender === "male") return "/images/user/male.jpg";
+
+        const title = String(advisor?.title || "").toLowerCase();
+        const name = String(advisor?.name || "").toLowerCase();
+        const isLikelyFemale = title.includes("mrs") || title.includes("miss") || name.startsWith("mrs ") || name.startsWith("sister ");
+        return isLikelyFemale ? "/images/user/female.jpg" : "/images/user/male.jpg";
+    }
     
 </script>
 
@@ -212,16 +228,14 @@
                             
                             <div class="relative z-10 p-6 sm:p-8">
                                 <div class="flex flex-col md:flex-row gap-6 items-start">
-                                    {#if advisor.photo}
-                                        <div class="relative mx-auto md:mx-0 mb-4 md:mb-0">
-                                            <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500/20 to-primary-700/20 backdrop-blur-sm -z-10 transform scale-110"></div>
-                                            <img 
-                                                src={advisor.photo || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='100' cy='100' r='100' fill='%23e5e7eb'/%3E%3Ccircle cx='100' cy='80' r='30' fill='%239ca3af'/%3E%3Cpath d='M30 180c0-38.7 31.3-70 70-70s70 31.3 70 70' fill='%239ca3af'/%3E%3C/svg%3E"} 
-                                                alt="Photo of {advisor.title} {advisor.name}" 
-                                                class="w-32 h-32 rounded-full object-cover border-2 border-white shadow-md transition-transform duration-500 group-hover:scale-105"
-                                            >
-                                        </div>
-                                    {/if}
+                                    <div class="relative mx-auto md:mx-0 mb-4 md:mb-0">
+                                        <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500/20 to-primary-700/20 backdrop-blur-sm -z-10 transform scale-110"></div>
+                                        <img 
+                                            src={advisor.photo || getAdvisorPlaceholder(advisor)} 
+                                            alt="Photo of {advisor.title} {advisor.name}" 
+                                            class="w-32 h-32 rounded-full object-cover border-2 border-white shadow-md transition-transform duration-500 group-hover:scale-105"
+                                        >
+                                    </div>
                                     
                                     <div class="flex-grow">
                                         <div class="flex justify-between items-start">

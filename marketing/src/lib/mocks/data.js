@@ -4,6 +4,8 @@
 import { exampleBlog } from '$lib/examples/blog.js';
 import { exampleEvents } from '$lib/examples/events.js';
 import { exampleInfo } from '$lib/examples/info.js';
+import { events as staticEvents } from '$lib/data/events.js';
+import { excos as staticExcos } from '$lib/data/excos.js';
 import { programmes } from '$lib/data/programmes.js';
 
 // * Mock blog posts - transform to match expected format
@@ -31,7 +33,7 @@ export const mockBlog = {
 
 // * Mock events
 export const mockEvents = {
-	events: exampleEvents.events || []
+	events: (staticEvents && staticEvents.length > 0 ? staticEvents : (exampleEvents.events || []))
 };
 
 // * Mock site info
@@ -56,11 +58,12 @@ export const mockAdvisors = {
 						id: 'advisor-1',
 						name: 'Dr. Amina Bello',
 						title: 'Dr.',
+						gender: 'female',
 						position: 'Chief Adviser',
 						department: 'Department of Islamic Studies',
 						phone: '+234 803 123 4567',
 						email: 'amina.bello@oauife.edu.ng',
-						photo: '/images/woman_2.webp',
+						photo: '/images/user/female.jpg',
 						summary: 'Experienced academic advisor with expertise in Islamic studies and student mentorship.',
 						socials: {
 							whatsapp: '2348031234567',
@@ -71,11 +74,12 @@ export const mockAdvisors = {
 						id: 'advisor-2',
 						name: 'Prof. Khalid Adeyemi',
 						title: 'Prof.',
+						gender: 'male',
 						position: 'Senior Adviser',
 						department: 'Department of Arabic and Islamic Studies',
 						phone: '+234 802 987 6543',
 						email: 'khalid.adeyemi@oauife.edu.ng',
-						photo: '/images/man_3.webp',
+						photo: '/images/user/male.jpg',
 						summary: 'Dedicated to supporting Muslim students in their academic and spiritual journey.',
 						socials: {
 							whatsapp: '2348029876543'
@@ -90,49 +94,7 @@ export const mockAdvisors = {
 // * Mock executives (excos)
 export const mockExcos = {
 	excos: {
-		sessions: [
-			{
-				session: '2024-2025',
-				start_year: 2024,
-				end_year: 2025,
-				executives: [
-					{
-						committee: 'Executive Council',
-						members: [
-							{
-								id: 'exco-1',
-								name: 'Ahmad Ibrahim',
-								position: 'Amir',
-								photo: '/images/man_1.webp',
-								phone: '+234 803 111 2222',
-								email: 'amir@mssnoau.org'
-							},
-							{
-								id: 'exco-2',
-								name: 'Fatima Abdullah',
-								position: 'Amirah',
-								photo: '/images/woman_1.webp',
-								phone: '+234 803 222 3333',
-								email: 'amirah@mssnoau.org'
-							}
-						]
-					},
-					{
-						committee: 'Academic Committee',
-						members: [
-							{
-								id: 'academic-1',
-								name: 'Ibrahim Musa',
-								position: 'Coordinator',
-								photo: '/images/man_2.webp',
-								phone: '+234 803 333 4444',
-								email: 'academic@mssnoau.org'
-							}
-						]
-					}
-				]
-			}
-		]
+		sessions: staticExcos.sessions || []
 	}
 };
 
