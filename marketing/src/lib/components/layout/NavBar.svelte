@@ -242,20 +242,6 @@
 
                                         <div class="flex flex-col space-y-1 mt-3 lg:mt-0">
                                             <div class="px-3 py-2 text-xs font-semibold text-primary-600 uppercase tracking-wider">Resources</div>
-                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" 
-                                               href="#" 
-                                               onclick={(event) => { event.preventDefault(); toast.warning('Quiz feature is in development and is currently unavailable.'); }}
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-                                                Quiz
-                                            </a>
-                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" 
-                                               href="#" 
-                                               onclick={(event) => { event.preventDefault(); toast.warning('E-Library feature is in development and is currently unavailable.'); }}
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-                                                E-Library
-                                            </a>
                                             <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/annual-dues">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                                                 Annual Dues
@@ -263,18 +249,10 @@
                                         </div>
 
                                         <div class="flex flex-col space-y-1 mt-3 lg:mt-0">
-                                            <div class="px-3 py-2 text-xs font-semibold text-primary-600 uppercase tracking-wider">Account</div>
+                                            <div class="px-3 py-2 text-xs font-semibold text-primary-600 uppercase tracking-wider">Support</div>
                                             <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/contact#faqs">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
                                                 FAQs
-                                            </a>
-                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/auth/login">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                                                Log In
-                                            </a>
-                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/auth/signup">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                                                Sign Up
                                             </a>
                                         </div>
                                     </div>
@@ -296,17 +274,7 @@
                             {/if}
                         </a>
                         
-                        <!-- Mobile View: Special buttons -->
-                        <div class="lg:hidden flex flex-col gap-3 mt-5 border-t border-gray-100 pt-5">
-                            <a href="/auth/login" class="py-2.5 px-4 inline-flex justify-center items-center gap-2 rounded-xl border border-primary-300 font-medium text-primary-700 shadow-sm align-middle hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-primary-600 transition-all text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                                Log In
-                            </a>
-                            <a href="/auth/signup" class="py-2.5 px-4 inline-flex justify-center items-center gap-2 rounded-xl border border-transparent font-medium bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                                Sign Up
-                            </a>
-                        </div>
+                        <!-- Mobile View: Special buttons removed (no auth pages) -->
                     </div>
                 </div>
             {/if}

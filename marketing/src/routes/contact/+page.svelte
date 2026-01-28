@@ -45,10 +45,6 @@
                 "question": "How are the funds utilized by MSSN OAU?",
                 "answer": "Funds are used to support <strong  class='text-primary-800'>MSSN OAU</strong> activities, including organizing events, maintaining the Secretariat, providing resources for members, and running community service projects."
                 },
-                {
-                "question": "What resources are available in the MSSN E-library?",
-                "answer": "The <strong  class='text-primary-800'>MSSN E-library</strong> offers a wide range of Islamic books, scholarly articles, lecture notes, and multimedia resources to support spiritual and academic development. Members can access these materials through our <a  class='text-primary-800 underline hover:text-primary-700' href='https://library.mssnoau.org'>e-library platform</a> or at designated times from the Secretariat."
-                }
             ],
             "map_link": "https://maps.app.goo.gl/r4T4g5NCUW36dGeZ7",
             "address": "MSSN OAU Secretariat, Inside Fájúyì Hall",
