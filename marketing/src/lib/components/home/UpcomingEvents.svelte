@@ -204,7 +204,7 @@
             <a 
                 in:fly={{ y: 20, duration: 800, delay: 800 + (events.length * 200) }}
                 class="group relative flex flex-col w-full min-h-60 bg-cover bg-center rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2 focus:outline-none focus:shadow-lg col-span-full"
-                href="/events/register"
+                href="/events/how-to-register-paid-events-online"
                 style="background-image: url('https://plus.unsplash.com/premium_photo-1676496046182-356a6a0ed002?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=560&q=80')"
             >
                 <!-- Enhanced overlay with glassmorphism -->
