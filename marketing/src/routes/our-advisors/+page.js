@@ -3,7 +3,7 @@ import { mockAdvisors } from "$lib/mocks/data.js";
 
 /**
  * Loads the advisor data for the page.
- * @returns {Promise<{ sessions: import('../api/v1/advisors/+server').AdvisorSessionData[] }>}
+ * @returns {Promise<{ sessions: import('$lib/types.js').AdvisorSessionData[] }>}
  * The advisor data with sessions array.
  */
 export const load = async () => {
