@@ -1,6 +1,5 @@
 import { browser } from '$app/environment';
 
-// SPA mode: no global prerender, but keep SSR+CSR for good UX when served via Node.
 export const trailingSlash = 'always';
 export const ssr = true;
 export const csr = true; // Enable client-side rendering for hydration

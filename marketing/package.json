@@ -58,6 +58,7 @@
 		"@tailwindcss/line-clamp": "^0.4.4",
 		"@tailwindcss/typography": "^0.5.15",
 		"@vercel/speed-insights": "^1.1.0",
+		"@wp-headless/client": "^0.9.8",
 		"date-fns": "^4.1.0",
 		"dotenv": "^16.5.0",
 		"embla-carousel-autoplay": "^8.5.1",
