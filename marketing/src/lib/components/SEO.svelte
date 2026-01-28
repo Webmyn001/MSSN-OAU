@@ -34,7 +34,7 @@
     // Props with defaults
     let {
         title = "",
-        description = DEFAULT_DESCRIPTION,
+        description = /** @type {string} */ (DEFAULT_DESCRIPTION),
         path = "",
         type = "website",
         images = [

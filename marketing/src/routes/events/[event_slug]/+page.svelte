@@ -308,13 +308,27 @@
                                         </div>
                                     {/if}
                                     {#if !isEventPast}
-                                        <Button 
-                                            class="w-full mt-4 {eventData.paid ? 'bg-primary-700 hover:bg-primary-800 text-white' : ''}"
-                                            variant={eventData.paid ? "default" : "outline"}
-                                            onclick={handleRegister}
-                                        >
-                                            {eventData.paid ? 'Register Now' : 'RSVP to Event'}
-                                        </Button>
+                                        <div class="space-y-2 mt-4">
+                                            <Button 
+                                                class="w-full {eventData.paid ? 'bg-primary-700 hover:bg-primary-800 text-white' : ''}"
+                                                variant={eventData.paid ? "default" : "outline"}
+                                                onclick={handleRegister}
+                                            >
+                                                {eventData.paid ? 'Register Now' : 'RSVP to Event'}
+                                            </Button>
+
+                                            {#if eventData.image}
+                                                <Button
+                                                    as="a"
+                                                    href={eventData.image}
+                                                    target="_blank"
+                                                    variant="outline"
+                                                    class="w-full"
+                                                >
+                                                    View / Download Flyer <ExternalLink class="ml-2 h-4 w-4" />
+                                                </Button>
+                                            {/if}
+                                        </div>
                                     {:else}
                                         <div class="bg-gray-100 rounded-lg p-3 text-center text-gray-700 font-medium mt-4">
                                             This event has already passed

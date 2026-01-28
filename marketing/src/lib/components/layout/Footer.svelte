@@ -87,16 +87,6 @@
                            href="/#prayer-times">Prayer Times</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-                           href="#" 
-                           onclick={(event) => { event.preventDefault(); toast.warning('Quiz feature is in development and is currently unavailable.'); }}
-                        >Quiz</a></p>
-                    <p>
-                        <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-                           href="#" 
-                           onclick={(event) => { event.preventDefault(); toast.warning('E-Library feature is in development and is currently unavailable.'); }}
-                        >E-Library</a></p>
-                    <p>
-                        <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
                            href="https://status.mssnoau.org/">Status</a></p>
                 </div>
             </div>

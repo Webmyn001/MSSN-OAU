@@ -26,6 +26,7 @@
      * @property {string | number} id
      * @property {string} name
      * @property {string} position
+     * @property {'male' | 'female'} [gender]
      * @property {string} [phone]
      * @property {string} [email]
      * @property {string} [photo]
@@ -158,6 +159,18 @@
             .catch(() => {
             toast.error(`Failed to copy ${member.name}'s details.`);
             });
+    }
+
+    /**
+     * * Returns a gender-based placeholder image path for members without photos.
+     * * This uses role keywords as a best-effort heuristic.
+     * @param {Member} member
+     * @param {string} committeeName
+     * @returns {string}
+     */
+    function getMemberPlaceholder(member, committeeName) {
+        if (member?.gender === "female") return "/images/user/female.jpg";
+        return "/images/user/male.jpg";
     }
 </script>
 
@@ -310,7 +323,7 @@
                                     >
                                         <div class="relative mb-5 mx-auto w-28 h-28">
                                             <Image
-                                        src={member.photo || "/images/avatar.webp"} 
+                                        src={member.photo || getMemberPlaceholder(member, committee.committee)} 
                                         alt={`${member.name} - ${member.position}`}
                                                 width={112}
                                                 height={112}
@@ -368,7 +381,7 @@
             bind:open={memberModalOpen}
             title={activeMemberForModal.name}
             description={`${activeMemberForModal.position}${activeMemberForModal.committeeName ? `, ${activeMemberForModal.committeeName}` : ''}`}
-            onOpenChange={(isOpen) => { if (!isOpen) closeMemberModal(); }}
+            onOpenChange={(/** @type {boolean} */ isOpen) => { if (!isOpen) closeMemberModal(); }}
             contentClass="sm:max-w-md"
         >
             <!-- Trigger is implicit from the member card click -->

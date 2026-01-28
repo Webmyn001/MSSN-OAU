@@ -5,7 +5,7 @@ import slugify from "$lib/utils/slugify.js";
 export async function load({ params }) {
     // * Find event by matching slug
     const event = mockEvents.events.find(e => {
-        const eventSlug = slugify(e.title);
+        const eventSlug = e.slug || slugify(e.title);
         return eventSlug === params.event_slug;
     });
 
@@ -13,7 +13,7 @@ export async function load({ params }) {
         return {
             event: {
                 ...event,
-                slug: slugify(event.title)
+                slug: event.slug || slugify(event.title)
             },
             status: 200
         };

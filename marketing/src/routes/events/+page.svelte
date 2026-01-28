@@ -799,13 +799,29 @@
         </div>
         
         {#snippet footer()}
-            {#if currentEvent.url}
-                <Button as="a" href={currentEvent.url} target="_blank" class={buttonVariants({ class: "w-full bg-primary-700 hover:bg-primary-800" })}>
-                    Register / View Details <ExternalLink class="ml-2 h-4 w-4" />
-                </Button>
-            {:else}
-                <Button onclick={closeEventDetails} variant="outline" class="w-full">Close</Button> 
-            {/if}
+            <div class="space-y-2 w-full">
+                {#if currentEvent.url}
+                    <Button as="a" href={currentEvent.url} target="_blank" class={buttonVariants({ class: "w-full bg-primary-700 hover:bg-primary-800" })}>
+                        Register / View Details <ExternalLink class="ml-2 h-4 w-4" />
+                    </Button>
+                {/if}
+
+                {#if currentEvent.image}
+                    <Button
+                        as="a"
+                        href={currentEvent.image}
+                        target="_blank"
+                        variant="outline"
+                        class="w-full"
+                    >
+                        View / Download Flyer <ExternalLink class="ml-2 h-4 w-4" />
+                    </Button>
+                {/if}
+
+                {#if !currentEvent.url}
+                    <Button onclick={closeEventDetails} variant="outline" class="w-full">Close</Button>
+                {/if}
+            </div>
         {/snippet}
     </ResponsiveModal>
 {/if}

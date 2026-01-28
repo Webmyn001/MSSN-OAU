@@ -11,7 +11,7 @@ export const GET = async ({ params }) => {
 
     // * Find event by matching slug
     const event = mockEvents.events.find(e => {
-        const eventSlug = slugify(e.title);
+        const eventSlug = e.slug || slugify(e.title);
         return eventSlug === event_slug;
     });
 
@@ -21,7 +21,7 @@ export const GET = async ({ params }) => {
             data: {
                 event: {
                     ...event,
-                    slug: slugify(event.title)
+                    slug: event.slug || slugify(event.title)
                 }
             }
         });
