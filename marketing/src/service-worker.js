@@ -86,7 +86,7 @@ function shouldHandleRequest(request) {
   if (request.method !== 'GET') return false;
   const url = new URL(request.url);
   if (url.protocol === 'chrome-extension:') return false;
-  if (url.pathname.includes('/auth/')) return false; // Example: Don't cache auth routes
+  // * Avoid caching non-public routes (none currently configured here)
   if (url.pathname.includes('/node_modules/')) return false; // Don't cache dev dependencies
   // Add other exclusion rules if necessary
   return true;
