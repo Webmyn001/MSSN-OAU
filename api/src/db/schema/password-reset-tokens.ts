@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core'
-import { users } from './users.js'
+import { users } from './users'
 
 // * Password reset tokens table
 export const passwordResetTokens = pgTable(
@@ -16,7 +16,7 @@ export const passwordResetTokens = pgTable(
 		usedAt: timestamp('used_at', { withTimezone: true }),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 	},
-	(table) => ({
+	table => ({
 		// * Indexes for common queries
 		userIdIdx: index('password_reset_tokens_user_id_idx').on(table.userId),
 		tokenIdx: index('password_reset_tokens_token_idx').on(table.token),
@@ -27,4 +27,3 @@ export const passwordResetTokens = pgTable(
 // * Export types
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect
 export type NewPasswordResetToken = typeof passwordResetTokens.$inferInsert
-

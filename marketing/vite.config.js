@@ -21,17 +21,53 @@ export default defineConfig({
                 comments: false // Remove all comments
             }
         },
-        // Disable chunking to avoid initialization order issues
         rollupOptions: {
             output: {
-                manualChunks: () => 'app' // Put everything in one chunk
+                // Allow proper code splitting so the browser only loads what each page needs
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        // Group large vendor libs into separate cacheable chunks
+                        if (id.includes('svelte')) return 'vendor-svelte';
+                        if (id.includes('bits-ui') || id.includes('embla-carousel')) return 'vendor-ui';
+                        if (id.includes('date-fns') || id.includes('timeago')) return 'vendor-date';
+                        return 'vendor';
+                    }
+                }
             }
         },
-        // Reduce initial load time
         cssCodeSplit: true,
         assetsInlineLimit: 4096, // Inline small assets (4kb or less)
         chunkSizeWarningLimit: 1000
     },
+
+    // Pre-bundle heavy dependencies to speed up dev cold starts significantly
+    optimizeDeps: {
+        include: [
+            'embla-carousel-svelte',
+            'embla-carousel-autoplay',
+            'date-fns',
+            'clsx',
+            'tailwind-merge',
+            'mode-watcher',
+            'svelte-sonner',
+            'he',
+            'timeago.js',
+            'reading-time-estimator',
+            'svelte-meta-tags'
+        ]
+    },
+
+    // Pre-transform the most commonly accessed files on dev server start
+    server: {
+        warmup: {
+            clientFiles: [
+                './src/routes/+layout.svelte',
+                './src/routes/+page.svelte',
+                './src/app.css'
+            ]
+        }
+    },
+
 	plugins: [
         // Temporarily comment out Sentry plugins
         // sentryVitePlugin({

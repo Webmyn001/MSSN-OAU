@@ -63,7 +63,26 @@ services:
     networks:
       - mssnoau-network
 
+  db:
+    image: pgvector/pgvector:16-pg16
+    container_name: mssnoau-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=mssn_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - mssnoau-network
+    restart: unless-stopped
+
 networks:
   mssnoau-network:
     driver: bridge
+
+volumes:
+  pgdata:
+
 

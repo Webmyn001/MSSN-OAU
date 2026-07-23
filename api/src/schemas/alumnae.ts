@@ -6,4 +6,3 @@ export const listAlumnaeRequestsQuerySchema = z.object({
 	limit: z.coerce.number().int().positive().max(100).default(20),
 	status: z.enum(['pending', 'approved', 'rejected']).optional()
 })
-

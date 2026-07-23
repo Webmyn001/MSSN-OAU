@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core'
-import { users } from './users.js'
+import { users } from './users'
 
 // * Authentication sessions table
 export const authSessions = pgTable(
@@ -16,7 +16,7 @@ export const authSessions = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		lastUsedAt: timestamp('last_used_at', { withTimezone: true }).notNull().defaultNow()
 	},
-	(table) => ({
+	table => ({
 		// * Indexes for common queries
 		userIdIdx: index('auth_sessions_user_id_idx').on(table.userId),
 		tokenIdx: index('auth_sessions_token_idx').on(table.token),
@@ -27,4 +27,3 @@ export const authSessions = pgTable(
 // * Export types
 export type AuthSession = typeof authSessions.$inferSelect
 export type NewAuthSession = typeof authSessions.$inferInsert
-

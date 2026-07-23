@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import type { Context } from 'hono'
-import { errorHandler } from './middleware/error-handler.js'
-import { logger } from './lib/logger.js'
-import env from './lib/env.js'
+import { errorHandler } from './middleware/error-handler'
+import { logger } from './lib/logger'
+import env from './lib/env'
 
 // * Main Hono application instance
 const app = new Hono<{
@@ -25,7 +25,7 @@ const app = new Hono<{
 app.use(
 	'*',
 	cors({
-		origin: (origin) => {
+		origin: origin => {
 			// * Allow requests from the app URL
 			if (origin === env.APP_URL) {
 				return origin
@@ -84,12 +84,12 @@ app.get('/health', (c: Context) => {
 })
 
 // * Register route handlers
-import authRoutes from './routes/auth.js'
-import usersRoutes from './routes/users.js'
-import excosRoutes from './routes/excos.js'
-import sessionsRoutes from './routes/sessions.js'
-import alumnaeRoutes from './routes/alumnae.js'
-import webhooksRoutes from './routes/webhooks.js'
+import authRoutes from './routes/auth'
+import usersRoutes from './routes/users'
+import excosRoutes from './routes/excos'
+import sessionsRoutes from './routes/sessions'
+import alumnaeRoutes from './routes/alumnae'
+import webhooksRoutes from './routes/webhooks'
 
 app.route('/auth', authRoutes)
 app.route('/users', usersRoutes)

@@ -57,17 +57,17 @@ export type Env = z.infer<typeof envSchema>
 let env: Env
 
 try {
-	env = envSchema.parse(Bun.env)
-	} catch (error) {
-		if (error instanceof z.ZodError) {
-			console.error('❌ Environment variable validation failed:')
-			for (const err of error.issues) {
-				console.error(`  - ${err.path.join('.')}: ${err.message}`)
-			}
-			console.error('\nPlease check your .env file and ensure all required variables are set.')
-			process.exit(1)
+	env = envSchema.parse(process.env)
+} catch (error) {
+	if (error instanceof z.ZodError) {
+		console.error('❌ Environment variable validation failed:')
+		for (const err of error.issues) {
+			console.error(`  - ${err.path.join('.')}: ${err.message}`)
 		}
-		throw error
+		console.error('\nPlease check your .env file and ensure all required variables are set.')
+		process.exit(1)
 	}
+	throw error
+}
 
 export default env

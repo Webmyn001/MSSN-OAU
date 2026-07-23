@@ -25,7 +25,7 @@ const config = {
 				'default-src': ["'self'"],
 				// * Allows SvelteKit to hash inline scripts/styles during prerendering (CSP meta) while keeping SSR safe.
 				'script-src': ["'self'"],
-				'style-src': ["'self'", "'unsafe-inline'"],
+				'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
 				'img-src': [
 					"'self'",
 					'data:',
@@ -34,7 +34,7 @@ const config = {
 					'https://plus.unsplash.com',
 					'https://mssnoau.sirv.com'
 				],
-				'font-src': ["'self'", 'data:'],
+				'font-src': ["'self'", 'data:', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
 				'connect-src': [
 					"'self'",
 					'https://api.aladhan.com'

@@ -1,12 +1,9 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { authMiddleware, requireExco } from '../middleware/auth.js'
-import { successResponse, errorResponse } from '../lib/response.js'
-import { logger } from '../lib/logger.js'
-import { listAlumnaeRequestsQuerySchema } from '../schemas/alumnae.js'
-import { eq, or } from 'drizzle-orm'
-import { db } from '../lib/db.js'
-import { users } from '../db/schema/users.js'
+import { authMiddleware, requireExco } from '../middleware/auth'
+import { successResponse, errorResponse } from '../lib/response'
+import { logger } from '../lib/logger'
+import { listAlumnaeRequestsQuerySchema } from '../schemas/alumnae'
 
 const alumnaeRoute = new Hono()
 
@@ -15,10 +12,10 @@ alumnaeRoute.get(
 	'/requests',
 	authMiddleware,
 	zValidator('query', listAlumnaeRequestsQuerySchema),
-	async (c) => {
+	async c => {
 		try {
 			await requireExco(c)
-			const { page, limit, status } = c.req.valid('query')
+			const { page, limit, status: _status } = c.req.valid('query')
 
 			// * TODO: Alumnae requests are stored in users table with a status field
 			// * For now, this is a placeholder implementation
@@ -55,4 +52,3 @@ alumnaeRoute.get(
 )
 
 export default alumnaeRoute
-

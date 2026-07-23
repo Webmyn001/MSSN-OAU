@@ -1,5 +1,5 @@
 import { pgTable, uuid, varchar, text, jsonb, timestamp } from 'drizzle-orm/pg-core'
-import { users } from './users.js'
+import { users } from './users'
 
 // * Website configuration table
 // * Using key-value approach for flexibility

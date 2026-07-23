@@ -1,5 +1,5 @@
-import env from '../../lib/env.js'
-import { logger } from '../../lib/logger.js'
+import env from '../../lib/env'
+import { logger } from '../../lib/logger'
 
 // * Plunk API base URL
 const PLUNK_API_URL = 'https://api.useplunk.com/v1'
@@ -43,10 +43,7 @@ export async function sendEmail({
 
 		if (!response.ok) {
 			const errorData = (await response.json().catch(() => ({}))) as { message?: string }
-			logger.error(
-				{ status: response.status, error: errorData, to, subject },
-				'Plunk API error'
-			)
+			logger.error({ status: response.status, error: errorData, to, subject }, 'Plunk API error')
 			throw new Error(
 				`Plunk API Error: ${response.status} - ${errorData.message || 'Unknown error'}`
 			)
@@ -98,4 +95,3 @@ export async function sendEmailWithContent({
 		from: from || env.PLUNK_FROM_EMAIL
 	})
 }
-

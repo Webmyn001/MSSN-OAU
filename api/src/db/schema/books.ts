@@ -1,5 +1,14 @@
-import { pgTable, uuid, varchar, text, integer, timestamp, index, customType } from 'drizzle-orm/pg-core'
-import { users } from './users.js'
+import {
+	pgTable,
+	uuid,
+	varchar,
+	text,
+	integer,
+	timestamp,
+	index,
+	customType
+} from 'drizzle-orm/pg-core'
+import { users } from './users'
 
 // * Custom vector type for pgvector (1536 dimensions for OpenAI embeddings)
 // * Note: The actual vector type will be created via SQL migration
@@ -10,10 +19,10 @@ const vector = customType<{ data: number[]; driverData: string }>({
 	fromDriver: (value: string) => {
 		if (typeof value === 'string') {
 			return value
-				.replace(/[\[\]]/g, '')
+				.replace(/[[\]]/g, '')
 				.split(',')
-				.map((v) => parseFloat(v.trim()))
-				.filter((v) => !isNaN(v))
+				.map(v => parseFloat(v.trim()))
+				.filter(v => !isNaN(v))
 		}
 		return []
 	}
@@ -44,7 +53,7 @@ export const books = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
-	(table) => ({
+	table => ({
 		// * Indexes for search optimization
 		titleIdx: index('books_title_idx').on(table.title),
 		authorIdx: index('books_author_idx').on(table.author),

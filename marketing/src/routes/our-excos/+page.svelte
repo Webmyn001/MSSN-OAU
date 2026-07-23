@@ -92,11 +92,8 @@
             toast.error(`Failed to load data: ${data.error.substring(0, 100)}`);
         }
         
-        if (data?.excos?.sessions || data?.error) {
-            setTimeout(() => { isLoaded = true; }, 300);
-        } else {
-            isLoaded = false;
-        }
+        // Mark as loaded — data is always available synchronously from static mock
+        setTimeout(() => { isLoaded = true; }, 300);
     });
 
     /** @type {Session | undefined} */

@@ -23,15 +23,9 @@
     import { browser } from '$app/environment';
     import { SITE_URL } from '$lib/config';
 
-    // Home section components
-    import UpcomingEvents from '$lib/components/home/UpcomingEvents.svelte';
-    import BlogSection from '$lib/components/home/BlogSection.svelte';
-    import Donate from '$lib/components/home/Donate.svelte';
-    import SuggestionsSection from '$lib/components/home/SuggestionsSection.svelte';
-    import PrayerTimesSection from '$lib/components/home/PrayerTimesSection.svelte';
+    // Home section components — lazily loaded to reduce initial bundle parse time
 	import HeroSection from '$lib/components/home/HeroSection.svelte';
 	import Programmes from '$lib/components/sections/Programmes.svelte';
-    import Footer from '$lib/components/layout/Footer.svelte';
 
     // if (browser) {
     //     // console.log('homepage', data)
@@ -129,26 +123,36 @@
 <!-- End Events -->
 
 <!-- Prayer Times -->
-<PrayerTimesSection />
+{#await import('$lib/components/home/PrayerTimesSection.svelte') then { default: PrayerTimesSection }}
+    <PrayerTimesSection />
+{/await}
 <!-- End Prayer Times -->
 
 <!-- Upcoming Events Section -->
-<UpcomingEvents events={data?.events} />
+{#await import('$lib/components/home/UpcomingEvents.svelte') then { default: UpcomingEvents }}
+    <UpcomingEvents events={data?.events} />
+{/await}
 <!-- End Upcoming Events Section -->
 
 <!-- Blog Section -->
-<BlogSection posts={data.posts} />
+{#await import('$lib/components/home/BlogSection.svelte') then { default: BlogSection }}
+    <BlogSection posts={data.posts} />
+{/await}
 <!-- End Blog Section -->
 
 <!-- Donation CTA -->
  <i class="hidden" id="donate"></i>
-{#if data.info && data.info.info && data.info.info.account}
-<Donate />
+{#if data.info && data.info.account}
+{#await import('$lib/components/home/Donate.svelte') then { default: Donate }}
+    <Donate />
+{/await}
 {/if}
 <!-- End Donation CTA -->
 
 <!-- Suggestions Section -->
-<SuggestionsSection />
+{#await import('$lib/components/home/SuggestionsSection.svelte') then { default: SuggestionsSection }}
+    <SuggestionsSection />
+{/await}
 <!-- End Suggestions Section -->
 
 <style>

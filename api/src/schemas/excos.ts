@@ -20,4 +20,3 @@ export const updateExcoSchema = z.object({
 	phone: z.string().max(20).optional(),
 	imageUrl: z.string().url().optional()
 })
-

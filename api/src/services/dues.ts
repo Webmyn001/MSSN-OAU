@@ -1,7 +1,7 @@
 import { eq, and } from 'drizzle-orm'
-import { db } from '../lib/db.js'
-import { duesPayments, type DuesPayment, type NewDuesPayment } from '../db/schema/dues.js'
-import { logger } from '../lib/logger.js'
+import { db } from '../lib/db'
+import { duesPayments, type DuesPayment, type NewDuesPayment } from '../db/schema/dues'
+import { logger } from '../lib/logger'
 
 /**
  * * Checks if a user has paid dues for a specific academic session
@@ -91,4 +91,3 @@ export async function updateDuesPayment(
 		return null
 	}
 }
-

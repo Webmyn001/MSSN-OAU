@@ -1,7 +1,7 @@
 import type { Context, ErrorHandler } from 'hono'
 import { HTTPException } from 'hono/http-exception'
-import { logger } from '../lib/logger.js'
-import env from '../lib/env.js'
+import { logger } from '../lib/logger'
+import env from '../lib/env'
 
 // * Global error handler middleware
 export const errorHandler: ErrorHandler = (error: Error, c: Context) => {

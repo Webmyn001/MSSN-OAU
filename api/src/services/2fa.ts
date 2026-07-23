@@ -1,10 +1,9 @@
 import speakeasy from 'speakeasy'
 import QRCode from 'qrcode'
 import { eq } from 'drizzle-orm'
-import { db } from '../lib/db.js'
-import { users } from '../db/schema/users.js'
-import { logger } from '../lib/logger.js'
-import env from '../lib/env.js'
+import { db } from '../lib/db'
+import { users } from '../db/schema/users'
+import { logger } from '../lib/logger'
 
 // * 2FA service name for QR code
 const SERVICE_NAME = 'MSSN Website'
@@ -197,4 +196,3 @@ export async function getUserBackupCodes(userId: string): Promise<string[] | nul
 		return null
 	}
 }
-

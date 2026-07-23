@@ -1,5 +1,15 @@
-import { pgTable, uuid, varchar, text, boolean, integer, timestamp, jsonb, index } from 'drizzle-orm/pg-core'
-import { users } from './users.js'
+import {
+	pgTable,
+	uuid,
+	varchar,
+	text,
+	boolean,
+	integer,
+	timestamp,
+	jsonb,
+	index
+} from 'drizzle-orm/pg-core'
+import { users } from './users'
 
 // * Articles table
 export const articles = pgTable(
@@ -24,7 +34,7 @@ export const articles = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
-	(table) => ({
+	table => ({
 		// * Indexes for search and filtering
 		slugIdx: index('articles_slug_idx').on(table.slug),
 		categoryIdx: index('articles_category_idx').on(table.category),

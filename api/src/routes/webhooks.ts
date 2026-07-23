@@ -1,12 +1,12 @@
 import { Hono } from 'hono'
-import { successResponse, errorResponse } from '../lib/response.js'
-import { logger } from '../lib/logger.js'
-import { getDuesPaymentByReference, updateDuesPayment, createDuesPayment } from '../services/dues.js'
+import { successResponse } from '../lib/response'
+import { logger } from '../lib/logger'
+import { getDuesPaymentByReference, updateDuesPayment, createDuesPayment } from '../services/dues'
 
 const webhooksRoute = new Hono()
 
 // * POST /webhooks/paystack - Paystack webhook handler
-webhooksRoute.post('/paystack', async (c) => {
+webhooksRoute.post('/paystack', async c => {
 	try {
 		// * TODO: Verify webhook signature
 		// * For now, accept all requests (should verify in production)
@@ -69,4 +69,3 @@ webhooksRoute.post('/paystack', async (c) => {
 })
 
 export default webhooksRoute
-

@@ -32,4 +32,3 @@ export const updateUserSchema = z.object({
 	role: z.enum(['member', 'exco']).optional(),
 	duesPaid: z.boolean().optional() // * Manual override (Exco only)
 })
-

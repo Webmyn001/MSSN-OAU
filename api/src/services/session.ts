@@ -1,7 +1,7 @@
 import { eq, and, lt, gt } from 'drizzle-orm'
-import { db } from '../lib/db.js'
-import { authSessions, type AuthSession, type NewAuthSession } from '../db/schema/auth-sessions.js'
-import { logger } from '../lib/logger.js'
+import { db } from '../lib/db'
+import { authSessions, type AuthSession, type NewAuthSession } from '../db/schema/auth-sessions'
+import { logger } from '../lib/logger'
 import { createId } from '@paralleldrive/cuid2'
 
 // * Session expiration time (14 days in milliseconds)
@@ -139,7 +139,7 @@ export async function cleanupExpiredSessions(): Promise<number> {
 	try {
 		// * Note: Drizzle doesn't return rowCount directly
 		// * We'll need to count before deletion or use a different approach
-		const result = await db.delete(authSessions).where(lt(authSessions.expiresAt, new Date()))
+		await db.delete(authSessions).where(lt(authSessions.expiresAt, new Date()))
 		// * For now, return 0 as we can't get the count from Drizzle
 		// * TODO: Use raw query if we need exact count
 		const deletedCount = 0
@@ -150,4 +150,3 @@ export async function cleanupExpiredSessions(): Promise<number> {
 		return 0
 	}
 }
-

@@ -1,7 +1,7 @@
 import { eq, and } from 'drizzle-orm'
-import { db } from '../lib/db.js'
-import { excos, type Exco, type NewExco } from '../db/schema/excos.js'
-import { logger } from '../lib/logger.js'
+import { db } from '../lib/db'
+import { excos, type Exco, type NewExco } from '../db/schema/excos'
+import { logger } from '../lib/logger'
 
 /**
  * * Checks if a user is an Exco for a specific academic session
@@ -9,10 +9,7 @@ import { logger } from '../lib/logger.js'
  * @param sessionId - Academic session ID
  * @returns Exco record or null
  */
-export async function isExcoForSession(
-	userId: string,
-	sessionId: string
-): Promise<Exco | null> {
+export async function isExcoForSession(userId: string, sessionId: string): Promise<Exco | null> {
 	try {
 		const [exco] = await db
 			.select()
@@ -78,10 +75,7 @@ export async function createExco(excoData: NewExco): Promise<Exco> {
  * @param updates - Fields to update
  * @returns Updated Exco record or null
  */
-export async function updateExco(
-	excoId: string,
-	updates: Partial<Exco>
-): Promise<Exco | null> {
+export async function updateExco(excoId: string, updates: Partial<Exco>): Promise<Exco | null> {
 	try {
 		const [exco] = await db
 			.update(excos)
@@ -114,4 +108,3 @@ export async function deleteExco(excoId: string): Promise<boolean> {
 		return false
 	}
 }
-

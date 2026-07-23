@@ -1,5 +1,3 @@
-import env from '../lib/env.js'
-
 /**
  * * Generates password reset email content
  * @param name - User's name
@@ -52,4 +50,3 @@ The MSSN Website Team`
 
 	return { subject, text, html }
 }
-

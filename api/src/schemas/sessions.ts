@@ -12,4 +12,3 @@ export const createSessionSchema = z.object({
 export const listSessionsQuerySchema = z.object({
 	active: z.coerce.boolean().optional()
 })
-

@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt'
 import { eq } from 'drizzle-orm'
-import { db } from '../lib/db.js'
-import { users, type User, type NewUser } from '../db/schema/users.js'
-import { logger } from '../lib/logger.js'
-import { ConflictError, NotFoundError } from '../lib/errors.js'
+import { db } from '../lib/db'
+import { users, type User, type NewUser } from '../db/schema/users'
+import { logger } from '../lib/logger'
+import { ConflictError } from '../lib/errors'
 
 // * Password hashing salt rounds
 const SALT_ROUNDS = 10
@@ -49,7 +49,11 @@ export async function createUser(userData: {
 	const username = userData.username || userData.email.split('@')[0]
 
 	// * Check if username already exists
-	const existingUsername = await db.select().from(users).where(eq(users.username, username)).limit(1)
+	const existingUsername = await db
+		.select()
+		.from(users)
+		.where(eq(users.username, username))
+		.limit(1)
 
 	if (existingUsername.length > 0) {
 		// * Append random number to username
@@ -74,8 +78,12 @@ export async function createUser(userData: {
 		const [createdUser] = await db.insert(users).values(newUser).returning()
 
 		// * Remove sensitive fields from response
-		const { passwordHash: _, twoFASecret: __, twoFABackupCodes: ___, ...userWithoutSecrets } =
-			createdUser
+		const {
+			passwordHash: _,
+			twoFASecret: __,
+			twoFABackupCodes: ___,
+			...userWithoutSecrets
+		} = createdUser
 
 		logger.info({ userId: createdUser.id, email: createdUser.email }, 'User created')
 		return userWithoutSecrets
@@ -131,4 +139,3 @@ export async function updateUserPassword(userId: string, newPassword: string): P
 		throw error
 	}
 }
-

@@ -1,11 +1,11 @@
-import { eq, and } from 'drizzle-orm'
-import { db } from '../lib/db.js'
+import { eq } from 'drizzle-orm'
+import { db } from '../lib/db'
 import {
 	academicSessions,
 	type AcademicSession,
 	type NewAcademicSession
-} from '../db/schema/sessions.js'
-import { logger } from '../lib/logger.js'
+} from '../db/schema/sessions'
+import { logger } from '../lib/logger'
 
 /**
  * * Gets the current active academic session
@@ -34,10 +34,7 @@ export async function getActiveSession(): Promise<AcademicSession | null> {
 export async function getSessions(active?: boolean): Promise<AcademicSession[]> {
 	try {
 		if (active !== undefined) {
-			return await db
-				.select()
-				.from(academicSessions)
-				.where(eq(academicSessions.isActive, active))
+			return await db.select().from(academicSessions).where(eq(academicSessions.isActive, active))
 		}
 		return await db.select().from(academicSessions)
 	} catch (error) {
@@ -106,4 +103,3 @@ export async function createSession(
 		throw error
 	}
 }
-

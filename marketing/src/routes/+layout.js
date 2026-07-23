@@ -111,8 +111,9 @@ async function loadClientSideTools() {
             }
         });
 
-        // Register service worker for improved caching
-        if ('serviceWorker' in navigator) {
+        // Register service worker for improved caching (production only)
+        // In dev mode, the SW intercepts Vite's module requests and causes huge slowdowns
+        if ('serviceWorker' in navigator && import.meta.env.PROD) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
                     .catch(error => {

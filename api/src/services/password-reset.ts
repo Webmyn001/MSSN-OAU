@@ -1,11 +1,11 @@
 import { eq, and, gt, lt, isNull } from 'drizzle-orm'
-import { db } from '../lib/db.js'
+import { db } from '../lib/db'
 import {
 	passwordResetTokens,
 	type PasswordResetToken,
 	type NewPasswordResetToken
-} from '../db/schema/password-reset-tokens.js'
-import { logger } from '../lib/logger.js'
+} from '../db/schema/password-reset-tokens'
+import { logger } from '../lib/logger'
 import { createId } from '@paralleldrive/cuid2'
 
 // * Password reset token expiration time (15 minutes in milliseconds)
@@ -25,10 +25,10 @@ export async function createPasswordResetToken(
 	const expiresAt = new Date(Date.now() + expiresIn)
 
 	// * Invalidate any existing tokens for this user
-		await db
-			.update(passwordResetTokens)
-			.set({ usedAt: new Date() })
-			.where(and(eq(passwordResetTokens.userId, userId), isNull(passwordResetTokens.usedAt)))
+	await db
+		.update(passwordResetTokens)
+		.set({ usedAt: new Date() })
+		.where(and(eq(passwordResetTokens.userId, userId), isNull(passwordResetTokens.usedAt)))
 
 	const newToken: NewPasswordResetToken = {
 		userId,
@@ -115,4 +115,3 @@ export async function cleanupExpiredTokens(): Promise<number> {
 		return 0
 	}
 }
-

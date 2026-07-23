@@ -1,4 +1,13 @@
-import { pgTable, pgEnum, uuid, varchar, text, decimal, timestamp, index } from 'drizzle-orm/pg-core'
+import {
+	pgTable,
+	pgEnum,
+	uuid,
+	varchar,
+	text,
+	decimal,
+	timestamp,
+	index
+} from 'drizzle-orm/pg-core'
 
 // * Email status enum
 export const emailStatusEnum = pgEnum('email_status', ['PENDING', 'SENT', 'FAILED', 'BOUNCED'])
@@ -21,7 +30,7 @@ export const emailLogs = pgTable(
 		sentAt: timestamp('sent_at', { withTimezone: true }),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 	},
-	(table) => ({
+	table => ({
 		recipientIdx: index('email_logs_recipient_idx').on(table.recipientEmail),
 		statusIdx: index('email_logs_status_idx').on(table.status),
 		createdAtIdx: index('email_logs_created_at_idx').on(table.createdAt)
@@ -43,7 +52,7 @@ export const smsLogs = pgTable(
 		sentAt: timestamp('sent_at', { withTimezone: true }),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 	},
-	(table) => ({
+	table => ({
 		recipientIdx: index('sms_logs_recipient_idx').on(table.recipientPhone),
 		statusIdx: index('sms_logs_status_idx').on(table.status),
 		createdAtIdx: index('sms_logs_created_at_idx').on(table.createdAt)

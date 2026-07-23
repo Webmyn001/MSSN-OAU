@@ -1,10 +1,10 @@
 import type { Context, Next } from 'hono'
-import { validateSession } from '../services/session.js'
-import { findUserById } from '../services/user.js'
-import { AuthenticationError } from '../lib/errors.js'
-import { errorResponse } from '../lib/response.js'
-import { getActiveSession } from '../services/academic-session.js'
-import { isExcoForSession } from '../services/exco.js'
+import { validateSession } from '../services/session'
+import { findUserById } from '../services/user'
+import { AuthenticationError } from '../lib/errors'
+import { errorResponse } from '../lib/response'
+import { getActiveSession } from '../services/academic-session'
+import { isExcoForSession } from '../services/exco'
 
 // * Extend Hono context to include user
 declare module 'hono' {
@@ -101,17 +101,16 @@ export async function requireExco(c: Context) {
 	// * Get current active session
 	const activeSession = await getActiveSession()
 	if (!activeSession) {
-		const { AuthorizationError } = await import('../lib/errors.js')
+		const { AuthorizationError } = await import('../lib/errors')
 		throw new AuthorizationError('No active academic session')
 	}
 
 	// * Check if user is Exco for current active session
 	const excoRecord = await isExcoForSession(user.id, activeSession.id)
 	if (!excoRecord) {
-		const { AuthorizationError } = await import('../lib/errors.js')
+		const { AuthorizationError } = await import('../lib/errors')
 		throw new AuthorizationError('Exco access required')
 	}
 
 	return user
 }
-
