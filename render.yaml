@@ -1,0 +1,75 @@
+# * Render Blueprint — MSSN OAU API (database hosted on Neon — permanent free tier, no expiry)
+# * Deploy: push this file, then in Render dashboard:
+# *   New -> Blueprint -> select repo -> fill in the sync:false secrets (incl. Neon DATABASE_URL) -> Apply
+# * Blueprint schema: https://render.com/schema/render.yaml.json
+# * Uses Render's native runtime (Bun ships with the Node runtime) — no Docker needed.
+
+services:
+  - type: web
+    name: mssn-api
+    runtime: node
+    rootDir: api
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    # Bun ships with Render's native Node runtime
+    buildCommand: bun install --frozen-lockfile
+    startCommand: bun run start
+    # Runs after build, before the server starts (applies Drizzle migrations)
+    preDeployCommand: bun run db:migrate
+    envVars:
+      # Non-secret / static config
+      - key: NODE_ENV
+        value: production
+      - key: BUN_VERSION
+        value: 1.3.14
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        value: ab5e9b001@smtp-brevo.com
+
+      # You'll paste your Neon connection string here during Blueprint creation
+      - key: DATABASE_URL
+        sync: false
+
+      # Render generates a random secret for JWT signing
+      - key: JWT_SECRET
+        generateValue: true
+
+      # Secrets/values to fill in during Blueprint creation (prompted in dashboard)
+      - key: APP_URL
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_ACCESS_KEY_ID
+        sync: false
+      - key: CLOUDFLARE_SECRET_ACCESS_KEY
+        sync: false
+      - key: CLOUDFLARE_BUCKET_NAME
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: KUDISMS_API_TOKEN
+        sync: false
+      - key: KUDISMS_SENDER_ID
+        sync: false
+      - key: GOOGLE_GEMINI_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_UPLOAD_PRESET
+        sync: false
