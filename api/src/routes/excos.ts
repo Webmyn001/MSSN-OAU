@@ -57,7 +57,7 @@ excosRoute.post('/invite', authMiddleware, zValidator('json', inviteExcoSchema),
 			imageUrl: null
 		})
 
-		// * TODO: Send invitation email via Plunk
+		// * TODO: Send invitation email via Brevo
 		// * For now, just log
 		logger.info({ excoId: exco.id, email, sessionId: session.id }, 'Exco invited')
 

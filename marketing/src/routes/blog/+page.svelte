@@ -1,92 +1,90 @@
 <script>
-    import { fly, fade, scale } from 'svelte/transition'
+    import { fly, fade } from 'svelte/transition'
     import { onMount } from 'svelte'
-    import { browser } from '$app/environment'
-    import { Calendar, ChevronRight, Mail, Send, ExternalLink } from '@lucide/svelte'
+    import { Calendar, Mail, Send, ExternalLink, Search, ChevronDown, Filter } from '@lucide/svelte'
     import { toast } from 'svelte-sonner'
     import { formatDate } from "$lib/utils/dates.js"
+	import { Image } from '$lib/components/ui/image'
 	import SEO from '$lib/components/SEO.svelte';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
-    import { fetchPosts } from '$lib/utils/wordpress.js'
 
     /**
      * @typedef {import('$lib/types.js').WordPressPost} WordPressPost
      */
-    
+
     let { data } = $props()
-    
+
     let visible = $state(false)
-    let hoveredPost = $state(null)
     let email = $state("")
     let posts = $state(/** @type {WordPressPost[]} */ ([]))
-    let loading = $state(false)
-    let error = $state(false)
+    let searchQuery = $state("")
+    let selectedCategory = $state("All")
+    let showCategoryDropdown = $state(false)
 
-    onMount(async () => {
+    onMount(() => {
         visible = true
-        
-        // * Initialize posts from data if available (fallback)
-        if (data.posts && data.posts.length > 0 && posts.length === 0) {
+        if (data.posts && data.posts.length > 0) {
             posts = data.posts;
         }
-        
-        // * Fetch WordPress posts client-side
-        if (browser) {
-            loading = true;
-            error = false;
-            
-            try {
-                const fetchedPosts = await fetchPosts({ per_page: 11 });
-                if (fetchedPosts && fetchedPosts.length > 0) {
-                    posts = fetchedPosts;
-                } else {
-                    error = true;
-                    toast.error("Blog server is temporarily unavailable.", {
-                        duration: Number.POSITIVE_INFINITY,
-                        action: {
-                            label: "Go to blog",
-                            onClick: () => window.open("https://annuurpress.org.ng")
-                        }
-                    })
-                }
-            } catch (err) {
-                console.error('Error fetching blog posts:', err);
-                error = true;
-                toast.error("Blog server is temporarily unavailable.", {
-                    duration: Number.POSITIVE_INFINITY,
-                    action: {
-                        label: "Go to blog",
-                        onClick: () => window.open("https://annuurpress.org.ng")
-                    }
-                })
-            } finally {
-                loading = false;
+    })
+
+    const allCategories = $derived(() => {
+        const cats = new Set()
+        for (const post of posts) {
+            if (post.categories) {
+                for (const cat of post.categories) cats.add(cat)
             }
         }
+        return ["All", ...Array.from(cats).sort()]
     })
-    
-    const handleSubscribe = (e) => {
-        e.preventDefault()
-        if (!email) {
-            toast.error("Please enter your email address")
-            return
+
+    const filteredPosts = $derived(() => {
+        let result = posts
+        if (selectedCategory !== "All") {
+            result = result.filter(p => p.categories?.includes(selectedCategory))
         }
-        
-        if (!/^\S+@\S+\.\S+$/.test(email)) {
+        if (searchQuery.trim()) {
+            const q = searchQuery.trim().toLowerCase()
+            result = result.filter(p =>
+                p.title.toLowerCase().includes(q) ||
+                p.excerpt.toLowerCase().includes(q) ||
+                (p.categories || []).some(c => c.toLowerCase().includes(q))
+            )
+        }
+        return result
+    })
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault()
+        const trimmedEmail = email.trim().toLowerCase();
+        if (!trimmedEmail || !trimmedEmail.includes('@')) {
             toast.error("Please enter a valid email address")
             return
         }
-        
-        toast.warning("Newsletter is currently unavailable.")
-        email = ""
+
+        try {
+            const res = await fetch('http://localhost:3000/public/newsletter/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: trimmedEmail })
+            });
+            const json = await res.json();
+            if (json.success) {
+                toast.success(json.data?.message || "Successfully subscribed to our newsletter!");
+                email = "";
+            } else {
+                toast.error(json.error || "Subscription failed. Please try again.");
+            }
+        } catch (err) {
+            toast.error("Unable to connect to subscription server.");
+        }
     }
 
-    // * Generate JSON-LD schema from posts (reactive)
     const jsonLd = $derived([
         {
             "@type": "WebPage",
             "name": "Our Blog | MSSNOAU",
-            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University.",
+            "description": "Welcome to the Muslim Students Society of Nigeria, Great Ife (OAU) Branch.",
             "publisher": {
                 "@type": "Organization",
                 "name": "MSSNOAU"
@@ -94,48 +92,28 @@
         },
         ...(posts || []).map(post => ({
             '@type': 'Article',
-            mainEntityOfPage: {
-                '@type': 'WebPage',
-                '@id': post.link
-            },
+            mainEntityOfPage: { '@type': 'WebPage', '@id': post.link },
             headline: post.title,
-            image: [
-                post.featured_image
-            ],
+            image: [post.featured_image],
             datePublished: post.date,
             dateModified: post.date,
-            author: {
-                '@type': 'Person',
-                name: post.authors?.[0]?.name || post.author?.name || 'MSSN OAU'
-            },
+            author: { '@type': 'Organization', name: 'MSSN OAU' },
             publisher: {
                 '@type': 'Organization',
                 name: 'MSSNOAU',
-                logo: {
-                    '@type': 'ImageObject',
-                    url: 'https://mssnoau.sirv.com/mssn-logo.png'
-                }
+                logo: { '@type': 'ImageObject', url: 'https://mssnoau.sirv.com/mssn-logo.png' }
             }
         }))
     ])
-
-
 </script>
 
 <SEO
-        title="Blog"
-        description="Welcome to the Muslim Students Society of Nigeria, Great Ìfẹ́ (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
-    path="/blog" 
+    title="Blog"
+    description="Welcome to the Muslim Students Society of Nigeria, Great Ife (OAU) Branch. Discover our programs, events, and resources designed to support Muslim students at Obafemi Awolowo University."
+    path="/blog"
     type="WebPage"
-    images={[
-      {
-        url: 'https://i.ibb.co/zbWfh5B/home.webp',
-        width: 1200,
-        height: 640,
-            alt: 'MSSNOAU Blog'
-        }
-    ]}
-    schema={jsonLd} 
+    images={[{ url: 'https://i.ibb.co/zbWfh5B/home.webp', width: 1200, height: 640, alt: 'MSSNOAU Blog' }]}
+    schema={jsonLd}
     keywords={["mssnoau blog", "an-nuur press", "islamic articles", "muslim students oau blog", "oau mssn articles"]}
 />
 
@@ -147,161 +125,124 @@
     </p>
 </PageHeader>
 
-
-<section class="py-16 relative overflow-hidden">
-    <!-- Decorative background elements -->
+<section class="py-12 relative overflow-hidden">
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
     <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
-    
-    <div class="max-w-7xl mx-auto px-5 sm:px-10 md:px-12 lg:px-5 space-y-14 relative z-10">
+
+    <div class="max-w-5xl mx-auto px-5 sm:px-8 space-y-8 relative z-10">
         {#if visible}
-            {#if loading}
-                <!-- Loading state -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 rounded-t-lg">
-                    {#each Array(6) as _, i}
-                        <div class="flex flex-col bg-white/80 backdrop-blur-sm border border-primary-100 rounded-xl overflow-hidden shadow-sm animate-pulse">
-                            <div class="h-48 bg-gray-200"></div>
-                            <div class="flex flex-col p-5 space-y-3">
-                                <div class="h-6 bg-gray-200 rounded"></div>
-                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-                                <div class="h-4 bg-gray-200 rounded"></div>
-                                <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
-                                    <div class="size-8 bg-gray-200 rounded-full"></div>
-                                    <div class="h-4 bg-gray-200 rounded w-24"></div>
-                                </div>
-                            </div>
-                        </div>
-                    {/each}
+            <!-- Search and Filter Bar -->
+            <div class="flex flex-col sm:flex-row gap-3" in:fly={{ y: 20, duration: 600, delay: 100 }}>
+                <div class="relative flex-1">
+                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                    <input
+                        type="text"
+                        bind:value={searchQuery}
+                        class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/80 backdrop-blur-sm border border-primary-100 text-gray-800 text-sm placeholder:text-gray-400 outline-none focus:border-primary-300 focus:ring-2 focus:ring-primary-100 transition-all"
+                        placeholder="Search articles..."
+                    />
                 </div>
-            {:else if posts && Array.isArray(posts) && posts.length > 0}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 rounded-t-lg">
-                    {#each posts as post, i}
-                        <!-- Enhanced Post Card -->
-                        <a 
+
+                <div class="relative">
+                    <button
+                        onclick={() => showCategoryDropdown = !showCategoryDropdown}
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/80 backdrop-blur-sm border border-primary-100 text-sm text-gray-700 hover:border-primary-300 transition-all whitespace-nowrap"
+                    >
+                        <Filter class="size-4" />
+                        <span>{selectedCategory}</span>
+                        <ChevronDown class="size-3.5 transition-transform {showCategoryDropdown ? 'rotate-180' : ''}" />
+                    </button>
+
+                    {#if showCategoryDropdown}
+                        <div
+                            class="absolute right-0 top-full mt-1 bg-white border border-primary-100 rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
+                            in:fade={{ duration: 150 }}
+                        >
+                            {#each allCategories() as cat}
+                                <button
+                                    onclick={() => { selectedCategory = cat; showCategoryDropdown = false; }}
+                                    class="w-full text-left px-4 py-2 text-sm transition-colors {selectedCategory === cat ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}"
+                                >
+                                    {cat}
+                                </button>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            </div>
+
+            {#if showCategoryDropdown}
+                <button
+                    class="fixed inset-0 z-40"
+                    onclick={() => showCategoryDropdown = false}
+                    aria-label="Close category filter"
+                ></button>
+            {/if}
+
+            {#if filteredPosts().length > 0}
+                <!-- Card Grid -->
+                <div class="grid sm:grid-cols-2 gap-6">
+                    {#each filteredPosts() as post, i}
+                        <a
                             href={post.link}
                             target="_blank"
-                            class="flex flex-col bg-white/80 backdrop-blur-sm group border border-primary-100 hover:border-primary-200 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full"
-                            in:fly={{ y: 30, duration: 800, delay: 200 + (i * 150) }}
-                            onmouseenter={() => hoveredPost = post.title}
-                            onmouseleave={() => hoveredPost = null}
+                            rel="noopener noreferrer"
+                            class="group flex flex-col bg-white/80 backdrop-blur-sm border border-primary-100 hover:border-primary-200 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+                            in:fly={{ y: 20, duration: 600, delay: 150 + (i * 80) }}
                         >
-                            <div class="relative overflow-hidden bg-gray-200">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
-                                <img 
-                                    src={post.featured_image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='337'%3E%3Crect fill='%23f3f4f6' width='600' height='337'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='18'%3ENo Image%3C/text%3E%3C/svg%3E"}
-                                    class="aspect-[4/2.8] w-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                            <!-- Image -->
+                            <div class="relative overflow-hidden bg-gray-200 aspect-[16/10]">
+                                {#if post.categories && post.categories.length > 0}
+                                    <div class="absolute top-3 left-3 z-10">
+                                        <span class="px-2.5 py-1 text-xs font-medium bg-primary-700/90 text-white backdrop-blur-sm rounded-full">
+                                            {post.categories[0]}
+                                        </span>
+                                    </div>
+                                {/if}
+                                <Image
+                                    src={post.featured_image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect fill='%23f3f4f6' width='400' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E"}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     alt={post.title}
+                                    width={400}
+                                    height={200}
+                                    loading="lazy"
                                 />
-                                
-                                <!-- Date badge -->
-                                <div class="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full">
+                            </div>
+
+                            <!-- Content -->
+                            <div class="flex flex-col p-5 flex-1">
+                                <h2 class="text-lg font-bold text-gray-800 group-hover:text-primary-700 transition-colors line-clamp-2 mb-2">
+                                    {@html post.title}
+                                </h2>
+                                <div class="flex items-center gap-2 text-xs text-gray-500 mb-3">
                                     <Calendar class="size-3.5" />
                                     <span>{formatDate(post.date).fullDate}</span>
                                 </div>
-                            </div>
-                            
-                            <div class="flex flex-col p-5 relative justify-between h-full">
-                                <h1 class="text-xl font-semibold text-gray-800 group-hover:text-primary-700 transition-colors line-clamp-2">
-                                    {@html post.title.replace("&", "&").replace("'", "'").replace("<", "<").replace(">", ">").replace(" ", " ")}
-                                </h1>
-                                <p class="text-gray-700 py-3 line-clamp-2 flex-grow">{@html post.excerpt.replace("&", "&").replace("'", "'").replace("<", "<").replace(">", ">").replace(" ", " ").replace("©", "©").replace("®", "®").replaceAll('[…]', '...')}</p>
-                                
-                                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                                    <div class="flex items-center gap-2">
-                                        {#if post.authors && post.authors.length > 0 && post.authors[0]}
-                                            <img 
-                                                src={post.authors[0].avatar_urls ? post.authors[0]?.avatar_urls["48"] : `https://api.dicebear.com/9.x/lorelei/svg?seed=${post.authors[0].name}`} 
-                                                alt={post.authors[0].name}
-                                                class="size-8 rounded-full border-2 border-white shadow-sm"
-                                            />
-                                            <span class="text-sm text-gray-600 group-hover:text-primary-600 transition-colors font-medium">
-                                                {post.authors[0].name}
-                                            </span>
-                                        {:else if post.author}
-                                            <img 
-                                                src={post.author.picture || `https://api.dicebear.com/9.x/lorelei/svg?seed=${post.author.name}`} 
-                                                alt={post.author.name}
-                                                class="size-8 rounded-full border-2 border-white shadow-sm"
-                                            />
-                                            <span class="text-sm text-gray-600 group-hover:text-primary-600 transition-colors font-medium">
-                                                {post.author.name}
-                                            </span>
-                                        {/if}
-                                    </div>
-                                    
-                                    <span class="inline-flex items-center justify-center size-8 rounded-full bg-primary-50 text-primary-700 group-hover:bg-primary-100 transition-colors">
-                                        <ChevronRight class="size-4" />
+                                <p class="text-gray-600 text-sm line-clamp-3 leading-relaxed flex-1">
+                                    {@html post.excerpt}
+                                </p>
+
+                                <div class="mt-4 pt-4 border-t border-gray-100">
+                                    <span class="inline-flex items-center gap-1.5 text-sm font-medium text-primary-700 group-hover:text-primary-800 transition-colors">
+                                        Read on An-Nuur Press
+                                        <ExternalLink class="size-3.5" />
                                     </span>
                                 </div>
                             </div>
                         </a>
-                        <!-- End Post Card -->
                     {/each}
-                    
-                    <!-- Enhanced Newsletter Form -->
-                    <div 
-                        id="newsletter"
-                        class="sm:col-span-2 lg:col-span-1 p-6 sm:p-8 rounded-xl bg-white/80 backdrop-blur-sm border border-primary-100 shadow-md flex flex-col space-y-6 relative overflow-hidden"
-                        in:fly={{ y: 30, duration: 800, delay: 800 }}
-                    >
-                        <!-- Decorative elements -->
-                        <div class="absolute w-32 h-32 rounded-full bg-gradient-to-bl from-primary-500/30 to-primary-700/30 blur-3xl -top-16 -left-16 opacity-60"></div>
-                        <div class="absolute w-32 h-32 rounded-full bg-gradient-to-tr from-primary-500/30 to-primary-700/30 blur-3xl -bottom-16 -right-16 opacity-60"></div>
-                        
-                        <div class="lg:h-full flex flex-col items-center text-center justify-center space-y-5 mx-auto max-w-2xl relative z-10">
-                            <div class="inline-flex items-center justify-center size-16 rounded-full bg-primary-100 text-primary-700 mb-2">
-                                <Mail class="size-8" />
-                            </div>
-                            
-                            <h1 class="font-bold text-gray-900 text-2xl font-secondary">
-                                Join our Newsletter
-                            </h1>
-                            <p class="text-gray-700 text-center font-tertiary">
-                                Only Events, Blog Posts and Press Releases.
-                            </p>
-                            
-                            <form 
-                                class="w-full flex flex-col sm:items-center sm:flex-row lg:flex-col gap-y-3 gap-x-4 mt-4"
-                                onsubmit={handleSubscribe}
-                            >
-                                <input 
-                                    type="email"
-                                    bind:value={email}
-                                    class="py-3 px-5 rounded-lg text-gray-800 bg-white border border-gray-200 outline-none focus:border-primary-300 focus:ring-2 focus:ring-primary-100 w-full placeholder:text-gray-500 transition-all duration-300"
-                                    placeholder="ali@example.com"
-                                />
-                                <div class="flex justify-center w-full sm:w-max lg:w-full">
-                                    <button
-                                        type="submit"
-                                        class="py-3 rounded-lg px-6 bg-primary-700 text-white font-medium text-base w-full flex justify-center items-center gap-2 hover:bg-primary-800 transition-all duration-300 hover:shadow-md"
-                                    >
-                                        Subscribe
-                                        <Send class="size-4" />
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <!-- End Newsletter Form -->
                 </div>
 
-                <!-- Enhanced See More Button -->
-                <div 
-                    class="flex justify-center"
-                    in:fly={{ y: 30, duration: 800, delay: 1000 }}
-                >
-                    <a 
-                        href="https://annuurpress.org.ng/category/articles/"
-                        class="px-6 py-3 border rounded-xl border-primary-100 bg-white/80 backdrop-blur-sm text-primary-700 flex items-center gap-x-3 hover:bg-primary-50 hover:border-primary-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-                    >
-                        See More
-                        <ChevronRight class="size-4" />
-                    </a>
+                <!-- Powered by WordPress -->
+                <div class="flex justify-center pt-4" in:fly={{ y: 20, duration: 600, delay: 400 }}>
+                    <span class="text-xs text-gray-400 flex items-center gap-1.5">
+                        Powered by
+                        <a href="https://wordpress.org" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-700 font-medium transition-colors">WordPress</a>
+                    </span>
                 </div>
-                <!-- End See More Button -->
             {:else}
-                <!-- Empty state when no blog posts are available -->
-                <div 
+                <!-- Empty state -->
+                <div
                     class="bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 p-8 shadow-md max-w-lg mx-auto text-center"
                     in:fly={{ y: 30, duration: 800, delay: 200 }}
                 >
@@ -316,8 +257,8 @@
                     </div>
                     <h3 class="text-xl font-medium text-gray-800 mb-2">No Blog Posts Available</h3>
                     <p class="text-gray-500 mb-6">We're currently refreshing our content. Please check back soon for new articles and updates.</p>
-                    
-                    <a 
+
+                    <a
                         href="https://annuurpress.org.ng"
                         target="_blank"
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary-700 text-white hover:bg-primary-800 transition-colors"
@@ -325,31 +266,49 @@
                         <span>Visit An-Nuur Press</span>
                         <ExternalLink class="size-4" />
                     </a>
-                    
-                    <!-- Newsletter form in empty state -->
-                    <div class="mt-10 pt-6 border-t border-primary-100">
-                        <h4 class="font-medium text-gray-700 mb-3">Subscribe to our newsletter</h4>
-                        <form 
-                            class="flex flex-col sm:flex-row gap-2"
-                            onsubmit={handleSubscribe} 
-                        >
-                            <input 
-                                type="email"
-                                bind:value={email}
-                                class="py-2 px-4 rounded-lg text-gray-800 bg-white border border-gray-200 outline-none focus:border-primary-300 focus:ring-2 focus:ring-primary-100 flex-grow"
-                                placeholder="ali@example.com"
-                            />
-                            <button
-                                type="submit"
-                                class="py-2 rounded-lg px-4 bg-primary-700 text-white font-medium text-sm flex items-center justify-center gap-2 hover:bg-primary-800 transition-all"
-                            >
-                                Subscribe
-                                <Send class="size-3.5" />
-                            </button>
-                        </form>
-                    </div>
                 </div>
             {/if}
+
+            <!-- Newsletter Form -->
+            <div
+                id="newsletter"
+                class="p-6 sm:p-8 rounded-xl bg-white/80 backdrop-blur-sm border border-primary-100 shadow-md relative overflow-hidden"
+                in:fly={{ y: 20, duration: 600, delay: 500 }}
+            >
+                <div class="absolute w-32 h-32 rounded-full bg-gradient-to-bl from-primary-500/30 to-primary-700/30 blur-3xl -top-16 -left-16 opacity-60"></div>
+                <div class="absolute w-32 h-32 rounded-full bg-gradient-to-tr from-primary-500/30 to-primary-700/30 blur-3xl -bottom-16 -right-16 opacity-60"></div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10">
+                    <div class="flex items-center gap-3 shrink-0">
+                        <div class="inline-flex items-center justify-center size-12 rounded-full bg-primary-100 text-primary-700">
+                            <Mail class="size-6" />
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900 text-lg font-secondary">Join our Newsletter</h3>
+                            <p class="text-gray-500 text-xs font-tertiary">Events, Blog Posts and Press Releases.</p>
+                        </div>
+                    </div>
+
+                    <form
+                        class="flex w-full sm:flex-1 gap-2"
+                        onsubmit={handleSubscribe}
+                    >
+                        <input
+                            type="email"
+                            bind:value={email}
+                            class="py-2.5 px-4 rounded-lg text-gray-800 bg-white border border-gray-200 outline-none focus:border-primary-300 focus:ring-2 focus:ring-primary-100 flex-1 text-sm placeholder:text-gray-400 transition-all"
+                            placeholder="ali@example.com"
+                        />
+                        <button
+                            type="submit"
+                            class="py-2.5 px-5 rounded-lg bg-primary-700 text-white font-medium text-sm flex items-center gap-2 hover:bg-primary-800 transition-all shrink-0"
+                        >
+                            Subscribe
+                            <Send class="size-3.5" />
+                        </button>
+                    </form>
+                </div>
+            </div>
         {/if}
     </div>
 </section>

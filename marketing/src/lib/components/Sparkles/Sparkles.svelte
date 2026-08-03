@@ -8,28 +8,32 @@
     function getRandomValue(min, max) {
         return min + Math.random() * (max - min);
     }
-    
-    // Create blood cell-like particles
-    let particles = $state(Array(particleDensity).fill(null).map(() => {
-        const size = getRandomValue(minSize, maxSize);
-        const isYellow = Math.random() < 0.2; // 20% chance of yellow cells
-        
-        return {
-            top: Math.random() * 100,
-            left: Math.random() * 100,
-            size: size,
-            innerSize: size * 0.6, // The dimple size
-            animationDuration: getRandomValue(speed, speed * 2),
-            opacity: getRandomValue(0.6, 0.9),
-            color: isYellow ? secondaryColor : particleColor,
-            velocityX: getRandomValue(-0.1, 0.1),
-            velocityY: getRandomValue(-0.1, 0.1),
-            rotation: getRandomValue(0, 360)
-        };
-    }));
+
+    /** @type {Array<{top: number, left: number, size: number, innerSize: number, animationDuration: number, opacity: number, color: string, velocityX: number, velocityY: number, rotation: number}>} */
+    let particles = $state([]);
     
     // For moving particles
     let animationFrameId = $state(null);
+    
+    function createParticles() {
+        particles = Array(particleDensity).fill(null).map(() => {
+            const size = getRandomValue(minSize, maxSize);
+            const isYellow = Math.random() < 0.2; // 20% chance of yellow cells
+            
+            return {
+                top: Math.random() * 100,
+                left: Math.random() * 100,
+                size: size,
+                innerSize: size * 0.6, // The dimple size
+                animationDuration: getRandomValue(speed, speed * 2),
+                opacity: getRandomValue(0.6, 0.9),
+                color: isYellow ? secondaryColor : particleColor,
+                velocityX: getRandomValue(-0.1, 0.1),
+                velocityY: getRandomValue(-0.1, 0.1),
+                rotation: getRandomValue(0, 360)
+            };
+        });
+    }
     
     function animateParticles() {
         particles = particles.map(particle => {
@@ -68,6 +72,7 @@
     }
     
     onMount(() => {
+        createParticles();
         animationFrameId = requestAnimationFrame(animateParticles);
     });
     

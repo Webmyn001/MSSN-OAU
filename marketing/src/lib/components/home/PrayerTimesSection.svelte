@@ -1,43 +1,41 @@
 <script>
     import { onMount } from 'svelte';
-    import { prayerTimes as solahTimes, upcomingPrayer, formatTime } from '$lib/stores/prayerTimes';
-    import { Badge } from '$lib/components/ui/badge';
-    import { Clock, MapPin, Calendar, Moon, MapPinned } from '@lucide/svelte';
-    import { mosques } from '$lib/stores/mosques';
+    import { upcomingPrayer, formatTime } from '$lib/stores/prayerTimes';
+    import { Clock, MapPin, Calendar, Moon, MapPinned, MousePointerClick } from '@lucide/svelte';
     import PrayerTimeCard from './PrayerTimeCard.svelte';
     import { fade, fly } from 'svelte/transition';
-    import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
     import AutoplayModule from 'embla-carousel-autoplay';
+    import * as Carousel from '$lib/components/ui/carousel';
     import { getFormattedDateVerbose, getFormattedDateVerboseShort } from '$lib/utils/dateFormatting.js';
-	import { page } from '$app/state';
-    
-        /** @typedef {{ adhan: string, iqamah: string }} PrayerTimeEntry */
-    /** @typedef {{ subhi?: PrayerTimeEntry, dhuhr?: PrayerTimeEntry, asr?: PrayerTimeEntry, maghrib?: PrayerTimeEntry, isha?: PrayerTimeEntry, jumuah?: PrayerTimeEntry }} PagePrayerTimes */
 
     /**
-     * @typedef {Object} MosquePrayerTimes
-     * @property {string} [fajr]
-     * // ... other prayers
+     * @typedef {{ adhan: string, iqamah: string }} PrayerTimeEntry
+     * @typedef {{ subhi?: PrayerTimeEntry, dhuhr?: PrayerTimeEntry, asr?: PrayerTimeEntry, maghrib?: PrayerTimeEntry, isha?: PrayerTimeEntry, jumuah?: PrayerTimeEntry }} PrayerTimesData
+     * @typedef {{ id: string, label: string, url: string, images: string[], address: string, description?: string }} MosqueData
      */
 
-    /**
-     * @typedef {Object} Mosque
-     * @property {string} id
-     * @property {string} label // Ensure this matches your $mosques store items
-     * @property {string} [name]
-     * @property {string} [address]
-     * @property {string[]} [images]
-     * @property {string} [url]
-     * @property {string} [description]
-     * @property {MosquePrayerTimes | Record<string, string>} [prayerTimes]
-     */
+    /** @type {{ prayerTimes?: PrayerTimesData | null, prayerTimesUpdatedAt?: string, hijriDate?: string, shortHijriDate?: string, mosques?: MosqueData[] }} */
+    let {
+        prayerTimes: initialPrayerTimes = null,
+        prayerTimesUpdatedAt = '',
+        hijriDate: initialHijriDate = '',
+        shortHijriDate: initialShortHijriDate = '',
+        mosques: mosqueList = []
+    } = $props();
     
     // Hijri date state
-    let hijrahDate = $state("");
-    let shortHijrahDate = $state("");
+    let hijrahDate = $state(initialHijriDate || "");
+    let shortHijrahDate = $state(initialShortHijriDate || "");
 
-        /** @type {PagePrayerTimes | undefined} */
-        const prayer_times_from_page_data = page.data?.info?.prayer_times;
+    const formattedUpdatedAt = $derived.by(() => {
+        if (!prayerTimesUpdatedAt) return '';
+        try {
+            const d = new Date(prayerTimesUpdatedAt);
+            return d.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' }) +
+                ' at ' +
+                d.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
+        } catch { return ''; }
+    });
     
     // Get the upcoming prayer index for styling
     const upcoming_solat = $derived($upcomingPrayer === 'fajr' ? 0 : 
@@ -46,108 +44,112 @@
                        $upcomingPrayer === 'maghrib' ? 3 : 
                        $upcomingPrayer === 'isha' ? 4 : 0);
     
+    // Prayer times from props (SSR) or client-side fetch
+    let apiPrayerTimes = $state(initialPrayerTimes || null);
+
+    /** Safely extract prayer data array from apiPrayerTimes */
+    function buildPrayerData(pt) {
+        if (!pt || typeof pt !== 'object') return [];
+        const names = ['subhi', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        const meta = [
+            { name: 'Fajr', background: '/images/midnight.webp', color: 'from-indigo-500/80 to-purple-600/80', icon: '🌅' },
+            { name: 'Dhuhr', background: '/images/noon.webp', color: 'from-amber-500/80 to-orange-600/80', icon: '☀️' },
+            { name: 'Asr', background: '/images/evening.webp', color: 'from-orange-400/80 to-rose-600/80', icon: '🌇' },
+            { name: 'Maghrib', background: '/images/late-evening.webp', color: 'from-rose-500/80 to-purple-700/80', icon: '🌆' },
+            { name: 'Isha', background: '/images/night.webp', color: 'from-blue-600/80 to-indigo-900/80', icon: '🌙' },
+        ];
+        return names.map((key, i) => {
+            const entry = pt[key];
+            if (!entry || typeof entry !== 'object') return null;
+            return {
+                ...meta[i],
+                adhan: entry.adhan || '',
+                iqamah: entry.iqamah || '',
+            };
+        }).filter(Boolean);
+    }
+
+    // Whether we have any prayer times to display
+    // Gated on `loaded` to avoid Svelte 5 hydration timing issues where $state can be briefly undefined
+    const hasPrayerTimes = $derived(loaded && buildPrayerData(apiPrayerTimes).length > 0);
+
     // Prayer data for cards with enhanced backgrounds and colors
-    const prayerData = [
-        { 
-            name: 'Fajr', 
-            background: '/images/midnight.webp', 
-            times: () => prayer_times_from_page_data?.subhi || $solahTimes.subhi,
-            color: 'from-indigo-500/80 to-purple-600/80',
-            icon: '🌅'
-        },
-        { 
-            name: 'Dhuhr', 
-            background: '/images/noon.webp', 
-            times: () => prayer_times_from_page_data?.dhuhr || $solahTimes.dhuhr,
-            color: 'from-amber-500/80 to-orange-600/80',
-            icon: '☀️'
-        },
-        { 
-            name: 'Asr', 
-            background: '/images/evening.webp', 
-            times: () => prayer_times_from_page_data?.asr || $solahTimes.asr,
-            color: 'from-orange-400/80 to-rose-600/80',
-            icon: '🌇'
-        },
-        { 
-            name: 'Maghrib', 
-            background: '/images/late-evening.webp', 
-            times: () => prayer_times_from_page_data?.maghrib || $solahTimes.maghrib,
-            color: 'from-rose-500/80 to-purple-700/80',
-            icon: '🌆'
-        },
-        { 
-            name: 'Isha', 
-            background: '/images/night.webp', 
-            times: () => prayer_times_from_page_data?.isha || $solahTimes.isha,
-            color: 'from-blue-600/80 to-indigo-900/80',
-            icon: '🌙'
-        }
-    ];
+    const prayerData = $derived(loaded ? buildPrayerData(apiPrayerTimes) : []);
     
     // For mosque modal functionality
     let selectedMosque = $state("");
     let showMosqueModal = $state(false);
     let loaded = $state(false);
     
-    // Get the selected mosque object
-     // Make sure $mosques store provides items typed as Mosque[]
-    // For example, if mosquesData is the raw array from the store:
-    // /** @type {Mosque[]} */
-    // const mosques = mosquesData;
-    const selectedMosqueObject = $derived($mosques.find(mosque => mosque.id === selectedMosque));
+    // For compact mosque accordion on homepage
+    let expandedMosqueId = $state("");
+    
+    const selectedMosqueObject = $derived(mosqueList.find(mosque => mosque.id === selectedMosque));
+    const expandedMosqueObject = $derived(mosqueList.find(mosque => mosque.id === expandedMosqueId));
 
-    const handleBadgeClick = async (mosqueId) => {
-                        selectedMosque = mosqueId;
-                        if (!carouselLoadedForModal && $mosques.find(m => m.id === mosqueId)?.images?.length) {
-                            const carouselMod = await import('$lib/components/ui/carousel/index.js');
-                            Carousel = carouselMod;
-                            carouselLoadedForModal = true;
-                        }
-                        showMosqueModal = true;
-                    }
+    /** @param {string} mosqueId */
+    function toggleMosque(mosqueId) {
+        expandedMosqueId = expandedMosqueId === mosqueId ? "" : mosqueId;
+    }
+
+    const handleBadgeClick = (mosqueId) => {
+        selectedMosque = mosqueId;
+        showMosqueModal = true;
+    }
     
     // Carousel API instance
     let carouselAPI = $state();
     
-    /** @type {import('$lib/components/ui/carousel/index.js') | null} */
-    let Carousel = $state(null);
-    let carouselLoadedForModal = $state(false);
-    
     onMount(async () => {
-        try {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0'); 
-            const year = now.getFullYear();
-            
-            const formattedDate = `${day}-${month}-${year}`;
-            
-            const req = await fetch(`https://api.aladhan.com/v1/gToH/${formattedDate}`);
-            
-            if (!req.ok) throw new Error("Bad Response");
-            
-            const res = await req.json();
-            
-            if (!res || res.code !== 200) throw new Error("Invalid response format");
-            
-            hijrahDate = `${res.data.hijri.day} ${res.data.hijri.month.en}, ${res.data.hijri.year}${res.data.hijri.designation.abbreviated}`;
-            shortHijrahDate = res.data.hijri.date.replaceAll("-", "/") + res.data.hijri.designation.abbreviated;
-        } catch (e) {
-            const error = e instanceof Error ? e : new Error(String(e));
-            console.error("Error retrieving Hijrah Date:", error.message);
-            hijrahDate = "Hijri date unavailable";
-            shortHijrahDate = "Hijri date unavailable";
+        // Fetch prayer times from API if props didn't provide them
+        if (!apiPrayerTimes) {
+            try {
+                const res = await fetch('http://localhost:3000/public/prayer-times');
+                if (res.ok) {
+                    const body = await res.json();
+                    if (body?.success && body?.data) {
+                        if (body.data.prayer_times) {
+                            apiPrayerTimes = body.data.prayer_times;
+                        }
+                        if (body.data.hijriDate && !hijrahDate) {
+                            hijrahDate = body.data.hijriDate;
+                        }
+                        if (body.data.shortHijriDate && !shortHijrahDate) {
+                            shortHijrahDate = body.data.shortHijriDate;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not fetch prayer times from API server:", err);
+            }
+        }
+
+        // Fallback Hijri date fetch from AlAdhan if not set
+        if (!hijrahDate) {
+            try {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0'); 
+                const year = now.getFullYear();
+                const formattedDate = `${day}-${month}-${year}`;
+                
+                const req = await fetch(`https://api.aladhan.com/v1/gToH/${formattedDate}`);
+                if (req.ok) {
+                    const res = await req.json();
+                    if (res && res.code === 200) {
+                        hijrahDate = `${res.data.hijri.day} ${res.data.hijri.month.en}, ${res.data.hijri.year}${res.data.hijri.designation.abbreviated}`;
+                        shortHijrahDate = res.data.hijri.date.replaceAll("-", "/") + res.data.hijri.designation.abbreviated;
+                    }
+                }
+            } catch (e) {
+                console.error("Error retrieving Hijrah Date:", e);
+                hijrahDate = "Hijri date unavailable";
+                shortHijrahDate = "Hijri date unavailable";
+            }
         }
         
         loaded = true;
     });
-
-    // Remove dynamic imports of Dialog and Sheet, and associated states (dialogLoaded, sheetAndCarouselLoaded, isLargeScreen)
-    // ResponsiveModal handles its own dynamic loading and screen size detection.
-
-    // $effect for showMosqueModal is removed as ResponsiveModal handles its showing/hiding and dynamic parts.
-    // We only need to ensure Carousel is loaded when the modal is about to be shown.
 </script>
 
 <!-- Prayer Times Section with Glassmorphism -->
@@ -169,7 +171,7 @@
                         Prayer Times
                     </h1>
                     <p class="text-primary-700 dark:text-primary-300 font-secondary text-lg">
-                        For all mosques at OAU, Ile-Ife.
+                        For all musollahs at OAU, Ile-Ife.
                     </p>
                 </div>
 
@@ -190,19 +192,28 @@
                                 <span class="sm:hidden">{shortHijrahDate}</span>
                             </p>
                         </div>
+                        {#if formattedUpdatedAt}
+                            <div class="flex items-center gap-2 mt-2 pt-2 border-t border-white/20">
+                                <Clock class="h-3.5 w-3.5 text-primary-600 dark:text-primary-400" />
+                                <p class="text-primary-700 dark:text-primary-300 font-tertiary text-xs">
+                                    Updated: {formattedUpdatedAt}
+                                </p>
+                            </div>
+                        {/if}
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Prayer Times Grid with staggered animation -->
+        {#if hasPrayerTimes}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
             {#each prayerData as prayer, index}
                 <div in:fly={{ y: 20, duration: 400, delay: 200 + (index * 100) }}>
                     <PrayerTimeCard 
                         prayerName={prayer.name}
-                        adhanTime={prayer.times().adhan}
-                        iqamahTime={prayer.times().iqamah}
+                        adhanTime={prayer.adhan}
+                        iqamahTime={prayer.iqamah}
                         background={prayer.background}
                         isUpcoming={upcoming_solat === index}
                         gradientColor={prayer.color}
@@ -212,41 +223,129 @@
             {/each}
         </div>
 
-        <!-- Friday Prayer Notice with glassmorphism -->
-        <div class="flex justify-center items-center w-full">
-            <div class="backdrop-blur-xl bg-gradient-to-r from-primary-600/80 to-primary-800/80 text-white rounded-xl border border-white/20 p-5 font-tertiary text-sm shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-                <div class="flex items-center justify-center gap-3">
-                    <div class="bg-white/20 p-2 rounded-full">
-                        <Clock class="h-5 w-5" />
-                    </div>
-                    <span>Jumu'ah: Khutbah {prayer_times_from_page_data?.jumuah?.adhan ? formatTime(prayer_times_from_page_data.jumuah.adhan) : '1:30 PM'},
-                        Solah {prayer_times_from_page_data?.jumuah?.iqamah ? formatTime(prayer_times_from_page_data.jumuah.iqamah) : '2:00 PM'}</span>
-                </div>
-            </div>
+		<!-- Friday Prayer Notice with glassmorphism -->
+		{#if apiPrayerTimes?.jumuah}
+		<div class="flex justify-center items-center w-full">
+			<div class="backdrop-blur-xl bg-gradient-to-r from-primary-600/80 to-primary-800/80 text-white rounded-xl border border-white/20 p-5 font-tertiary text-sm shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+				<div class="flex items-center justify-center gap-3">
+					<div class="bg-white/20 p-2 rounded-full">
+						<Clock class="h-5 w-5" />
+					</div>
+					<span>Jumu'ah: Khutbah {formatTime(apiPrayerTimes.jumuah.adhan)},
+						Salah {formatTime(apiPrayerTimes.jumuah.iqamah)}</span>
+				</div>
+			</div>
+		</div>
+		{/if}
+        {:else}
+        <!-- Empty state when API is unreachable -->
+        <div class="text-center py-12">
+            <Clock class="h-12 w-12 text-primary-300 mx-auto mb-4" />
+            <p class="text-primary-600 font-secondary text-lg">Prayer times are currently unavailable.</p>
+            <p class="text-primary-400 font-tertiary text-sm mt-1">Please check back later or contact the secretariat.</p>
         </div>
+        {/if}
 
-        <!-- Mosque Selection with glassmorphism -->
-        <div class="backdrop-blur-xl bg-white/30 dark:bg-black/30 rounded-2xl shadow-xl border border-white/20 p-6 space-y-4">
-            <div class="flex items-center gap-2">
-                <MapPin class="h-5 w-5 text-primary-700 dark:text-primary-300" />
-                <h3 class="font-secondary font-semibold text-primary-800 dark:text-primary-200 text-lg">Available Mosques</h3>
+        <!-- Mosque & Musollah Finder (compact accordion) -->
+        <div class="backdrop-blur-xl bg-white/30 dark:bg-black/30 rounded-2xl shadow-xl border border-white/20 p-5 sm:p-6">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <MapPin class="h-5 w-5 text-primary-700 dark:text-primary-300" />
+                    <h3 class="font-secondary font-semibold text-primary-800 dark:text-primary-200 text-base sm:text-lg">
+                        Mosque & Musollah Finder
+                    </h3>
+                </div>
+                {#if mosqueList.length > 0}
+                    <span class="text-xs font-tertiary text-primary-600 dark:text-primary-400">
+                        {mosqueList.length} locations
+                    </span>
+                {/if}
             </div>
-            
-            <div class="flex flex-wrap gap-3 max-w-full overflow-x-auto py-2 scrollbar-hide">
-                {#each $mosques as mosque (mosque.id)} 
-                    <Badge 
-                    href={undefined}
-                        class="cursor-pointer transition-all backdrop-blur-md bg-white/40 dark:bg-black/40 border border-white/30 dark:border-white/10 hover:bg-primary-100/80 hover:text-primary-900 px-4 py-2 text-sm" 
-                        variant="outline" 
-                        role="button"
-                        tabindex="0"
-                        onclick={() => handleBadgeClick(mosque.id)}
-                        onkeydown={/** @param {KeyboardEvent} e */ (e) => { if (e.key === 'Enter' || e.key === ' ') handleBadgeClick(); }}
-                    >
-                        {mosque.label}
-                    </Badge>
-                {/each}
-            </div>
+            {#if mosqueList.length > 0}
+                <p class="flex items-center gap-1.5 text-[11px] sm:text-xs font-tertiary text-primary-600 dark:text-primary-300 mb-3">
+                    <MousePointerClick class="w-3.5 h-3.5 shrink-0" />
+                    Tap a photo to view details & photos
+                </p>
+            {/if}
+
+            {#if mosqueList.length > 0}
+                <!-- Horizontal thumbnail strip -->
+                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x -mx-1 px-1">
+                    {#each mosqueList as mosque (mosque.id)}
+                        <button
+                            type="button"
+                            onclick={() => toggleMosque(mosque.id)}
+                            aria-expanded={expandedMosqueId === mosque.id}
+                            aria-label={`Toggle details for ${mosque.label}`}
+                            class="snap-start shrink-0 w-28 rounded-xl overflow-hidden border-2 transition-all duration-300 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 {expandedMosqueId === mosque.id ? 'border-primary-600 ring-2 ring-primary-300 scale-[1.02] shadow-lg' : 'border-white/30 dark:border-white/10 hover:border-primary-300 dark:hover:border-primary-500'}"
+                        >
+                            <div class="relative h-24">
+                                <img
+                                    src={mosque.images?.[0] || "/images/placeholder.webp"}
+                                    alt={mosque.label}
+                                    loading="lazy"
+                                    class="w-full h-full object-cover"
+                                />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                <span class="absolute bottom-1.5 left-2 right-2 text-white text-[11px] font-medium truncate drop-shadow">
+                                    {mosque.label}
+                                </span>
+                            </div>
+                        </button>
+                    {/each}
+                </div>
+
+                <!-- Expanded accordion panel -->
+                {#if expandedMosqueObject}
+                    {#key expandedMosqueId}
+                    <div class="mt-4 pt-4 border-t border-white/20 dark:border-white/10" in:fly={{ y: 10, duration: 250 }}>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="sm:w-2/5 shrink-0">
+                                <img
+                                    src={expandedMosqueObject.images?.[0] || "/images/placeholder.webp"}
+                                    alt={expandedMosqueObject.label}
+                                    loading="lazy"
+                                    class="w-full h-40 sm:h-56 object-cover rounded-xl"
+                                />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                                    <div class="min-w-0">
+                                        <h4 class="font-secondary font-semibold text-primary-900 dark:text-primary-100 text-base">
+                                            {expandedMosqueObject.label}
+                                        </h4>
+                                        {#if expandedMosqueObject.address}
+                                            <p class="text-xs text-primary-600 dark:text-primary-400 mt-1 flex items-center gap-1">
+                                                <MapPinned class="w-3 h-3 shrink-0" />
+                                                <span class="truncate min-w-0">{expandedMosqueObject.address}</span>
+                                            </p>
+                                        {/if}
+                                    </div>
+                                    {#if expandedMosqueObject.images && expandedMosqueObject.images.length > 1}
+                                        <button
+                                            type="button"
+                                            onclick={() => handleBadgeClick(expandedMosqueObject.id)}
+                                            class="text-xs font-semibold text-primary-700 dark:text-primary-300 hover:underline shrink-0 mt-1 inline-flex items-center gap-1"
+                                        >
+                                            View photos →
+                                        </button>
+                                    {/if}
+                                </div>
+                                {#if expandedMosqueObject.description}
+                                    <p class="mt-3 text-sm text-primary-800/80 dark:text-primary-200/80 leading-relaxed">
+                                        {expandedMosqueObject.description}
+                                    </p>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+                    {/key}
+                {/if}
+            {:else}
+                <p class="text-sm text-primary-600/70 dark:text-primary-300/70 font-tertiary">
+                    Mosque and musollah locations coming soon.
+                </p>
+            {/if}
         </div>
 
 {#if showMosqueModal && selectedMosqueObject}
@@ -272,12 +371,12 @@
 
                     <!-- Default slot content -->
                     <div class="py-2 space-y-4">
-                        {#if carouselLoadedForModal && Carousel && selectedMosqueObject.images && selectedMosqueObject.images.length > 0}
+                        {#if selectedMosqueObject.images && selectedMosqueObject.images.length > 0}
                             <Carousel.Root plugins={[AutoplayModule({ delay: 3000, stopOnInteraction: true })]} class="w-full max-w-xl mx-auto rounded-lg overflow-hidden shadow-lg" bind:api={carouselAPI}>
                                 <Carousel.Content>
                             {#each selectedMosqueObject.images as image, i}
                                         <Carousel.Item>
-                                            <img src={image} alt={`${selectedMosqueObject.name || selectedMosqueObject.label} - Image ${i + 1}`} class="w-full h-64 object-cover" />
+                                            <img src={image} alt={`${selectedMosqueObject.name || selectedMosqueObject.label} - Image ${i + 1}`} class="w-full h-80 object-cover rounded-lg" />
                                 </Carousel.Item>
                             {/each}
                         </Carousel.Content>
@@ -286,8 +385,6 @@
                                     <Carousel.Next class="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
                                 {/if}
                     </Carousel.Root>
-                        {:else if selectedMosqueObject.images && selectedMosqueObject.images.length > 0}
-                            <p class="text-center text-muted-foreground">Loading images...</p>
                         {/if}
             
                 {#if selectedMosqueObject.description}
@@ -308,12 +405,6 @@
                     </div>
                 {/if}
             </div>
-            
-                    {#snippet footer()}
-                        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 border-t pt-4 mt-4">
-                            <Button variant="outline" on:click={() => showMosqueModal = false}>Close</Button>
-                        </div>
-                    {/snippet}
                 </ResponsiveModal>
             {/await}
                 {/if}

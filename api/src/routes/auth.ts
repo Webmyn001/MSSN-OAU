@@ -20,7 +20,7 @@ import {
 	validatePasswordResetToken,
 	markTokenAsUsed
 } from '../services/password-reset'
-import { sendEmailWithContent } from '../services/email/plunk'
+import { sendEmailWithContent } from '../services/email/brevo'
 import { generatePasswordResetEmail } from '../templates/password-reset'
 import env from '../lib/env'
 import { successResponse, errorResponse } from '../lib/response'
@@ -152,7 +152,7 @@ auth.post('/reset-password', zValidator('json', resetPasswordRequestSchema), asy
 		// * Generate email content
 		const emailContent = generatePasswordResetEmail(user.fullName, resetLink)
 
-		// * Send email via Plunk
+		// * Send email via Brevo
 		await sendEmailWithContent({
 			to: user.email,
 			subject: emailContent.subject,

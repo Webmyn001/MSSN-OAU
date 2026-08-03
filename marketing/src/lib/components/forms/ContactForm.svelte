@@ -5,6 +5,8 @@
   
     let { wrapperClass = "max-w-lg mx-auto", title = "Contact Form", submitLabel = "Submit Message", subtitle = "We'll try to get back to you as soon as possible Insha'Allah." } = $props();
     
+    const API_URL = 'http://localhost:3000/public/contact';
+
     // Form state
     let isSubmitting = $state(false);
     let isSubmitted = $state(false);
@@ -49,7 +51,7 @@
         return "";
     }
     
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
         // Set all fields as touched for validation
         Object.keys(touched).forEach(key => touched[key] = true);
@@ -69,12 +71,21 @@
         // Set loading state
         isSubmitting = true;
         formError = null;
-        
-        // Simulated form submission
-        setTimeout(() => {
-            isSubmitting = false;
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err?.message || 'Failed to send message');
+            }
+
             isSubmitted = true;
-            
+
             // Reset form
             formData = {
                 fname: "",
@@ -83,10 +94,12 @@
                 phone: "",
                 message: ""
             };
-            
-            // Reset touched state
             Object.keys(touched).forEach(key => touched[key] = false);
-        }, 1500);
+        } catch (err) {
+            formError = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+        } finally {
+            isSubmitting = false;
+        }
     }
 </script>
 

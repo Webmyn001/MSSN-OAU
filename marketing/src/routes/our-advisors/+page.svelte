@@ -1,44 +1,67 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { MessageCircle, Phone, Ellipsis, ChevronDown, Check, Mail, ExternalLink } from "@lucide/svelte";
-    import { tick, onMount } from "svelte";
-    import { useId } from "bits-ui";
-    import * as Popover from "$lib/components/ui/popover/index.js";
-    import * as Command from "$lib/components/ui/command/index.js";
+    import { MessageCircle, Phone, Mail } from "@lucide/svelte";
+    import { onMount } from "svelte";
+    import { browser } from "$app/environment";
     import SEO from '$lib/components/SEO.svelte';
     import { toast } from "svelte-sonner";
     import { fly } from "svelte/transition";
 
+    /**
+     * @typedef {Object} Socials
+     * @property {string} [whatsapp]
+     * @property {string} [linkedin]
+     *
+     * @typedef {Object} Advisor
+     * @property {string} [id]
+     * @property {string} name
+     * @property {string} [title]
+     * @property {'male' | 'female' | string} [gender]
+     * @property {string} [position]
+     * @property {string} [department]
+     * @property {string} [phone]
+     * @property {string} [email]
+     * @property {string} [photo]
+     * @property {string} [summary]
+     * @property {Socials} [socials]
+     *
+     * @typedef {Object} PageData
+     * @property {Advisor[]} [advisors]
+     * @property {string} [error]
+     */
+
+    /** @type {{ data: PageData }} */
     let { data } = $props();
 
-    let sessions = $state([]);
-    let selectedSessionLabel = $state(undefined);
+    /** @type {Advisor[]} */
+    let advisors = $state([]);
     let initialized = false;
     let visible = $state(false);
     
+    /** @type {string | undefined | null} */
     let hoveredAdvisor = $state(null);
 
-    let sessionSelectorOpen = $state(false); // For Popover
-    const triggerId = useId();
-
-    /**
-     * JSDoc type for individual session data.
-     * @type {import('$lib/types.js').AdvisorSessionData[]}
-     */
-
-    onMount(() => {
+    onMount(async () => {
         visible = true;
+
+        if (browser) {
+            try {
+                const res = await fetch('http://localhost:3000/public/advisors', { signal: AbortSignal.timeout(10000) });
+                if (res.ok) {
+                    const body = await res.json();
+                    if (body?.success && Array.isArray(body?.data?.advisors)) {
+                        advisors = body.data.advisors;
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to fetch advisors data:', e);
+            }
+        }
     });
 
     $effect(() => {
-        if (!initialized && data && Array.isArray(data.sessions)) {
-            sessions = data.sessions;
-            if (sessions.length > 0) {
-                const preferred = sessions.find(s => s.label === "2024/2025") || sessions[0];
-                selectedSessionLabel = preferred.label;
-            } else {
-                selectedSessionLabel = undefined;
-            }
+        if (!initialized && data && Array.isArray(data.advisors)) {
+            advisors = data.advisors;
             initialized = true;
         }
         if (data && data.error) {
@@ -46,23 +69,6 @@
             toast.error(`Failed to load advisor data: ${data.error.substring(0, 100)}`);
         }
     });
-
-    const currentDisplaySessionAdvisors = $derived(
-        selectedSessionLabel
-            ? sessions.find(s => s.label === selectedSessionLabel)?.advisors
-            : undefined
-    );
-
-    function selectSession(sessionLabel) {
-        selectedSessionLabel = sessionLabel;
-    }
-    
-    function closeAndFocusTrigger(idOfTrigger) {
-        sessionSelectorOpen = false;
-        tick().then(() => {
-            document.getElementById(idOfTrigger)?.focus();
-        });
-    }
 
     /**
      * * Returns a gender-based placeholder image path for advisors without photos.
@@ -84,7 +90,7 @@
 
 <SEO
     title="Our Advisors"
-    description="Meet the esteemed advisors of the Muslim Students Society of Nigeria, OAU Branch. Find their profiles, departments, and contact information for various academic sessions."
+    description="Meet the esteemed advisors of the Muslim Students Society of Nigeria, OAU Branch. Find their profiles, departments, and contact information."
     path="/our-advisors"
     type="CollectionPage"
     images={[
@@ -99,7 +105,7 @@
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         "name": "Our Advisors | MSSNOAU",
-        "description": "Profiles of the advisors for the Muslim Students Society of Nigeria, Obafemi Awolowo University Branch, across various academic sessions.",
+        "description": "Profiles of the advisors for the Muslim Students Society of Nigeria, Obafemi Awolowo University Branch.",
         "url": "https://mssnoau.org/our-advisors", 
         "publisher": {
             "@type": "Organization",
@@ -109,9 +115,9 @@
                 "url": "https://mssnoau.org/mssn-logo.png"
             }
         },
-        "hasPart": currentDisplaySessionAdvisors && currentDisplaySessionAdvisors.length > 0 ? {
+        "hasPart": advisors && advisors.length > 0 ? {
             "@type": "ItemList",
-            "itemListElement": currentDisplaySessionAdvisors.map((advisor, idx) => ({
+            "itemListElement": advisors.map((/** @type {Advisor} */ advisor, /** @type {number} */ idx) => ({
                 "@type": "Person",
                 "name": `${advisor.title ? advisor.title + ' ' : ''}${advisor.name}`,
                 "jobTitle": advisor.position,
@@ -138,57 +144,6 @@
         {/if}
     </div>
     <br/>
-    
-    {#if sessions.length > 0 && visible}
-        <div in:fly={{ y: 30, duration: 800, delay: 400 }} class="flex justify-center">
-            <Popover.Root bind:open={sessionSelectorOpen} preventScroll={true}>
-                <Popover.Trigger asChild>
-                    <button
-                        id={triggerId}
-                        class="group inline-flex items-center bg-white/20 hover:bg-white/30 border border-white/20 p-1 ps-4 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-primary-700 transition-all duration-300"
-                    >
-                        <span class="me-2 text-white text-sm font-medium">
-                            {selectedSessionLabel || "Choose Session"}
-                        </span>
-                        <span class="group-hover:bg-white/30 py-1.5 px-2.5 flex justify-center items-center gap-x-2 rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300">
-                            <ChevronDown class="shrink-0 size-4 transition-transform duration-300 {sessionSelectorOpen ? 'rotate-180' : ''}" />
-                        </span>
-                    </button>
-                </Popover.Trigger>
-                <Popover.Content 
-                    class="w-[250px] p-0 rounded-xl bg-white border border-primary-100 shadow-xl z-[9999] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2" 
-                    side="bottom" 
-                    align="center" 
-                    portalProps={{ target: 'body' }}
-                    sideOffset={5}
-                >
-                    <Command.Root class="rounded-xl overflow-hidden">
-                        <Command.Input placeholder="Search Session..." class="flex h-9 w-full rounded-md border-0 border-b border-primary-100 bg-transparent px-3 py-1.5 text-sm outline-none placeholder:text-gray-400 focus:border-b-2 focus:border-primary-500 focus:ring-0" />
-                        <Command.List class="max-h-[300px] overflow-y-auto overflow-x-hidden">
-                            <Command.Empty class="py-4 text-center text-sm text-gray-500">No sessions found.</Command.Empty>
-                            <Command.Group class="p-1.5" value="sessions_group"> 
-                                {#each sessions as sessionItem (sessionItem.id)}
-                                    <Command.Item
-                                        value={sessionItem.label}
-                                        class="relative flex cursor-pointer select-none items-center rounded-md px-2 py-1.5 text-sm text-gray-700 outline-none data-[highlighted]:bg-primary-50 data-[highlighted]:text-primary-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                                        onSelect={() => {
-                                            selectSession(sessionItem.label);
-                                            closeAndFocusTrigger(triggerId);
-                                        }}
-                                    >
-                                        <span class="flex-grow">{sessionItem.label}</span>
-                                        {#if selectedSessionLabel === sessionItem.label}
-                                            <Check class="ms-auto size-4 text-primary-600" />
-                                        {/if}
-                                    </Command.Item>
-                                {/each}
-                            </Command.Group>
-                        </Command.List>
-                    </Command.Root>
-                </Popover.Content>
-            </Popover.Root>
-        </div>
-    {/if}
 </PageHeader>
 
 <div class="py-12 relative overflow-hidden">
@@ -196,7 +151,7 @@
     <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
     
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10"> 
-    {#if data && data.error && (!currentDisplaySessionAdvisors || currentDisplaySessionAdvisors.length === 0)}
+    {#if data && data.error && (!advisors || advisors.length === 0)}
             <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -210,9 +165,9 @@
                     </div>
                 </div>
             </div>
-        {:else if currentDisplaySessionAdvisors && currentDisplaySessionAdvisors.length > 0}
+        {:else if advisors && advisors.length > 0}
             <div class="grid grid-cols-1 gap-8">
-                {#each currentDisplaySessionAdvisors as advisor, index (advisor.id)}
+                {#each advisors as advisor, index (advisor.id)}
                     <div 
                         class="mx-auto w-full max-w-3xl"
                         in:fly={{ y: 30, duration: 800, delay: 600 + (index * 200) }}
@@ -320,36 +275,7 @@
                     </div>
                 {/each}
             </div>
-        {:else if selectedSessionLabel && (!currentDisplaySessionAdvisors || currentDisplaySessionAdvisors.length === 0) && !(data && data.error)}
-            <div class="max-w-lg mx-auto bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 p-8 shadow-md text-center">
-                <div class="mb-6 bg-primary-50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-10 text-primary-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-medium text-gray-800 mb-2">No Advisors Found</h3>
-                <p class="text-gray-500 mb-6">No advisors found for the session {selectedSessionLabel}. Our records for this session may still be in progress.</p>
-                
-                <div class="inline-flex flex-col sm:flex-row gap-3">
-                    <button 
-                        class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-primary-300 bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors"
-                        onclick={() => sessionSelectorOpen = true}
-                    >
-                        Select Different Session
-                        <ChevronDown class="ml-2 size-4" />
-                    </button>
-                    <a 
-                        href="/contact"
-                        class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-primary-700 text-white hover:bg-primary-800 transition-colors"
-                    >
-                        Contact Administration
-                    </a>
-                </div>
-            </div>
-        {:else if sessions.length === 0 && !(data && data.error)}
+        {:else if advisors.length === 0 && !(data && data.error)}
             <div class="max-w-lg mx-auto bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 p-8 shadow-md text-center">
                 <div class="mb-6 bg-primary-50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-10 text-primary-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -358,8 +284,8 @@
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
                 </div>
-                <h3 class="text-xl font-medium text-gray-800 mb-2">No Sessions Available</h3>
-                <p class="text-gray-500 mb-6">We couldn't find any academic sessions with advisor information. Please check back later as we update our records.</p>
+                <h3 class="text-xl font-medium text-gray-800 mb-2">No Advisors Available</h3>
+                <p class="text-gray-500 mb-6">We couldn't find any advisor information. Please check back later as we update our records.</p>
                 
                 <button 
                     onclick={() => window.location.reload()}
@@ -377,14 +303,3 @@
     {/if}
     </div>
 </div>
-
-<style>
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    #session-dropdown {
-        animation: fadeIn 0.2s ease-out;
-    }
-</style>

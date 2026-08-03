@@ -78,7 +78,7 @@
                     { "@type": "Organization", "name": "Programmes and Events", "url": ORGANIZATION.url + "/programmes" },
                     { "@type": "Organization", "name": "Executive Council", "url": ORGANIZATION.url + "/our-excos" },
                     { "@type": "Organization", "name": "Advisory Board", "url": ORGANIZATION.url + "/our-advisors" },
-                    { "@type": "Organization", "name": "Alumnae Relations", "url": ORGANIZATION.url + "/alumnae" }
+                    { "@type": "Organization", "name": "Alumnae Relations", "url": ORGANIZATION.url + "/alumni" }
                 ],
                 "knowsAbout": ["Islam", "Student Development", "Community Service", "Islamic Education", "Spiritual Growth", "Academic Excellence"],
                 "mainEntityOfPage": {

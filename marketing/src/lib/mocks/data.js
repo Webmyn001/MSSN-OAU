@@ -102,60 +102,44 @@ export const mockExcos = {
 export const mockCommittees = {
 	committees: [
 		{
-			id: 'academic',
-			name: 'Academic Committee',
-			description: 'Organizes tutorials and academic support programs for students.',
-			image: '/images/chalkboard.webp',
-			members: [
-				{
-					id: 'academic-1',
-					name: 'Ibrahim Musa',
-					position: 'Coordinator',
-					photo: '/images/man_2.webp'
-				}
-			]
+			id: 'islamic-affairs',
+			name: 'Islamic Affairs Committee',
+			description: 'Oversees Islamic education programs including Madrasah and Al-Usrah, and coordinates spiritual development for members.'
 		},
 		{
-			id: 'islamic-affairs',
-			name: 'Islamic Affairs Board',
-			description: 'Oversees Islamic education programs including Madrasah and Al-Usrah.',
-			image: '/images/madrasah.webp',
-			members: [
-				{
-					id: 'iab-1',
-					name: 'Aisha Yusuf',
-					position: 'Coordinator',
-					photo: '/images/woman_3.webp'
-				}
-			]
+			id: 'academic',
+			name: 'Academic Committee',
+			description: 'Organizes tutorials and academic support programs to help students excel in their studies.'
+		},
+		{
+			id: 'welfare',
+			name: 'Welfare Committee',
+			description: 'Caters to the welfare needs of members, providing support and assistance whenever needed.'
+		},
+		{
+			id: 'secondary-school',
+			name: 'Secondary School Committee',
+			description: 'Coordinates outreach and support for Muslim students in secondary schools within the community.'
+		},
+		{
+			id: 'moro',
+			name: 'Moro Committee',
+			description: 'Handles activities and outreach in the Moro community, fostering unity among Muslim residents.'
+		},
+		{
+			id: 'mosque-cleaning',
+			name: 'Mosque Cleaning Committee',
+			description: 'Ensures the mosque is kept clean, neat and welcoming for all worshippers at all times.'
 		},
 		{
 			id: 'jwc',
 			name: 'Jihad Week Committee',
-			description: 'Organizes the annual Jihad Week activities and competitions.',
-			image: '/images/committees/jwc.webp',
-			members: [
-				{
-					id: 'jwc-1',
-					name: 'Hassan Ali',
-					position: 'Coordinator',
-					photo: '/images/man_4.webp'
-				}
-			]
+			description: 'Organizes the annual Jihad Week activities and competitions.'
 		},
 		{
 			id: 'an-nuur',
 			name: 'An-Nuur Committee',
-			description: 'Organizes events and activities for sisters.',
-			image: '/images/committees/an-nuur.webp',
-			members: [
-				{
-					id: 'annuur-1',
-					name: 'Zainab Mohammed',
-					position: 'Coordinator',
-					photo: '/images/woman_4.webp'
-				}
-			]
+			description: 'Organizes events and activities for sisters.'
 		}
 	]
 };

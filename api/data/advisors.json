@@ -1,0 +1,12 @@
+{
+  "advisors": [
+    {
+      "id": "advisor-1",
+      "name": "Yusuf",
+      "title": "Advisor",
+      "bio": "",
+      "photo": null,
+      "priority": 1
+    }
+  ]
+}

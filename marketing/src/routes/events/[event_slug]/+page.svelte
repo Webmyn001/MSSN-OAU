@@ -1,5 +1,5 @@
 <script>
-    import { fly, fade, scale } from 'svelte/transition';
+    import { fly, fade } from 'svelte/transition';
     import { Button } from '$lib/components/ui/button'
     import { Badge } from '$lib/components/ui/badge'
     import { ArrowLeft, Calendar, Clock, MapPin, Tag, Users, Info, ChevronRight, ExternalLink, Ticket, CalendarCheck, User, Phone, AlertCircle } from '@lucide/svelte';
@@ -9,48 +9,8 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
 
-    /**
-     * @typedef {any} IconType  // Changed from SvelteComponentType to any for simplicity with Lucide icons
-     */
-
-    /**
-     * @typedef {Object} EventType
-     * @property {string} title - The title of the event
-     * @property {string} slug - The unique slug identifier
-     * @property {string} image - URL of event image
-     * @property {string} summary - Short summary description
-     * @property {boolean} paid - Whether the event requires payment
-     * @property {string} [price] - Price of the event if paid
-     * @property {string} date - Date and time of the event (ISO string)
-     * @property {string} venue - Location of the event
-     * @property {string} [url] - Registration or details URL
-     * @property {string} [host] - Organizing entity
-     * @property {string} [contact] - Contact information
-     * @property {string} [category] - Event category
-     * @property {string[]} [tags] - Related tags
-     * @property {number} [capacity] - Maximum attendees
-     * @property {string} [registration_deadline] - Deadline for registration (ISO string)
-     * @property {string} [additional_details] - Further information
-     */
-
-    /**
-     * @typedef {Object} EventStatus
-     * @property {string} label - Display label for the status
-     * @property {string} variant - Visual variant for the badge
-     * @property {IconType} icon - Icon component to display (using any for broader compatibility)
-     */
-
-    /**
-     * @typedef {Object} FormattedDate
-     * @property {string} full
-     * @property {string} date
-     * @property {string} time
-     * @property {string} relative
-     */
-
     let { data } = $props();
 
-    /** @type {EventType | undefined} */
     let eventData = $state();
     let eventExists = $state(true);
     let errorMessage = $state("");
@@ -59,47 +19,49 @@
         eventData = data.event;
         eventExists = true;
     } else {
-        console.error("Error fetching event data:", data?.error);
         eventExists = false;
         errorMessage = data?.error?.message || "Event not found or could not be loaded.";
-        // eventData remains undefined
     }
 
     let visible = $state(false);
-    
+    let regName = $state("");
+    let regEmail = $state("");
+    let regPhone = $state("");
+    let regLoading = $state(false);
+    let regSuccess = $state(null);
+    let regError = $state("");
+
+    async function submitRegistration() {
+        if (!eventData) return;
+        if (!regName.trim() || !regEmail.trim()) {
+            regError = "Please enter your Name and Email.";
+            return;
+        }
+
+        regLoading = true;
+        regError = "";
+        regSuccess = null;
+        try {
+            const res = await fetch(`http://localhost:3000/public/events/${eventData.id}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: regName.trim(), email: regEmail.trim(), phone: regPhone.trim() || null })
+            });
+            const json = await res.json();
+            if (json.success) {
+                regSuccess = json.data;
+                toast.success("Registration completed successfully!");
+                regName = ""; regEmail = ""; regPhone = "";
+            } else { regError = json.error || "Registration failed"; }
+        } catch { regError = "Unable to connect to registration server."; }
+        finally { regLoading = false; }
+    }
+
     onMount(() => {
         visible = true;
-        if (browser) {
-            window.scrollTo(0, 0);
-        }
+        if (browser) window.scrollTo(0, 0);
     });
-    
-    /**
-     * Returns status badge configuration for the event
-     * @param {EventType} event - The event object to analyze
-     * @returns {EventStatus}
-     */
-    function getEventStatusBadge(event) {
-        const eventDate = new Date(event.date);
-        if (isPast(eventDate)) {
-            return { label: "Past Event", variant: "destructive", icon: Calendar };
-        }
-        const daysUntil = Math.ceil((eventDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-        if (daysUntil <= 3 && daysUntil >= 0) {
-            return { label: "Coming Soon", variant: "warning", icon: Clock };
-        }
-        const deadlineDate = event.registration_deadline ? new Date(event.registration_deadline) : null;
-        if (deadlineDate && isPast(deadlineDate)) {
-            return { label: "Registration Closed", variant: "secondary", icon: CalendarCheck };
-        }
-        return { label: "Upcoming", variant: "default", icon: Calendar };
-    }
-    
-    /**
-     * Format dates for display
-     * @param {string} dateString - ISO date string to format
-     * @returns {FormattedDate}
-     */
+
     function formatEventDate(dateString) {
         const date = new Date(dateString);
         return {
@@ -109,42 +71,31 @@
             relative: formatDistanceToNow(date, { addSuffix: true })
         };
     }
-    
-    function handleRegister() {
-        if (!eventData) return;
-        if (isPast(new Date(eventData.date))) {
-            toast.error("This event has already passed!");
-            return;
-        }
-        if (eventData.url) {
-            window.open(eventData.url, '_blank');
-        } else if(eventData.url === '') {
-            toast.info("Registration link not available yet.");
-        } else {
-            toast.info("Registration link not available.");
-        }   
-    }
 
     const formattedEventDate = $derived.by(() => {
         if (!eventData?.date) return null;
         return formatEventDate(eventData.date);
     });
 
-    const deadlineFormatted = $derived.by(() => {
-        if (!eventData?.registration_deadline) return null;
-        return formatEventDate(eventData.registration_deadline);
+    const formattedEndDate = $derived.by(() => {
+        if (!eventData?.endDate) return null;
+        return formatEventDate(eventData.endDate);
     });
 
     const eventStatus = $derived.by(() => {
         if (!eventData) return { label: "Unknown", variant: "secondary", icon: Info };
-        return getEventStatusBadge(eventData);
+        const endDate = new Date(eventData.endDate || eventData.date);
+        const startDate = new Date(eventData.date);
+        if (isPast(endDate)) return { label: "Past Event", variant: "destructive", icon: Calendar };
+        const daysUntil = Math.ceil((startDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        if (daysUntil <= 3 && daysUntil >= 0) return { label: "Coming Soon", variant: "warning", icon: Clock };
+        return { label: "Upcoming", variant: "default", icon: Calendar };
     });
 
     const isEventPast = $derived.by(() => {
-        if (!eventData?.date) return true; // Default to past if no date
-        return isPast(new Date(eventData.date));
+        if (!eventData?.endDate && !eventData?.date) return true;
+        return isPast(new Date(eventData.endDate || eventData.date));
     });
-
 </script>
 
 <section class="py-12 relative overflow-hidden min-h-[80vh]">
@@ -154,10 +105,7 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {#if visible}
             <div in:fade={{ duration: 300 }}>
-                <a 
-                    href="/events"
-                    class="inline-flex items-center gap-2 text-sm text-primary-700 hover:text-primary-900 transition-colors mb-8"
-                >
+                <a href="/events" class="inline-flex items-center gap-2 text-sm text-primary-700 hover:text-primary-900 transition-colors mb-8">
                     <ArrowLeft class="h-4 w-4" />
                     Back to all events
                 </a>
@@ -174,7 +122,6 @@
                                     {eventStatus.label}
                                 </Badge>
                                 {/if}
-                                
                                 {#if eventData.category}
                                     <Badge variant="outline" class="bg-white/80 backdrop-blur-sm flex items-center gap-1.5" href="#">
                                         <Tag class="h-3.5 w-3.5" />
@@ -250,8 +197,12 @@
                                         <Calendar class="h-5 w-5 text-primary-600 mt-0.5 shrink-0" />
                                         <div>
                                             <h3 class="text-sm font-medium text-gray-900">Date & Time</h3>
-                                            <p class="text-gray-700">{formattedEventDate.full}</p>
-                                            <p class="text-sm text-gray-500 mt-1">{formattedEventDate.relative}</p>
+                                            <p class="text-gray-700"><span class="font-semibold">Start:</span> {formattedEventDate.full}</p>
+                                            <p class="text-sm text-gray-500 mt-0.5">{formattedEventDate.relative}</p>
+                                            {#if formattedEndDate}
+                                                <p class="text-gray-700 mt-1"><span class="font-semibold">End:</span> {formattedEndDate.full}</p>
+                                                <p class="text-sm text-gray-500 mt-0.5">{formattedEndDate.relative}</p>
+                                            {/if}
                                         </div>
                                     </div>
                                     {/if}
@@ -289,46 +240,59 @@
                                             </div>
                                         </div>
                                     {/if}
-                                    {#if eventData.paid}
-                                        <div class="flex items-start gap-3">
-                                            <Ticket class="h-5 w-5 text-primary-600 mt-0.5 shrink-0" />
-                                            <div>
-                                                <h3 class="text-sm font-medium text-gray-900">Price</h3>
-                                                <p class="text-gray-700">{eventData.price || 'Paid Event'}</p>
-                                            </div>
-                                        </div>
-                                    {/if}
-                                    {#if deadlineFormatted}
-                                        <div class="flex items-start gap-3">
-                                            <CalendarCheck class="h-5 w-5 text-primary-600 mt-0.5 shrink-0" />
-                                            <div>
-                                                <h3 class="text-sm font-medium text-gray-900">Registration Deadline</h3>
-                                                <p class="text-gray-700">{deadlineFormatted.date}</p>
-                                            </div>
-                                        </div>
-                                    {/if}
                                     {#if !isEventPast}
-                                        <div class="space-y-2 mt-4">
-                                            <Button 
-                                                class="w-full {eventData.paid ? 'bg-primary-700 hover:bg-primary-800 text-white' : ''}"
-                                                variant={eventData.paid ? "default" : "outline"}
-                                                onclick={handleRegister}
-                                            >
-                                                {eventData.paid ? 'Register Now' : 'RSVP to Event'}
-                                            </Button>
+                                        {#if regSuccess}
+                                            <div class="rounded-lg bg-green-50 p-4 border border-green-200 text-green-900 space-y-2 mt-4">
+                                                <div class="flex items-center gap-2 font-bold text-sm text-green-800">
+                                                    <span>&#10003; {regSuccess.message}</span>
+                                                </div>
+                                                <p class="text-xs">Your Ticket Code: <code class="bg-green-100 px-2 py-0.5 rounded font-mono font-bold text-green-900">{regSuccess.ticket?.ticketCode ?? ''}</code></p>
+                                                <p class="text-[11px] text-gray-500">Screenshot or save your ticket code for check-in at the venue.</p>
+                                            </div>
+                                        {:else}
+                                            <div class="mt-4 rounded-xl border border-primary-100 bg-gradient-to-b from-primary-50/80 to-white p-4 shadow-sm">
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h4 class="font-bold text-primary-900 text-sm flex items-center gap-2">
+                                                        <Ticket class="h-4 w-4 text-primary-600" />
+                                                        Register
+                                                    </h4>
+                                                    <span class="text-xs font-bold px-2 py-0.5 bg-green-100 text-green-800 rounded-full">Free</span>
+                                                </div>
+                                                {#if regError}
+                                                    <div class="mb-3 p-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs">{regError}</div>
+                                                {/if}
+                                                <div class="space-y-3">
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+                                                        <input type="text" bind:value={regName} placeholder="Your full name" class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Email Address *</label>
+                                                        <input type="email" bind:value={regEmail} placeholder="student@example.com" class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Phone Number</label>
+                                                        <input type="tel" bind:value={regPhone} placeholder="08012345678" class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white" />
+                                                    </div>
+                                                    <Button onclick={submitRegistration} disabled={regLoading} class="w-full font-bold text-xs py-2.5 rounded-lg shadow-sm text-white bg-primary-700 hover:bg-primary-800">
+                                                        {#if regLoading}
+                                                            <span class="flex items-center justify-center gap-2">
+                                                                <span class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+                                                                Registering...
+                                                            </span>
+                                                        {:else}
+                                                            Register for Free
+                                                        {/if}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        {/if}
 
-                                            {#if eventData.image}
-                                                <Button
-                                                    as="a"
-                                                    href={eventData.image}
-                                                    target="_blank"
-                                                    variant="outline"
-                                                    class="w-full"
-                                                >
-                                                    View / Download Flyer <ExternalLink class="ml-2 h-4 w-4" />
-                                                </Button>
-                                            {/if}
-                                        </div>
+                                        {#if eventData.image}
+                                            <Button as="a" href={eventData.image} target="_blank" variant="outline" class="w-full mt-3">
+                                                View / Download Flyer <ExternalLink class="ml-2 h-4 w-4" />
+                                            </Button>
+                                        {/if}
                                     {:else}
                                         <div class="bg-gray-100 rounded-lg p-3 text-center text-gray-700 font-medium mt-4">
                                             This event has already passed
@@ -350,18 +314,10 @@
                             {errorMessage || "We couldn't find the event you're looking for. It may have been removed or the URL might be incorrect."}
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button 
-                                onclick={() => goto('/events')}
-                                variant="default"
-                                class="bg-primary-700 hover:bg-primary-800 text-white"
-                            >
+                            <Button onclick={() => goto('/events')} variant="default" class="bg-primary-700 hover:bg-primary-800 text-white">
                                 Browse All Events
                             </Button>
-                            <Button 
-                                onclick={() => window.location.reload()}
-                                variant="outline"
-                                class="border-primary-300 hover:bg-primary-50 text-primary-700"
-                            >
+                            <Button onclick={() => window.location.reload()} variant="outline" class="border-primary-300 hover:bg-primary-50 text-primary-700">
                                 Try Again
                             </Button>
                         </div>

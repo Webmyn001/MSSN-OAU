@@ -2,8 +2,8 @@ import { writable, derived } from 'svelte/store';
 
 /**
  * @typedef {Object} PrayerTime
- * @property {number} adhan - The adhan (call to prayer) time in milliseconds
- * @property {number} iqamah - The iqamah (start of prayer) time in milliseconds
+ * @property {number | string} adhan - The adhan (call to prayer) time
+ * @property {number | string} iqamah - The iqamah (start of prayer) time
  */
 
 /**
@@ -16,55 +16,70 @@ import { writable, derived } from 'svelte/store';
  */
 
 /**
- * @type {import('svelte/store').Writable<PrayerTimes>}
+ * Prayer times store — populated from API only, no dummy fallback.
+ * @type {import('svelte/store').Writable<PrayerTimes | null>}
  */
-export const prayerTimes = writable({
-    subhi: {
-        adhan: new Date().setHours(5, 0, 0),
-        iqamah: new Date().setHours(5, 30, 0)
-    },
-    dhuhr: {
-        adhan: new Date().setHours(13, 0, 0),
-        iqamah: new Date().setHours(13, 30, 0)
-    },
-    asr: {
-        adhan: new Date().setHours(16, 0, 0),
-        iqamah: new Date().setHours(16, 30, 0)
-    },
-    maghrib: {
-        adhan: new Date().setHours(18, 30, 0),
-        iqamah: new Date().setHours(18, 45, 0)
-    },
-    isha: {
-        adhan: new Date().setHours(19, 30, 0),
-        iqamah: new Date().setHours(19, 45, 0)
-    }
-});
+export const prayerTimes = writable(null);
 
 /**
  * @type {import('svelte/store').Readable<string>}
  */
 export const upcomingPrayer = derived(prayerTimes, ($prayerTimes) => {
+    if (!$prayerTimes) return 'fajr';
     return getSolahPeriod($prayerTimes);
 });
 
 /**
+ * Checks if a string is already in "H:MM AM/PM" format
+ * @param {string} s
+ * @returns {boolean}
+ */
+function isFormattedTime(s) {
+    return /^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(s.trim());
+}
+
+/**
+ * Converts any input to a Date object
+ * @param {any} val
+ * @returns {Date | null}
+ */
+function toDate(val) {
+    if (val == null) return null;
+    if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+    if (typeof val === 'number') {
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? null : d;
+    }
+    if (typeof val === 'string') {
+        if (isFormattedTime(val)) return null;
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? null : d;
+    }
+    return null;
+}
+
+/**
  * Formats a date or timestamp into a 12-hour time string
- * @param {number|Date|undefined} dateInput - The date or timestamp to format
- * @returns {string} Formatted time string in 12-hour format (e.g., "1:30 PM")
+ * @param {any} dateInput - The date or timestamp to format
+ * @returns {string} Formatted time string in 12-hour format (e.g., "5:30 PM")
  */
 export function formatTime(dateInput) {
-    if (!dateInput) return "00:00 AM";
-    
-    const date = new Date(dateInput);
-    
+    if (dateInput == null || dateInput === '') return '--:--';
+
+    if (typeof dateInput === 'string' && isFormattedTime(dateInput)) {
+        return dateInput.trim();
+    }
+
+    const date = toDate(dateInput);
+    if (!date) return '--:--';
+
     const hours = date.getHours();
     const minutes = date.getMinutes();
-    
+
     const ampm = hours >= 12 ? 'PM' : 'AM';
-    const hour12 = hours % 12 || 12; // Convert hour to 12-hour format
-    const minuteFormatted = minutes < 10 ? '0' + minutes : minutes; // Add leading zero for minutes
-    
+    const hour12 = hours % 12 || 12;
+    const minuteFormatted = String(minutes).padStart(2, '0');
+
     return `${hour12}:${minuteFormatted} ${ampm}`;
 }
 
@@ -74,6 +89,7 @@ export function formatTime(dateInput) {
  * @returns {string} The name of the next prayer
  */
 function getSolahPeriod(times) {
+    if (!times?.subhi?.adhan || !times?.dhuhr?.adhan || !times?.asr?.adhan || !times?.maghrib?.adhan || !times?.isha?.adhan) return 'fajr';
     /**
      * Converts a date to minutes since midnight
      * @param {number|Date|undefined} date - The date to convert

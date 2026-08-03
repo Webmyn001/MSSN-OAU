@@ -1,30 +1,10 @@
-<!-- @migration-task Error while migrating Svelte code: Unexpected token
-https://svelte.dev/e/js_parse_error -->
-
 <script>
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';
     import * as Dialog from '$lib/components/ui/dialog/index.js';
     import * as Sheet from '$lib/components/ui/sheet/index.js';
     import { X } from '@lucide/svelte';
-    // import { Button } from '$lib/components/ui/button/index.js'; // Not directly used in this component's script
-    
-    /**
-     * @typedef {Object} ResponsiveModalProps
-     * @property {boolean} open - Whether the modal is open.
-     * @property {string} [title] - Optional title for the modal.
-     * @property {string} [description] - Optional description for the modal.
-     * @property {('top'|'bottom'|'left'|'right')} [side='bottom'] - Side from which the sheet slides in (mobile only).
-     * @property {string} [contentClass] - Additional CSS class for the modal content.
-     * @property {Function} [onOpenChange] - Callback when the open state changes.
-     * @property {boolean} [closeOnOutsideClick=true] - Whether to close the modal when clicking outside.
-     * @property {boolean} [closeOnEscape=true] - Whether to close the modal when pressing Escape.
-     * @property {string} [portalTarget='#modal-portal'] - Target element for the portal.
-     * @property {Function} [trigger] - Render function for the trigger element.
-     * @property {Function} [header] - Render function for the header.
-     * @property {Function} [children] - Render function for the main content.
-     * @property {Function} [footer] - Render function for the footer.
-     */
+
     let {
         open = $bindable(false),
         title = '',
@@ -35,7 +15,10 @@ https://svelte.dev/e/js_parse_error -->
         closeOnOutsideClick = true,
         closeOnEscape = true,
         portalTarget = '#modal-portal',
-        ...rest
+        trigger = undefined,
+        header = undefined,
+        children = undefined,
+        footer = undefined
     } = $props();
 
     /** @type {boolean} */
@@ -65,21 +48,21 @@ https://svelte.dev/e/js_parse_error -->
 
 </script>
 
-{#if rest?.trigger}
-    {@render rest?.trigger?.()}
+{#if trigger}
+    {@render trigger()}
 {/if}
 
 {#if isMobile}
-    <Sheet.Root bind:open={open} {onOpenChange} {closeOnEscape}>
+    <Sheet.Root bind:open={open} {onOpenChange}>
         <Sheet.Content
             {side}
             class="flex flex-col p-0 max-h-[85dvh] {contentClass}" 
             portalProps={{ target: portalTarget }}
             aria-describedby={description ? 'sheet-description' : undefined}
-            onInteractOutside={closeOnOutsideClick ? (e) => { e.preventDefault(); open = false; } : undefined}
+            onInteractOutside={(/** @type {any} */ e) => { if (closeOnOutsideClick) { e.preventDefault(); open = false; } }}
         >
-            {#if rest?.header}
-                 {@render rest?.header?.()}
+            {#if header}
+                 {@render header()}
             {:else if title}
                 <Sheet.Header class="sticky top-0 bg-background/90 backdrop-blur-sm z-20 px-6 pt-5 pb-4 border-b text-left">
                     <Sheet.Title class="text-lg font-semibold text-foreground pr-8">{title}</Sheet.Title>
@@ -96,25 +79,25 @@ https://svelte.dev/e/js_parse_error -->
             {/if}
 
             <div class="flex-1 overflow-y-auto p-6 dialog-inner-content-scrollable">
-                {@render rest?.children?.()}
+                {@render children?.()}
             </div>
 
-            {#if rest?.footer}
+            {#if footer}
                 <Sheet.Footer class="sticky bottom-0 bg-background/90 backdrop-blur-sm z-20 p-4 border-t mt-auto">
-                    {@render rest?.footer?.()}
+                    {@render footer()}
                 </Sheet.Footer>
             {/if}
         </Sheet.Content>
     </Sheet.Root>
 {:else}
-    <Dialog.Root bind:open={open} {onOpenChange} {closeOnOutsideClick} {closeOnEscape}>
+    <Dialog.Root bind:open={open} {onOpenChange}>
         <Dialog.Content
             class="sm:max-w-md flex flex-col {contentClass}" 
             portalProps={{ target: portalTarget }}
             aria-describedby={description ? 'dialog-description' : undefined}
         >
-            {#if rest?.header}
-                {@render rest?.header?.()}
+            {#if header}
+                {@render header()}
             {:else if title}
                 <Dialog.Header class="text-left">
                     <Dialog.Title class="text-xl font-semibold text-foreground">{title}</Dialog.Title>
@@ -131,12 +114,12 @@ https://svelte.dev/e/js_parse_error -->
             {/if}
 
             <div class="flex-1 overflow-y-auto py-4 dialog-inner-content-scrollable">
-                {@render rest?.children?.()}
+                {@render children?.()}
             </div>
 
-            {#if rest?.footer}
+            {#if footer}
                 <Dialog.Footer class="mt-auto">
-                    {@render rest?.footer?.()}
+                    {@render footer()}
                 </Dialog.Footer>
             {/if}
         </Dialog.Content>

@@ -1,0 +1,6 @@
+@echo off
+echo Cleaning caches...
+if exist .svelte-kit rmdir /s /q .svelte-kit
+if exist node_modules\.vite rmdir /s /q node_modules\.vite
+echo Done. Starting dev server...
+npx vite dev

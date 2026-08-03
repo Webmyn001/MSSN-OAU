@@ -43,8 +43,6 @@ export default defineConfig({
     // Pre-bundle heavy dependencies to speed up dev cold starts significantly
     optimizeDeps: {
         include: [
-            'embla-carousel-svelte',
-            'embla-carousel-autoplay',
             'date-fns',
             'clsx',
             'tailwind-merge',
@@ -54,7 +52,10 @@ export default defineConfig({
             'timeago.js',
             'reading-time-estimator',
             'svelte-meta-tags'
-        ]
+        ],
+        // embla-carousel has circular re-exports that break the dep optimizer,
+        // causing "Cannot access 'X' before initialization" and killing HMR.
+        exclude: ['embla-carousel', 'embla-carousel-svelte', 'embla-carousel-autoplay']
     },
 
     // Pre-transform the most commonly accessed files on dev server start
@@ -65,6 +66,19 @@ export default defineConfig({
                 './src/routes/+page.svelte',
                 './src/app.css'
             ]
+        },
+        fs: {
+            allow: ['.']
+        },
+        // Fix HMR WebSocket failures (common on Windows): force the client to
+        // reconnect to ws://localhost explicitly and relax the origin allowlist.
+        host: true,
+        allowedHosts: true,
+        hmr: {
+            protocol: 'ws',
+            host: 'localhost',
+            port: 5173,
+            clientPort: 5173
         }
     },
 

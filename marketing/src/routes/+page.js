@@ -1,46 +1,47 @@
-// * Use mocked data directly (no server-side fetching)
-import { mockBlog, mockEvents, mockInfo, mockProgrammes } from "$lib/mocks/data.js";
+export const load = async ({ parent }) => {
+	const data = await parent();
 
-// * Always provide fallback prayer times
-const getDefaultPrayerTimes = () => {
-	const today = new Date();
 	return {
-		subhi: {
-			adhan: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 5, 0, 0).getTime(),
-			iqamah: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 5, 30, 0).getTime()
-		},
-		dhuhr: {
-			adhan: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 13, 0, 0).getTime(),
-			iqamah: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 13, 30, 0).getTime()
-		},
-		asr: {
-			adhan: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 0, 0).getTime(),
-			iqamah: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 30, 0).getTime()
-		},
-		maghrib: {
-			adhan: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 18, 30, 0).getTime(),
-			iqamah: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 18, 45, 0).getTime()
-		},
-		isha: {
-			adhan: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 19, 30, 0).getTime(),
-			iqamah: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 19, 45, 0).getTime()
-		},
-		jumuah: {
-			adhan: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 13, 30, 0).getTime(),
-			iqamah: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 0, 0).getTime()
-		}
+		events: (data.events || []).slice(0, 3).map(e => ({
+			id: e.id,
+			title: e.title,
+			summary: e.description || e.title,
+			description: e.description || '',
+			image: e.imageUrl || '',
+			imageUrl: e.imageUrl,
+			paid: parseFloat(e.ticketPrice || '0') > 0,
+			price: parseFloat(e.ticketPrice || '0') > 0 ? `₦${parseFloat(e.ticketPrice).toLocaleString()}` : 'Free',
+			ticketPrice: e.ticketPrice,
+			date: e.startDate,
+			startDate: e.startDate,
+			endDate: e.endDate,
+			venue: e.venue || 'MSSN OAU Secretariat',
+			location: e.venue || 'MSSN OAU Secretariat',
+			capacity: e.maxTickets,
+			ticketsSold: e.ticketsSold,
+			slug: e.id
+		})),
+		latestNews: (data.latestNews || []).slice(0, 3),
+		blogPosts: [...(data.posts || [])]
+			.sort((a, b) => new Date(b.approvedAt || 0) - new Date(a.approvedAt || 0))
+			.slice(0, 3)
+			.map(p => mapPost(p)),
+		programmes: (data.programmes || []).slice(0, 4),
+		mosques: data.mosques || [],
+		info: data.info
 	};
 };
 
-export const load = async () => {
+function mapPost(p) {
 	return {
-		posts: mockBlog.posts.slice(0, 3),
-		events: mockEvents.events.slice(0, 3),
-		programmes: mockProgrammes.programmes.slice(0, 4),
-		info: {
-			...mockInfo,
-			// * Ensure prayer_times always exists with fallback
-			prayer_times: mockInfo.prayer_times || getDefaultPrayerTimes()
-		}
+		title: p.title,
+		excerpt: p.excerpt,
+		link: p.link,
+		slug: p.slug,
+		featured_image: p.featuredImage || '',
+		date: p.wpDate,
+		author: p.authorName ? { name: p.authorName, picture: p.authorAvatar || '' } : null,
+		authors: p.authorName ? [{ name: p.authorName, avatar_urls: { '48': p.authorAvatar || '', '96': p.authorAvatar || '' } }] : [],
+		categories: (() => { try { return p.categories ? JSON.parse(p.categories) : []; } catch { return []; } })()
 	};
-};
+}

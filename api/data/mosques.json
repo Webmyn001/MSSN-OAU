@@ -1,0 +1,15 @@
+{
+  "mosques": [
+    {
+      "id": "mosque-1785622990943",
+      "label": "Awolowo Hall Agba",
+      "address": "Awolowo Hall of Residence, After Awo Cafe, OAU.",
+      "description": "io uu ytuy ui yieur",
+      "url": "",
+      "images": [
+        "https://res.cloudinary.com/dufk9toy2/image/upload/v1785622988/ahc9s98n24vnpnazlkrp.jpg"
+      ]
+    }
+  ],
+  "updatedAt": "2026-08-01T22:23:10.966Z"
+}

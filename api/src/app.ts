@@ -2,14 +2,13 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import type { Context } from 'hono'
 import { errorHandler } from './middleware/error-handler'
+import { adminAuthMiddleware } from './middleware/admin-auth'
 import { logger } from './lib/logger'
 import env from './lib/env'
 
 // * Main Hono application instance
 const app = new Hono<{
 	Variables: {
-		// * Variables that can be set via c.set() and accessed via c.get()
-		// * Add custom variables here as needed
 		user?: {
 			id: string
 			email: string
@@ -17,6 +16,11 @@ const app = new Hono<{
 			fullName: string
 			role: 'MEMBER' | 'EXCO'
 			has2FA: boolean
+		}
+		adminUser?: {
+			email: string
+			fullName: string
+			role: string
 		}
 	}
 }>()
@@ -65,6 +69,10 @@ app.use('*', async (c, next) => {
 	)
 })
 
+// * Admin JWT auth — protects write operations (POST/PUT/PATCH/DELETE)
+// * GET requests and public paths are always open
+app.use('*', adminAuthMiddleware)
+
 // * Health check endpoint
 app.get('/', (c: Context) => {
 	return c.json({
@@ -90,12 +98,41 @@ import excosRoutes from './routes/excos'
 import sessionsRoutes from './routes/sessions'
 import alumnaeRoutes from './routes/alumnae'
 import webhooksRoutes from './routes/webhooks'
+import publicExcosRoute from './routes/public-excos'
+import publicPrayerTimesRoute from './routes/public-prayer-times'
+import publicEventsRoute from './routes/public-events'
+import publicNewsletterRoute from './routes/public-newsletter'
+import publicAnnualDuesRoute from './routes/public-annual-dues'
+import publicMosquesRoute from './routes/public-mosques'
+import publicLatestNewsRoute from './routes/public-latest-news'
+import publicBlogPostsRoute from './routes/public-blog-posts'
+import publicProgrammesRoute from './routes/public-programmes'
+import publicAlumniRoute from './routes/public-alumni'
+import publicAdvisorsRoute from './routes/public-advisors'
+import publicContactRoute from './routes/public-contact'
+import publicSuggestionRoute from './routes/public-suggestions'
+import adminAuthRoutes from './routes/admin-auth'
 
+app.route('/admin-auth', adminAuthRoutes)
 app.route('/auth', authRoutes)
 app.route('/users', usersRoutes)
 app.route('/excos', excosRoutes)
 app.route('/sessions', sessionsRoutes)
 app.route('/alumnae', alumnaeRoutes)
 app.route('/webhooks', webhooksRoutes)
+app.route('/public/excos', publicExcosRoute)
+app.route('/public/prayer-times', publicPrayerTimesRoute)
+app.route('/public/events', publicEventsRoute)
+app.route('/public/newsletter', publicNewsletterRoute)
+app.route('/public/annual-dues', publicAnnualDuesRoute)
+app.route('/public/mosques', publicMosquesRoute)
+app.route('/public/latest-news', publicLatestNewsRoute)
+app.route('/public/blog-posts', publicBlogPostsRoute)
+app.route('/public/programmes', publicProgrammesRoute)
+app.route('/public/alumni', publicAlumniRoute)
+app.route('/public/advisors', publicAdvisorsRoute)
+app.route('/public/contact', publicContactRoute)
+app.route('/public/suggestions', publicSuggestionRoute)
 
 export default app
+

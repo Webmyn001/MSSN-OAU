@@ -1,0 +1,32 @@
+{
+  "hijriDate": "18 Ṣafar, 1448AH",
+  "shortHijriDate": "18/02/1448AH",
+  "prayer_times": {
+    "subhi": {
+      "adhan": "05:20 AM",
+      "iqamah": "05:40 AM"
+    },
+    "dhuhr": {
+      "adhan": "01:00 PM",
+      "iqamah": "01:15 PM"
+    },
+    "asr": {
+      "adhan": "04:15 PM",
+      "iqamah": "04:25 PM"
+    },
+    "maghrib": {
+      "adhan": "07:00 PM",
+      "iqamah": "07:05 PM"
+    },
+    "isha": {
+      "adhan": "08:15 PM",
+      "iqamah": "08:25 PM"
+    },
+    "jumuah": {
+      "adhan": "01:00 PM",
+      "iqamah": "02:15 PM"
+    }
+  },
+  "updatedAt": "2026-08-01T22:06:47.148Z",
+  "isCustomHijri": false
+}

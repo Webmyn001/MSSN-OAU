@@ -2,7 +2,6 @@
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
     import SEO from "$lib/components/SEO.svelte";
     import { onMount } from "svelte";
-	import { toast } from "svelte-sonner";
     let { data } = $props();
     
     // Define the committees variable and showAll state
@@ -110,20 +109,7 @@
     {#if committees.length > 0}
         <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
             {#each (showAll ? committees : committees.slice(0, 3)) as committee}
-                <div class="rounded-xl overflow-hidden shadow-md border border-gray-100 bg-white hover:shadow-lg transition-shadow duration-300">
-                    <div class="h-48 bg-primary-50 relative">
-                        <img 
-                            src={committee.image}
-                            alt={committee.alt || committee.name} 
-                            class="w-full h-full object-cover" 
-                        />
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        {#if committee.badge}
-                        <div class="absolute bottom-0 left-0 p-4">
-                            <span class={(committee.badgeColor || 'bg-primary-600 text-white') + " text-xs font-medium px-2.5 py-1 rounded-full"}>{committee.badge}</span>
-        </div>
-                        {/if}
-        </div>
+                <div class="rounded-xl shadow-md border border-gray-100 bg-white hover:shadow-lg transition-shadow duration-300">
                     <div class="p-5">
                         <h3 class="text-xl font-semibold font-secondary text-primary-800 mb-3">{committee.name}</h3>
                         <p class="text-gray-600 text-sm mb-4">{committee.description}</p>
@@ -139,9 +125,11 @@
         </div>
                         {/if}
                         
-                        <a href="#"
-                        onclick={(event) => { event.preventDefault(); toast.warning('Committee feature is in development and is currently unavailable.'); }}
-                        class="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-600">
+                        <a
+                            href={`https://wa.me/2347076412101?text=${encodeURIComponent(`Assalāmu 'alaykum wa raḥmatullāhi wa barakātuh.\n\nI would like to express my interest in serving as a member of the ${committee.name}. I would be grateful if my application could be considered.\n\n\nJazākumullāhu khayran.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-600">
                             Join this committee
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

@@ -25,13 +25,29 @@ const envSchema = z.object({
 	CLOUDFLARE_SECRET_ACCESS_KEY: z.string().min(1),
 	CLOUDFLARE_BUCKET_NAME: z.string().min(1),
 
-	// * Email (Plunk)
-	PLUNK_API_KEY: z.string().min(1),
-	PLUNK_FROM_EMAIL: z.string().email(),
+	// * Email (SMTP — Brevo relay)
+	SMTP_HOST: z.string().min(1),
+	SMTP_PORT: z
+		.string()
+		.transform(Number)
+		.pipe(z.number().int().positive()),
+	SMTP_SECURE: z
+		.string()
+		.default('false')
+		.transform(v => v === 'true'),
+	SMTP_USER: z.string().min(1),
+	SMTP_PASS: z.string().min(1),
+	SMTP_FROM: z.string().min(1),
 
 	// * SMS (Kudisms)
 	KUDISMS_API_TOKEN: z.string().min(1),
 	KUDISMS_SENDER_ID: z.string().min(1),
+
+	// * Storage (Cloudinary)
+	CLOUDINARY_CLOUD_NAME: z.string().optional().default('your_cloud_name'),
+	CLOUDINARY_API_KEY: z.string().optional().default('your_api_key'),
+	CLOUDINARY_API_SECRET: z.string().optional().default('your_api_secret'),
+	CLOUDINARY_UPLOAD_PRESET: z.string().optional().default('mssn_events'),
 
 	// * AI (Gemini)
 	GOOGLE_GEMINI_API_KEY: z.string().min(1),

@@ -234,7 +234,7 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/><circle cx="17" cy="7" r="5"/></svg>
                                                 Our Advisers
                                             </a>
-                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/alumnae">
+                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/alumni">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg>
                                                 Alumnae
                                             </a>

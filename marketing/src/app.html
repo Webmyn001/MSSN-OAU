@@ -11,8 +11,7 @@
 	<!-- Cache Control -->
 	<meta http-equiv="Cache-Control" content="max-age=86400" />
 
-	<!-- Security Headers - X-Content-Type-Options is managed by SvelteKit's CSP or hosting headers -->
-	<!-- The static CSP meta tag has been removed in favor of svelte.config.js CSP -->
+	<!-- Security Headers -->
 	<meta http-equiv="X-Content-Type-Options" content="nosniff" />
 
 	<!-- Performance Optimizations -->
@@ -38,7 +37,7 @@
 	<link rel="manifest" href="/app.webmanifest" />
 
 	<!-- Critical CSS for initial render -->
-	<style nonce="%sveltekit.nonce%">
+	<style>
 		:root {
 			--background: 0 0% 100%;
 			--foreground: 0 0% 3.9%;
@@ -122,12 +121,6 @@
 	<meta name="sentry-trace" content="ecfd9c2bcd2df0ec4729f2cd9468623c-1d3b2227cc96377a-1" />
 	<meta name="baggage"
 		content="sentry-environment=production,sentry-public_key=8a6c37d91d61d59f93315969a077bace,sentry-trace_id=ecfd9c2bcd2df0ec4729f2cd9468623c,sentry-sample_rate=1,sentry-transaction=GET%20%2Fcontact%2F,sentry-sampled=true" />
-
-	<script>
-		// * Exposes a nonce placeholder for legacy client-side script injection.
-		// * When prerendering with CSP mode 'auto', SvelteKit uses hashes (not nonces) for inline scripts.
-		window.APP_NONCE = '';
-	</script>
 
 	%sveltekit.head%
 </head>

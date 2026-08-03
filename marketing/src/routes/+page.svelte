@@ -13,15 +13,15 @@
     import {slide} from 'svelte/transition'
     import {toast} from 'svelte-sonner'
     import {Badge} from "$lib/components/ui/badge/index.js";
-    import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {Button} from "$lib/components/ui/button";
     import copyTextToClipboard from '$lib/utils/copy.js'
     import slugify from "$lib/utils/slugify.js"
     import SEO from '$lib/components/SEO.svelte';
-    import { programmes } from '$lib/data/programmes';
-    import { browser } from '$app/environment';
     import { SITE_URL } from '$lib/config';
+    import { onMount } from 'svelte';
+    import { invalidate } from '$app/navigation';
+    import { dev } from '$app/environment';
 
     // Home section components — lazily loaded to reduce initial bundle parse time
 	import HeroSection from '$lib/components/home/HeroSection.svelte';
@@ -59,23 +59,13 @@
         }
     }
 
-    let selectedEvent = $state("Tutorials")
-    let selectedMosqueObject = $state(null)
-    let showMosqueModal = $state(false);
-
-    const selectedImage = $derived(programmes.find(event => event.title === selectedEvent)?.image)
-
+    // Dev-only: auto-refresh homepage data so dashboard saves appear immediately
+    // without needing a manual reload. Does nothing in production.
     onMount(() => {
-        if (data.posts && data.posts.length === 0) {
-            toast.error("Blog server is temporarily unavailable.", {
-                duration: Number.POSITIVE_INFINITY,
-                action: {
-                    label: "Go to blog",
-                    onClick: () => window.open("https://annuurpress.org.ng")
-                }
-            })
-        }
-    })
+        if (!dev) return;
+        const id = setInterval(() => invalidate(() => true), 5000);
+        return () => clearInterval(id);
+    });
 </script>
 
 <SEO 
@@ -119,14 +109,20 @@
 <!-- End Hero -->
 
 <!-- Events -->
-<Programmes />
+<Programmes programmes={data?.programmes || []} />
 <!-- End Events -->
 
 <!-- Prayer Times -->
 {#await import('$lib/components/home/PrayerTimesSection.svelte') then { default: PrayerTimesSection }}
-    <PrayerTimesSection />
+    <PrayerTimesSection prayerTimes={data?.info?.prayer_times} prayerTimesUpdatedAt={data?.info?.prayerTimesUpdatedAt} hijriDate={data?.info?.hijriDate} shortHijriDate={data?.info?.shortHijriDate} mosques={data?.mosques || []} />
 {/await}
 <!-- End Prayer Times -->
+
+<!-- Latest News Section -->
+{#await import('$lib/components/home/LatestNewsSection.svelte') then { default: LatestNewsSection }}
+    <LatestNewsSection items={data?.latestNews} />
+{/await}
+<!-- End Latest News Section -->
 
 <!-- Upcoming Events Section -->
 {#await import('$lib/components/home/UpcomingEvents.svelte') then { default: UpcomingEvents }}
@@ -136,18 +132,15 @@
 
 <!-- Blog Section -->
 {#await import('$lib/components/home/BlogSection.svelte') then { default: BlogSection }}
-    <BlogSection posts={data.posts} />
+    <BlogSection posts={data?.blogPosts} />
 {/await}
 <!-- End Blog Section -->
 
-<!-- Donation CTA -->
- <i class="hidden" id="donate"></i>
-{#if data.info && data.info.account}
-{#await import('$lib/components/home/Donate.svelte') then { default: Donate }}
-    <Donate />
+<!-- Alumni Section -->
+{#await import('$lib/components/home/AlumniSection.svelte') then { default: AlumniSection }}
+    <AlumniSection sessions={data?.alumni?.sessions || []} />
 {/await}
-{/if}
-<!-- End Donation CTA -->
+<!-- End Alumni Section -->
 
 <!-- Suggestions Section -->
 {#await import('$lib/components/home/SuggestionsSection.svelte') then { default: SuggestionsSection }}

@@ -1,5 +1,5 @@
 <script>
-	import { SquareArrowOutUpRight } from "@lucide/svelte";
+	import { SquareArrowOutUpRight, MessageCircle } from "@lucide/svelte";
 	import { BookOpenText, NotebookPen, Presentation, UsersRound } from '@lucide/svelte';
 	import { Image } from '$lib/components/ui/image';
 	import { slide, fade, fly } from 'svelte/transition';
@@ -17,21 +17,28 @@
      * @property {string} href
      * 
     */
-        programmes = page.data?.programmes
+        programmes = page.data?.programmes || []
      } = $props();
     
     let selectedEvent = $state(programmes[0]?.title ?? '');
     const selectedImage = $derived(programmes.find((/** @type {any} */ p) => p.title === selectedEvent)?.image);
+
+    $effect(() => {
+        if (Array.isArray(programmes) && programmes.length > 0) {
+            if (!selectedEvent || !programmes.some((p) => p.title === selectedEvent)) {
+                selectedEvent = programmes[0].title;
+            }
+        }
+    });
     
     // For tab hover effects
     let hoveredTab = $state(null);
     
-    // For image animation
-    let imageLoaded = $state(false);
-    let imageVisible = $state(false);
-    let isTransitioning = $state(false);
-    let currentDisplayedImage = $state(selectedImage);
-    
+    // For image display
+    let imageLoaded = $state(true);
+    let imageVisible = $state(true);
+    const currentDisplayedImage = $derived(selectedImage || '');
+
     // For parallax effect
     /** @type {HTMLElement | undefined} */
     let containerEl;
@@ -45,52 +52,6 @@
         mouseX = (e.clientX - rect.left) / rect.width;
         mouseY = (e.clientY - rect.top) / rect.height;
     }
-    
-    // Handle image load
-    function handleImageLoad() {
-        imageLoaded = true;
-        setTimeout(() => {
-            imageVisible = true;
-            isTransitioning = false;
-        }, 50);
-    }
-    
-    // Handle image error
-    function handleImageError() {
-        // * If image fails to load, still show it (fallback will display)
-        imageLoaded = true;
-        imageVisible = true;
-        isTransitioning = false;
-    }
-    
-    // Initialize image state on mount - fallback for cached images
-    onMount(() => {
-        if (currentDisplayedImage) {
-            // * Fallback: if image doesn't load within 500ms (e.g., cached images that fire onload before handler attaches),
-            // * assume it's loaded or show it anyway to prevent infinite spinner
-            const timeout = setTimeout(() => {
-                if (!imageLoaded) {
-                    imageLoaded = true;
-                    imageVisible = true;
-                }
-            }, 500);
-            
-            return () => clearTimeout(timeout);
-        }
-    });
-    
-    $effect(() => {
-        if (selectedImage !== currentDisplayedImage) {
-            isTransitioning = true;
-            imageVisible = false;
-            imageLoaded = false;
-            
-            // Wait for fade out, then change image
-            setTimeout(() => {
-                currentDisplayedImage = selectedImage;
-            }, 300);
-        }
-    });
     
     // Icon mapping for programmes
     /** @type {Record<string, any>} */
@@ -161,7 +122,7 @@
                                 <span class="grow">
                                     <span class="block text-lg font-semibold font-secondary transition-all duration-300 {selectedEvent === programme.title || hoveredTab === programme.title ? 'text-primary-700' : 'text-neutral-800'}">{programme.title}</span>
                                     {#if selectedEvent === programme.title}
-                                        <span in:slide={{ duration: 300 }} out:slide={{ duration: 300 }} class="block mt-1 text-neutral-800 font-tertiary">{programme.text}</span>
+                                        <span in:slide={{ duration: 300 }} out:slide={{ duration: 300 }} class="block mt-1 text-neutral-800 font-tertiary">{programme.text || programme.summary || programme.description || ''}</span>
                                     {/if}
                                 </span>
                             </span>
@@ -183,6 +144,21 @@
                             </span>
                         </span>
                     </button>
+
+                    <a
+                        href="https://wa.me/2347076412101?text=Hello%2C%20I%27d%20like%20to%20enquire%20about%20MSSN%20programmes."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="relative text-start hover:bg-white/50 focus:outline-none focus:bg-white/50 p-4 md:p-5 rounded-xl transition-all duration-300 group"
+                        in:fly={{ y: 20, duration: 800, delay: 400 + ((programmes.length + 1) * 100) }}
+                    >
+                        <span class="flex gap-x-6">
+                            <MessageCircle class="shrink-0 mt-2 size-6 md:size-7 text-neutral-800 group-hover:text-primary-700 group-hover:scale-110 transition-all duration-300 cursor-pointer"/>
+                            <span class="grow">
+                                <span class="block text-lg font-semibold text-neutral-800 group-hover:text-primary-700 transition-all duration-300">Enquiry</span>
+                            </span>
+                        </span>
+                    </a>
                 </nav>
                 <!-- End Tab Navs -->
             </div>
@@ -203,13 +179,11 @@
                                         <Image 
                                             loading="eager" 
                                             className="rounded-lg shadow-lg transform transition-transform duration-700 hover:scale-105"
-                                            width={800}
-                                            height={500}
-                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 800px"
+                                            width={640}
+                                            height={400}
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 640px"
                                             src={currentDisplayedImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23f3f4f6' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='18'%3ENo Image%3C/text%3E%3C/svg%3E"}
                                             alt={selectedEvent}
-                                            onload={handleImageLoad}
-                                            onerror={handleImageError}
                                         />
                                         
                                         <!-- Glassmorphism overlay -->
@@ -220,13 +194,6 @@
                                         </div>
                                     </div>
                                 {/key}
-                                
-                                <!-- Loading indicator -->
-                                {#if !imageLoaded || isTransitioning}
-                                    <div class="absolute inset-0 flex items-center justify-center bg-gray-100/50 backdrop-blur-sm rounded-lg">
-                                        <div class="w-10 h-10 border-4 border-primary-700/30 border-t-primary-700 rounded-full animate-spin"></div>
-                                    </div>
-                                {/if}
                             </div>
                         </div>
                     </div>

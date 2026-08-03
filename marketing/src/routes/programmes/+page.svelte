@@ -11,7 +11,7 @@
      * @typedef {Object} ProgrammeScheduleItem
      * @property {string} day
      * @property {string} time
-     * @property {string} [venue]
+     * @property {string} [location]
      */
 
     /**
@@ -226,7 +226,7 @@
                                         <p class="font-medium text-gray-800">{item.day}</p>
                                                 <p class="text-xs text-gray-500">{item.time}</p>
                                     </div>
-                                            <p class="text-sm text-gray-600 sm:text-right">{item.venue || 'Online'}</p>
+                                            <p class="text-sm text-gray-600 sm:text-right">{item.location || 'Online'}</p>
                                 </div>
                             {/each}
                         </div>

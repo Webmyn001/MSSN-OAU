@@ -1,6 +1,6 @@
 <script>
     import {Button, buttonVariants} from "$lib/components/ui/button/index.js";
-    import {format, register} from 'timeago.js';
+
     import {toast} from "svelte-sonner";
     import {formatDate, isPastDate, months} from "$lib/utils/dates.js";
     import Seo from "$lib/components/SEO.svelte";
@@ -163,34 +163,6 @@
         allEvents = processEvents(data?.events);
     });
     
-    /**
-     * Custom locale function for timeago
-     * @param {number} _number The timeago/timein number (unused)
-     * @param {number} index The index in the locale array
-     * @returns {[string, string] | undefined} Tuple of [past, future] strings or undefined if index is out of bounds
-     */
-    const localeFunc = (_number, index) => {
-        const locales = [
-            ['just now', 'happening right now'],
-            ['%s seconds ago', 'in %s seconds'],
-            ['1 minute ago', 'in 1 minute'],
-            ['%s minutes ago', 'in %s minutes'],
-            ['1 hour ago', 'in 1 hour'],
-            ['%s hours ago', 'in %s hours'],
-            ['yesterday', 'tomorrow'],
-            ['%s days ago', 'in %s days'],
-            ['1 week ago', 'in 1 week'],
-            ['%s weeks ago', 'in %s weeks'],
-            ['1 month ago', 'in 1 month'],
-            ['%s months ago', 'in %s months'],
-            ['1 year ago', 'in 1 year'],
-            ['%s years ago', 'in %s years']
-        ];
-        return locales[index];
-    };
-
-    register('my-locale', localeFunc);
-
     let open = $state(false);
     let mode = $state("upcoming");
     let events = $derived(allEvents[mode]);
@@ -233,17 +205,66 @@
         })()
     );
 
+    let regName = $state("");
+    let regEmail = $state("");
+    let regPhone = $state("");
+    let regLoading = $state(false);
+    let regSuccess = $state(null);
+    let regError = $state("");
+
     /** @param {Event} event */
     function openEventDetails(event) {
         currentEvent = event;
+        regSuccess = null;
+        regError = "";
         open = true;
     }
 
     function closeEventDetails() {
         open = false;
         setTimeout(() => {
-            if (!open) currentEvent = null;
+            if (!open) {
+                currentEvent = null;
+                regSuccess = null;
+                regError = "";
+            }
         }, 300);
+    }
+
+    async function submitRegistration(eventId) {
+        if (!regName.trim() || !regEmail.trim()) {
+            regError = "Please enter your Name and Email.";
+            return;
+        }
+
+        regLoading = true;
+        regError = "";
+        regSuccess = null;
+        try {
+            const res = await fetch(`http://localhost:3000/public/events/${eventId}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: regName.trim(),
+                    email: regEmail.trim(),
+                    phone: regPhone.trim() || null
+                })
+            });
+            const json = await res.json();
+            if (json.success) {
+                regSuccess = json.data;
+                toast.success("Registration completed successfully!");
+                regName = "";
+                regEmail = "";
+                regPhone = "";
+            } else {
+                regError = json.error || "Registration failed";
+            }
+        } catch {
+            regError = "Unable to connect to registration server. Please try again.";
+        } finally {
+            regLoading = false;
+        }
     }
 
     /** @param {SubmitEvent} e */
@@ -293,19 +314,17 @@
                         name: event.host || "MSSN OAU"
                     },
                     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-                };
-                if (event.image) {
-                    schemaEvent.image = [event.image];
-                }
-                if (event.paid && event.price) {
-                    schemaEvent.offers = {
+                    offers: {
                         "@type": "Offer",
-                        price: event.price,
+                        price: "0",
                         priceCurrency: "NGN",
                         url: schemaEventUrl,
                         availability: "https://schema.org/InStock",
                         validFrom: event.registration_deadline || new Date().toISOString() 
-                    };
+                    },
+                };
+                if (event.image) {
+                    schemaEvent.image = [event.image];
                 }
                 return schemaEvent;
             });
@@ -367,19 +386,17 @@
                             name: event.host || "MSSN OAU"
                         },
                         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-                    };
-                     if (event.image) {
-                        schemaEvent.image = [event.image];
-                    }
-                    if (event.paid && event.price) {
-                        schemaEvent.offers = {
+                        offers: {
                             "@type": "Offer",
-                            price: event.price,
+                            price: "0",
                             priceCurrency: "NGN",
                             url: schemaEventUrl,
                             availability: "https://schema.org/InStock",
                             validFrom: event.registration_deadline || new Date().toISOString()
-                        };
+                        },
+                    };
+                     if (event.image) {
+                        schemaEvent.image = [event.image];
                     }
                     return schemaEvent;
                 });
@@ -487,18 +504,9 @@
                 </p>
 
                 {#if mode === "upcoming"}
-                    <div class="mx-auto max-w-2xl bg-primary-50 border border-primary-100 rounded-xl px-4 py-3 text-sm text-primary-900 font-tertiary flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
-                        <div>
-                            <span class="font-semibold">New to online registration?</span>
-                            <span class="ml-1">Read our step-by-step guide on how to register for paid MSSN events via the website.</span>
-                        </div>
-                        <a
-                          href="/events/how-to-register-paid-events-online"
-                          class="inline-flex items-center text-primary-700 hover:text-primary-800 font-semibold underline decoration-primary-300 text-xs sm:text-sm"
-                        >
-                            How to register for paid events
-                        </a>
-                    </div>
+                    <p class="mx-auto max-w-screen-md text-center text-sm text-primary-700">
+                        All events are free to attend. Register directly on the event page!
+                    </p>
                 {/if}
                 
                 <!-- Search and Filter -->
@@ -619,9 +627,10 @@
                                 />
                                 
                                 {#if mode === "upcoming" && !isPastDate(event.date)}
+                                    {@const badgeDate = formatDate(event.date)}
                                     <div class="absolute top-3 right-3 z-20">
                                         <span class="rounded-full bg-primary-700/90 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold tracking-wider text-white shadow-sm">
-                                            {format(event.date, 'my-locale')}
+                                            {badgeDate?.month && badgeDate?.day ? `${badgeDate.month} ${badgeDate.day}` : event.date}
                         </span>
                                     </div>
                                 {/if}
@@ -665,11 +674,7 @@
                                         </div>
                                     </div>
 
-                                    {#if event.paid}
-                                        <span class="rounded-full border border-amber-500 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">{event.price || 'Paid Event'}</span>
-                                    {:else}
-                                        <span class="rounded-full border border-green-500 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">Free</span>
-                                {/if}
+                                    <span class="rounded-full border border-green-500 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">Free</span>
                                 </div>
                                 
                                 <!-- View Details Button (visible on hover) -->
@@ -767,9 +772,6 @@
                 <CalendarDays class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
                 <span class="text-gray-700">
                     {eventDateDetailsModal?.fullDate || ''} at {eventDateDetailsModal?.time || ''}
-                    {#if mode === "upcoming" && !isPastDate(currentEvent.date)}
-                        <span class="ml-2 text-xs font-medium text-green-700">({format(currentEvent.date, 'my-locale')})</span>
-                    {/if}
                 </span>
                 </div>
 
@@ -780,10 +782,8 @@
 
             <div class="flex items-start">
                 <Ticket class="h-4 w-4 text-primary-600 mr-3 mt-0.5 shrink-0" />
-                <span class="text-gray-700">
-                    {currentEvent.paid ? (currentEvent.price || "Paid Event - Check link for price") : "Free Admission"}
-                            </span>
-                </div>
+                <span class="text-gray-700">Free Admission</span>
+            </div>
 
             {#if currentEvent.contact}
                 <div class="flex items-start">
@@ -812,6 +812,80 @@
                 </div>
                 {/if}
         </div>
+
+        <!-- Interactive Event Registration Form -->
+        {#if !isPastDate(currentEvent.date)}
+            <div class="mt-5 rounded-xl border border-primary-100 bg-gradient-to-b from-primary-50/80 to-white p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-bold text-primary-900 text-sm flex items-center gap-2">
+                        <Ticket class="h-4 w-4 text-primary-600" />
+                        Event Registration
+                    </h4>
+                    <span class="text-xs font-bold px-2 py-0.5 bg-green-100 text-green-800 rounded-full">Free Event</span>
+                </div>
+
+                {#if regSuccess}
+                    <div class="rounded-lg bg-green-50 p-4 border border-green-200 text-green-900 space-y-2">
+                        <div class="flex items-center gap-2 font-bold text-sm text-green-800">
+                            <span>✓ {regSuccess.message}</span>
+                        </div>
+                        <p class="text-xs">Your Ticket Code: <code class="bg-green-100 px-2 py-0.5 rounded font-mono font-bold text-green-900">{regSuccess.ticket?.ticketCode ?? ''}</code></p>
+                        <p class="text-[11px] text-gray-500">Screenshot or save your ticket code — you will need it for check-in at the venue.</p>
+                    </div>
+                {:else}
+                    {#if regError}
+                        <div class="mb-3 p-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs">
+                            {regError}
+                        </div>
+                    {/if}
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+                            <input
+                                type="text"
+                                bind:value={regName}
+                                placeholder="Your full name"
+                                class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                            />
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Email Address *</label>
+                                <input
+                                    type="email"
+                                    bind:value={regEmail}
+                                    placeholder="student@example.com"
+                                    class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    bind:value={regPhone}
+                                    placeholder="08012345678"
+                                    class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                />
+                            </div>
+                        </div>
+                        <Button
+                            onclick={() => submitRegistration(currentEvent.id)}
+                            disabled={regLoading}
+                            class="w-full font-bold text-xs py-2.5 rounded-lg shadow-sm text-white bg-primary-700 hover:bg-primary-800"
+                        >
+                            {#if regLoading}
+                                <span class="flex items-center justify-center gap-2">
+                                    <span class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+                                    Registering...
+                                </span>
+                            {:else}
+                                Register for Free
+                            {/if}
+                        </Button>
+                    </div>
+                {/if}
+            </div>
+        {/if}
         
         {#snippet footer()}
             <div class="space-y-2 w-full">

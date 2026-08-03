@@ -65,6 +65,10 @@
                 <Carousel.Next class="right-2" />
             </Carousel.Root>
 
+            {#if mosque.description}
+                <p class="text-sm text-gray-600 leading-relaxed px-1 mb-4">{mosque.description}</p>
+            {/if}
+
             <Sheet.Footer class="gap-3">
                 <Button variant="outline" onclick={onClose}>Close</Button>
                 {#if mosque.url}

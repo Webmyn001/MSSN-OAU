@@ -32,14 +32,13 @@ export const events = pgTable(
 		startDate: timestamp('start_date', { withTimezone: true }).notNull(),
 		endDate: timestamp('end_date', { withTimezone: true }).notNull(),
 		venue: varchar('venue', { length: 255 }),
-		imageUrl: text('image_url'), // * R2 URL
+		imageUrl: text('image_url'), // * Cloudinary URL
 		ticketPrice: decimal('ticket_price', { precision: 10, scale: 2 }).notNull().default('0'),
 		maxTickets: integer('max_tickets'),
 		ticketsSold: integer('tickets_sold').notNull().default(0),
 		isPublic: boolean('is_public').notNull().default(true),
 		createdBy: uuid('created_by')
-			.notNull()
-			.references(() => users.id, { onDelete: 'restrict' }),
+			.references(() => users.id, { onDelete: 'set null' }),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
@@ -62,8 +61,7 @@ export const tickets = pgTable(
 			.notNull()
 			.references(() => events.id, { onDelete: 'cascade' }),
 		userId: uuid('user_id')
-			.notNull()
-			.references(() => users.id, { onDelete: 'restrict' }),
+			.references(() => users.id, { onDelete: 'set null' }),
 		ticketCode: varchar('ticket_code', { length: 50 }).notNull().unique(), // * For QR code generation
 		quantity: integer('quantity').notNull().default(1),
 		totalAmount: decimal('total_amount', { precision: 10, scale: 2 }).notNull(),

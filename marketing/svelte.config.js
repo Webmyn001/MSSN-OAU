@@ -19,30 +19,8 @@ const config = {
 			'$lib': './src/lib',
 			'$components': './src/lib/components'
 		},
-		csp: {
-			mode: 'auto',
-			directives: {
-				'default-src': ["'self'"],
-				// * Allows SvelteKit to hash inline scripts/styles during prerendering (CSP meta) while keeping SSR safe.
-				'script-src': ["'self'"],
-				'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-				'img-src': [
-					"'self'",
-					'data:',
-					'blob:',
-					'https://images.unsplash.com',
-					'https://plus.unsplash.com',
-					'https://mssnoau.sirv.com'
-				],
-				'font-src': ["'self'", 'data:', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
-				'connect-src': [
-					"'self'",
-					'https://api.aladhan.com'
-				],
-				'object-src': ["'none'"],
-				'base-uri': ["'self'"]
-			}
-		}
+		// CSP disabled: Svelte 5 inline event handlers (onclick, etc.) are incompatible
+		// with nonce/hash-based CSP. Re-enable only after migrating to non-inline event handling.
 	}
 };
 

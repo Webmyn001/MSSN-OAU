@@ -1,13 +1,14 @@
 import { browser } from '$app/environment';
+import { loadSiteData } from '$lib/api/site-data.js';
 
 export const trailingSlash = 'always';
 export const ssr = true;
 export const csr = true; // Enable client-side rendering for hydration
 
 // Add route-based code splitting
-export const load = async ({ route }) => {
-    // * Use mocked data directly (no server-side fetching)
-    const dataPromise = fetchSiteData();
+export const load = async ({ route, fetch }) => {
+    // Load all site API data (events, programmes, mosques, news, blog, advisors, alumni, excos)
+    const dataPromise = loadSiteData(fetch);
 
     // Client-side only code
     if (browser) {
@@ -125,19 +126,4 @@ async function loadClientSideTools() {
         console.error('Error loading client tools:', error);
         // Non-critical, so we can continue without throwing
     }
-}
-
-// * Use mocked data directly (no server-side fetching)
-import { mockInfo } from "$lib/mocks/data.js";
-
-/**
- * * Returns mocked site data (client-side data, no external APIs)
- * @returns {Promise<Object>} Site data object
- */
-async function fetchSiteData() {
-    return {
-        info: mockInfo,
-        events: [],
-        posts: []
-    };
 }

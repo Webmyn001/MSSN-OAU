@@ -52,21 +52,23 @@
         if (interval) clearInterval(interval);
     });
 
-    // Helper to ensure formatTime gets a number or Date
+    // Helper to normalize any time value for formatTime
     /** @param {any} val */
     function toTime(val) {
+        if (val == null || val === '') return null;
+        if (typeof val === 'string' && /^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(val.trim())) return val.trim();
+        if (typeof val === 'number') return val;
         if (typeof val === 'string') {
             const n = Number(val);
-            if (!isNaN(n)) return n;
+            if (!isNaN(n) && n > 0) return n;
             const d = Date.parse(val);
-            if (!isNaN(d)) return new Date(d);
-            return undefined;
+            if (!isNaN(d)) return d;
         }
-        return val;
+        return null;
     }
 
     // Use $derived for cardClass in runes mode
-    const cardClass = $derived(() => `relative overflow-hidden rounded-xl shadow-xl w-full ${isUpcoming ? 'min-h-64 sm:min-h-full' : 'min-h-48 sm:min-h-full'}`);
+    const cardClass = $derived(`relative overflow-hidden rounded-xl shadow-xl w-full ${isUpcoming ? 'min-h-64 sm:min-h-full' : 'min-h-48 sm:min-h-full'}`);
 </script>
 
 <div
@@ -110,17 +112,17 @@
                 {prayerName}
             </h2>
 
-            <!-- Time display with glassmorphism -->
-            <div 
-                class="backdrop-blur-xl bg-white/30 border border-white/40 rounded-full px-2 py-1 w-auto min-w-0 max-w-[150px] transition-all duration-300 hover:bg-white/40 group text-xs overflow-hidden text-ellipsis whitespace-nowrap"
-            >
-                <div class="flex items-center justify-center gap-1 min-w-0">
-                    <Clock class="shrink-0 size-3 text-white group-hover:text-primary-900 transition-colors"/>
-                    <span class="whitespace-nowrap font-medium font-primary text-white group-hover:text-primary-900 transition-colors text-xs overflow-hidden text-ellipsis block min-w-0">
-                        {formatTime(toTime(adhanTime))} • {formatTime(toTime(iqamahTime))}
-                    </span>
-                </div>
-            </div>
+		<!-- Time display with glassmorphism -->
+		<div
+			class="backdrop-blur-xl bg-white/30 border border-white/40 rounded-full px-3 py-1.5 transition-all duration-300 hover:bg-white/40 group"
+		>
+			<div class="flex items-center justify-center gap-1.5">
+				<Clock class="shrink-0 size-3 text-white group-hover:text-primary-900 transition-colors"/>
+				<span class="font-medium font-primary text-white group-hover:text-primary-900 transition-colors text-xs whitespace-nowrap">
+					{formatTime(toTime(adhanTime))} — {formatTime(toTime(iqamahTime))}
+				</span>
+			</div>
+		</div>
             
         </div>
     </div>

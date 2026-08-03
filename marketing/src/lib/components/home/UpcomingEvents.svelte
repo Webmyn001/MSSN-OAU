@@ -124,7 +124,7 @@
                 <a 
                     in:fly={{ y: 20, duration: 800, delay: 800 + (i * 200) }}
                     class="group flex flex-col h-full focus:outline-none rounded-xl overflow-hidden backdrop-blur-sm bg-white/30 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
-                    href={`/events/${slugify(event.title)}`}
+                    href={`/events/${event.slug || slugify(event.title)}`}
                     onmouseenter={() => hoveredCard = event.title}
                     onmouseleave={() => hoveredCard = null}
                 >
@@ -181,7 +181,7 @@
                         
                         <div class="mt-auto pt-4">
                             <button 
-                                onclick={() => goto(`/events/${slugify(event.title)}`)}
+                                onclick={() => goto(`/events/${event.slug || slugify(event.title)}`)}
                                 class="inline-flex items-center gap-x-1 text-sm text-primary-700 font-medium font-secondary group-hover:text-primary-800 transition-colors duration-300"
                             >
                                 <span class="relative">
@@ -200,46 +200,6 @@
                 <!-- End Card -->
             {/each}
 
-            <!-- Article Card with enhanced glassmorphism -->
-            <a 
-                in:fly={{ y: 20, duration: 800, delay: 800 + (events.length * 200) }}
-                class="group relative flex flex-col w-full min-h-60 bg-cover bg-center rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2 focus:outline-none focus:shadow-lg col-span-full"
-                href="/events/how-to-register-paid-events-online"
-                style="background-image: url('https://plus.unsplash.com/premium_photo-1676496046182-356a6a0ed002?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=560&q=80')"
-            >
-                <!-- Enhanced overlay with glassmorphism -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 backdrop-blur-[2px] rounded-xl group-hover:backdrop-blur-[4px] transition-all duration-500"></div>
-                
-                <div class="flex-auto p-4 md:p-6 z-10">
-                    <h3 class="text-xl text-white/90 group-hover:text-white font-tertiary transition-colors duration-300">
-                        <span class="font-bold text-primary-100 font-secondary">How To</span> register for Paid MSSN Events online via the website.
-                    </h3>
-                </div>
-                
-                <div class="pt-0 p-4 md:p-6 mt-auto z-10">
-                    <div class="inline-flex items-center gap-2 text-sm font-medium text-white group-hover:text-primary-100 transition-colors duration-300">
-                        <span class="relative">
-                            Read Article
-                            <span class="absolute bottom-0 left-0 w-full h-0.5 bg-primary-100 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
-                        </span>
-                        <svg 
-                            class="shrink-0 size-4 transition-transform duration-300 group-hover:translate-x-1" 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="24" 
-                            height="24"
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            stroke-width="2"
-                            stroke-linecap="round" 
-                            stroke-linejoin="round"
-                        >
-                            <path d="m9 18 6-6-6-6"/>
-                        </svg>
-                    </div>
-                </div>
-            </a>
-            <!-- End Article Card -->
         {/if}
     </div>
     <!-- End Grid -->

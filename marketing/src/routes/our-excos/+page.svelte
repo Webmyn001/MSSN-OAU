@@ -1,104 +1,111 @@
 <script>
     import PageHeader from "$lib/components/layout/PageHeader.svelte";
-    import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown, MessageCircle, X, Info, MessageSquareText, Smartphone } from "@lucide/svelte";
+    import { Phone, Mail, ExternalLink, Copy, Check, ChevronDown, MessageCircle, X, Info, MessageSquareText, Smartphone, Users, Building2, Award, Contact } from "@lucide/svelte";
     import copyTextToClipboard from "$lib/utils/copy.js";
     import { toast } from "svelte-sonner";
     import { tick } from "svelte";
     import { useId } from "bits-ui";
     import * as Popover from "$lib/components/ui/popover/index.js";
     import * as Command from "$lib/components/ui/command/index.js";
-    import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
+    import { Button } from "$lib/components/ui/button/index.js";
     import SEO from '$lib/components/SEO.svelte';
     import { fly, fade, scale } from "svelte/transition";
     import { Image } from '$lib/components/ui/image';
     import { browser } from '$app/environment';
     import { SITE_URL } from '$lib/config';
-    // import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
+    import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
 
-    /**
-     * @typedef {Object} SocialLink
-     * @property {string} platform
-     * @property {string} link
-     */
+    import { onMount } from 'svelte';
 
-    /**
-     * @typedef {Object} Member
-     * @property {string | number} id
-     * @property {string} name
-     * @property {string} position
-     * @property {'male' | 'female'} [gender]
-     * @property {string} [phone]
-     * @property {string} [email]
-     * @property {string} [photo]
-     * @property {string} [bio]
-     * @property {SocialLink[]} [socials]
-     * @property {string} [committeeName]
-     */
-
-    /**
-     * @typedef {Object} Committee
-     * @property {string} committee
-     * @property {Member[]} members
-     */
-
-    /**
-     * @typedef {Object} Session
-     * @property {string} session
-     * @property {Committee[]} executives
-     */
-    
-    /**
-     * @typedef {Object} ExcosData
-     * @property {Session[]} sessions
-     */
-
-    /**
-     * @typedef {Object} PagePropsData // Renamed to avoid conflict with a potential global PageData
-     * @property {ExcosData} [excos]
-     * @property {string} [error]
-     */
-
-    /** @type {{data: PagePropsData}} */
+    /** @type {{ data: any }} */
     let { data } = $props();
 
     let sessionSelectorOpen = $state(false);
-    /** @type {Session[]} */
-    let sessions = $state(/** @type {Session[]} */ ([]));
+    /** @type {any[]} */
+    let sessions = $state([]);
     /** @type {string | undefined} */
-    let selectedSession = $state(/** @type {string | undefined} */ (undefined));
+    let selectedSession = $state(undefined);
     let isLoaded = $state(false);
-    /** @type {string | number | null} */
-    let hoveredMember = $state(null);
     let visible = $state(false);
-
-    /** @type {Member | null} */
-    let activeMemberForModal = $state(null);
+    /** @type {any} */
+    let activeMember = $state(null);
     let memberModalOpen = $state(false);
+    /** @type {string | null} */
+    let selectedCommittee = $state(null);
+    /** @type {string | null} */
+    let copiedId = $state(null);
+
+    /** @param {any[]} sessionList @returns {any[]} */
+    function sortSessionsNewestFirst(sessionList) {
+        return [...sessionList].sort((a, b) => {
+            const aYear = parseInt(String(a.session || '').split('/')[0]) || 0;
+            const bYear = parseInt(String(b.session || '').split('/')[0]) || 0;
+            return bYear - aYear;
+        });
+    }
+
+    async function fetchLatestExcos() {
+        try {
+            const res = await fetch('http://localhost:3000/public/excos');
+            if (res.ok) {
+                const body = await res.json();
+                if (body?.success && body?.data?.excos?.sessions) {
+                    const freshSessions = sortSessionsNewestFirst(body.data.excos.sessions);
+                    if (JSON.stringify(freshSessions) !== JSON.stringify(sessions)) {
+                        sessions = freshSessions;
+                        if (!selectedSession && freshSessions.length > 0) {
+                            selectedSession = freshSessions[0]?.session;
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn("Client fetch for excos failed, keeping loaded state:", err);
+        }
+    }
+
+    onMount(() => {
+        fetchLatestExcos();
+    });
 
     $effect(() => {
-        const newSessions = data?.excos?.sessions || [];
+        const newSessions = sortSessionsNewestFirst(data?.excos?.sessions || []);
         if (JSON.stringify(newSessions) !== JSON.stringify(sessions)) {
             sessions = newSessions;
             if (selectedSession === undefined && newSessions.length > 0) {
-                const preferred = newSessions.find(s => s.session === "2024/2025");
-                selectedSession = preferred ? preferred.session : newSessions[0]?.session;
+                selectedSession = newSessions[0]?.session;
             } else if (newSessions.length === 0) {
                 selectedSession = undefined;
             }
         }
 
-        if (data?.error) {
-            console.error("Error loading executive data:", data.error);
-            toast.error(`Failed to load data: ${data.error.substring(0, 100)}`);
+        if (/** @type {any} */ (data)?.error) {
+            console.error("Error loading executive data:", /** @type {any} */ (data).error);
+            toast.error(`Failed to load data`);
         }
         
-        // Mark as loaded — data is always available synchronously from static mock
         setTimeout(() => { isLoaded = true; }, 300);
     });
 
-    /** @type {Session | undefined} */
-    const currentDisplaySessionData = $derived(
-        selectedSession ? sessions.find(s => s.session === selectedSession) : undefined
+    const currentSession = $derived(
+        selectedSession ? sessions.find(/** @param {any} s */ s => s.session === selectedSession) : undefined
+    );
+
+    const stats = $derived(() => {
+        if (!currentSession?.executives) return { totalMembers: 0, committees: 0, maleCount: 0, femaleCount: 0 };
+        const allMembers = currentSession.executives.flatMap(/** @param {any} c */ c => c.members);
+        return {
+            totalMembers: allMembers.length,
+            committees: currentSession.executives.length,
+            maleCount: allMembers.filter(/** @param {any} m */ m => m.gender === 'male').length,
+            femaleCount: allMembers.filter(/** @param {any} m */ m => m.gender === 'female').length
+        };
+    });
+
+    const filteredCommittees = $derived(
+        selectedCommittee 
+            ? currentSession?.executives?.filter(/** @param {any} c */ c => c.committee === selectedCommittee) || []
+            : currentSession?.executives || []
     );
 
     const triggerId = useId();
@@ -108,7 +115,7 @@
         sessionSelectorOpen = false;
         tick().then(() => {
             if (browser) {
-            document.getElementById(id)?.focus();
+                document.getElementById(id)?.focus();
             }
         });
     }
@@ -117,92 +124,78 @@
         visible = true;
     });
     
-    /** 
-     * @param {number} min 
-     * @param {number} max 
-     * @returns {number} 
-     */
-    function getRandomDelay(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    
-    /** 
-     * @param {Member} member 
-     * @param {string} committeeName 
-     */
-    function openMemberModal(member, committeeName) {
-        activeMemberForModal = { ...member, committeeName };
+    /** @param {any} member @param {string} committeeName */
+    function openMemberDetail(member, committeeName) {
+        activeMember = { ...member, committeeName };
         memberModalOpen = true;
     }
 
-    function closeMemberModal() {
+    function closeMemberDetail() {
         memberModalOpen = false;
-        setTimeout(() => {
-            activeMemberForModal = null;
-        }, 300); 
+        setTimeout(() => { activeMember = null; }, 300);
     }
 
-    /** @param {Member} member */
-    function copyContactDetails(member) {
+    /** @param {any} member */
+    async function copyContact(member) {
         if (!member) return;
-        // Ensure committeeName is a string, default to empty if undefined
-        const committeeNameStr = member.committeeName || '';
-        const details = `${member.name}\n${member.position}, ${committeeNameStr}, MSSNOAU${member.phone ? `\nPhone: ${member.phone}` : ''}${member.email ? `\nEmail: ${member.email}` : ''}`;
-        copyTextToClipboard(details)
-            .then(() => {
+        const committeeName = member.committeeName || '';
+        const details = `${member.name}\n${member.position}, ${committeeName}, MSSNOAU${member.phone ? `\nPhone: ${member.phone}` : ''}${member.email ? `\nEmail: ${member.email}` : ''}`;
+        try {
+            await copyTextToClipboard(details);
+            copiedId = member.id;
             toast.success(`${member.name}'s details copied.`);
-            closeMemberModal();
-            })
-            .catch(() => {
-            toast.error(`Failed to copy ${member.name}'s details.`);
-            });
+            setTimeout(() => { copiedId = null; }, 2000);
+        } catch {
+            toast.error(`Failed to copy details.`);
+        }
     }
 
-    /**
-     * * Returns a gender-based placeholder image path for members without photos.
-     * * This uses role keywords as a best-effort heuristic.
-     * @param {Member} member
-     * @param {string} committeeName
-     * @returns {string}
-     */
-    function getMemberPlaceholder(member, committeeName) {
-        if (member?.gender === "female") return "/images/user/female.jpg";
-        return "/images/user/male.jpg";
+    /** @param {any} member */
+    function getPlaceholder(member) {
+        return member?.gender === "female" ? "/images/user/female.jpg" : "/images/user/male.jpg";
+    }
+
+    /** @param {string} committee */
+    function getCommitteeIcon(committee) {
+        const name = committee.toLowerCase();
+        if (name.includes('executive')) return Award;
+        if (name.includes('faculty') || name.includes('co-ordinator')) return Building2;
+        return Users;
     }
 </script>
 
 <SEO
-        title="Our Executives"
+    title="Our Executives"
     description="Meet the executives of the Muslim Students Society of Nigeria, OAU Branch. Find contact information and committee details for various sessions."
     path="/our-excos"
     type="WebPage"
     images={[
         {
-            url: data?.excos?.sessions?.find(s => s.session === selectedSession)?.executives?.[0]?.members?.[0]?.photo || 'https://mssnoau.sirv.com/og/og-excos.jpg',
-        width: 1200,
+            url: data?.excos?.sessions?.find(/** @param {any} s */ s => s.session === selectedSession)?.executives?.[0]?.members?.[0]?.photo || 'https://mssnoau.sirv.com/og/og-excos.jpg',
+            width: 1200,
             height: 630,
             alt: `MSSN OAU Executives ${selectedSession || ''}`
         }
     ]}
-    schema={currentDisplaySessionData?.executives ? {
+    schema={currentSession?.executives ? {
         "@context": "https://schema.org",
-            "@type": "WebPage",
+        "@type": "WebPage",
         "name": `Our Executives ${selectedSession ? `- ${selectedSession} Session` : ''} | MSSNOAU`,
         "description": `Meet the executives of the Muslim Students Society of Nigeria, OAU Branch for the ${selectedSession || 'current'} session.`,
         "url": `${SITE_URL}/our-excos${selectedSession ? '?session=' + encodeURIComponent(selectedSession) : ''}`,
         "mainEntity": {
-                "@type": "Organization",
+            "@type": "Organization",
             "name": `MSSN OAU Executives - ${selectedSession || 'Current'} Session`,
-            "member": currentDisplaySessionData.executives.flatMap(committee =>
-            committee.members.map(member => ({
-                "@type": "Person",
-                "name": member.name,
+            "member": currentSession.executives.flatMap(/** @param {any} committee */ committee =>
+                committee.members.map(/** @param {any} member */ member => ({
+                    "@type": "Person",
+                    "name": member.name,
                     "jobTitle": `${member.position}, ${committee.committee}`,
                     "image": member.photo,
                     "telephone": member.phone,
                     "email": member.email,
                     "worksFor": {
-                    "@type": "Organization",
+                        "@type": "Organization",
                         "name": "Muslim Students Society of Nigeria, OAU Branch"
                     }
                 }))
@@ -216,7 +209,7 @@
     <div class="relative">
         {#if visible}
             <h1 in:fly={{ y: 30, duration: 800, delay: 200 }} class="relative z-10">
-    Our Executives
+                Our Executives
                 <span class="absolute -bottom-2 left-1/4 right-1/4 h-1 bg-green-600 rounded-full"></span>
             </h1>
         {/if}
@@ -224,17 +217,17 @@
     <br/>
     {#if sessions.length > 0 && visible}
         <div in:fly={{ y: 30, duration: 800, delay: 400 }}>
-    <Popover.Root bind:open={sessionSelectorOpen}>
+            <Popover.Root bind:open={sessionSelectorOpen}>
                 <Popover.Trigger id={triggerId} class="flex justify-center mx-auto mt-4">
                     <button class="group inline-flex items-center bg-white/20 hover:bg-white/30 border border-white/20 p-1 ps-4 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-green-700 transition-all duration-300">
-                            <span class="me-2 text-white text-sm font-medium">
-                                {selectedSession || "Choose Session"}
-                    </span>
-                            <span class="group-hover:bg-white/30 py-1.5 px-2.5 flex justify-center items-center gap-x-2 rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300">
-                                <ChevronDown class="shrink-0 size-4 transition-transform duration-300 group-hover:rotate-180" />
-        </span>
-                </button>
-        </Popover.Trigger>
+                        <span class="me-2 text-white text-sm font-medium">
+                            {selectedSession || "Choose Session"}
+                        </span>
+                        <span class="group-hover:bg-white/30 py-1.5 px-2.5 flex justify-center items-center gap-x-2 rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300">
+                            <ChevronDown class="shrink-0 size-4 transition-transform duration-300 group-hover:rotate-180" />
+                        </span>
+                    </button>
+                </Popover.Trigger>
                 <Popover.Content class="w-[300px] p-0 rounded-xl border border-green-100 shadow-xl" side="bottom" align="center" portalProps={{ target: 'body' }}>
                     <Command.Root class="rounded-xl overflow-hidden">
                         <Command.Input placeholder="Search Session..." class="border-green-100 focus:ring-green-500" />
@@ -242,127 +235,207 @@
                             <Command.Empty class="py-6 text-center text-sm">No results found.</Command.Empty>
                             <Command.Group class="p-2" heading="Sessions" value="sessions_group">
                                 {#each sessions as sessionItem (sessionItem.session)}
-                            <Command.Item
-                                            value={sessionItem.session}
+                                    <Command.Item
+                                        value={sessionItem.session}
                                         class="aria-selected:bg-green-50 aria-selected:text-green-900 cursor-pointer"
                                         onSelect={() => {
                                             selectedSession = sessionItem.session;
-                                        closeAndFocusTrigger(triggerId);
-                                            }}
+                                            closeAndFocusTrigger(triggerId);
+                                        }}
                                     >
                                         <span>{sessionItem.session}</span>
-                            </Command.Item>
-                        {/each}
-                    </Command.Group>
-                </Command.List>
-            </Command.Root>
-        </Popover.Content>
-    </Popover.Root>
+                                    </Command.Item>
+                                {/each}
+                            </Command.Group>
+                        </Command.List>
+                    </Command.Root>
+                </Popover.Content>
+            </Popover.Root>
+            <p class="text-white/70 text-xs text-center mt-3 flex items-center justify-center gap-1.5">
+                <ChevronDown class="shrink-0 size-3.5" />
+                <span>
+                    {sessions.length > 1
+                        ? 'Switch session above to explore executives from previous years.'
+                        : `Showing the ${selectedSession} executives.`}
+                </span>
+            </p>
         </div>
     {/if}
 </PageHeader>
 
-<section class="py-16 sm:py-24 relative overflow-hidden">
+<section class="py-12 sm:py-16 lg:py-20 relative overflow-hidden bg-gradient-to-b from-gray-50 to-white">
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-green-500/5 rounded-full blur-3xl -z-10"></div>
     <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-green-700/5 rounded-full blur-3xl -z-10"></div>
     
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {#if data?.error && sessions.length === 0}
-             <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+        {#if /** @type {any} */ (data)?.error && sessions.length === 0}
+            <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                         <X class="h-6 w-6 text-red-400 bg-red-100 rounded-full p-0.5" />
+                        <X class="h-6 w-6 text-red-400 bg-red-100 rounded-full p-0.5" />
                     </div>
                     <div class="ml-3">
                         <p class="text-red-700 text-lg font-medium">Error Loading Executives</p>
-                        <p class="text-red-600 mt-1 text-sm">{data.error}. Please try refreshing the page or contact support.</p>
+                        <p class="text-red-600 mt-1 text-sm">Please try refreshing the page or contact support.</p>
                     </div>
                 </div>
-             </div>
-        {:else if !isLoaded && sessions.length === 0} <!-- Initial loading skeleton -->
+            </div>
+        {:else if !isLoaded && sessions.length === 0}
             <div class="text-center text-gray-500 py-10">Loading executive details...</div>
-             {#each Array(2) as _, committeeIndex}
+            {#each Array(2) as _}
                 <div class="mb-16">
                     <div class="text-xl h-8 bg-gray-200 rounded w-1/3 mx-auto animate-pulse my-3"></div>
-                    <div class="grid grid-cols-1 min-[450px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-14 mt-8">
-                        {#each Array(5) as _, memberIndex}
-                            <div class="text-center relative">
-                                <div class="relative mb-5 mx-auto w-28 h-28 bg-gray-200 rounded-full animate-pulse"></div>
-                                <div class="h-5 bg-gray-200 rounded w-3/4 mx-auto mb-2 animate-pulse"></div>
-                                <div class="h-4 bg-gray-200 rounded w-1/2 mx-auto animate-pulse"></div>
+                    <div class="grid grid-cols-1 min-[450px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+                        {#each Array(4) as _}
+                            <div class="bg-white rounded-2xl p-6 shadow-sm animate-pulse">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-24 h-24 bg-gray-200 rounded-full mb-4"></div>
+                                    <div class="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                </div>
                             </div>
                         {/each}
                     </div>
                 </div>
             {/each}
-        {:else if selectedSession && currentDisplaySessionData?.executives && currentDisplaySessionData.executives.length > 0}
-            {#each currentDisplaySessionData.executives as committee, committeeIndex (committee.committee)}
-                <div class="mb-16" in:fly={{ y: 30, duration: 800, delay: 100 + (committeeIndex * 150) }}>
-                    <div class="text-xl text-green-800 font-semibold text-center font-secondary py-3 flex items-center before:flex-1 before:border-t before:border-green-300 before:me-6 after:flex-1 after:border-t after:border-green-300 after:ms-6">
-                        <span class="relative px-4 py-2">
-                            {committee.committee}
-                            <span class="absolute inset-0 bg-green-50/50 rounded-lg -z-10 transform -skew-x-3"></span>
-                        </span>
+        {:else if selectedSession && currentSession?.executives && currentSession.executives.length > 0}
+            {#if stats().totalMembers > 0}
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12" in:fly={{ y: 20, duration: 600, delay: 100 }}>
+                    <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100 text-center">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <Users class="w-5 h-5 text-green-600" />
+                        </div>
+                        <p class="text-2xl sm:text-3xl font-bold text-green-700">{stats().totalMembers}</p>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1">Total Members</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100 text-center">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <Building2 class="w-5 h-5 text-blue-600" />
+                        </div>
+                        <p class="text-2xl sm:text-3xl font-bold text-blue-700">{stats().committees}</p>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1">Committees</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100 text-center">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <span class="text-lg">&#9794;</span>
+                        </div>
+                        <p class="text-2xl sm:text-3xl font-bold text-indigo-700">{stats().maleCount}</p>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1">Brothers</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100 text-center">
+                        <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <span class="text-lg">&#9792;</span>
+                        </div>
+                        <p class="text-2xl sm:text-3xl font-bold text-pink-700">{stats().femaleCount}</p>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1">Sisters</p>
+                    </div>
+                </div>
+            {/if}
+
+            <div class="flex flex-wrap justify-center gap-2 mb-10" in:fly={{ y: 20, duration: 600, delay: 200 }}>
+                <button
+                    class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {selectedCommittee === null ? 'bg-green-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-700'}"
+                    onclick={() => selectedCommittee = null}
+                >
+                    All Committees
+                </button>
+                {#each currentSession.executives as committee (committee.committee)}
+                    {@const Icon = getCommitteeIcon(committee.committee)}
+                    <button
+                        class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-1.5 {selectedCommittee === committee.committee ? 'bg-green-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-700'}"
+                        onclick={() => selectedCommittee = selectedCommittee === committee.committee ? null : committee.committee}
+                    >
+                        <Icon class="w-3.5 h-3.5" />
+                        {committee.committee}
+                    </button>
+                {/each}
+            </div>
+
+            {#each filteredCommittees as committee, committeeIndex (committee.committee)}
+                {@const Icon = getCommitteeIcon(committee.committee)}
+                <div class="mb-14" in:fly={{ y: 30, duration: 800, delay: 100 + (committeeIndex * 100) }}>
+                    <div class="flex items-center justify-center gap-3 mb-8">
+                        <div class="h-px flex-1 max-w-[100px] bg-gradient-to-r from-transparent to-green-300"></div>
+                        <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-5 py-2.5">
+                            <Icon class="w-5 h-5 text-green-600" />
+                            <h2 class="text-base sm:text-lg font-semibold text-green-800 font-secondary">{committee.committee}</h2>
+                            <span class="bg-green-200 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">{committee.members.length}</span>
+                        </div>
+                        <div class="h-px flex-1 max-w-[100px] bg-gradient-to-l from-transparent to-green-300"></div>
                     </div>
 
-                    <div class="grid grid-cols-1 min-[450px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-14 mt-8">
-                        {#each committee.members as member (member.id)}
-                            {@const isMemberModalOpen = activeMemberForModal?.id === member.id}
-                                    <div 
-                                        role="button"
-                                        tabindex="0"
-                                class="group cursor-pointer text-center relative outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-lg"
-                                onclick={() => openMemberModal(member, committee.committee)}
-                                onkeydown={(e) => e.key === 'Enter' && openMemberModal(member, committee.committee)}
-                                        onmouseenter={() => hoveredMember = member.id}
-                                        onmouseleave={() => hoveredMember = null}
-                                in:scale={{ duration: 600, delay: 200 + getRandomDelay(0, 400) }}
-                                    >
-                                        <div class="relative mb-5 mx-auto w-28 h-28">
-                                            <Image
-                                        src={member.photo || getMemberPlaceholder(member, committee.committee)} 
-                                        alt={`${member.name} - ${member.position}`}
-                                                width={112}
-                                                height={112}
+                    <div class="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
+                        {#each committee.members as member, memberIndex (member.id)}
+                            {@const memberData = /** @type {any} */ (member)}
+                            <button
+                                class="group relative bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:border-green-200 hover:shadow-lg transition-all duration-300 text-center cursor-pointer"
+                                onclick={() => openMemberDetail(memberData, committee.committee)}
+                                in:scale={{ duration: 400, delay: 150 + (memberIndex * 40) }}
+                            >
+                                <div class="relative mx-auto w-20 h-20 mb-4">
+                                    <Image
+                                        src={memberData.photo || getPlaceholder(memberData)}
+                                        alt={memberData.name}
+                                        width={80}
+                                        height={80}
                                         loading="lazy"
-                                        className={`object-cover rounded-full shadow-xl transition-all duration-500 ease-in-out 
-                                                ${hoveredMember === member.id ? 'ring-4 ring-green-500/70 ring-offset-2 scale-105' : 'ring-2 ring-green-200/50'}
-                                                border-2 ${member.photo ? 'border-white' : 'border-green-100'}
-                                        `}
+                                        className="w-full h-full object-cover rounded-full ring-4 ring-green-50 group-hover:ring-green-100 transition-all duration-300 border-2 border-white shadow-md"
                                     />
-                                    <div class={`absolute bottom-0 right-0 bg-green-600 text-white p-1.5 rounded-full shadow-md transition-opacity duration-300 ${hoveredMember === member.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-80' }`}>
-                                        <MessageCircle class="w-3 h-3" />
+                                    <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-sm">
+                                        <Contact class="w-3 h-3 text-white" />
                                     </div>
-                                        </div>
-                                <h3 class="text-md font-semibold text-green-900 group-hover:text-green-700 transition-colors">{member.name}</h3>
-                                <p class="text-xs text-gray-600 group-hover:text-green-600 transition-colors">{member.position}</p>
+                                </div>
+
+                                <h3 class="text-sm font-semibold text-gray-900 group-hover:text-green-700 transition-colors leading-tight mb-1">{memberData.name}</h3>
+                                <p class="text-xs text-green-600 font-medium leading-tight">{memberData.position}</p>
+                                
+                                {#if memberData.phone}
+                                    <div class="mt-3 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <a 
+                                            href={`tel:${memberData.phone}`}
+                                            class="w-7 h-7 bg-green-50 hover:bg-green-100 rounded-full flex items-center justify-center transition-colors"
+                                            onclick={(e) => e.stopPropagation()}
+                                        >
+                                            <Phone class="w-3 h-3 text-green-600" />
+                                        </a>
+                                        <a 
+                                            href={`https://wa.me/${memberData.phone.replace(/\D/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="w-7 h-7 bg-green-50 hover:bg-green-100 rounded-full flex items-center justify-center transition-colors"
+                                            onclick={(e) => e.stopPropagation()}
+                                        >
+                                            <MessageSquareText class="w-3 h-3 text-green-600" />
+                                        </a>
                                     </div>
+                                {/if}
+                            </button>
                         {/each}
                     </div>
                 </div>
             {/each}
-        {:else if isLoaded && sessions.length > 0 && (!currentDisplaySessionData?.executives || currentDisplaySessionData.executives.length === 0)}
-             <div class="text-center py-12 px-4">
-                 <div class="bg-gray-50 rounded-xl border border-gray-200 p-8 shadow-sm w-full max-w-md text-center mx-auto">
-                    <div class="mb-6 bg-primary-50 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
-                        <Info class="size-10 text-primary-400" />
-                </div>
-                    <h3 class="text-xl font-medium text-primary-800 mb-3">No Executives Found</h3>
-                    <p class="text-gray-600 mb-6">
-                        No executive members are listed for the selected session ({selectedSession || 'Unknown Session'}). Please select another session or check back later.
+        {:else if isLoaded && sessions.length > 0 && (!currentSession?.executives || currentSession.executives.length === 0)}
+            <div class="text-center py-12 px-4">
+                <div class="bg-gray-50 rounded-2xl border border-gray-200 p-8 shadow-sm w-full max-w-md text-center mx-auto">
+                    <div class="mb-6 bg-gray-100 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto">
+                        <Info class="size-10 text-gray-400" />
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-800 mb-3">No Executives Found</h3>
+                    <p class="text-gray-500 text-sm">
+                        No executive members are listed for the {selectedSession || 'selected'} session. Please select another session or check back later.
                     </p>
                 </div>
             </div>
-        {:else if isLoaded && sessions.length === 0 && !data?.error} <!-- Loaded but no sessions and no explicit error -->
+        {:else if isLoaded && sessions.length === 0}
             <div class="text-center py-12 px-4">
-                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg shadow-md max-w-2xl mx-auto">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <Info class="h-6 w-6 text-yellow-500" />
                         </div>
                         <div class="ml-3">
                             <p class="text-yellow-700 text-lg font-medium">No Sessions Available</p>
-                            <p class="text-yellow-600 mt-1 text-sm">Currently, there are no executive sessions available to display. Please check back later or contact support if you believe this is an error.</p>
+                            <p class="text-yellow-600 mt-1 text-sm">Currently, there are no executive sessions available. Please check back later.</p>
                         </div>
                     </div>
                 </div>
@@ -371,106 +444,140 @@
     </div>
 </section>
 
-{#if memberModalOpen && activeMemberForModal}
-    {#await import('$lib/components/layout/ResponsiveModal.svelte') then module}
-        {@const ResponsiveModal = module.default}
-        <ResponsiveModal 
-            bind:open={memberModalOpen}
-            title={activeMemberForModal.name}
-            description={`${activeMemberForModal.position}${activeMemberForModal.committeeName ? `, ${activeMemberForModal.committeeName}` : ''}`}
-            onOpenChange={(/** @type {boolean} */ isOpen) => { if (!isOpen) closeMemberModal(); }}
-            contentClass="sm:max-w-md"
-        >
-            <!-- Trigger is implicit from the member card click -->
-            <div class="space-y-4">
-                <div class="flex justify-center pt-2">
-                     <Image 
-                        src={activeMemberForModal.photo || 'https://secure.gravatar.com/avatar/?d=mp&s=120'} 
-                        alt={activeMemberForModal.name} 
-                        width={120} 
-                        height={120} 
-                        className="rounded-full shadow-lg border-4 border-white"
+{#if memberModalOpen && activeMember}
+    <ResponsiveModal 
+        bind:open={memberModalOpen}
+        onOpenChange={(/** @type {boolean} */ isOpen) => { if (!isOpen) closeMemberDetail(); }}
+        contentClass="sm:max-w-lg"
+    >
+        <div class="space-y-6">
+            <div class="flex flex-col items-center pt-2">
+                <div class="relative mb-4">
+                    <Image 
+                        src={activeMember.photo || getPlaceholder(activeMember)} 
+                        alt={activeMember.name} 
+                        width={128} 
+                        height={128} 
+                        className="w-32 h-32 object-cover rounded-full shadow-xl border-4 border-white ring-2 ring-green-100"
                     />
+                    <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                        <Check class="w-4 h-4 text-white" />
+                    </div>
                 </div>
+                
+                <h2 class="text-xl font-bold text-gray-900 text-center">{activeMember.name}</h2>
+                <p class="text-green-600 font-medium text-sm mt-1">{activeMember.position}</p>
+                <p class="text-gray-400 text-xs mt-0.5">{activeMember.committeeName}</p>
+            </div>
 
-                {#if activeMemberForModal.bio}
-                    <div class="text-sm text-gray-600 text-center prose prose-sm max-w-none">
-                        {@html activeMemberForModal.bio}
+            {#if activeMember.bio}
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Department & Level</h4>
+                    <p class="text-sm text-gray-700">{activeMember.bio}</p>
+                </div>
+            {/if}
+
+            <div class="space-y-3">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact Information</h4>
+                
+                {#if activeMember.phone}
+                    <div class="space-y-2">
+                        <a 
+                            href={`tel:${activeMember.phone}`} 
+                            class="flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 rounded-xl transition-colors group"
+                        >
+                            <div class="w-10 h-10 bg-green-100 group-hover:bg-green-200 rounded-full flex items-center justify-center transition-colors">
+                                <Phone class="w-5 h-5 text-green-600" />
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">Phone</p>
+                                <p class="text-sm font-medium text-gray-900">{activeMember.phone}</p>
+                            </div>
+                        </a>
+                        
+                        <a 
+                            href={`https://wa.me/${activeMember.phone.replace(/\D/g, '')}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 rounded-xl transition-colors group"
+                        >
+                            <div class="w-10 h-10 bg-green-100 group-hover:bg-green-200 rounded-full flex items-center justify-center transition-colors">
+                                <MessageSquareText class="w-5 h-5 text-green-600" />
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">WhatsApp</p>
+                                <p class="text-sm font-medium text-gray-900">Chat on WhatsApp</p>
+                            </div>
+                            <ExternalLink class="w-4 h-4 text-gray-400" />
+                        </a>
+
+                        <a 
+                            href={`sms:${activeMember.phone}`} 
+                            class="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors group"
+                        >
+                            <div class="w-10 h-10 bg-gray-100 group-hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
+                                <Smartphone class="w-5 h-5 text-gray-600" />
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">SMS</p>
+                                <p class="text-sm font-medium text-gray-900">Send a text message</p>
+                            </div>
+                        </a>
                     </div>
                 {/if}
 
-                <div class="space-y-2 text-sm border-t pt-4 mt-4">
-                    {#if activeMemberForModal.phone}
-                        <a href={`tel:${activeMemberForModal.phone}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
-                            <Phone class="h-4 w-4 mr-2 shrink-0" /> Call: {activeMemberForModal.phone}
-                        </a>
-                        <a href={`https://wa.me/${activeMemberForModal.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
-                            <MessageSquareText class="h-4 w-4 mr-2 shrink-0" /> Chat on WhatsApp
-                        </a>
-                        <a href={`sms:${activeMemberForModal.phone}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
-                            <Smartphone class="h-4 w-4 mr-2 shrink-0" /> Send SMS
-                        </a>
-                    {/if}
-                    {#if activeMemberForModal.email}
-                        <a href={`mailto:${activeMemberForModal.email}`} class="flex items-center text-green-700 hover:underline justify-center sm:justify-start">
-                            <Mail class="h-4 w-4 mr-2 shrink-0" /> {activeMemberForModal.email}
-                        </a>
-                    {/if}
-                </div>
-                
-                {#if activeMemberForModal.socials && activeMemberForModal.socials.length > 0}
-                    <div class="flex justify-center sm:justify-start flex-wrap gap-2 pt-2 border-t mt-4">
-                        {#each activeMemberForModal.socials as social (social.platform)}
-                            <Button as="a" href={social.link} target="_blank" rel="noopener noreferrer" variant="outline" size="sm" class="text-xs flex items-center gap-1.5">
-                                {social.platform} <ExternalLink class="h-3 w-3" />
+                {#if activeMember.email}
+                    <a 
+                        href={`mailto:${activeMember.email}`} 
+                        class="flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors group"
+                    >
+                        <div class="w-10 h-10 bg-blue-100 group-hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
+                            <Mail class="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-500">Email</p>
+                            <p class="text-sm font-medium text-gray-900">{activeMember.email}</p>
+                        </div>
+                        <ExternalLink class="w-4 h-4 text-gray-400" />
+                    </a>
+                {/if}
+
+                {#if !activeMember.phone && !activeMember.email}
+                    <p class="text-center text-gray-400 text-sm py-4">No contact information available</p>
+                {/if}
+            </div>
+
+            {#if activeMember.socials && activeMember.socials.length > 0}
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Social Links</h4>
+                    <div class="flex flex-wrap gap-2">
+                        {#each activeMember.socials as social (social.platform)}
+                            <Button as="a" href={social.link} target="_blank" rel="noopener noreferrer" variant="outline" size="sm" class="text-xs">
+                                {social.platform} <ExternalLink class="h-3 w-3 ml-1" />
                             </Button>
                         {/each}
                     </div>
-                {/if}
-            </div>
+                </div>
+            {/if}
+        </div>
 
-            {#snippet footer()} 
-            <div class="flex flex-col sm:flex-row gap-2 w-full">
-                <Button variant="outline" onclick={closeMemberModal} class="w-full sm:flex-1">Close</Button>
+        {#snippet footer()} 
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <Button variant="outline" onclick={closeMemberDetail} class="flex-1">
+                    Close
+                </Button>
                 <Button 
-                    onclick={() => {
-                        if (activeMemberForModal) {
-                            copyContactDetails(activeMemberForModal);
-                        }
-                    }} 
-                    class="w-full sm:flex-1 bg-green-600 hover:bg-green-700 text-white"
-                    disabled={!activeMemberForModal || (!activeMemberForModal.phone && !activeMemberForModal.email)}
+                    onclick={() => activeMember && copyContact(activeMember)} 
+                    class="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    disabled={!activeMember?.phone && !activeMember?.email}
                 >
-                    <Copy class="mr-2 h-4 w-4" /> Copy Details
+                    {#if copiedId === activeMember?.id}
+                        <Check class="mr-2 h-4 w-4" /> Copied!
+                    {:else}
+                        <Copy class="mr-2 h-4 w-4" /> Copy Details
+                    {/if}
                 </Button>
             </div>
-            {/snippet}
-        </ResponsiveModal>
-    {:catch error}
-        <p class="text-red-500 text-center p-4">Error loading modal: {error.message}</p>
-        <!-- You could offer a retry button or alternative content here -->
-    {/await}
+        {/snippet}
+    </ResponsiveModal>
 {/if}
-
-<style>
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-    }
-    
-    /* Hide scrollbar for IE, Edge and Firefox */
-    .scrollbar-hide {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
-    
-    /* Subtle hover animation for profile cards */
-    @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-5px); }
-    }
-    
-    .group:hover {
-        animation: float 2s ease-in-out infinite;
-    }
-</style>

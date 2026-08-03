@@ -1,206 +1,152 @@
 <script>
-    import { SquareArrowOutUpRight, ChevronRight, Calendar, User, Clock } from '@lucide/svelte'
-    import { Image } from '$lib/components/ui/image'
-    import { Button } from "$lib/components/ui/button"
-    import { fly, fade, scale } from 'svelte/transition'
+    import { fly, scale } from 'svelte/transition'
     import { onMount } from 'svelte'
+    import { Image } from '$lib/components/ui/image'
+    import { Calendar, ExternalLink, ChevronRight, Link as LinkIcon } from '@lucide/svelte'
     import { browser } from '$app/environment'
-    import { fetchPosts } from '$lib/utils/wordpress.js'
 
-    /**
-     * @typedef {import('$lib/types.js').WordPressPost} WordPressPost
-     */
-    
+    const BLOG_API = 'http://localhost:3000/public/blog-posts/approved'
+
     let { posts: initialPosts = [] } = $props()
-    
-    let visible = $state(false);
-    let hoveredPost = $state(null);
-    let posts = $state(/** @type {WordPressPost[]} */ (initialPosts));
-    let loading = $state(false);
-    let error = $state(false);
-    
-    // * Hide section if no posts available
-    const hasPosts = $derived(Array.isArray(posts) && posts.length > 0);
-    
+
+    let visible = $state(false)
+    let posts = $state(initialPosts)
+    let loading = $state(false)
+
+    const hasPosts = $derived(Array.isArray(posts) && posts.length > 0)
+
+    function formatDate(dateStr) {
+        if (!dateStr) return ''
+        const d = new Date(dateStr)
+        return d.toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })
+    }
+
     onMount(async () => {
         visible = true
-        
-        // * Fetch WordPress posts client-side if we don't have any
+
         if (browser && (!posts || posts.length === 0)) {
-            loading = true;
-            error = false;
-            
+            loading = true
             try {
-                const fetchedPosts = await fetchPosts({ per_page: 3 });
-                if (fetchedPosts && fetchedPosts.length > 0) {
-                    posts = fetchedPosts;
-                } else {
-                    error = true;
+                const res = await fetch(BLOG_API, { signal: AbortSignal.timeout(10000) })
+                if (res.ok) {
+                    const json = await res.json()
+                    if (json?.success && Array.isArray(json.data?.posts)) {
+                        posts = [...json.data.posts]
+                            .sort((a, b) => new Date(b.approvedAt || 0) - new Date(a.approvedAt || 0))
+                            .slice(0, 3)
+                            .map(p => ({
+                            id: p.wpId,
+                            title: p.title,
+                            excerpt: p.excerpt,
+                            link: p.link,
+                            date: p.wpDate,
+                            featured_image: p.featuredImage || '',
+                            categories: safeParse(p.categories)
+                        }))
+                    }
                 }
             } catch (err) {
-                console.error('Error fetching blog posts:', err);
-                error = true;
+                console.error('Error fetching blog posts:', err)
             } finally {
-                loading = false;
+                loading = false
             }
         }
     })
+
+    function safeParse(json) {
+        try { return json ? JSON.parse(json) : []; } catch { return []; }
+    }
 </script>
 
-{#if hasPosts}
-<div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto relative overflow-hidden">
-    <!-- Decorative background elements -->
-    <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
-    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
-    
-    <!-- Title with animation -->
-    <div class="max-w-2xl mx-auto text-left mb-10 lg:mb-14 relative z-10">
-        {#if visible}
-            <h2 
-                in:fly={{ y: 30, duration: 800, delay: 200 }}
-                class="text-2xl font-bold md:text-4xl md:leading-tight font-secondary text-primary-700 relative inline-block"
-            >
-                From the Press
-                <span class="absolute -bottom-2 left-0 w-1/2 h-1 bg-primary-700 rounded-full"></span>
-            </h2>
-            <p 
-                in:fly={{ y: 30, duration: 800, delay: 400 }}
-                class="mt-4 font-tertiary text-primary-700"
-            >
-                Value Packed Insights and Publications from An-Nur Press
-            </p>
-        {/if}
+<section class="py-16 sm:py-20 lg:py-24 relative overflow-hidden bg-gradient-to-b from-white via-green-50/30 to-white">
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div class="absolute -top-40 -right-40 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-green-700/5 rounded-full blur-3xl"></div>
     </div>
-    <!-- End Title -->
 
-    <!-- Grid with staggered animation -->
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+    <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 relative z-10">
         {#if visible}
+            <div class="text-center mb-12" in:fly={{ y: 30, duration: 800, delay: 200 }}>
+                <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+                    <LinkIcon class="w-4 h-4" />
+                    From Our Blog
+                </div>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 font-secondary mb-4">
+                    Press <span class="text-green-700">Releases</span>
+                </h2>
+                <p class="text-gray-600 max-w-2xl mx-auto text-base sm:text-lg font-tertiary leading-relaxed">
+                    Official press releases and featured articles from the An-Nuur Press.
+                </p>
+            </div>
+
             {#if loading}
-                <!-- Loading state -->
-                {#each Array(3) as _, i}
-                    <div class="flex flex-col h-full backdrop-blur-sm bg-white/80 border border-primary-200 rounded-xl overflow-hidden animate-pulse">
-                        <div class="h-[210px] bg-gray-200"></div>
-                        <div class="flex-1 p-5 space-y-3">
-                            <div class="h-6 bg-gray-200 rounded"></div>
-                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-                            <div class="h-4 bg-gray-200 rounded"></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    {#each Array(3) as _, i}
+                        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-pulse">
+                            <div class="h-48 bg-gray-200"></div>
+                            <div class="p-5 space-y-3">
+                                <div class="h-3 bg-gray-200 rounded w-1/3"></div>
+                                <div class="h-5 bg-gray-200 rounded"></div>
+                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            </div>
                         </div>
-                    </div>
-                {/each}
+                    {/each}
+                </div>
             {:else if hasPosts}
-                {#each posts as post, i}
-                <!-- Enhanced Card with glassmorphism -->
-                <a 
-                    in:fly={{ y: 30, duration: 800, delay: 600 + (i * 200) }}
-                    class="group flex flex-col h-full backdrop-blur-sm bg-white/80 border border-primary-200 hover:border-transparent hover:shadow-xl focus:outline-none focus:border-transparent focus:shadow-xl transition-all duration-500 rounded-xl overflow-hidden"
-                    href={post.link}
-                    target="_blank"
-                    onmouseenter={() => hoveredPost = post.title}
-                    onmouseleave={() => hoveredPost = null}
-                >
-                    <div class="relative overflow-hidden">
-                        <div class="aspect-w-16 aspect-h-11 overflow-hidden">
-                            <Image 
-                                className="w-full object-cover h-[210px] transition-transform duration-700 group-hover:scale-110" 
-                                loading="lazy"
-                                width={600}
-                                height={337}
-                                fetchpriority="low"
-                                src={post.featured_image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='337'%3E%3Crect fill='%23f3f4f6' width='600' height='337'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='sans-serif' font-size='18'%3ENo Image%3C/text%3E%3C/svg%3E"}
-                                alt={post.title}
-                            />
-                        </div>
-                        
-                        <!-- Category badge if available -->
-                        {#if post.categories && post.categories.length > 0}
-                            <div class="absolute top-3 right-3">
-                                <span class="inline-flex items-center rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
-                                    {post.categories[0]}
-                                </span>
-                            </div>
-                        {/if}
-                    </div>
-                    
-                    <div class="flex-1 p-5 flex flex-col">
-                        <h3 class="text-xl font-secondary font-semibold text-primary-700 group-hover:text-primary-800 transition-colors mb-3">
-                            {@html post.title}
-                        </h3>
-                        <p class="text-gray-700 font-tertiary flex-grow">
-                            {@html post.excerpt}
-                        </p>
-                        
-                        <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-x-3">
-                                {#if post.authors && post.authors.length > 0 && post.authors[0]}
-                                    <Image 
-                                        className="size-8 rounded-full shadow-sm border border-white" 
-                                        loading="lazy" 
-                                        width={48} 
-                                        height={48} 
-                                        src={post.authors[0].avatar_urls?.["48"] || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23e5e7eb'/%3E%3Ccircle cx='24' cy='20' r='8' fill='%239ca3af'/%3E%3Cpath d='M8 40c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%239ca3af'/%3E%3C/svg%3E"}
-                                        alt={post.authors[0].name || "Author"} 
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    {#each posts.slice(0, 3) as post, i}
+                        <a
+                            href={post.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+                            in:scale={{ duration: 400, delay: 300 + (i * 100) }}
+                        >
+                            {#if post.featured_image}
+                                <div class="relative h-48 overflow-hidden">
+                                    <Image
+                                        src={post.featured_image}
+                                        alt={post.title}
+                                        width={400}
+                                        height={200}
+                                        loading="lazy"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
-                                    <div>
-                                        <p class="text-sm text-gray-700 font-secondary">
-                                            By {post.authors[0].name} {post.authors.length > 1 ? "and " + (post.authors.length - 1) + " others" : ""}
-                                        </p>
-                                    </div>
-                                {:else if post.author}
-                                    <Image 
-                                        className="size-8 rounded-full shadow-sm border border-white" 
-                                        loading="lazy" 
-                                        width={48} 
-                                        height={48} 
-                                        src={post.author.picture || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23e5e7eb'/%3E%3Ccircle cx='24' cy='20' r='8' fill='%239ca3af'/%3E%3Cpath d='M8 40c0-8.8 7.2-16 16-16s16 7.2 16 16' fill='%239ca3af'/%3E%3C/svg%3E"}
-                                        alt={post.author.name || "Author"} 
-                                    />
-                                    <div>
-                                        <p class="text-sm text-gray-700 font-secondary">
-                                            By {post.author.name}
-                                        </p>
-                                    </div>
-                                {/if}
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                                    <span class="absolute top-3 right-3 px-3 py-1 bg-green-700 text-white text-[11px] font-semibold rounded-full flex items-center gap-1">
+                                        <ExternalLink class="w-3 h-3" /> Read Article
+                                    </span>
+                                </div>
+                            {/if}
+
+                            <div class="p-5 flex flex-col flex-1">
+                                <div class="flex items-center gap-2 text-[11px] text-gray-400 mb-2">
+                                    <Calendar class="w-3 h-3" />
+                                    <span>{formatDate(post.date)}</span>
+                                </div>
+
+                                <h3 class="text-base font-bold text-gray-900 group-hover:text-green-700 transition-colors leading-snug mb-2 line-clamp-2">
+                                    {post.title}
+                                </h3>
+
+                                <p class="text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
+                                    {post.excerpt?.replace(/<[^>]+>/g, '')}
+                                </p>
                             </div>
-                            
-                            <span class="inline-flex items-center justify-center size-8 rounded-full bg-primary-50 text-primary-700 group-hover:bg-primary-100 transition-colors">
-                                <ChevronRight class="size-4" />
-                            </span>
-                        </div>
-                    </div>
-                </a>
-                <!-- End Card -->
-                {/each}
-            {:else}
-                <!-- Empty/Error state - hidden by hasPosts check, but kept for structure -->
+                        </a>
+                    {/each}
+                </div>
+
+                <div class="mt-12 text-center" in:fly={{ y: 20, duration: 600, delay: 600 }}>
+                    <a
+                        href="/blog"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-green-700 text-white rounded-xl font-medium text-sm hover:bg-green-800 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                    >
+                        View All Press Releases
+                        <ChevronRight class="w-4 h-4" />
+                    </a>
+                </div>
             {/if}
         {/if}
     </div>
-    <!-- End Grid -->
-
-    <!-- Call to action buttons with animation -->
-    {#if visible}
-        <div 
-            in:fly={{ y: 30, duration: 800, delay: 1000 }}
-            class="mt-12 text-center gap-4 flex flex-wrap justify-center"
-        >
-            <a 
-                class="py-3 px-5 inline-flex items-center gap-x-2 text-sm font-medium font-secondary rounded-xl border border-primary-200 bg-primary-700 text-white shadow-sm hover:bg-primary-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                href="/blog"
-                aria-label="Read more from our blog"
-            >
-                Read more
-                <ChevronRight class="size-4" />
-            </a>
-            <a 
-                class="py-3 px-5 inline-flex items-center gap-x-2 text-sm font-medium font-secondary rounded-xl border border-primary-200 bg-white text-primary-700 shadow-sm hover:bg-primary-50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                href="/blog#newsletter"
-            >
-                Join Newsletter
-                <ChevronRight class="size-4" />
-            </a>
-        </div>
-    {/if}
-    <!-- End Call to action -->
-</div>
-{/if}
+</section>

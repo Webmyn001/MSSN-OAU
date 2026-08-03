@@ -8,6 +8,48 @@
       "when": 1783556263878,
       "tag": "0000_smooth_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784843824754,
+      "tag": "0001_giant_celestials",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753382400000,
+      "tag": "0002_annual_dues_payments",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785234710106,
+      "tag": "0003_military_jubilee",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785236640923,
+      "tag": "0004_overrated_whirlwind",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785243398657,
+      "tag": "0005_bumpy_kulan_gath",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785763816605,
+      "tag": "0006_blushing_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

@@ -16,14 +16,7 @@ export const exampleInfo = {
         bank: "GTBank",
         name: "Muslim Students’ Society Of Nigeria, OAU"
     },
-    prayer_times: {
-        subhi: { iqamah: "2023-01-01T05:42:00.000Z", adhan: "2023-01-01T05:22:00.000Z" },
-        dhuhr: { iqamah: "2023-01-01T13:15:00.000Z", adhan: "2023-01-01T13:00:00.000Z" },
-        asr: { iqamah: "2023-01-01T16:10:00.000Z", adhan: "2023-01-01T15:55:00.000Z" },
-        maghrib: { iqamah: "2023-01-01T18:32:00.000Z", adhan: "2023-01-01T18:25:00.000Z" },
-        isha: { iqamah: "2023-01-01T20:10:00.000Z", adhan: "2023-01-01T20:00:00.000Z" },
-        jumuah: { iqamah: "2023-01-01T13:00:00.000Z", adhan: "2023-01-01T14:00:00.000Z" }
-    }
+    prayer_times: null
 };
 
 

@@ -53,7 +53,7 @@ function loadDeferredScripts() {
         id: 'preline-js', 
         async: true, 
         defer: true, 
-        nonce: typeof window !== 'undefined' ? window.APP_NONCE : undefined 
+        nonce: undefined
       }
     }
   ]);

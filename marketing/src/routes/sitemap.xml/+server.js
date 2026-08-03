@@ -20,7 +20,7 @@ export async function GET() {
     { url: '/events/how-to-register-paid-events-online', changefreq: 'monthly', priority: 0.6 },
     { url: '/blog', changefreq: 'weekly', priority: 0.8 },
     { url: '/contact', changefreq: 'monthly', priority: 0.6 },
-    { url: '/alumnae', changefreq: 'monthly', priority: 0.6 },
+    { url: '/alumni', changefreq: 'monthly', priority: 0.6 },
     { url: '/annual-dues', changefreq: 'monthly', priority: 0.5 },
   ];
 
