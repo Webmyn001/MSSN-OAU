@@ -13,8 +13,7 @@ const transporter = nodemailer.createTransport({
 
 try {
 	const ok = await transporter.verify()
-	console.log('SMTP_CONNECTION_OK:', ok)
-	console.log('HOST:', env.SMTP_HOST, 'PORT:', env.SMTP_PORT, 'SECURE:', env.SMTP_SECURE, 'USER:', env.SMTP_USER)
+	console.log('SMTP_CONNECTION_OK:', ok, '| user:', env.SMTP_USER)
 } catch (err) {
 	console.error('SMTP_CONNECTION_FAILED:', err instanceof Error ? err.message : err)
 	process.exit(1)

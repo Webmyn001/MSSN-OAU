@@ -21,6 +21,6 @@ export const ADMIN_USERS: AdminUser[] = [
 ]
 
 export const JWT_SECRET = process.env.JWT_SECRET || 'mssn-oau-admin-jwt-secret-2024'
-export const JWT_EXPIRY = '24h'
+export const JWT_EXPIRY = '30m'
 export const OTP_EXPIRY_MS = 60 * 1000 // 60 seconds
 export const OTP_LENGTH = 6

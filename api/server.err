@@ -1,1 +1,9 @@
 $ bun run --hot src/index.ts
+TimeoutNegativeWarning: -672784.5651605256 is a negative number.
+Timeout duration was set to 1.
+      at reconnect (C:\Users\USER\MSSN\MSSN-OAU\api\node_modules\postgres\src\connection.js:353:5)
+      at connect (C:\Users\USER\MSSN\MSSN-OAU\api\node_modules\postgres\src\connection.js:113:7)
+      at connect (C:\Users\USER\MSSN\MSSN-OAU\api\node_modules\postgres\src\index.js:393:7)
+      at handle (C:\Users\USER\MSSN\MSSN-OAU\api\node_modules\postgres\src\query.js:140:65)
+
+error: script "dev" exited with code 255
