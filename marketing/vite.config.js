@@ -6,6 +6,11 @@ import { defineConfig } from 'vite';
 // import { sentrySvelteKit } from "@sentry/sveltekit";
 // import { sentryVitePlugin } from "@sentry/vite-plugin";
 
+// Base URL used by all client-side API calls. Defaults to the local dev API;
+// set PUBLIC_API_BASE_URL (e.g. https://mssn-api.onrender.com) when building
+// for production so every fetch points at the live backend.
+const API_BASE = (process.env.PUBLIC_API_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
+
 export default defineConfig({
     build: {
         sourcemap: true, // Source map generation must be turned on
@@ -83,6 +88,17 @@ export default defineConfig({
     },
 
 	plugins: [
+        // Rewrite the hardcoded localhost API prefix in src modules so the
+        // frontend talks to PUBLIC_API_BASE_URL in production builds (a no-op
+        // in local dev, where API_BASE still defaults to localhost:3000).
+        {
+            name: 'api-base-url',
+            enforce: 'pre',
+            transform(code, id) {
+                if (!/[/\\]src[/\\]/.test(id)) return;
+                return code.replaceAll('http://localhost:3000', API_BASE);
+            }
+        },
         // Temporarily comment out Sentry plugins
         // sentryVitePlugin({
         //     org: "mssnoau",
