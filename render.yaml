@@ -14,9 +14,8 @@ services:
     healthCheckPath: /health
     # Bun ships with Render's native Node runtime
     buildCommand: bun install --frozen-lockfile
-    startCommand: bun run start
-    # Note: migrations are not run here (free tier has no preDeployCommand).
-    # Run `bun run db:migrate` once from the service's Shell after first deploy.
+    # Applies Drizzle migrations, then starts the server (free tier has no preDeployCommand or Shell)
+    startCommand: bun run db:migrate && bun run start
     envVars:
       # Non-secret / static config
       - key: NODE_ENV
