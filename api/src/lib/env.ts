@@ -19,11 +19,11 @@ const envSchema = z.object({
 	PAYSTACK_SECRET_KEY: z.string().min(1),
 	PAYSTACK_PUBLIC_KEY: z.string().min(1),
 
-	// * Storage (Cloudflare R2)
-	CLOUDFLARE_ACCOUNT_ID: z.string().min(1),
-	CLOUDFLARE_ACCESS_KEY_ID: z.string().min(1),
-	CLOUDFLARE_SECRET_ACCESS_KEY: z.string().min(1),
-	CLOUDFLARE_BUCKET_NAME: z.string().min(1),
+	// * Storage (Cloudflare R2) — optional for now
+	CLOUDFLARE_ACCOUNT_ID: z.string().optional().default('test'),
+	CLOUDFLARE_ACCESS_KEY_ID: z.string().optional().default('test'),
+	CLOUDFLARE_SECRET_ACCESS_KEY: z.string().optional().default('test'),
+	CLOUDFLARE_BUCKET_NAME: z.string().optional().default('test'),
 
 	// * Email (SMTP — Brevo relay)
 	SMTP_HOST: z.string().min(1),
@@ -39,9 +39,9 @@ const envSchema = z.object({
 	SMTP_PASS: z.string().min(1),
 	SMTP_FROM: z.string().min(1),
 
-	// * SMS (Kudisms)
-	KUDISMS_API_TOKEN: z.string().min(1),
-	KUDISMS_SENDER_ID: z.string().min(1),
+	// * SMS (Kudisms) — optional for now
+	KUDISMS_API_TOKEN: z.string().optional().default('test'),
+	KUDISMS_SENDER_ID: z.string().optional().default('test'),
 
 	// * Storage (Cloudinary)
 	CLOUDINARY_CLOUD_NAME: z.string().optional().default('your_cloud_name'),
@@ -49,8 +49,8 @@ const envSchema = z.object({
 	CLOUDINARY_API_SECRET: z.string().optional().default('your_api_secret'),
 	CLOUDINARY_UPLOAD_PRESET: z.string().optional().default('mssn_events'),
 
-	// * AI (Gemini)
-	GOOGLE_GEMINI_API_KEY: z.string().min(1),
+	// * AI (Gemini) — optional for now
+	GOOGLE_GEMINI_API_KEY: z.string().optional().default('test'),
 	// * Optional: OpenAI for embeddings if needed
 	OPENAI_API_KEY: z.string().optional(),
 
