@@ -15,8 +15,8 @@ services:
     # Bun ships with Render's native Node runtime
     buildCommand: bun install --frozen-lockfile
     startCommand: bun run start
-    # Runs after build, before the server starts (applies Drizzle migrations)
-    preDeployCommand: bun run db:migrate
+    # Note: migrations are not run here (free tier has no preDeployCommand).
+    # Run `bun run db:migrate` once from the service's Shell after first deploy.
     envVars:
       # Non-secret / static config
       - key: NODE_ENV
