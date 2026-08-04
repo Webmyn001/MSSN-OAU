@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;--> statement-breakpoint
+CREATE EXTENSION IF NOT EXISTS vector;--> statement-breakpoint
 CREATE TYPE "public"."user_role" AS ENUM('MEMBER', 'EXCO');--> statement-breakpoint
 CREATE TYPE "public"."ticket_status" AS ENUM('PENDING', 'CONFIRMED', 'USED', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "public"."email_status" AS ENUM('PENDING', 'SENT', 'FAILED', 'BOUNCED');--> statement-breakpoint
