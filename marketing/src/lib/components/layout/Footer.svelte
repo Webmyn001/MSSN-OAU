@@ -82,9 +82,6 @@
                            href="/blog">Blog</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-                           href="/#donate">Donate</a></p>
-                    <p>
-                        <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
                            href="/#prayer-times">Prayer Times</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"

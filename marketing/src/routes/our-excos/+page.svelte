@@ -252,9 +252,9 @@
                     </Command.Root>
                 </Popover.Content>
             </Popover.Root>
-            <p class="text-white/70 text-xs text-center mt-3 flex items-center justify-center gap-1.5">
-                <ChevronDown class="shrink-0 size-3.5" />
-                <span>
+            <p class="text-white text-sm sm:text-base font-bold text-center mt-3 px-4 flex items-center justify-center gap-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
+                <ChevronDown class="shrink-0 size-4" stroke-width={2.5} />
+                <span class="leading-snug">
                     {sessions.length > 1
                         ? 'Switch session above to explore executives from previous years.'
                         : `Showing the ${selectedSession} executives.`}

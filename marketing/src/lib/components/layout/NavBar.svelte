@@ -183,13 +183,6 @@
                         
                         <a 
                             class="lg:px-3 lg:py-5 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center" 
-                            href="/#donate"
-                        >
-                            <span>Donate</span>
-                        </a>
-                        
-                        <a 
-                            class="lg:px-3 lg:py-5 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center" 
                             href="/#prayer-times"
                         >
                             <span>Prayer Times</span>
@@ -236,7 +229,7 @@
                                             </a>
                                             <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/alumni">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg>
-                                                Alumnae
+                                                Past Ameer and Ameerah
                                             </a>
                                         </div>
 
@@ -245,10 +238,6 @@
                                             <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/annual-dues">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                                                 Annual Dues
-                                            </a>
-                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/events/how-to-register-paid-events-online">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18v-6h6v6"/><path d="M12 3v3"/><path d="M4.5 10.5 6 12"/><path d="M19.5 10.5 18 12"/><path d="M5 21h14"/></svg>
-                                                How to Register for Paid Events
                                             </a>
                                         </div>
 

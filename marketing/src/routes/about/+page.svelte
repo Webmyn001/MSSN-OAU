@@ -71,9 +71,9 @@
 <!-- Who We Are -->
 <div class="mt-8 mx-[10dvw] flex items-center flex-col">
     <h3 class="font-semibold text-2xl sm:text-3xl font-secondary mb-4 text-primary">WHO WE ARE</h3>
-    <p class="font-tertiary w-full text-center">The Muslim Students Society of Nigeria (MSSN), Obafemi Awolowo University (MSSNOAU) is a branch among MSSN higher institution branches and is an inclusive platform for all Muslim students in the university to find spiritual expression, islamic knowledge, and fellowship irrespective of their backgrounds and orientation.</p>
+    <p class="font-primary w-full text-center">The Muslim Students Society of Nigeria (MSSN), Obafemi Awolowo University (MSSNOAU) is a branch among MSSN higher institution branches and is an inclusive platform for all Muslim students in the university to find spiritual expression, islamic knowledge, and fellowship irrespective of their backgrounds and orientation.</p>
     <br /><br />
-    <p class="font-tertiary w-full text-center">At MSSNOAU, we foster a vibrant and inclusive community where every member is encouraged to grow and excel. Our diverse programs and activities are designed to cater to the holistic development of our members, ensuring they achieve academic excellence while maintaining strong spiritual and moral values.</p>
+    <p class="font-primary w-full text-center">At MSSNOAU, we foster a vibrant and inclusive community where every member is encouraged to grow and excel. Our diverse programs and activities are designed to cater to the holistic development of our members, ensuring they achieve academic excellence while maintaining strong spiritual and moral values.</p>
 </div>
 <!-- End Who We are -->
 
@@ -83,14 +83,14 @@
     <div class="grid grid-rows-1 sm:grid-cols-2 gap-8 text-center mt-8">
         <div class="flex flex-col gap-2">
             <h4 class="font-secondary text-primary-700 text-2xl font-semibold mb-2">Our Mission</h4>
-            <p class="font-tertiary text-center leading-relaxed">
+            <p class="font-primary text-center leading-relaxed">
                 To work relentlessly towards the establishment of a society that fosters all-around human development. To achieve this, MSSN will continuously strive towards strengthening Ummah educationally, emotionally, spiritually and politically through a wide spectrum of activities in the university and the larger society in partnership with like-minded organizations. To succeed, MSSN must ensure that its members are God-fearing, knowledgeable, united and with superior moral values.
             </p>
         </div>
 
         <div class="flex flex-col gap-2">
             <h4 class="font-secondary text-primary-700 text-2xl font-semibold mb-2">Our Vision</h4>
-            <p class="font-tertiary text-center leading-relaxed">
+            <p class="font-primary text-center leading-relaxed">
                 To establish an Islamic Ummah governed by the principles and rules of the Shariah. To become a leading student organization that inspires Muslim students to become dynamic leaders, passionate about their faith, knowledge, and community, and to create a supportive environment that nurtures their overall well-being and success.
             </p>
         </div>
@@ -103,7 +103,7 @@
 <div class="mt-16 mb-12 px-4 md:px-8 max-w-7xl mx-auto">
     <div class="text-center mb-12">
         <h2 class="font-semibold text-3xl sm:text-4xl font-secondary mb-4 text-primary-700">Our Committees</h2>
-        <p class="font-tertiary max-w-3xl mx-auto text-gray-600">The Muslim Students\' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, has established various committees to cater to the diverse needs of Muslim students on campus. Students can join these committees to develop valuable skills and contribute meaningfully to the community.</p>
+        <p class="font-primary max-w-3xl mx-auto text-gray-600">The Muslim Students\' Society of Nigeria (MSSN), Obafemi Awolowo University Branch, has established various committees to cater to the diverse needs of Muslim students on campus. Students can join these committees to develop valuable skills and contribute meaningfully to the community.</p>
     </div>
 
     {#if committees.length > 0}

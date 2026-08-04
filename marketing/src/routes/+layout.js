@@ -7,8 +7,10 @@ export const csr = true; // Enable client-side rendering for hydration
 
 // Add route-based code splitting
 export const load = async ({ route, fetch }) => {
-    // Load all site API data (events, programmes, mosques, news, blog, advisors, alumni, excos)
-    const dataPromise = loadSiteData(fetch);
+    // Load the site data needed on every page. Heavy, page-specific payloads
+    // (excos, advisors) are loaded by their own routes' loaders instead, so they
+    // don't slow down unrelated pages (especially the home page).
+    const dataPromise = loadSiteData(fetch, ['info', 'events', 'programmes', 'mosques', 'latestNews', 'posts', 'alumni']);
 
     // Client-side only code
     if (browser) {
