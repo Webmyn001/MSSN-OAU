@@ -8,6 +8,7 @@
     import { browser } from '$app/environment';
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
+    import { API_BASE } from '$lib/api/base';
 
     let { data } = $props();
 
@@ -42,7 +43,7 @@
         regError = "";
         regSuccess = null;
         try {
-            const res = await fetch(`http://localhost:3000/public/events/${eventData.id}/register`, {
+            const res = await fetch(`${API_BASE}/public/events/${eventData.id}/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: regName.trim(), email: regEmail.trim(), phone: regPhone.trim() || null })

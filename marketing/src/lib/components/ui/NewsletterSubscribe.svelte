@@ -1,11 +1,12 @@
 <script>
     import { toast } from 'svelte-sonner';
     import { Mail, Send, Loader2 } from '@lucide/svelte';
+    import { API_BASE } from '$lib/api/base';
 
     let email = $state('');
     let loading = $state(false);
 
-    const API_URL = 'http://localhost:3000/public/newsletter/subscribe';
+    const API_URL = `${API_BASE}/public/newsletter/subscribe`;
 
     async function handleSubscribe(e) {
         e.preventDefault();

@@ -10,7 +10,7 @@
 
     let { data } = $props()
 
-    const API_BASE = 'http://localhost:3000'
+    import { API_BASE } from '$lib/api/base'
 
     let visible = $state(false)
     let paystackLoaded = $state(false)

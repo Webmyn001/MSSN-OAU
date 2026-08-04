@@ -4,8 +4,9 @@
     import { Image } from '$lib/components/ui/image'
     import { Calendar, ExternalLink, ChevronRight, Link as LinkIcon } from '@lucide/svelte'
     import { browser } from '$app/environment'
+    import { API_BASE } from '$lib/api/base'
 
-    const BLOG_API = 'http://localhost:3000/public/blog-posts/approved'
+    const BLOG_API = `${API_BASE}/public/blog-posts/approved`
 
     let { posts: initialPosts = [] } = $props()
 

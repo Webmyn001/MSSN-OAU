@@ -25,7 +25,7 @@
 		Trash2
 	} from '@lucide/svelte';
 
-	const API_BASE = 'http://localhost:3000';
+	import { API_BASE } from '$lib/api/base';
 
 	let payments = $state<any[]>([]);
 	let stats = $state({ total: 0, completed: 0, pending: 0, failed: 0, totalAmount: 0, amount: 0, sessionName: '' });

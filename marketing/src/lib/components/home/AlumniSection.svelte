@@ -4,8 +4,9 @@
     import { onMount } from 'svelte';
     import { GraduationCap, ArrowRight, Phone, Mail, MessageSquareText, Smartphone, X } from '@lucide/svelte';
     import { browser } from '$app/environment';
+    import { API_BASE } from '$lib/api/base';
 
-    const API_URL = 'http://localhost:3000/public/alumni';
+    const API_URL = `${API_BASE}/public/alumni`;
 
     let { sessions: initialSessions = [] } = $props();
 

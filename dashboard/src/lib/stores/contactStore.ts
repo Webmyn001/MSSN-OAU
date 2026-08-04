@@ -2,7 +2,9 @@ import type { ContactData } from '$lib/data/sampleContacts';
 
 export type { ContactData, ContactEntry } from '$lib/data/sampleContacts';
 
-const API_URL = 'http://localhost:3000/public/contact';
+import { API_BASE } from '$lib/api/base';
+
+const API_URL = `${API_BASE}/public/contact`;
 
 export async function loadContactData(): Promise<ContactData> {
 	try {

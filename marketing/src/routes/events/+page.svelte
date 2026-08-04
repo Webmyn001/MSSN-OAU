@@ -17,6 +17,7 @@
     } from '@lucide/svelte';
     import { fade, fly, scale } from 'svelte/transition';
     import { SITE_URL } from '$lib/config';
+    import { API_BASE } from '$lib/api/base';
 
     /** @type {{data: { events: Event[] | undefined }}} */
     let { data } = $props(); 
@@ -241,7 +242,7 @@
         regError = "";
         regSuccess = null;
         try {
-            const res = await fetch(`http://localhost:3000/public/events/${eventId}/register`, {
+            const res = await fetch(`${API_BASE}/public/events/${eventId}/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

@@ -36,7 +36,9 @@
 		unsubscribed: number;
 	};
 
-	const API = 'http://localhost:3000/public/newsletter';
+	import { API_BASE } from '$lib/api/base';
+
+	const API = `${API_BASE}/public/newsletter`;
 
 	let subscribers = $state<Subscriber[]>([]);
 	let stats = $state<Stats>({ total: 0, active: 0, unsubscribed: 0 });

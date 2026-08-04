@@ -1,6 +1,7 @@
 <script>
     import {toast} from "svelte-sonner";
     import { Image } from '$lib/components/ui/image';
+    import { API_BASE } from '$lib/api/base';
 </script>
 
 <!-- ========== FOOTER ========== -->
@@ -107,7 +108,7 @@
                         return;
                     }
                     try {
-                        const res = await fetch('http://localhost:3000/public/newsletter/subscribe', {
+                        const res = await fetch(`${API_BASE}/public/newsletter/subscribe`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ email: userEmail })

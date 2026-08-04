@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000';
+import { API_BASE } from '$lib/api/base';
 
 export const MAX_IMAGE_SIZE = 3 * 1024 * 1024; // 3 MB target (auto-compressed)
 export const MAX_UPLOAD_SIZE = 15 * 1024 * 1024; // 15 MB hard rejection limit

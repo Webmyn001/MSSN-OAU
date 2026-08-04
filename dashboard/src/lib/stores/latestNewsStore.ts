@@ -2,7 +2,9 @@ import type { LatestNewsData } from '$lib/data/sampleLatestNews';
 
 export type { LatestNews, LatestNewsData } from '$lib/data/sampleLatestNews';
 
-const API_URL = 'http://localhost:3000/public/latest-news';
+import { API_BASE } from '$lib/api/base';
+
+const API_URL = `${API_BASE}/public/latest-news`;
 
 export async function loadLatestNewsData(): Promise<LatestNewsData> {
 	try {

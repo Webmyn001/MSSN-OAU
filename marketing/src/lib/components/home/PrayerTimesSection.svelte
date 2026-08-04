@@ -7,6 +7,7 @@
     import AutoplayModule from 'embla-carousel-autoplay';
     import * as Carousel from '$lib/components/ui/carousel';
     import { getFormattedDateVerbose, getFormattedDateVerboseShort } from '$lib/utils/dateFormatting.js';
+    import { API_BASE } from '$lib/api/base';
 
     /**
      * @typedef {{ adhan: string, iqamah: string }} PrayerTimeEntry
@@ -104,7 +105,7 @@
         // Fetch prayer times from API if props didn't provide them
         if (!apiPrayerTimes) {
             try {
-                const res = await fetch('http://localhost:3000/public/prayer-times');
+                const res = await fetch(`${API_BASE}/public/prayer-times`);
                 if (res.ok) {
                     const body = await res.json();
                     if (body?.success && body?.data) {

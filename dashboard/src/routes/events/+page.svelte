@@ -8,7 +8,7 @@
 		ArrowLeft, UserCheck, QrCode, RefreshCw
 	} from '@lucide/svelte';
 
-	const API_BASE = 'http://localhost:3000';
+	import { API_BASE } from '$lib/api/base';
 	let cloudinaryCloudName = $state('your_cloud_name');
 	let cloudinaryUploadPreset = $state('mssn_events');
 

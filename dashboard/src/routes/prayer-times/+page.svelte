@@ -35,7 +35,9 @@
 		};
 	}
 
-	const API_URL = 'http://localhost:3000/public/prayer-times';
+	import { API_BASE } from '$lib/api/base';
+
+	const API_URL = `${API_BASE}/public/prayer-times`;
 	const LOCAL_STORAGE_KEY = 'mssn_prayer_times';
 
 	const defaultData: PrayerTimesPayload = {

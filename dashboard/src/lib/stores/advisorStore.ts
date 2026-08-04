@@ -2,8 +2,10 @@ import type { AdvisorData } from '$lib/data/sampleAdvisors';
 
 export type { AdvisorData, Advisor } from '$lib/data/sampleAdvisors';
 
+import { API_BASE } from '$lib/api/base';
+
 const STORAGE_KEY = 'mssn_advisor_admin_data_v1';
-const API_URL = 'http://localhost:3000/public/advisors';
+const API_URL = `${API_BASE}/public/advisors`;
 
 const emptyData: AdvisorData = { advisors: [] };
 

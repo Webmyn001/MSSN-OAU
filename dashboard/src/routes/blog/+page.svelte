@@ -17,7 +17,7 @@
 		ChevronUp
 	} from '@lucide/svelte';
 
-	const API_BASE = 'http://localhost:3000';
+	import { API_BASE } from '$lib/api/base';
 
 	interface BlogPost {
 		id: string;

@@ -7,6 +7,7 @@
 	import { Image } from '$lib/components/ui/image'
 	import SEO from '$lib/components/SEO.svelte';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
+	import { API_BASE } from '$lib/api/base';
 
     /**
      * @typedef {import('$lib/types.js').WordPressPost} WordPressPost
@@ -63,7 +64,7 @@
         }
 
         try {
-            const res = await fetch('http://localhost:3000/public/newsletter/subscribe', {
+            const res = await fetch(`${API_BASE}/public/newsletter/subscribe`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: trimmedEmail })

@@ -6,6 +6,7 @@
     import SEO from '$lib/components/SEO.svelte';
     import { toast } from "svelte-sonner";
     import { fly } from "svelte/transition";
+    import { API_BASE } from "$lib/api/base";
 
     /**
      * @typedef {Object} Socials
@@ -46,7 +47,7 @@
 
         if (browser) {
             try {
-                const res = await fetch('http://localhost:3000/public/advisors', { signal: AbortSignal.timeout(10000) });
+                const res = await fetch(`${API_BASE}/public/advisors`, { signal: AbortSignal.timeout(10000) });
                 if (res.ok) {
                     const body = await res.json();
                     if (body?.success && Array.isArray(body?.data?.advisors)) {

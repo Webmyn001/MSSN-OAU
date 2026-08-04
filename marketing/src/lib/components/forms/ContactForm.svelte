@@ -1,11 +1,12 @@
 <script>
     import { Button } from "$lib/components/ui/button";
     import { Loader2 } from "@lucide/svelte";
+    import { API_BASE } from "$lib/api/base";
     
   
     let { wrapperClass = "max-w-lg mx-auto", title = "Contact Form", submitLabel = "Submit Message", subtitle = "We'll try to get back to you as soon as possible Insha'Allah." } = $props();
     
-    const API_URL = 'http://localhost:3000/public/contact';
+    const API_URL = `${API_BASE}/public/contact`;
 
     // Form state
     let isSubmitting = $state(false);

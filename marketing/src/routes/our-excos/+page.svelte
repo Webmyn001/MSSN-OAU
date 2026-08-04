@@ -16,6 +16,7 @@
     import ResponsiveModal from "$lib/components/layout/ResponsiveModal.svelte";
 
     import { onMount } from 'svelte';
+    import { API_BASE } from '$lib/api/base';
 
     /** @type {{ data: any }} */
     let { data } = $props();
@@ -46,7 +47,7 @@
 
     async function fetchLatestExcos() {
         try {
-            const res = await fetch('http://localhost:3000/public/excos');
+            const res = await fetch(`${API_BASE}/public/excos`);
             if (res.ok) {
                 const body = await res.json();
                 if (body?.success && body?.data?.excos?.sessions) {

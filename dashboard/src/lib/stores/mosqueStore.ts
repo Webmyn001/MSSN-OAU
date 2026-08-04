@@ -2,7 +2,9 @@ import type { MosqueData } from '$lib/data/sampleMosques';
 
 export type { MosqueEntry, MosqueData } from '$lib/data/sampleMosques';
 
-const API_URL = 'http://localhost:3000/public/mosques';
+import { API_BASE } from '$lib/api/base';
+
+const API_URL = `${API_BASE}/public/mosques`;
 
 export async function loadMosqueData(): Promise<MosqueData> {
 	try {

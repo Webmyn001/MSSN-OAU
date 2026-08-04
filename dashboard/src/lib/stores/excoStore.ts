@@ -2,8 +2,10 @@ import { sampleExcosData, type ExcosData } from '$lib/data/sampleExcos';
 
 export type { ExcosData, ExecutiveMember, ExecutiveSession, ExecutiveCommittee } from '$lib/data/sampleExcos';
 
+import { API_BASE } from '$lib/api/base';
+
 const STORAGE_KEY = 'mssn_excos_admin_data_v2';
-const API_URL = 'http://localhost:3000/public/excos';
+const API_URL = `${API_BASE}/public/excos`;
 
 // Fetch remote source of truth from API (PostgreSQL database)
 export async function fetchExcosDataFromApi(): Promise<ExcosData | null> {

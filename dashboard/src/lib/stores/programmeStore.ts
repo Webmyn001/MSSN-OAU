@@ -2,7 +2,9 @@ import type { ProgrammeData } from '$lib/data/sampleProgrammes';
 
 export type { ProgrammeData, Programme, ProgrammeScheduleItem } from '$lib/data/sampleProgrammes';
 
-const API_URL = 'http://localhost:3000/public/programmes';
+import { API_BASE } from '$lib/api/base';
+
+const API_URL = `${API_BASE}/public/programmes`;
 
 export async function loadProgrammeData(): Promise<ProgrammeData> {
 	try {

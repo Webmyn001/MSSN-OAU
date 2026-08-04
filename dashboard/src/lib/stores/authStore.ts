@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000'
+import { API_BASE } from '$lib/api/base'
 const AUTH_TOKEN_KEY = 'mssn_admin_token'
 const AUTH_USER_KEY = 'mssn_admin_user'
 

@@ -2,8 +2,10 @@ import type { AlumniData } from '$lib/data/sampleAlumni';
 
 export type { AlumniData, Alumnus, AlumniSession } from '$lib/data/sampleAlumni';
 
+import { API_BASE } from '$lib/api/base';
+
 const STORAGE_KEY = 'mssn_alumni_admin_data_v1';
-const API_URL = 'http://localhost:3000/public/alumni';
+const API_URL = `${API_BASE}/public/alumni`;
 
 const emptyData: AlumniData = { sessions: [] };
 
