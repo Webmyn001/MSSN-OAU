@@ -6,11 +6,6 @@ import { defineConfig } from 'vite';
 // import { sentrySvelteKit } from "@sentry/sveltekit";
 // import { sentryVitePlugin } from "@sentry/vite-plugin";
 
-// Base URL used by all client-side API calls. Defaults to the local dev API;
-// set PUBLIC_API_BASE_URL (e.g. https://mssn-api.onrender.com) when building
-// for production so every fetch points at the live backend.
-const API_BASE = (process.env.PUBLIC_API_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
-
 export default defineConfig({
     build: {
         sourcemap: true, // Source map generation must be turned on
@@ -28,16 +23,11 @@ export default defineConfig({
         },
         rollupOptions: {
             output: {
-                // Allow proper code splitting so the browser only loads what each page needs
-                manualChunks(id) {
-                    if (id.includes('node_modules')) {
-                        // Group large vendor libs into separate cacheable chunks
-                        if (id.includes('svelte')) return 'vendor-svelte';
-                        if (id.includes('bits-ui') || id.includes('embla-carousel')) return 'vendor-ui';
-                        if (id.includes('date-fns') || id.includes('timeago')) return 'vendor-date';
-                        return 'vendor';
-                    }
-                }
+                // NOTE: manualChunks is intentionally NOT used here. Forcing svelte
+                // and other vendor libs into custom chunks created a circular
+                // dependency between chunks that broke the SSR output with
+                // "Cannot access 'Ft' before initialization". Let Vite split chunks
+                // naturally instead.
             }
         },
         cssCodeSplit: true,
@@ -88,17 +78,6 @@ export default defineConfig({
     },
 
 	plugins: [
-        // Rewrite the hardcoded localhost API prefix in src modules so the
-        // frontend talks to PUBLIC_API_BASE_URL in production builds (a no-op
-        // in local dev, where API_BASE still defaults to localhost:3000).
-        {
-            name: 'api-base-url',
-            enforce: 'pre',
-            transform(code, id) {
-                if (!/[/\\]src[/\\]/.test(id)) return;
-                return code.replaceAll('http://localhost:3000', API_BASE);
-            }
-        },
         // Temporarily comment out Sentry plugins
         // sentryVitePlugin({
         //     org: "mssnoau",
