@@ -7,46 +7,9 @@
     
     // For animated text reveal
     let visible = $state(false);
-    let imagesLoaded = false;
-    
-    // For image loading tracking
-    let loadedImages = 0;
-    const totalImages = 15; // Main image + 14 profile images
-    
-    function handleImageLoad() {
-        loadedImages++;
-        if (loadedImages >= totalImages) {
-            imagesLoaded = true;
-        }
-    }
     
     onMount(() => {
         visible = true;
-        
-        // Preload images
-        const imageUrls = [
-            '/images/bg-1.webp',
-            '/images/man_1.webp',
-            '/images/woman_1.webp',
-            '/images/man_2.webp',
-            '/images/woman_2.webp',
-            '/images/man_3.webp',
-            '/images/woman_3.webp',
-            '/images/man_4.webp',
-            '/images/woman_4.webp',
-            '/images/man_5.webp',
-            '/images/woman_5.webp',
-            '/images/man_6.webp',
-            '/images/woman_6.webp',
-            '/images/man_7.webp',
-            '/images/woman_7.webp'
-        ];
-        
-        imageUrls.forEach(url => {
-            const img = new Image();
-            img.onload = handleImageLoad;
-            img.src = url;
-        });
     });
 </script>
 
@@ -55,6 +18,9 @@
 >
     <!-- Decorative background elements -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <!-- Animated soft gradient wash -->
+        <div class="absolute -top-40 -right-40 size-[28rem] rounded-full bg-[#EBB957]/15 blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-40 size-[28rem] rounded-full bg-[#026d3b]/10 blur-3xl"></div>
         <!-- Subtle pattern overlay -->
         <div class="absolute inset-0 bg-[url('/images/pattern.svg')] opacity-[0.03] mix-blend-overlay"></div>
     </div>
@@ -63,6 +29,13 @@
         <!-- Hero heading with enhanced text effect -->
         {#if visible}
         <div in:fade={{ duration: 1000, delay: 200 }} class="relative">
+            <span
+                in:fly={{ y: 30, duration: 800, delay: 100 }}
+                class="inline-flex items-center gap-2 mb-6 rounded-full border border-[#EBB957]/30 bg-[#EBB957]/10 px-4 py-1.5 text-xs sm:text-sm font-semibold tracking-wide text-primary-800 backdrop-blur-sm"
+            >
+                <span class="size-2 rounded-full bg-[#EBB957] animate-pulse"></span>
+                Muslim Students' Society of Nigeria, OAU Branch
+            </span>
             <h1 class="text-primary-900 oau my-6 text-pretty text-4xl font-bold lg:text-6xl xl:text-7xl text-center tracking-tight" id="hero-text">
                 <span in:fly={{ y: 30, duration: 800, delay: 300 }}>We are Great</span>
                 <span class="inline-block relative oau mt-2">
@@ -109,7 +82,7 @@
                 <Sparkles
                     minSize={8}
                     maxSize={16}
-                    particleDensity={100}
+                    particleDensity={60}
                     className="w-full mx-auto h-[25dvh]"
                     particleColor="#026d3b"
                     secondaryColor="#EBB957"
@@ -164,16 +137,12 @@
                             <img 
                                 src="/images/man_1.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                loading="lazy"                                                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
                             />
                             <img 
                                 src="/images/woman_1.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-14 rounded-full object-cover border-2 border-white shadow-md absolute -bottom-6 -right-4"
+                                loading="lazy"                                                                class="size-14 rounded-full object-cover border-2 border-white shadow-md absolute -bottom-6 -right-4"
                             />
                         </div>
                     </div>
@@ -183,9 +152,7 @@
                             <img 
                                 src="/images/man_2.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-14 rounded-full object-cover border-2 border-white shadow-md"
+                                loading="lazy"                                                                class="size-14 rounded-full object-cover border-2 border-white shadow-md"
                             />
                         </div>
                     </div>
@@ -195,16 +162,12 @@
                             <img 
                                 src="/images/woman_2.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                loading="lazy"                                                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
                             />
                             <img 
                                 src="/images/man_3.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-12 rounded-full object-cover border-2 border-white shadow-md absolute -top-8 -right-2"
+                                loading="lazy"                                                                class="size-12 rounded-full object-cover border-2 border-white shadow-md absolute -top-8 -right-2"
                             />
                         </div>
                     </div>
@@ -215,16 +178,12 @@
                             <img 
                                 src="/images/woman_3.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                loading="lazy"                                                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
                             />
                             <img 
                                 src="/images/man_4.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-14 rounded-full object-cover border-2 border-white shadow-md absolute -bottom-4 -left-6"
+                                loading="lazy"                                                                class="size-14 rounded-full object-cover border-2 border-white shadow-md absolute -bottom-4 -left-6"
                             />
                         </div>
                     </div>
@@ -234,9 +193,7 @@
                             <img 
                                 src="/images/woman_4.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-14 rounded-full object-cover border-2 border-white shadow-md"
+                                loading="lazy"                                                                class="size-14 rounded-full object-cover border-2 border-white shadow-md"
                             />
                         </div>
                     </div>
@@ -246,16 +203,12 @@
                             <img 
                                 src="/images/man_5.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
+                                loading="lazy"                                                                class="size-16 rounded-full object-cover border-2 border-white shadow-md"
                             />
                             <img 
                                 src="/images/woman_5.webp" 
                                 alt="community member"
-                                loading="eager"
-                                onload={handleImageLoad}
-                                class="size-12 rounded-full object-cover border-2 border-white shadow-md absolute -top-6 -left-4"
+                                loading="lazy"                                                                class="size-12 rounded-full object-cover border-2 border-white shadow-md absolute -top-6 -left-4"
                             />
                         </div>
                     </div>
@@ -272,7 +225,7 @@
                     <img
                         src="/images/bg-1.webp"
                         loading="eager"
-                        onload={handleImageLoad}
+                        fetchpriority="high"
                         alt="central mosque of unity"
                         class="mt-2 flex aspect-[16/9] min-h-[300px] max-h-[600px] w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                     />

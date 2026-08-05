@@ -28,7 +28,7 @@
     path="/latest-news"
 />
 
-<PageHeader>
+<PageHeader subtitle="Stay up to date with announcements, updates and stories from across the MSSN OAU community.">
     Latest News
 </PageHeader>
 

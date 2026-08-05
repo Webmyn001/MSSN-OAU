@@ -32,7 +32,7 @@
         images={item.image ? [{ url: item.image, width: 1200, height: 630, alt: item.title }] : []}
     />
 
-    <PageHeader>
+    <PageHeader subtitle="Stay up to date with announcements, updates and stories from across the MSSN OAU community.">
         Latest News
     </PageHeader>
 

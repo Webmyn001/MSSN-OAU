@@ -22,6 +22,7 @@
     import { onMount } from 'svelte';
     import { invalidate } from '$app/navigation';
     import { dev } from '$app/environment';
+    import HomeSkeleton from '$lib/components/home/HomeSkeleton.svelte';
 
     // Home section components — lazily loaded to reduce initial bundle parse time
 	import HeroSection from '$lib/components/home/HeroSection.svelte';
@@ -74,7 +75,7 @@
     description="Welcome to the Muslim Students Society of Nigeria, OAU Branch – the official community of Muslim students at Obafemi Awolowo University. Join us for academic excellence, Islamic education, and community engagement."
     images={[
         {
-            url: 'https://mssnoau.sirv.com/mssn-home.jpg',
+            url: '/images/bg-1.webp',
             width: 1200,
             height: 630,
             alt: 'MSSNOAU - Muslim Students Society of Nigeria, OAU Branch'
@@ -94,7 +95,7 @@
         },
         "primaryImageOfPage": {
             "@type": "ImageObject",
-            "url": "https://mssnoau.sirv.com/mssn-home.jpg"
+            "url": "/images/bg-1.webp"
         },
         "inLanguage": "en-US"
     }}
@@ -113,37 +114,49 @@
 <!-- End Events -->
 
 <!-- Prayer Times -->
-{#await import('$lib/components/home/PrayerTimesSection.svelte') then { default: PrayerTimesSection }}
+{#await import('$lib/components/home/PrayerTimesSection.svelte')}
+    <HomeSkeleton />
+{:then { default: PrayerTimesSection }}
     <PrayerTimesSection prayerTimes={data?.info?.prayer_times} prayerTimesUpdatedAt={data?.info?.prayerTimesUpdatedAt} hijriDate={data?.info?.hijriDate} shortHijriDate={data?.info?.shortHijriDate} mosques={data?.mosques || []} />
 {/await}
 <!-- End Prayer Times -->
 
 <!-- Latest News Section -->
-{#await import('$lib/components/home/LatestNewsSection.svelte') then { default: LatestNewsSection }}
+{#await import('$lib/components/home/LatestNewsSection.svelte')}
+    <HomeSkeleton />
+{:then { default: LatestNewsSection }}
     <LatestNewsSection items={data?.latestNews} />
 {/await}
 <!-- End Latest News Section -->
 
 <!-- Upcoming Events Section -->
-{#await import('$lib/components/home/UpcomingEvents.svelte') then { default: UpcomingEvents }}
+{#await import('$lib/components/home/UpcomingEvents.svelte')}
+    <HomeSkeleton />
+{:then { default: UpcomingEvents }}
     <UpcomingEvents events={data?.events} />
 {/await}
 <!-- End Upcoming Events Section -->
 
 <!-- Blog Section -->
-{#await import('$lib/components/home/BlogSection.svelte') then { default: BlogSection }}
+{#await import('$lib/components/home/BlogSection.svelte')}
+    <HomeSkeleton />
+{:then { default: BlogSection }}
     <BlogSection posts={data?.blogPosts} />
 {/await}
 <!-- End Blog Section -->
 
 <!-- Alumni Section -->
-{#await import('$lib/components/home/AlumniSection.svelte') then { default: AlumniSection }}
+{#await import('$lib/components/home/AlumniSection.svelte')}
+    <HomeSkeleton />
+{:then { default: AlumniSection }}
     <AlumniSection sessions={data?.alumni?.sessions || []} />
 {/await}
 <!-- End Alumni Section -->
 
 <!-- Suggestions Section -->
-{#await import('$lib/components/home/SuggestionsSection.svelte') then { default: SuggestionsSection }}
+{#await import('$lib/components/home/SuggestionsSection.svelte')}
+    <HomeSkeleton />
+{:then { default: SuggestionsSection }}
     <SuggestionsSection />
 {/await}
 <!-- End Suggestions Section -->

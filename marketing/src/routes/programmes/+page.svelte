@@ -105,7 +105,7 @@
     keywords={["mssnoau programmes", "mssn oau events", "islamic activities oau", "muslim student programmes oau", "oau mssn activities"]}
 />
 
-<PageHeader>
+<PageHeader subtitle="From Qur'an circles to community drives — the programmes and initiatives that keep the MSSN OAU family thriving.">
     Our Programmes
 </PageHeader>
 

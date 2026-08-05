@@ -134,7 +134,7 @@
     description="Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus."
     images={[
         {
-            url: 'https://mssnoau.sirv.com/contact-page.jpg',
+            url: '/images/bg-1.webp',
             width: 1200,
             height: 630,
             alt: 'Contact MSSNOAU'
@@ -144,7 +144,7 @@
     schema={combinedSchema}
 />
 
-<PageHeader>
+<PageHeader subtitle="Have a question, suggestion or partnership idea? We'd love to hear from you.">
     Contact Us
 </PageHeader>
 

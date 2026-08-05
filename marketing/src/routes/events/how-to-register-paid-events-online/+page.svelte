@@ -58,7 +58,7 @@
     }}
 />
 
-<PageHeader>
+<PageHeader subtitle="A simple step-by-step guide to securing your spot at paid MSSN OAU events.">
     How to Register for Paid MSSN Events Online
 </PageHeader>
 

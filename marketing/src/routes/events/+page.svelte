@@ -439,7 +439,7 @@
     });
 </script>
 
-<PageHeader>
+<PageHeader subtitle="Mark your calendar — from Islamic lectures and Jihad Week to community outreaches and fun-filled socials.">
     <div in:fly={{ y: -20, duration: 800, delay: 200 }}>
     Our Events
     <br/>
@@ -473,7 +473,7 @@
         description: 'Stay updated with events, programmes, and activities by the Muslim Students Society of Nigeria, OAU Branch.',
         images: [
           {
-            url: data.events?.[0]?.image || 'https://mssnoau.sirv.com/og/og-events.jpg', 
+            url: data.events?.[0]?.image || '/images/bg-1.webp', 
             width: 1200,
             height: 630,
             alt: 'MSSNOAU Events'

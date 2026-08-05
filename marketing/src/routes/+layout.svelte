@@ -11,8 +11,9 @@
     let {children, data} = $props();
 
     const info = $derived(data?.info)
-    
-    // Define website-wide SEO constants
+
+    // Use the live request origin so JSON-LD, canonical and OG URLs always match the deployed domain
+    const org = $derived({ ...ORGANIZATION, url: page?.url?.origin || ORGANIZATION.url })
 </script>
 
 <JsonLd
@@ -20,31 +21,31 @@
             {
                 "@context": "https://schema.org",
                 "@type": "NonProfitOrganization",
-                "@id": ORGANIZATION.url + '#organization',
-                "name": ORGANIZATION.name,
-                "alternateName": ORGANIZATION.shortName,
-                "url": ORGANIZATION.url,
-                "logo": ORGANIZATION.logo,
-                "image": ORGANIZATION.ogImage,
-                "description": ORGANIZATION.description,
+                "@id": org.url + '#organization',
+                "name": org.name,
+                "alternateName": org.shortName,
+                "url": org.url,
+                "logo": org.logo,
+                "image": org.ogImage,
+                "description": org.description,
                 "address": {
                     "@type": "PostalAddress",
-                    "streetAddress": ORGANIZATION.address.street,
-                    "addressLocality": ORGANIZATION.address.city,
-                    "addressRegion": ORGANIZATION.address.state,
-                    "postalCode": ORGANIZATION.address.postalCode,
-                    "addressCountry": ORGANIZATION.address.country
+                    "streetAddress": org.address.street,
+                    "addressLocality": org.address.city,
+                    "addressRegion": org.address.state,
+                    "postalCode": org.address.postalCode,
+                    "addressCountry": org.address.country
                 },
                 "geo": {
                     "@type": "GeoCoordinates",
-                    "latitude": ORGANIZATION.coordinates.latitude,
-                    "longitude": ORGANIZATION.coordinates.longitude
+                    "latitude": org.coordinates.latitude,
+                    "longitude": org.coordinates.longitude
                 },
-                "hasMap": ORGANIZATION.map,
+                "hasMap": org.map,
                 "contactPoint": [
                     {
                         "@type": "ContactPoint",
-                        "email": ORGANIZATION.email,
+                        "email": org.email,
                         "contactType": "General Enquiry",
                         "areaServed": "NG",
                         "availableLanguage": ["en", "yo"]
@@ -59,9 +60,9 @@
                 ],
                 "openingHours": "Mo 09:00-17:00 Tu 09:00-17:00 We 09:00-17:00 Th 09:00-17:00 Fr 09:00-17:00 Sa 09:00-17:00 Su Closed",
                 "sameAs": [
-                    ORGANIZATION.socialMedia.facebook
+                    org.socialMedia.facebook
                 ],
-                "foundingDate": ORGANIZATION.foundingYear,
+                "foundingDate": org.foundingYear,
                 "founder": {
                     "@type": "Organization",
                     "name": "Muslim Students' Society of Nigeria"
@@ -75,35 +76,35 @@
                     "roleName": "Member"
                 },
                 "department": [
-                    { "@type": "Organization", "name": "Programmes and Events", "url": ORGANIZATION.url + "/programmes" },
-                    { "@type": "Organization", "name": "Executive Council", "url": ORGANIZATION.url + "/our-excos" },
-                    { "@type": "Organization", "name": "Advisory Board", "url": ORGANIZATION.url + "/our-advisors" },
-                    { "@type": "Organization", "name": "Alumnae Relations", "url": ORGANIZATION.url + "/alumni" }
+                    { "@type": "Organization", "name": "Programmes and Events", "url": org.url + "/programmes" },
+                    { "@type": "Organization", "name": "Executive Council", "url": org.url + "/our-excos" },
+                    { "@type": "Organization", "name": "Advisory Board", "url": org.url + "/our-advisors" },
+                    { "@type": "Organization", "name": "Alumnae Relations", "url": org.url + "/alumni" }
                 ],
                 "knowsAbout": ["Islam", "Student Development", "Community Service", "Islamic Education", "Spiritual Growth", "Academic Excellence"],
                 "mainEntityOfPage": {
                     "@type": "WebPage",
-                    "@id": ORGANIZATION.url
+                    "@id": org.url
                 }
             },
             {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
-                "@id": ORGANIZATION.url + '#website',
-                "name": ORGANIZATION.name,
-                "url": ORGANIZATION.url,
+                "@id": org.url + '#website',
+                "name": org.name,
+                "url": org.url,
                 "publisher": {
-                    "@id": ORGANIZATION.url + '#organization'
+                    "@id": org.url + '#organization'
                 },
                 "inLanguage": "en-NG",
                 "about": {
-                    "@id": ORGANIZATION.url + '#organization'
+                    "@id": org.url + '#organization'
                 },
                 "potentialAction": {
                     "@type": "SearchAction",
                     "target": {
                         "@type": "EntryPoint",
-                        "urlTemplate": ORGANIZATION.url + "/search?q={search_term_string}"
+                        "urlTemplate": org.url + "/search?q={search_term_string}"
                     },
                     "query-input": "required name=search_term_string"
                 }
@@ -116,7 +117,7 @@
                         "@type": "ListItem",
                         "position": 1,
                         "name": "Home",
-                        "item": ORGANIZATION.url
+                        "item": org.url
                     }
                 ]
             }

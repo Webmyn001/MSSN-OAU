@@ -1,5 +1,6 @@
 <script>
     import { MetaTags, JsonLd } from 'svelte-meta-tags';
+    import { page } from '$app/state';
     import { 
         SITE_NAME, 
         SITE_URL, 
@@ -53,10 +54,19 @@
     const finalKeywords = $derived(formatKeywords(keywords));
     
     // Format the canonical and OG URLs
-    const url = path ? `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}` : SITE_URL;
+    const origin = $derived(page?.url?.origin || SITE_URL);
+    const url = $derived(path ? `${origin}${path.startsWith("/") ? path : `/${path}`}` : origin);
+
+    // Resolve relative image urls against the live origin so OG images always point at a working URL
+    const finalImages = $derived(
+        (images || []).map(img => ({
+            ...img,
+            url: img.url?.startsWith("/") ? `${origin}${img.url}` : img.url
+        }))
+    );
     
     // Format the title
-    const formattedTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+    const formattedTitle = $derived(title ? `${title} | ${SITE_NAME}` : SITE_NAME);
 </script>
 
 <MetaTags
@@ -69,7 +79,7 @@
         url,
         title: formattedTitle,
         description,
-        images,
+        images: finalImages,
         siteName: SITE_NAME, // Corrected from site_name
         type
     }}

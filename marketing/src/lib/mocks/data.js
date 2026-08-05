@@ -139,7 +139,7 @@ export const mockCommittees = {
 		{
 			id: 'an-nuur',
 			name: 'An-Nuur Committee',
-			description: 'Organizes events and activities for sisters.'
+			description: 'In charge of publications, article writing, blogs and magazines for MSSN OAU.'
 		}
 	]
 };

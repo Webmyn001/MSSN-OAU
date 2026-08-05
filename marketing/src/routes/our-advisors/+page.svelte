@@ -135,7 +135,7 @@
     keywords={["mssn oau advisors", "mssnoau advisors", "oau muslim advisors", "mssn oau patrons", "islamic guidance oau"]}
 />
 
-<PageHeader>
+<PageHeader subtitle="Trusted voices guiding the MSSN OAU family — meet the scholars, patrons and mentors shaping our journey.">
     <div class="relative">
         {#if visible}
             <h1 in:fly={{ y: 30, duration: 800, delay: 200 }} class="relative z-10">

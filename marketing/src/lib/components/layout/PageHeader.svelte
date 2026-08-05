@@ -2,7 +2,7 @@
     import { fly, fade } from 'svelte/transition'
     import { onMount } from 'svelte'
 
-    let { children } = $props()
+    let { children, subtitle } = $props()
     
     let visible = $state(false);
     
@@ -30,12 +30,22 @@
     <!-- Content with animation -->
     <div class="relative w-full h-full z-[2] flex justify-center items-center">
         {#if visible}
-            <h2 
-                in:fly={{ y: 30, duration: 800, delay: 300 }}
-                class="font-secondary text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold drop-shadow-xl flex justify-center items-center flex-col text-center px-4"
-            >
-                {@render children?.()}
-            </h2>
+            <div class="flex justify-center items-center flex-col text-center px-4">
+                <h2 
+                    in:fly={{ y: 30, duration: 800, delay: 300 }}
+                    class="font-secondary text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold drop-shadow-xl"
+                >
+                    {@render children?.()}
+                </h2>
+                {#if subtitle}
+                    <p 
+                        in:fade={{ duration: 800, delay: 500 }}
+                        class="mt-3 sm:mt-4 max-w-2xl mx-auto text-primary-50/90 font-primary text-xs sm:text-sm md:text-base leading-relaxed drop-shadow-lg"
+                    >
+                        {subtitle}
+                    </p>
+                {/if}
+            </div>
         {/if}
     </div>
     

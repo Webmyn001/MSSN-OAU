@@ -64,7 +64,7 @@
     }}
 />
 
-<PageHeader>
+<PageHeader subtitle="Welcome to the Muslim Students' Society of Nigeria, OAU Branch — a community rooted in faith, knowledge and service.">
     About MSSNOAU
 </PageHeader>
 

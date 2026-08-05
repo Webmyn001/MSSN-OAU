@@ -5,7 +5,8 @@ import { mockBlog, mockEvents } from '$lib/mocks/data.js';
  * * Returns sitemap using mocked data (no server-side fetching)
  * @type {import('@sveltejs/kit').RequestHandler}
  */
-export async function GET() {
+export async function GET({ url: requestUrl }) {
+  const siteUrl = requestUrl?.origin || SITE_URL;
   // * Use mocked data directly
   const posts = mockBlog.posts || [];
   const events = mockEvents.events || [];
@@ -32,14 +33,14 @@ export async function GET() {
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
     ${staticPages.map(page => `
     <url>
-        <loc>${SITE_URL}${page.url}</loc>
+        <loc>${siteUrl}${page.url}</loc>
         <changefreq>${page.changefreq}</changefreq>
         <priority>${page.priority}</priority>
     </url>`).join('')}
     
     ${posts.map(post => `
     <url>
-        <loc>${SITE_URL}/blog/${post.slug || post.id}</loc>
+        <loc>${siteUrl}/blog/${post.slug || post.id}</loc>
         <lastmod>${new Date(post.published_at || post.created_at || Date.now()).toISOString().split('T')[0]}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
@@ -47,7 +48,7 @@ export async function GET() {
     
     ${events.map(event => `
     <url>
-        <loc>${SITE_URL}/events/${event.slug || event.id}</loc>
+        <loc>${siteUrl}/events/${event.slug || event.id}</loc>
         <lastmod>${new Date(event.updated_at || event.created_at || Date.now()).toISOString().split('T')[0]}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

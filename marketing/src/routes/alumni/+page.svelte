@@ -76,7 +76,7 @@
     keywords={["mssnoau alumni", "oau muslim alumni", "mssn oau past leaders", "mssn oau ameer"]}
 />
 
-<PageHeader>Our Alumni</PageHeader>
+<PageHeader subtitle="The legacy lives on — the past Ameers and Ameerah who built and carried the MSSN OAU spirit forward.">Our Alumni</PageHeader>
 
 <section class="pt-6 pb-16 relative overflow-hidden">
     <div class="absolute -top-24 -right-24 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"></div>

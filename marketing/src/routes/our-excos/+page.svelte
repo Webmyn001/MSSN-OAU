@@ -172,7 +172,7 @@
     type="WebPage"
     images={[
         {
-            url: data?.excos?.sessions?.find(/** @param {any} s */ s => s.session === selectedSession)?.executives?.[0]?.members?.[0]?.photo || 'https://mssnoau.sirv.com/og/og-excos.jpg',
+            url: data?.excos?.sessions?.find(/** @param {any} s */ s => s.session === selectedSession)?.executives?.[0]?.members?.[0]?.photo || '/images/bg-1.webp',
             width: 1200,
             height: 630,
             alt: `MSSN OAU Executives ${selectedSession || ''}`
@@ -206,7 +206,7 @@
     keywords={["mssn oau executives", "mssnoau excos", "muslim students oau leaders", "mssn oau committees", "oau mssn leadership"]}
 />
 
-<PageHeader>
+<PageHeader subtitle="The student leaders steering MSSN OAU through this session — meet the hands on deck.">
     <div class="relative">
         {#if visible}
             <h1 in:fly={{ y: 30, duration: 800, delay: 200 }} class="relative z-10">
