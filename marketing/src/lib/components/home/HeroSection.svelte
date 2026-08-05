@@ -6,9 +6,10 @@
     import { spring } from 'svelte/motion';
     
     // For animated text reveal
-    let visible = $state(false);
+    let visible = $state(true);
     
     onMount(() => {
+        // Intro transitions replay after hydration
         visible = true;
     });
 </script>
