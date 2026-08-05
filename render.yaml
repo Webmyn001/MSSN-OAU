@@ -56,8 +56,11 @@ services:
         sync: false
       - key: SMTP_PASS
         sync: false
+      # Must be a sender verified in the Brevo account, otherwise Brevo rejects
+      # emails with "451 4.0.0 Invalid from". bellomuhyideen0001@gmail.com is
+      # verified and works.
       - key: SMTP_FROM
-        sync: false
+        value: "MSSN OAU <bellomuhyideen0001@gmail.com>"
       - key: KUDISMS_API_TOKEN
         sync: false
       - key: KUDISMS_SENDER_ID

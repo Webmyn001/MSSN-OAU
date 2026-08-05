@@ -2,11 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { login } from '$lib/stores/authStore';
 	import { toast } from '$lib/stores/toast.svelte';
-	import { Mail, Lock, Loader2 } from '@lucide/svelte';
+	import { Mail, Lock, Loader2, Eye, EyeOff } from '@lucide/svelte';
 
 	let email = $state('');
 	let password = $state('');
 	let loading = $state(false);
+	let showPassword = $state(false);
 
 	const patternUrl = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='1'/%3E%3Cpath d='M30 10L50 30L30 50L10 30Z' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3Ccircle cx='30' cy='30' r='4' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3C/svg%3E")`;
 
@@ -90,12 +91,24 @@
 							<Lock class="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
 							<input
 								id="password"
-								type="password"
+								type={showPassword ? 'text' : 'password'}
 								required
 								bind:value={password}
 								placeholder="Enter your password"
-								class="w-full pl-11 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all"
+								class="w-full pl-11 pr-11 py-3 bg-white border border-gray-300 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all"
 							/>
+							<button
+								type="button"
+								aria-label={showPassword ? 'Hide password' : 'Show password'}
+								onclick={() => (showPassword = !showPassword)}
+								class="absolute right-3 top-2.5 p-1 text-gray-400 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-600 rounded-md transition-colors"
+							>
+								{#if showPassword}
+									<EyeOff class="w-4 h-4" />
+								{:else}
+									<Eye class="w-4 h-4" />
+								{/if}
+							</button>
 						</div>
 					</div>
 
