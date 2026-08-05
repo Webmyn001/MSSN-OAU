@@ -72,3 +72,25 @@ services:
         sync: false
       - key: CLOUDINARY_UPLOAD_PRESET
         sync: false
+
+  # * MSSN OAU Admin Dashboard (SvelteKit, adapter-node)
+  # * VITE_API_BASE_URL is baked into the JS bundle at build time, so any change
+  # * to the API URL requires a rebuild (set it as a build-time env var).
+  - type: web
+    name: mssn-dashboard
+    runtime: node
+    rootDir: dashboard
+    plan: free
+    region: frankfurt
+    healthCheckPath: /login
+    buildCommand: npm ci && npm run build
+    startCommand: node build
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_BASE_URL
+        value: https://mssn-api.onrender.com
+      # Render generates a random secret; the dashboard does not use JWT directly
+      # (auth lives in the API), but keeping parity with the API service is harmless.
+      - key: JWT_SECRET
+        generateValue: true
