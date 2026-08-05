@@ -9,6 +9,7 @@ import {
 	verifyJWT
 } from '../services/admin-auth'
 import { sendEmailWithContent } from '../services/email/brevo'
+import { brandEmail } from '../services/email/template'
 import { successResponse, errorResponse } from '../lib/response'
 import { logger } from '../lib/logger'
 
@@ -41,19 +42,18 @@ adminAuth.post('/login', zValidator('json', loginSchema), async c => {
 			await sendEmailWithContent({
 				to: email,
 				subject: 'MSSN OAU Admin — Your Login Code',
-				html: `
-					<div style="font-family:system-ui,-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:32px;">
-						<div style="text-align:center;margin-bottom:24px;">
-							<h1 style="color:#003a1c;font-size:20px;margin:0;">MSSN OAU Admin</h1>
+				html: brandEmail(
+					'Admin Login Verification',
+					`
+						<p style="margin:0 0 16px;">Assalamu 'alaykum,</p>
+						<p style="margin:0 0 16px;">You requested to sign in to the <strong>MSSN OAU Admin Dashboard</strong>. Use the code below to complete your login:</p>
+						<div style="text-align:center; margin:28px 0;">
+							<span style="display:inline-block; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:32px; font-weight:700; letter-spacing:10px; color:#115F34; background:#f0f7f2; border:1px solid #e3ece6; border-radius:10px; padding:14px 24px;">${otp}</span>
 						</div>
-						<div style="background:#f8faf9;border:1px solid #e2e8f0;border-radius:12px;padding:32px;text-align:center;">
-							<p style="color:#475569;font-size:14px;margin:0 0 16px;">Your verification code is</p>
-							<p style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#003a1c;margin:0 0 16px;">${otp}</p>
-							<p style="color:#94a3b8;font-size:12px;margin:0;">This code expires in 60 seconds.</p>
-						</div>
-						<p style="color:#94a3b8;font-size:11px;text-align:center;margin-top:24px;">If you didn't request this, ignore this email.</p>
-					</div>
-				`,
+						<p style="margin:0 0 16px; color:#6b7280; font-size:13px;">This code expires in <strong>60 seconds</strong>. If you didn't request this, you can safely ignore this email.</p>
+						<p style="margin:0; color:#6b7280; font-size:13px;">Trouble logging in? Contact the MSSN OAU secretariat or reply to this email.</p>
+					`
+				),
 				text: `Your MSSN OAU Admin login code is: ${otp}. It expires in 60 seconds.`
 			})
 			logger.info({ email }, 'OTP sent via Brevo')

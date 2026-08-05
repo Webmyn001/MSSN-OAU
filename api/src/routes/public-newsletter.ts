@@ -5,6 +5,7 @@ import { db } from '../lib/db'
 import { newsletterSubscribers } from '../db/schema'
 import { eq, desc, count, and } from 'drizzle-orm'
 import { sendEmailWithContent } from '../services/email/brevo'
+import { brandEmail, emailButton, EMAIL_SITE_URL } from '../services/email/template'
 
 import env from '../lib/env'
 
@@ -64,20 +65,15 @@ publicNewsletterRoute.post('/subscribe', async c => {
 				safeSendEmail({
 					to: email,
 					subject: 'Welcome Back to MSSN OAU Newsletter!',
-					html: `
-						<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-							<div style="background-color: #047857; padding: 15px; text-align: center; color: white; font-size: 20px; font-weight: bold;">
-								MSSN OAU Newsletter
-							</div>
-							<div style="padding: 20px; color: #333; line-height: 1.6;">
-								<p>Assalamu 'alaykum ${name || 'Dear Brother/Sister'},</p>
-								<p>Welcome back to the official <strong>Muslim Students' Society of Nigeria, OAU Branch</strong> newsletter.</p>
-								<p>You will receive updates on latest news, Islamic lectures, upcoming programmes, and campus announcements.</p>
-								<hr style="border: 0; border-top: 1px solid #eeeeee; margin: 20px 0;" />
-								<p style="font-size: 12px; color: #777; text-align: center;">MSSN OAU Secretariat, Obafemi Awolowo University, Ile-Ife.</p>
-							</div>
-						</div>
-					`
+					html: brandEmail(
+						'Welcome Back',
+						`
+							<p style="margin:0 0 16px;">Assalamu 'alaykum ${name || 'Dear Brother/Sister'},</p>
+							<p style="margin:0 0 16px;">Welcome back to the official <strong>Muslim Students' Society of Nigeria, OAU Branch</strong> newsletter.</p>
+							<p style="margin:0 0 16px;">You will receive updates on latest news, Islamic lectures, upcoming programmes, and campus announcements.</p>
+							${emailButton('Visit Our Website', EMAIL_SITE_URL)}
+						`
+					)
 				})
 
 				return successResponse(c, {
@@ -103,24 +99,17 @@ publicNewsletterRoute.post('/subscribe', async c => {
 		safeSendEmail({
 			to: email,
 			subject: "Welcome to MSSN OAU Newsletter!",
-			html: `
-				<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-					<div style="background-color: #047857; padding: 20px; text-align: center; color: white; font-size: 22px; font-weight: bold; border-radius: 6px 6px 0 0;">
-						MSSN OAU Newsletter
-					</div>
-					<div style="padding: 24px; color: #333; line-height: 1.6;">
-						<p style="font-size: 16px;">Assalamu 'alaykum ${name || 'Dear Brother/Sister'},</p>
-						<p>Thank you for subscribing to the official <strong>Muslim Students' Society of Nigeria, OAU Branch</strong> newsletter!</p>
-						<p>You will now receive direct email notifications whenever new articles, press releases, or event updates are published on our website.</p>
-						<div style="margin: 30px 0; text-align: center;">
-							<a href="https://mssnoau.org" style="background-color: #047857; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;">Visit Our Website</a>
-						</div>
-						<p>Jazakallahu Khayran,<br/><strong>MSSN OAU Editorial & Media Team</strong></p>
-						<hr style="border: 0; border-top: 1px solid #eeeeee; margin: 24px 0;" />
-						<p style="font-size: 12px; color: #777; text-align: center;">MSSN OAU Secretariat, Fajuyi Hall, Obafemi Awolowo University, Ile-Ife.</p>
-					</div>
-				</div>
-			`
+			html: brandEmail(
+				'Welcome to the MSSN OAU Newsletter',
+				`
+					<p style="margin:0 0 16px;">Assalamu 'alaykum ${name || 'Dear Brother/Sister'},</p>
+					<p style="margin:0 0 16px;">Thank you for subscribing to the official <strong>Muslim Students' Society of Nigeria, OAU Branch</strong> newsletter!</p>
+					<p style="margin:0 0 16px;">You will now receive direct email notifications whenever new articles, press releases, or event updates are published on our website.</p>
+					${emailButton('Visit Our Website', EMAIL_SITE_URL)}
+					<p style="margin:0 0 4px;">Jazakallahu Khayran,</p>
+					<p style="margin:0;"><strong>MSSN OAU Editorial &amp; Media Team</strong></p>
+				`
+			)
 		})
 
 		return successResponse(
@@ -254,26 +243,17 @@ publicNewsletterRoute.post('/send', async c => {
 
 		for (const sub of activeSubscribers) {
 			try {
-				await sendEmailWithContent({
-					to: sub.email,
+			await sendEmailWithContent({
+				to: sub.email,
+				subject,
+				html: brandEmail(
 					subject,
-					html: `
-						<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-							<div style="background-color: #047857; padding: 20px; text-align: center; color: white; font-size: 22px; font-weight: bold; border-radius: 6px 6px 0 0;">
-								MSSN OAU Newsletter
-							</div>
-							<div style="padding: 24px; color: #333; line-height: 1.6;">
-								${content}
-								<hr style="border: 0; border-top: 1px solid #eeeeee; margin: 24px 0;" />
-								<p style="font-size: 11px; color: #777; text-align: center;">
-									You are receiving this email because you subscribed to MSSN OAU updates.<br/>
-									MSSN OAU Secretariat, Fajuyi Hall, Obafemi Awolowo University, Ile-Ife.
-								</p>
-							</div>
-						</div>
 					`
-				})
-				sentCount++
+						${content}
+					`
+				)
+			})
+			sentCount++
 			} catch (err) {
 				logger.error({ err, recipient: sub.email }, 'Failed sending broadcast email to recipient')
 				failCount++
@@ -317,26 +297,15 @@ publicNewsletterRoute.post('/broadcast-news', async c => {
 		const articleUrl = url || 'https://mssnoau.org/blog'
 		const emailSubject = `📰 Latest News: ${title}`
 
-		const emailHtml = `
-			<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-				<div style="background-color: #047857; padding: 20px; text-align: center; color: white; font-size: 22px; font-weight: bold; border-radius: 6px 6px 0 0;">
-					MSSN OAU - Latest News
-				</div>
-				<div style="padding: 24px; color: #333; line-height: 1.6;">
-					${imageUrl ? `<img src="${imageUrl}" alt="${title}" style="width: 100%; max-height: 280px; object-fit: cover; border-radius: 6px; margin-bottom: 20px;" />` : ''}
-					<h2 style="color: #047857; margin-top: 0;">${title}</h2>
-					<p style="font-size: 15px; color: #444;">${summary}</p>
-					<div style="margin: 28px 0; text-align: center;">
-						<a href="${articleUrl}" style="background-color: #047857; color: white; text-decoration: none; padding: 12px 26px; border-radius: 6px; font-weight: bold; display: inline-block;">Read Full Article</a>
-					</div>
-					<hr style="border: 0; border-top: 1px solid #eeeeee; margin: 24px 0;" />
-					<p style="font-size: 11px; color: #777; text-align: center;">
-						You are receiving this notification as a subscriber of MSSN OAU News.<br/>
-						MSSN OAU Secretariat, Obafemi Awolowo University, Ile-Ife.
-					</p>
-				</div>
-			</div>
-		`
+		const emailHtml = brandEmail(
+			'Latest News',
+			`
+				${imageUrl ? `<img src="${imageUrl}" alt="${title}" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px; margin-bottom:20px;" />` : ''}
+				<h2 style="margin:0 0 12px; color:#115F34; font-size:20px; line-height:1.3;">${title}</h2>
+				<p style="margin:0 0 16px; color:#444; font-size:15px;">${summary}</p>
+				${emailButton('Read Full Article', articleUrl)}
+			`
+		)
 
 		let sentCount = 0
 		let failCount = 0
