@@ -23,6 +23,7 @@
     import { invalidate } from '$app/navigation';
     import { dev } from '$app/environment';
     import HomeSkeleton from '$lib/components/home/HomeSkeleton.svelte';
+    import ImagePreloader from '$lib/components/home/ImagePreloader.svelte';
 
     // Home section components — lazily loaded to reduce initial bundle parse time
 	import HeroSection from '$lib/components/home/HeroSection.svelte';
@@ -37,6 +38,35 @@
     
     const pageData = data.page;
     const info = data.info;
+
+    // Collect every image shown on the home page so they can be pre-warmed once,
+    // preventing the "re-loading on scroll back up" jank from lazy images.
+    const homeImages = [
+        '/images/bg-1.webp',
+        '/images/pattern.svg',
+        '/images/man_1.webp',
+        '/images/woman_1.webp',
+        '/images/man_2.webp',
+        '/images/woman_2.webp',
+        '/images/man_3.webp',
+        '/images/woman_3.webp',
+        '/images/man_4.webp',
+        '/images/woman_4.webp',
+        '/images/man_5.webp',
+        '/images/woman_5.webp',
+        '/images/man_6.webp',
+        '/images/woman_6.webp',
+        '/images/man_7.webp',
+        '/images/woman_7.webp',
+        ...(data.programmes || []).map(p => p.image).filter(Boolean),
+        ...(data.events || []).map(e => e.image || e.imageUrl).filter(Boolean),
+        ...(data.latestNews || []).map(n => n.image).filter(Boolean),
+        ...(data.blogPosts || []).map(p => p.featured_image).filter(Boolean),
+        ...(data.mosques || []).flatMap(m => (m.images || []).slice(0, 1)),
+        ...((data.alumni?.sessions) || []).flatMap(s => [
+            s.ameer?.photo, s.ameerah?.photo
+        ]).filter(Boolean)
+    ];
 
     const copyAccNumber = async () => {
         if (!data.info || !data.info.account) return;
@@ -160,6 +190,9 @@
     <SuggestionsSection />
 {/await}
 <!-- End Suggestions Section -->
+
+<!-- Preloads every home image once after first paint so scrolling never re-triggers loads -->
+<ImagePreloader images={homeImages} />
 
 <style>
     .yoruba {
