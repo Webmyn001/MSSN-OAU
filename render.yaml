@@ -83,7 +83,10 @@ services:
     plan: free
     region: frankfurt
     healthCheckPath: /login
-    buildCommand: npm ci && npm run build
+    # npm ci fails cross-platform: this lockfile was generated on Windows, so it
+    # lacks the linux-x64 Rollup optional binaries. npm install resolves them for
+    # the build OS. Pin exact versions via package.json to keep builds deterministic.
+    buildCommand: npm install --no-audit --no-fund && npm run build
     startCommand: node build
     envVars:
       - key: NODE_ENV
