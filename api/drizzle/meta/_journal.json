@@ -50,6 +50,13 @@
       "when": 1785763816605,
       "tag": "0006_blushing_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786138200000,
+      "tag": "0007_events_created_by_nullable",
+      "breakpoints": true
     }
   ]
 }
