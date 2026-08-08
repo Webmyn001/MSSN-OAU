@@ -17,6 +17,12 @@ export const ADMIN_USERS: AdminUser[] = [
 		passwordHash: '$2b$10$annSLz7Qc09G2i439kjpEOWVqCySyEtHAJSDGueXJTyeyVw34jaZ2',
 		fullName: 'MSSN Admin',
 		role: 'admin'
+	},
+	{
+		email: 'abdmuizzyekeen@gmail.com',
+		passwordHash: '$2b$10$annSLz7Qc09G2i439kjpEOWVqCySyEtHAJSDGueXJTyeyVw34jaZ2',
+		fullName: 'MSSN Admin',
+		role: 'admin'
 	}
 ]
 
