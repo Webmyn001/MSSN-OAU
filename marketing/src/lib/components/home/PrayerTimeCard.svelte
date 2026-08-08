@@ -1,9 +1,6 @@
 <script>
-    import { Clock } from '@lucide/svelte';
     import { formatTime } from '$lib/stores/prayerTimes';
-    import { fly, scale, fade } from 'svelte/transition';
-    import { spring } from 'svelte/motion';
-    import { onMount, onDestroy } from 'svelte';
+    import { scale, fade } from 'svelte/transition';
 
     // Modern props declaration
     /**
@@ -16,7 +13,7 @@
      * @property {string} [gradientColor]
      * @property {string} [icon]
      */
-    
+
     /** @type {PrayerTimeCardProps} */
     let { 
         prayerName = '', 
@@ -28,30 +25,6 @@
         icon = '🕌' 
     } = $props();
     
-    // Spring animation for hover effect
-    const hovered = spring(1);
-    function handleMouseenter() {
-        hovered.set(1.05);
-    }
-    function handleMouseleave() {
-        hovered.set(1);
-    }
-    
-    // For the circular progress indicator
-    let progress = $state(0);
-    let interval;
-    
-    onMount(() => {
-        if (isUpcoming) {
-            interval = setInterval(() => {
-                progress = (progress + 1) % 100;
-            }, 1000);
-        }
-    });
-    onDestroy(() => {
-        if (interval) clearInterval(interval);
-    });
-
     // Helper to normalize any time value for formatTime
     /** @param {any} val */
     function toTime(val) {
@@ -67,126 +40,61 @@
         return null;
     }
 
-    // Use $derived for cardClass in runes mode
-    const cardClass = $derived(`relative overflow-hidden rounded-xl shadow-xl w-full ${isUpcoming ? 'min-h-64 sm:min-h-full' : 'min-h-48 sm:min-h-full'}`);
+    const adhan = $derived(formatTime(toTime(adhanTime)));
+    const iqamah = $derived(formatTime(toTime(iqamahTime)));
 </script>
 
 <div
     role="button"
     tabindex="0"
-    class={cardClass}
-    style="transform: scale({$hovered}); {isUpcoming ? 'z-index: 10;' : ''}"
-    onmouseenter={handleMouseenter}
-    onmouseleave={handleMouseleave}
+    class="relative group overflow-hidden rounded-2xl shadow-lg h-full w-full transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
 >
+    <!-- Background image with overlay -->
     <div 
-        class="aspect-square sm:aspect-auto sm:h-full flex flex-col justify-center items-center p-6 relative"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+        style="background-image: url('{background}');"
     >
-        <!-- Background Image with Overlay -->
-        <div 
-            class="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-110"
-            style="background-image: url('{background}');"
-        >
-            <!-- Gradient overlay with glassmorphism (reduced opacity) -->
-            <div class="absolute inset-0 bg-gradient-to-br {gradientColor} opacity-60 backdrop-blur-[2px]"></div>
-            
-            <!-- Glass panel effect (lower opacity) -->
-            <div class="absolute inset-0 backdrop-blur-sm opacity-10"></div>
-            
-            <!-- Overlay: more transparent, closer to black for both states -->
-            <div class={isUpcoming ? 'absolute inset-0 bg-black/20' : 'absolute inset-0 bg-black/70'}></div>
-            
-            <!-- Light reflection effect (removed for more visibility) -->
-            <div class="absolute -top-1/2 -right-1/2 w-full h-full bg-white/20 rotate-45 transform-gpu"></div>
-        </div>
-        
-        <!-- Content with glassmorphism -->
-        <div class="z-10 flex flex-col items-center gap-4 text-center w-full">
-            <!-- Prayer icon -->
-            <div class="text-3xl mb-1" in:scale={{ duration: 400, delay: 300 }}>
-                {icon}
-            </div>
-            
-            <!-- Prayer name -->
-            <h2 class="font-secondary font-bold text-white text-2xl drop-shadow-md">
-                {prayerName}
-            </h2>
+        <div class="absolute inset-0 bg-gradient-to-br {gradientColor} opacity-75"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20"></div>
+    </div>
 
-		<!-- Time display with glassmorphism -->
-		<div
-			class="backdrop-blur-xl bg-white/30 border border-white/40 rounded-full px-3 py-1.5 transition-all duration-300 hover:bg-white/40 group"
-		>
-			<div class="flex items-center justify-center gap-1.5">
-				<Clock class="shrink-0 size-3 text-white group-hover:text-primary-900 transition-colors"/>
-				<span class="font-medium font-primary text-white group-hover:text-primary-900 transition-colors text-xs whitespace-nowrap">
-					{formatTime(toTime(adhanTime))} — {formatTime(toTime(iqamahTime))}
-				</span>
-			</div>
-		</div>
-            
+    <!-- Next-prayer slim banner -->
+    {#if isUpcoming}
+        <div class="absolute inset-x-0 top-0 z-20 flex items-center gap-1.5 bg-amber-400 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-black shadow-md" in:fade={{ duration: 300 }}>
+            <span class="relative flex h-1.5 w-1.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-60"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-black"></span>
+            </span>
+            Up Next
+        </div>
+    {/if}
+
+    <!-- Content -->
+    <div class="relative z-10 flex flex-col justify-between gap-3 p-4 sm:p-5 h-full min-h-[132px] {isUpcoming ? 'pt-9' : 'pt-4'}">
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="shrink-0 w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center text-base shadow-inner" in:scale={{ duration: 300, delay: 150 }}>
+                    {icon}
+                </div>
+                <h3 class="font-primary font-bold text-white text-base sm:text-lg leading-tight drop-shadow truncate">
+                    {prayerName}
+                </h3>
+            </div>
+            {#if isUpcoming}
+                <span class="hidden sm:inline-flex shrink-0 items-center text-amber-200 text-[10px] font-bold uppercase tracking-wider">Next</span>
+            {/if}
+        </div>
+
+        <!-- Times -->
+        <div class="grid grid-cols-2 gap-2">
+            <div class="rounded-xl bg-black/35 backdrop-blur-sm border border-white/15 px-2.5 py-2 text-center">
+                <p class="text-[9px] font-semibold uppercase tracking-widest text-white/60">Adhan</p>
+                <p class="text-white font-primary font-semibold text-sm sm:text-[15px] tabular-nums whitespace-nowrap">{adhan}</p>
+            </div>
+            <div class="rounded-xl bg-white/15 backdrop-blur-sm border border-white/25 px-2.5 py-2 text-center {isUpcoming ? 'bg-amber-300/25 border-amber-300/40' : ''}">
+                <p class="text-[9px] font-semibold uppercase tracking-widest text-white/60">Iqamah</p>
+                <p class="text-white font-primary font-semibold text-sm sm:text-[15px] tabular-nums whitespace-nowrap">{iqamah}</p>
+            </div>
         </div>
     </div>
-    <!-- Upcoming prayer indicator -->
-    {#if isUpcoming}
-        <div class="absolute top-2 right-2" in:scale={{ duration: 400, delay: 400 }}>
-            <!-- Circular progress indicator -->
-            <div class="relative w-16 h-16">
-                <svg class="w-full h-full" viewBox="0 0 100 100">
-                    <!-- Background circle -->
-                    <circle 
-                        cx="50" cy="50" r="40" 
-                        fill="none" 
-                        stroke="rgba(255,255,255,0.3)" 
-                        stroke-width="8"
-                    />
-                    
-                    <!-- Progress circle -->
-                    <circle 
-                        cx="50" cy="50" r="40" 
-                        fill="none" 
-                        stroke="white" 
-                        stroke-width="8"
-                        stroke-dasharray="251.2" 
-                        stroke-dashoffset={251.2 - (251.2 * progress / 100)}
-                        transform="rotate(-90 50 50)"
-                        stroke-linecap="round"
-                    />
-                    
-                    <!-- Center text -->
-                    <text 
-                        x="50" y="55" 
-                        text-anchor="middle" 
-                        fill="white" 
-                        font-size="10"
-                        font-weight="bold"
-                    >
-                        NEXT
-                    </text>
-                </svg>
-            </div>
-        </div>
-        
-        <!-- Pulsing effect for upcoming prayer -->
-        <div 
-            class="absolute inset-0 border-2 border-white/50 rounded-xl animate-pulse"
-            in:fade={{ duration: 1000, delay: 500 }}
-        ></div>
-    {/if}
 </div>
-
-<style>
-    /* Custom animations */
-    @keyframes pulse {
-        0%, 100% { opacity: 0.5; transform: scale(1); }
-        50% { opacity: 0.8; transform: scale(1.05); }
-    }
-    
-    .animate-pulse {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    
-    /* Enhance hover transitions */
-    div {
-        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-</style>

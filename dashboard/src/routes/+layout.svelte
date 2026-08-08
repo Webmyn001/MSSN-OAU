@@ -194,7 +194,7 @@
 
 				<div class="px-4 py-4 border-t border-primary-700/50 space-y-2">
 					<a
-						href="http://localhost:5173"
+						href="https://mssn-oau.vercel.app"
 						target="_blank"
 						rel="noopener noreferrer"
 						class="flex items-center justify-center space-x-2 w-full px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary-700/60 hover:bg-primary-600 transition-all border border-primary-500/30"

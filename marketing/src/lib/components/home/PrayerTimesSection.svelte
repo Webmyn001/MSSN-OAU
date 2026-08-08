@@ -208,9 +208,9 @@
         
         <!-- Prayer Times Grid with staggered animation -->
         {#if hasPrayerTimes}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             {#each prayerData as prayer, index}
-                <div in:fly={{ y: 20, duration: 400, delay: 200 + (index * 100) }}>
+                <div class="h-full" in:fly={{ y: 20, duration: 400, delay: 200 + (index * 100) }}>
                     <PrayerTimeCard 
                         prayerName={prayer.name}
                         adhanTime={prayer.adhan}
