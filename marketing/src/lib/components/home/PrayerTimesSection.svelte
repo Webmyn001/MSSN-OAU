@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import { upcomingPrayer, formatTime } from '$lib/stores/prayerTimes';
+    import { formatTime, getSolahPeriod } from '$lib/stores/prayerTimes';
     import { Clock, MapPin, Calendar, Moon, MapPinned, MousePointerClick } from '@lucide/svelte';
     import PrayerTimeCard from './PrayerTimeCard.svelte';
     import { fade, fly } from 'svelte/transition';
@@ -38,12 +38,16 @@
         } catch { return ''; }
     });
     
-    // Get the upcoming prayer index for styling
-    const upcoming_solat = $derived($upcomingPrayer === 'fajr' ? 0 : 
-                       $upcomingPrayer === 'dhuhr' ? 1 : 
-                       $upcomingPrayer === 'asr' ? 2 : 
-                       $upcomingPrayer === 'maghrib' ? 3 : 
-                       $upcomingPrayer === 'isha' ? 4 : 0);
+    // Get the upcoming prayer index for styling — computed from real data so it stays correct
+    const upcoming_solat = $derived.by(() => {
+        const period = getSolahPeriod(
+            /** @type {any} */ (apiPrayerTimes) || {}
+        );
+        const order = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+        // Map store period name to section index
+        const idx = order.indexOf(period);
+        return idx === -1 ? 0 : idx;
+    });
     
     // Prayer times from props (SSR) or client-side fetch
     let apiPrayerTimes = $state(initialPrayerTimes || null);
@@ -224,16 +228,45 @@
             {/each}
         </div>
 
-		<!-- Friday Prayer Notice with glassmorphism -->
+		<!-- Jumu'ah Prayer — elegant dedicated card -->
 		{#if apiPrayerTimes?.jumuah}
 		<div class="flex justify-center items-center w-full">
-			<div class="backdrop-blur-xl bg-gradient-to-r from-primary-600/80 to-primary-800/80 text-white rounded-xl border border-white/20 p-5 font-tertiary text-sm shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-				<div class="flex items-center justify-center gap-3">
-					<div class="bg-white/20 p-2 rounded-full">
-						<Clock class="h-5 w-5" />
+			<div class="relative w-full max-w-3xl overflow-hidden rounded-2xl shadow-xl group">
+				<!-- Emerald + gold festive background -->
+				<div class="absolute inset-0 bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900"></div>
+				<!-- Decorative radial glows -->
+				<div class="absolute -top-20 -right-16 w-64 h-64 bg-amber-400/20 rounded-full blur-3xl"></div>
+				<div class="absolute -bottom-24 -left-16 w-72 h-72 bg-teal-300/20 rounded-full blur-3xl"></div>
+				<!-- Subtle Islamic geometric pattern -->
+				<div class="absolute inset-0 opacity-[0.08]" style="background-image: radial-gradient(circle at 1px 1px, #fbbf24 1px, transparent 0); background-size: 22px 22px;"></div>
+
+				<div class="relative z-10 flex flex-col sm:flex-row items-center gap-5 p-6 sm:p-8">
+					<!-- Ornate crescent badge -->
+					<div class="shrink-0 flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-emerald-900 shadow-lg ring-4 ring-amber-200/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+						<Moon class="w-8 h-8" />
 					</div>
-					<span>Jumu'ah: Khutbah {formatTime(apiPrayerTimes.jumuah.adhan)},
-						Salah {formatTime(apiPrayerTimes.jumuah.iqamah)}</span>
+
+					<!-- Label + times -->
+					<div class="flex-1 text-center sm:text-left">
+						<div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+							<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">Friday Prayer</span>
+						</div>
+						<h3 class="font-primary font-bold text-2xl sm:text-3xl text-white drop-shadow">Jumu'ah</h3>
+						<p class="font-tertiary text-emerald-100/90 text-sm mt-1">Gather early — the Khutbah begins before the congregational Salah.</p>
+					</div>
+
+					<!-- Times -->
+					<div class="flex items-center gap-3">
+						<div class="rounded-xl bg-black/30 backdrop-blur-sm border border-amber-200/25 px-4 py-2.5 text-center">
+							<p class="text-[9px] font-semibold uppercase tracking-widest text-amber-200/80">Khutbah</p>
+							<p class="text-white font-primary font-bold text-lg sm:text-xl tabular-nums whitespace-nowrap">{formatTime(apiPrayerTimes.jumuah.adhan)}</p>
+						</div>
+						<div class="h-8 w-px bg-amber-200/30 hidden sm:block"></div>
+						<div class="rounded-xl bg-amber-300/15 backdrop-blur-sm border border-amber-300/40 px-4 py-2.5 text-center">
+							<p class="text-[9px] font-semibold uppercase tracking-widest text-amber-200/80">Salah</p>
+							<p class="text-amber-200 font-primary font-bold text-lg sm:text-xl tabular-nums whitespace-nowrap">{formatTime(apiPrayerTimes.jumuah.iqamah)}</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -88,15 +88,23 @@ export function formatTime(dateInput) {
  * @param {PrayerTimes} times - The prayer times object
  * @returns {string} The name of the next prayer
  */
-function getSolahPeriod(times) {
+export function getSolahPeriod(times) {
     if (!times?.subhi?.adhan || !times?.dhuhr?.adhan || !times?.asr?.adhan || !times?.maghrib?.adhan || !times?.isha?.adhan) return 'fajr';
     /**
-     * Converts a date to minutes since midnight
-     * @param {number|Date|undefined} date - The date to convert
+     * Converts a date or formatted "H:MM AM/PM" string to minutes since midnight
+     * @param {number|Date|string|undefined} date - The date or formatted time to convert
      * @returns {number} Minutes since midnight
      */
     const toMinutes = (date) => {
+        if (typeof date === 'string' && isFormattedTime(date)) {
+            const m = date.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+            if (!m) return NaN;
+            let hours = parseInt(m[1], 10) % 12;
+            if (m[3].toUpperCase() === 'PM') hours += 12;
+            return hours * 60 + parseInt(m[2], 10);
+        }
         const tempdate = new Date(date ?? new Date());
+        if (isNaN(tempdate.getTime())) return NaN;
         const hours = tempdate.getHours();
         const minutes = tempdate.getMinutes();
         return hours * 60 + minutes;
