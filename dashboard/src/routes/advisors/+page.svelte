@@ -298,7 +298,7 @@
 									<div class="relative mb-3 mx-auto w-24 h-24">
 										<img src={advisor.photo || getPlaceholder(advisor.gender)} alt={advisor.name} class="w-24 h-24 object-cover rounded-full shadow-md border-2 border-white ring-2 ring-green-300 group-hover:ring-4 group-hover:ring-green-500/70 transition-all duration-300 mx-auto" onerror={(e) => { (e.currentTarget as HTMLImageElement).src = getPlaceholder(advisor.gender); }} />
 									</div>
-									<h3 class="text-sm font-bold text-green-950 group-hover:text-green-700 transition-colors line-clamp-1">{#if advisor.title}{advisor.title} {/if}{advisor.name}</h3>
+									<h3 class="text-sm font-bold text-green-950 group-hover:text-green-700 transition-colors line-clamp-1">{[advisor.title, advisor.name].filter(Boolean).join(' ')}</h3>
 									<p class="text-xs text-gray-600 group-hover:text-green-600 font-medium transition-colors line-clamp-2 mt-0.5">{advisor.position || 'Advisor'}</p>
 									{#if advisor.department}<p class="text-[11px] text-gray-400 mt-1 line-clamp-1">{advisor.department}</p>{/if}
 								</div>
@@ -341,7 +341,7 @@
 		<div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-gray-100">
 			<div class="flex items-center justify-between pb-3 border-b border-gray-100">
 				<div>
-					<h3 class="text-base font-bold text-green-950">{#if activeAdvisorDetails.advisor.title}{activeAdvisorDetails.advisor.title} {/if}{activeAdvisorDetails.advisor.name}</h3>
+					<h3 class="text-base font-bold text-green-950">{[activeAdvisorDetails.advisor.title, activeAdvisorDetails.advisor.name].filter(Boolean).join(' ')}</h3>
 					<p class="text-xs text-gray-500">{activeAdvisorDetails.advisor.position || 'Advisor'}</p>
 				</div>
 				<button onclick={() => (isDetailsModalOpen = false)} class="text-gray-400 hover:text-gray-700"><X class="w-5 h-5" /></button>

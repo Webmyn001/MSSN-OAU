@@ -12,13 +12,22 @@
     const API_URL = `${API_BASE}/public/alumni`;
 
     let visible = $state(false);
-    let sessions = $state(data?.alumni?.sessions || []);
+    let sessions = $state(sortSessionsNewestFirst(data?.alumni?.sessions || []));
     let loading = $state(true);
     let selectedMember = $state(null);
     let showModal = $state(false);
 
     function getPlaceholder(gender) {
         return gender === 'female' ? '/images/user/female.jpg' : '/images/user/male.jpg';
+    }
+
+    /** @param {any[]} sessionList @returns {any[]} */
+    function sortSessionsNewestFirst(sessionList) {
+        return [...sessionList].sort((a, b) => {
+            const aYear = parseInt(String(a?.session || '').split('/')[0]) || 0;
+            const bYear = parseInt(String(b?.session || '').split('/')[0]) || 0;
+            return bYear - aYear;
+        });
     }
 
     function getAmeer(session) {
@@ -48,7 +57,7 @@
                 if (res.ok) {
                     const body = await res.json();
                     if (body?.success && body?.data?.alumni?.sessions) {
-                        sessions = body.data.alumni.sessions;
+                        sessions = sortSessionsNewestFirst(body.data.alumni.sessions);
                     }
                 }
             } catch (e) {

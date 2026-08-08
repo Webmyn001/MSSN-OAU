@@ -11,10 +11,19 @@
     let { sessions: initialSessions = [] } = $props();
 
     let visible = $state(false);
-    let sessions = $state(initialSessions);
+    let sessions = $state(sortSessionsNewestFirst(initialSessions));
     let loading = $state(false);
     let selectedMember = $state(null);
     let showModal = $state(false);
+
+    /** @param {any[]} sessionList @returns {any[]} */
+    function sortSessionsNewestFirst(sessionList) {
+        return [...sessionList].sort((a, b) => {
+            const aYear = parseInt(String(a?.session || '').split('/')[0]) || 0;
+            const bYear = parseInt(String(b?.session || '').split('/')[0]) || 0;
+            return bYear - aYear;
+        });
+    }
 
     const pastLeaders = $derived(sessions.slice(0, 3).map(s => {
         const ameer = s.members.find(m => m.position.toLowerCase().includes('ameer') && m.gender === 'male');
@@ -46,7 +55,7 @@
                 if (res.ok) {
                     const body = await res.json();
                     if (body?.success && body?.data?.alumni?.sessions) {
-                        sessions = body.data.alumni.sessions;
+                        sessions = sortSessionsNewestFirst(body.data.alumni.sessions);
                     }
                 }
             } catch (e) {

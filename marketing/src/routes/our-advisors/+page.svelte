@@ -188,7 +188,7 @@
                                         <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500/20 to-primary-700/20 backdrop-blur-sm -z-10 transform scale-110"></div>
                                         <img 
                                             src={advisor.photo || getAdvisorPlaceholder(advisor)} 
-                                            alt="Photo of {advisor.title} {advisor.name}" 
+                                            alt={`Photo of ${[advisor.title, advisor.name].filter(Boolean).join(' ')}`} 
                                             class="w-32 h-32 rounded-full object-cover border-2 border-white shadow-md transition-transform duration-500 group-hover:scale-105"
                                         >
                                     </div>
@@ -197,7 +197,7 @@
                                         <div class="flex justify-between items-start">
                                             <div>
                                                 <h2 class="font-secondary font-bold text-primary-800 text-xl sm:text-2xl group-hover:text-primary-700 transition-colors duration-300">
-                                                    {advisor.title} {advisor.name}
+                                                    {[advisor.title, advisor.name].filter(Boolean).join(' ')}
                                                 </h2>
                                                 <p class="text-gray-700 font-semibold font-secondary text-lg mt-1">
                                                     {advisor.position}

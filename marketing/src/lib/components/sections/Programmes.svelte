@@ -4,7 +4,6 @@
 	import { Image } from '$lib/components/ui/image';
 	import { slide, fade, fly } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-    import { onMount } from 'svelte';
 	import { page } from "$app/state";
 
     let { 
@@ -19,13 +18,31 @@
     */
         programmes = page.data?.programmes || []
      } = $props();
+
+    /** Shuffles an array in place using Fisher-Yates. @param {any[]} arr @returns {any[]} */
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
     
+    /** @type {Array<{title: string, text?: string, image?: string, alt?: string, href?: string, summary?: string, description?: string}>} */
+    let displayedProgrammes = $state([]);
     let selectedEvent = $state(programmes[0]?.title ?? '');
-    const selectedImage = $derived(programmes.find((/** @type {any} */ p) => p.title === selectedEvent)?.image);
+    const selectedImage = $derived(displayedProgrammes.find((/** @type {any} */ p) => p.title === selectedEvent)?.image);
+
+    let initialised = false;
 
     $effect(() => {
         if (Array.isArray(programmes) && programmes.length > 0) {
-            if (!selectedEvent || !programmes.some((p) => p.title === selectedEvent)) {
+            if (!initialised) {
+                initialised = true;
+                displayedProgrammes = programmes.length > 1 ? shuffle(programmes) : programmes;
+                selectedEvent = displayedProgrammes[0].title;
+            } else if (!selectedEvent || !programmes.some((p) => p.title === selectedEvent)) {
                 selectedEvent = programmes[0].title;
             }
         }
@@ -82,8 +99,8 @@
         <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
         
         <!-- Grid -->
-        <div class="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
-            <div class="mb-10 lg:mb-0 lg:col-span-6 lg:col-start-8 lg:order-2">
+        <div class="relative z-10 flex flex-col lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
+            <div class="order-2 mb-10 lg:mb-0 lg:order-2 lg:col-span-6 lg:col-start-8">
                 <h2
                     class="text-2xl text-neutral-800 font-bold sm:text-3xl font-primary relative inline-block"
                     in:fly={{ y: 20, duration: 800, delay: 200 }}
@@ -99,7 +116,7 @@
                     class="relative grid gap-4 mt-5 md:mt-10"
                     in:fly={{ y: 20, duration: 800, delay: 400 }}
                 >
-                    {#each programmes as programme, i}
+                    {#each displayedProgrammes as programme, i}
                     {@const Icon = getIcon(programme.title)}
                         <button 
                             type="button"
@@ -164,7 +181,7 @@
             </div>
             <!-- End Col -->
 
-            <div class="lg:col-span-6">
+            <div class="order-1 lg:order-1 lg:col-span-6">
                 <div 
                     class="relative overflow-hidden rounded-xl backdrop-blur-sm bg-white/30 border border-white/20 shadow-xl p-2"
                     in:fly={{ x: -20, duration: 800, delay: 200 }}
