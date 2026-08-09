@@ -2,7 +2,6 @@
     import { formatTime } from '$lib/stores/prayerTimes';
     import { scale, fade } from 'svelte/transition';
 
-    // Modern props declaration
     /**
      * @typedef {Object} PrayerTimeCardProps
      * @property {string} prayerName
@@ -25,7 +24,6 @@
         icon = '🕌' 
     } = $props();
     
-    // Helper to normalize any time value for formatTime
     /** @param {any} val */
     function toTime(val) {
         if (val == null || val === '') return null;
@@ -47,30 +45,24 @@
 <div
     role="button"
     tabindex="0"
-    class="relative group overflow-hidden rounded-2xl shadow-lg h-full w-full transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
+    class="relative group overflow-hidden rounded-2xl h-full w-full transition-all duration-300 hover:-translate-y-1 {isUpcoming ? 'shadow-xl ring-2 ring-amber-400/70 shadow-amber-500/20' : 'shadow-lg hover:shadow-2xl'}"
 >
-    <!-- Background image with overlay -->
+    <!-- Background -->
     <div 
         class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
         style="background-image: url('{background}');"
     >
-        <div class="absolute inset-0 bg-gradient-to-br {gradientColor} opacity-75"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20"></div>
+        <div class="absolute inset-0 bg-gradient-to-br {gradientColor} opacity-80"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/25"></div>
     </div>
 
-    <!-- Next-prayer slim banner -->
+    <!-- Upcoming top glow line -->
     {#if isUpcoming}
-        <div class="absolute inset-x-0 top-0 z-20 flex items-center gap-1.5 bg-amber-400 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-black shadow-md" in:fade={{ duration: 300 }}>
-            <span class="relative flex h-1.5 w-1.5">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-60"></span>
-                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-black"></span>
-            </span>
-            Up Next
-        </div>
+        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 z-20" in:fade={{ duration: 300 }}></div>
     {/if}
 
     <!-- Content -->
-    <div class="relative z-10 flex flex-col justify-between gap-3 p-4 sm:p-5 h-full min-h-[132px] {isUpcoming ? 'pt-9' : 'pt-4'}">
+    <div class="relative z-10 flex flex-col justify-between gap-3 p-4 sm:p-5 h-full min-h-[132px]">
         <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2.5 min-w-0">
                 <div class="shrink-0 w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center text-base shadow-inner" in:scale={{ duration: 300, delay: 150 }}>
@@ -81,7 +73,13 @@
                 </h3>
             </div>
             {#if isUpcoming}
-                <span class="hidden sm:inline-flex shrink-0 items-center text-amber-200 text-[10px] font-bold uppercase tracking-wider">Next</span>
+                <span class="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-400/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black">
+                    <span class="relative flex h-1 w-1">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-60"></span>
+                        <span class="relative inline-flex rounded-full h-1 w-1 bg-black"></span>
+                    </span>
+                    Next
+                </span>
             {/if}
         </div>
 
