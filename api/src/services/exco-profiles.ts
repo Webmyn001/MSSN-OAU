@@ -136,6 +136,17 @@ export async function syncExcosDataToDb(payload: ExcosDataPayload): Promise<bool
 	writeFallbackFile(payload)
 
 	try {
+		const payloadNames = new Set(payload.sessions.map(s => s.session))
+		const dbSessions = await db.select().from(academicSessions)
+
+		for (const dbSession of dbSessions) {
+			if (payloadNames.has(dbSession.name)) continue
+			// Session was removed from the dataset — purge its profiles from the DB
+			await db.delete(excoProfiles).where(eq(excoProfiles.sessionId, dbSession.id))
+			await db.delete(academicSessions).where(eq(academicSessions.id, dbSession.id))
+			logger.info({ session: dbSession.name }, 'Removed deleted exco session from DB')
+		}
+
 		for (const sess of payload.sessions) {
 			let [dbSession] = await db
 				.select()
