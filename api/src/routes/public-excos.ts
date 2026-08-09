@@ -1,49 +1,67 @@
 import { Hono } from 'hono'
 import { successResponse, errorResponse } from '../lib/response'
 import { logger } from '../lib/logger'
-import { getFormattedExcosData, syncExcosDataToDb } from '../services/exco-profiles'
+import { getConfigValue, setConfigValue } from '../services/config-store'
+
+const EXCOS_KEY = 'excos'
+
+export interface ExcoMember {
+	id?: string
+	name: string
+	position: string
+	gender?: string
+	phone?: string
+	email?: string
+	photo?: string
+	bio?: string
+}
+
+export interface ExcoCommittee {
+	committee: string
+	members: ExcoMember[]
+}
+
+export interface ExcoSession {
+	session: string
+	start_year?: number
+	end_year?: number
+	executives: ExcoCommittee[]
+}
+
+export interface ExcosData {
+	sessions: ExcoSession[]
+}
+
+const defaultData: ExcosData = { sessions: [] }
 
 const publicExcosRoute = new Hono()
 
-// * GET /public/excos - Public endpoint to get all excos data from DB
+// * GET /public/excos - Public endpoint to get all excos data
 publicExcosRoute.get('/', async c => {
 	try {
-		const data = await getFormattedExcosData()
-		if (!data || !data.sessions || data.sessions.length === 0) {
-			return c.json({ success: false, error: 'No excos data found in database.' }, 404)
-		}
+		const data = await getConfigValue<ExcosData>(EXCOS_KEY, defaultData)
 		return successResponse(c, { excos: data })
 	} catch (error) {
-		logger.error({ error }, 'Failed to get public excos from DB')
-		return errorResponse(c, 'Failed to get excos data from database', 'READ_ERROR', 500)
+		logger.error({ error }, 'Failed getting excos data')
+		return errorResponse(c, 'Failed to get excos data', 'READ_ERROR', 500)
 	}
 })
 
-// * PUT /public/excos - Sync/save full excos dataset to PostgreSQL
+// * PUT /public/excos - Save/sync full excos dataset
 publicExcosRoute.put('/', async c => {
 	try {
-		const adminSecret = process.env.ADMIN_SECRET
-		if (adminSecret) {
-			const authHeader = c.req.header('x-admin-secret')
-			if (authHeader !== adminSecret) {
-				return errorResponse(c, 'Unauthorized', 'UNAUTHORIZED', 401)
-			}
-		}
-
 		const body = await c.req.json()
 		if (!body || !Array.isArray(body.sessions)) {
 			return errorResponse(c, 'Invalid data: must contain a "sessions" array', 'INVALID_DATA', 400)
 		}
 
-		const saved = await syncExcosDataToDb(body)
-		if (!saved) {
-			return errorResponse(c, 'Failed to save excos data to database', 'WRITE_ERROR', 500)
-		}
+		await setConfigValue(EXCOS_KEY, body)
 
-		return successResponse(c, { message: 'Excos data synced to PostgreSQL database successfully' })
+		logger.info('Excos data updated')
+		return successResponse(c, { message: 'Excos data saved successfully' })
 	} catch (error) {
-		logger.error({ error }, 'Failed to save public excos to DB')
-		return errorResponse(c, 'Failed to save excos data to database', 'WRITE_ERROR', 500)
+		logger.error({ error }, 'Failed saving excos data')
+		return errorResponse(c, 'Failed to save excos data', 'WRITE_ERROR', 500)
 	}
 })
 

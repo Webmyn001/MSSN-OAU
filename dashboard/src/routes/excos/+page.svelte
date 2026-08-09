@@ -3,8 +3,8 @@
 	import { toast } from '$lib/stores/toast.svelte';
 	import { page } from '$app/state';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
-	import { loadExcosData, saveExcosData, resetExcosDataToSample, fetchExcosDataFromApi } from '$lib/stores/excoStore';
-	import { sampleExcosData, type ExcosData, type ExecutiveMember, type ExecutiveCommittee, type ExecutiveSession } from '$lib/data/sampleExcos';
+	import { loadExcosData, saveExcosData, resetExcosDataToEmpty, fetchExcosDataFromApi } from '$lib/stores/excoStore';
+	import type { ExcosData, ExecutiveMember, ExecutiveCommittee, ExecutiveSession } from '$lib/data/sampleExcos';
 	import {
 		Users,
 		Plus,
@@ -18,7 +18,6 @@
 		UserPlus,
 		X,
 		FileCode,
-		Sparkles,
 		Phone,
 		Mail,
 		MessageSquareText,
@@ -157,13 +156,6 @@
 
 	// --- Actions & Handlers ---
 
-	// Load Sample JSON (All Excos)
-	function handleLoadSampleJson() {
-		jsonText = JSON.stringify(sampleExcosData, null, 2);
-		jsonError = null;
-		toast('success', 'Loaded complete official Exco dataset! Click "Apply & Save JSON" to confirm.');
-	}
-
 	// Apply & Save JSON
 	async function handleApplyJson() {
 		jsonError = null;
@@ -189,19 +181,16 @@
 		}
 	}
 
-	// Reset dataset to default sample
-	async function handleResetToSample() {
-		if (confirm('Reset all Exco data to default official dataset?')) {
+	// Reset dataset to empty
+	async function handleResetToEmpty() {
+		if (confirm('Clear all Exco data? This removes every session from the site.')) {
 			isSaving = true;
-			toast('success', 'Resetting & syncing…');
-			excosData = await resetExcosDataToSample();
-			sortSessionsNewestFirst();
-			if (excosData.sessions.length > 0) {
-				selectedSession = excosData.sessions[0].session;
-			}
+			toast('success', 'Clearing & syncing…');
+			excosData = await resetExcosDataToEmpty();
+			selectedSession = '';
 			jsonText = JSON.stringify(excosData, null, 2);
 			isSaving = false;
-			toast('success', '✅ Reset to official dataset & synced to marketing site.');
+			toast('success', '✅ All Exco data cleared & synced to marketing site.');
 		}
 	}
 
@@ -406,12 +395,12 @@
 
 		<div class="flex items-center space-x-2">
 			<button
-				onclick={handleResetToSample}
+				onclick={handleResetToEmpty}
 				class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-full text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-all shadow-sm"
-				title="Reset to default official dataset"
+				title="Clear all exco data"
 			>
 				<RotateCcw class="w-4 h-4 text-gray-500" />
-				<span class="hidden sm:inline">Reset to Official</span>
+				<span class="hidden sm:inline">Clear All Data</span>
 			</button>
 			<button
 				onclick={openAddModal}
@@ -614,18 +603,11 @@
 							JSON Raw Data Editor
 						</h3>
 						<p class="text-xs text-gray-500">
-							Paste or edit complete JSON payload. Click "Load Sample JSON" to import all official Exco data.
+							Paste or edit the complete JSON payload, then click "Apply & Save JSON" to sync it to the site.
 						</p>
 					</div>
 
 					<div class="flex items-center space-x-2">
-						<button
-							onclick={handleLoadSampleJson}
-							class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-green-100 text-green-800 hover:bg-green-200 transition-all"
-						>
-							<Sparkles class="w-4 h-4 text-green-700" />
-							<span>Load Official Sample JSON</span>
-						</button>
 						<button
 							onclick={handleApplyJson}
 							class="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full text-xs font-bold bg-green-700 hover:bg-green-800 text-white shadow-md transition-all"

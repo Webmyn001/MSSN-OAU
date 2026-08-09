@@ -1,4 +1,4 @@
-import { sampleExcosData, type ExcosData } from '$lib/data/sampleExcos';
+import type { ExcosData } from '$lib/data/sampleExcos';
 
 export type { ExcosData, ExecutiveMember, ExecutiveSession, ExecutiveCommittee } from '$lib/data/sampleExcos';
 
@@ -7,13 +7,15 @@ import { API_BASE } from '$lib/api/base';
 const STORAGE_KEY = 'mssn_excos_admin_data_v2';
 const API_URL = `${API_BASE}/public/excos`;
 
-// Fetch remote source of truth from API (PostgreSQL database)
+export const emptyExcosData: ExcosData = { sessions: [] };
+
+// Fetch remote source of truth from API (database-backed store)
 export async function fetchExcosDataFromApi(): Promise<ExcosData | null> {
 	try {
 		const res = await fetch(API_URL);
 		if (res.ok) {
 			const body = await res.json();
-			if (body && body.success && body.data && body.data.excos && body.data.excos.sessions && body.data.excos.sessions.length > 0) {
+			if (body && body.success && body.data && body.data.excos && Array.isArray(body.data.excos.sessions)) {
 				// Cache into localStorage
 				if (typeof window !== 'undefined') {
 					localStorage.setItem(STORAGE_KEY, JSON.stringify(body.data.excos, null, 2));
@@ -22,26 +24,26 @@ export async function fetchExcosDataFromApi(): Promise<ExcosData | null> {
 			}
 		}
 	} catch (e) {
-		console.warn('Could not fetch excos from DB API, using local storage fallback:', e);
+		console.warn('Could not fetch excos from API, using local storage fallback:', e);
 	}
 	return null;
 }
 
-// Helper to safely load data from localStorage or fallback to sampleExcosData
+// Helper to safely load data from localStorage or fallback to empty data
 export function loadExcosData(): ExcosData {
-	if (typeof window === 'undefined') return sampleExcosData;
+	if (typeof window === 'undefined') return emptyExcosData;
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
 			const parsed = JSON.parse(stored);
-			if (parsed && Array.isArray(parsed.sessions) && parsed.sessions.length > 0) {
+			if (parsed && Array.isArray(parsed.sessions)) {
 				return parsed;
 			}
 		}
 	} catch (e) {
 		console.error('Failed to load excos data from localStorage:', e);
 	}
-	return sampleExcosData;
+	return emptyExcosData;
 }
 
 // Save data to localStorage AND push to the shared API (PostgreSQL DB)
@@ -77,8 +79,8 @@ export function saveExcosDataSync(data: ExcosData): boolean {
 	return true;
 }
 
-// Reset data to initial sample dataset
-export async function resetExcosDataToSample(): Promise<ExcosData> {
-	await saveExcosData(sampleExcosData);
-	return sampleExcosData;
+// Reset data to empty state
+export async function resetExcosDataToEmpty(): Promise<ExcosData> {
+	await saveExcosData(emptyExcosData);
+	return emptyExcosData;
 }
