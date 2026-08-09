@@ -7,6 +7,7 @@
 		ExternalLink, ShieldCheck, Clock, Calendar, Newspaper, Link, Building2, CreditCard,
 		Menu, X, ChevronDown, ChevronRight, LogOut
 	} from '@lucide/svelte';
+	import { isTokenExpired } from '$lib/stores/authStore';
 
 	let { children } = $props();
 
@@ -74,6 +75,17 @@
 		localStorage.removeItem('mssn_admin_user');
 		window.location.href = '/login';
 	}
+
+	// Enforce the 30-minute token expiry even while the user is idle
+	$effect(() => {
+		if (isPublicPage) return;
+		const interval = setInterval(() => {
+			if (isTokenExpired()) {
+				handleLogout();
+			}
+		}, 30000);
+		return () => clearInterval(interval);
+	});
 </script>
 
 <svelte:head>

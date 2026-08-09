@@ -1,7 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { formatTime, getSolahPeriod } from '$lib/stores/prayerTimes';
-    import { Clock, MapPin, Calendar, Moon, Star, MapPinned, MousePointerClick } from '@lucide/svelte';
+    import { Clock, MapPin, Calendar, Moon, MapPinned, MousePointerClick } from '@lucide/svelte';
     import PrayerTimeCard from './PrayerTimeCard.svelte';
     import { fade, fly } from 'svelte/transition';
     import AutoplayModule from 'embla-carousel-autoplay';
@@ -214,7 +214,7 @@
         {#if hasPrayerTimes}
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             {#each prayerData as prayer, index}
-                <div class="h-full" in:fly={{ y: 20, duration: 400, delay: 200 + (index * 100) }}>
+                <div class="h-full {index === prayerData.length - 1 ? 'col-span-2 sm:col-span-1' : ''}" in:fly={{ y: 20, duration: 400, delay: 200 + (index * 100) }}>
                     <PrayerTimeCard 
                         prayerName={prayer.name}
                         adhanTime={prayer.adhan}
@@ -228,53 +228,47 @@
             {/each}
         </div>
 
-		<!-- Jumu'ah Prayer — premium featured card -->
+		<!-- Jumu'ah Prayer — featured card -->
 		{#if apiPrayerTimes?.jumuah}
 		<div class="flex justify-center items-center w-full">
-			<div class="relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] shadow-2xl group">
-				<!-- Rich emerald + gold background -->
-				<div class="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-950"></div>
-				<!-- Glowing orbs -->
-				<div class="absolute -top-24 -right-20 w-72 h-72 bg-amber-400/25 rounded-full blur-3xl"></div>
-				<div class="absolute -bottom-28 -left-20 w-80 h-80 bg-teal-300/20 rounded-full blur-3xl"></div>
-				<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[60%] bg-emerald-400/10 rounded-full blur-3xl"></div>
-				<!-- Geometric Islamic pattern -->
-				<div class="absolute inset-0 opacity-[0.09]" style="background-image: radial-gradient(circle at 1px 1px, #fbbf24 1px, transparent 0); background-size: 20px 20px;"></div>
-				<!-- Gold border frame -->
-				<div class="absolute inset-3 rounded-[1.25rem] border border-amber-200/25 pointer-events-none"></div>
+			<div class="relative w-full max-w-3xl overflow-hidden rounded-2xl shadow-xl group">
+				<!-- Real mosque photo background -->
+				<div class="absolute inset-0">
+					<img
+						src="/images/bg-1.webp"
+						alt="Central Mosque of Unity, OAU Ile-Ife"
+						loading="lazy"
+						class="w-full h-full object-cover object-center"
+					/>
+					<div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/40"></div>
+					<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30"></div>
+				</div>
 
 				<div class="relative z-10 flex flex-col sm:flex-row items-center gap-6 p-7 sm:p-9">
-					<!-- Ornate crescent medallion -->
+					<!-- Crescent medallion -->
 					<div class="shrink-0 relative">
-						<div class="absolute inset-0 rounded-full bg-amber-400/40 blur-xl"></div>
-						<div class="relative flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 text-emerald-950 shadow-xl ring-4 ring-amber-200/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
-							<Moon class="w-9 h-9" strokeWidth={2.2} />
-						</div>
-						<div class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-emerald-900 border-2 border-amber-300/60 flex items-center justify-center">
-							<Star class="w-3.5 h-3.5 text-amber-300" />
+						<div class="flex items-center justify-center w-16 h-16 rounded-full bg-white/15 backdrop-blur-md border border-white/40 text-amber-200 shadow-lg">
+							<Moon class="w-8 h-8" strokeWidth={2} />
 						</div>
 					</div>
 
 					<!-- Copy -->
 					<div class="flex-1 text-center sm:text-left">
-						<div class="flex items-center justify-center sm:justify-start gap-2 mb-1.5">
-							<span class="h-px w-6 bg-amber-300/70 hidden sm:block"></span>
-							<span class="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-300">Friday Congregation</span>
-						</div>
-						<h3 class="font-primary font-bold text-2xl sm:text-4xl text-white drop-shadow tracking-tight">Jumu'ah</h3>
-						<p class="font-tertiary text-emerald-100/80 text-sm mt-1.5">Gather early — the Khutbah begins before the congregational Salah.</p>
+						<p class="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300 mb-1">Friday Congregation</p>
+						<h3 class="font-primary font-bold text-2xl sm:text-3xl text-white drop-shadow tracking-tight">Jumu'ah Prayer</h3>
+						<p class="font-tertiary text-gray-100/90 text-sm mt-1.5">Gather early, the Khutbah begins before the congregational Salah.</p>
 					</div>
 
 					<!-- Times -->
 					<div class="flex items-center gap-3 shrink-0">
-						<div class="rounded-2xl bg-black/30 backdrop-blur-md border border-amber-200/25 px-4 py-3 text-center shadow-inner">
-							<p class="text-[9px] font-semibold uppercase tracking-widest text-amber-200/80 mb-0.5">Khutbah</p>
-							<p class="text-white font-primary font-bold text-xl sm:text-2xl tabular-nums whitespace-nowrap leading-none">{formatTime(apiPrayerTimes.jumuah.adhan)}</p>
+						<div class="rounded-xl bg-black/40 backdrop-blur-md border border-white/25 px-4 py-3 text-center">
+							<p class="text-[9px] font-semibold uppercase tracking-widest text-gray-300 mb-0.5">Khutbah</p>
+							<p class="text-white font-primary font-bold text-lg sm:text-xl tabular-nums whitespace-nowrap leading-none">{formatTime(apiPrayerTimes.jumuah.adhan)}</p>
 						</div>
-						<div class="h-10 w-px bg-amber-200/30 hidden sm:block"></div>
-						<div class="rounded-2xl bg-amber-300/20 backdrop-blur-md border border-amber-300/50 px-4 py-3 text-center shadow-inner">
-							<p class="text-[9px] font-semibold uppercase tracking-widest text-amber-200/80 mb-0.5">Salah</p>
-							<p class="text-amber-200 font-primary font-bold text-xl sm:text-2xl tabular-nums whitespace-nowrap leading-none">{formatTime(apiPrayerTimes.jumuah.iqamah)}</p>
+						<div class="h-10 w-px bg-white/25 hidden sm:block"></div>
+						<div class="rounded-xl bg-amber-400/90 px-4 py-3 text-center">
+							<p class="text-[9px] font-semibold uppercase tracking-widest text-amber-950 mb-0.5">Salah</p>
+							<p class="text-amber-950 font-primary font-bold text-lg sm:text-xl tabular-nums whitespace-nowrap leading-none">{formatTime(apiPrayerTimes.jumuah.iqamah)}</p>
 						</div>
 					</div>
 				</div>

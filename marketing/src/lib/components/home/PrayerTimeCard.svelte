@@ -87,11 +87,11 @@
         <div class="grid grid-cols-2 gap-1.5 sm:gap-2">
             <div class="rounded-xl bg-black/35 backdrop-blur-sm border border-white/15 px-2 py-1.5 sm:px-2.5 sm:py-2 text-center min-w-0">
                 <p class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-white/60 truncate">Adhan</p>
-                <p class="text-white font-primary font-semibold text-xs sm:text-[15px] tabular-nums whitespace-nowrap">{adhan}</p>
+                <p class="text-white font-primary font-semibold text-[11px] sm:text-sm tabular-nums whitespace-nowrap">{adhan}</p>
             </div>
             <div class="rounded-xl bg-white/15 backdrop-blur-sm border border-white/25 px-2 py-1.5 sm:px-2.5 sm:py-2 text-center min-w-0 {isUpcoming ? 'bg-amber-300/25 border-amber-300/40' : ''}">
                 <p class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-white/60 truncate">Iqamah</p>
-                <p class="text-white font-primary font-semibold text-xs sm:text-[15px] tabular-nums whitespace-nowrap">{iqamah}</p>
+                <p class="text-white font-primary font-semibold text-[11px] sm:text-sm tabular-nums whitespace-nowrap">{iqamah}</p>
             </div>
         </div>
     </div>

@@ -34,7 +34,34 @@ export function clearAuth() {
 }
 
 export function isAuthenticated(): boolean {
-	return !!getStoredToken()
+	return !!getStoredToken() && !isTokenExpired()
+}
+
+function decodeTokenPayload(token: string): Record<string, unknown> | null {
+	try {
+		const parts = token.split('.')
+		if (parts.length < 2) return null
+		const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+		const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4)
+		const decoded = atob(padded)
+		return JSON.parse(decoded)
+	} catch {
+		return null
+	}
+}
+
+/** Expiry timestamp in ms, or null if the token has no decodable exp claim. */
+export function getTokenExpiry(): number | null {
+	const token = getStoredToken()
+	if (!token) return null
+	const payload = decodeTokenPayload(token)
+	const exp = typeof payload?.exp === 'number' ? payload.exp : null
+	return exp ? exp * 1000 : null
+}
+
+export function isTokenExpired(): boolean {
+	const expiry = getTokenExpiry()
+	return expiry !== null && Date.now() >= expiry
 }
 
 export async function authFetch(path: string, options: RequestInit = {}): Promise<Response> {
