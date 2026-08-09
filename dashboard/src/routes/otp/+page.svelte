@@ -10,6 +10,20 @@
 	let code = $state('');
 	let loading = $state(false);
 	let success = $state(false);
+	let secondsLeft = $state(60);
+
+	$effect(() => {
+		if (success) return;
+		secondsLeft = 60;
+		const interval = setInterval(() => {
+			secondsLeft -= 1;
+			if (secondsLeft <= 0) {
+				clearInterval(interval);
+				secondsLeft = 0;
+			}
+		}, 1000);
+		return () => clearInterval(interval);
+	});
 
 	const patternUrl = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='1'/%3E%3Cpath d='M30 10L50 30L30 50L10 30Z' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3Ccircle cx='30' cy='30' r='4' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3C/svg%3E")`;
 
@@ -113,7 +127,12 @@
 							placeholder="000000"
 							class="w-full text-center text-3xl font-mono font-bold tracking-[0.5em] py-4 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all"
 						/>
-						<p class="text-xs text-gray-400 text-center mt-2">Expires in 60 seconds</p>
+						<p class="text-xs text-gray-400 text-center mt-2">
+							Expires in <span class="font-mono font-semibold text-gray-600" class:text-red-500={secondsLeft <= 10}>{secondsLeft}s</span>
+						</p>
+						{#if secondsLeft <= 0}
+							<p class="text-xs text-red-500 text-center mt-1">Code expired. Go back and sign in again to get a new code.</p>
+						{/if}
 					</div>
 
 					<button
