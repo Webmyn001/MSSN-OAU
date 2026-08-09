@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { verifyOTP, storeAuth } from '$lib/stores/authStore';
+	import { verifyOTP, storeAuth, login } from '$lib/stores/authStore';
 	import { toast } from '$lib/stores/toast.svelte';
-	import { ShieldCheck, Loader2, ArrowLeft, Mail } from '@lucide/svelte';
+	import { ShieldCheck, Loader2, ArrowLeft, Mail, RefreshCw } from '@lucide/svelte';
 
 	const email = $state(typeof window !== 'undefined' ? (sessionStorage.getItem('mssn_pending_email') || '') : '');
 	const devOtp = $state(typeof window !== 'undefined' ? (sessionStorage.getItem('mssn_otp_dev') || '') : '');
@@ -10,10 +10,10 @@
 	let code = $state('');
 	let loading = $state(false);
 	let success = $state(false);
+	let resending = $state(false);
 	let secondsLeft = $state(60);
 
-	$effect(() => {
-		if (success) return;
+	function startCountdown() {
 		secondsLeft = 60;
 		const interval = setInterval(() => {
 			secondsLeft -= 1;
@@ -23,6 +23,11 @@
 			}
 		}, 1000);
 		return () => clearInterval(interval);
+	}
+
+	$effect(() => {
+		if (success) return;
+		return startCountdown();
 	});
 
 	const patternUrl = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='1'/%3E%3Cpath d='M30 10L50 30L30 50L10 30Z' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3Ccircle cx='30' cy='30' r='4' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3C/svg%3E")`;
@@ -40,6 +45,7 @@
 			if (data.success) {
 				storeAuth(data.data.token, data.data.user);
 				sessionStorage.removeItem('mssn_pending_email');
+				sessionStorage.removeItem('mssn_pending_password');
 				sessionStorage.removeItem('mssn_otp_dev');
 				success = true;
 				setTimeout(() => goto('/'), 800);
@@ -50,6 +56,33 @@
 			toast('error', 'Cannot reach server.');
 		} finally {
 			loading = false;
+		}
+	}
+
+	async function handleResend() {
+		if (resending) return;
+		resending = true;
+		try {
+			const password = typeof window !== 'undefined' ? (sessionStorage.getItem('mssn_pending_password') || '') : '';
+			if (!email || !password) {
+				toast('error', 'Session expired. Please sign in again.');
+				goto('/login');
+				return;
+			}
+			const data = await login(email, password);
+			if (data.success) {
+				code = '';
+				sessionStorage.setItem('mssn_otp_dev', data.data?.otp || '');
+				startCountdown();
+				toast('success', 'A new code has been sent to your email.');
+			} else {
+				toast('error', data.error || 'Could not resend code. Please sign in again.');
+				goto('/login');
+			}
+		} catch {
+			toast('error', 'Cannot reach server.');
+		} finally {
+			resending = false;
 		}
 	}
 
@@ -127,12 +160,12 @@
 							placeholder="000000"
 							class="w-full text-center text-3xl font-mono font-bold tracking-[0.5em] py-4 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all"
 						/>
-						<p class="text-xs text-gray-400 text-center mt-2">
-							Expires in <span class="font-mono font-semibold text-gray-600" class:text-red-500={secondsLeft <= 10}>{secondsLeft}s</span>
-						</p>
-						{#if secondsLeft <= 0}
-							<p class="text-xs text-red-500 text-center mt-1">Code expired. Go back and sign in again to get a new code.</p>
-						{/if}
+					<p class="text-xs text-gray-400 text-center mt-2">
+						Expires in <span class="font-mono font-semibold text-gray-600" class:text-red-500={secondsLeft <= 10}>{secondsLeft}s</span>
+					</p>
+					{#if secondsLeft <= 0}
+						<p class="text-xs text-red-500 text-center mt-1">This code has expired.</p>
+					{/if}
 					</div>
 
 					<button
@@ -147,6 +180,23 @@
 							<span>Verify & Sign In</span>
 						{/if}
 					</button>
+
+					{#if secondsLeft <= 0}
+						<button
+							type="button"
+							onclick={handleResend}
+							disabled={resending || success}
+							class="w-full py-3 rounded-xl border border-primary-300 bg-primary-50 hover:bg-primary-100 active:bg-primary-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-primary-800 font-bold text-sm transition-all flex items-center justify-center gap-2"
+						>
+							{#if resending}
+								<Loader2 class="w-4 h-4 animate-spin" />
+								<span>Sending new code...</span>
+							{:else}
+								<RefreshCw class="w-4 h-4" />
+								<span>Resend Code</span>
+							{/if}
+						</button>
+					{/if}
 				</form>
 			</div>
 

@@ -19,6 +19,7 @@
 			const data = await login(email, password);
 			if (data.success) {
 				sessionStorage.setItem('mssn_pending_email', email);
+				sessionStorage.setItem('mssn_pending_password', password);
 				sessionStorage.setItem('mssn_otp_dev', data.data?.otp || '');
 				goto('/otp');
 			} else {

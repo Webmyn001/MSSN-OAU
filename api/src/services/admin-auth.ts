@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import { SignJWT, jwtVerify } from 'jose'
 import { ADMIN_USERS, JWT_SECRET, JWT_EXPIRY, OTP_EXPIRY_MS, OTP_LENGTH, type AdminUser } from '../config/admin-users'
+import { getConfigValue, setConfigValue } from './config-store'
 import { logger } from '../lib/logger'
 
 interface PendingOTP {
@@ -10,6 +11,63 @@ interface PendingOTP {
 }
 
 const otpStore = new Map<string, PendingOTP>()
+
+/** DB key for admin emails added via the dashboard (same shared password). */
+const EXTRA_ADMIN_EMAILS_KEY = 'admin_extra_emails'
+
+/** Password hash shared by all admins (used for emails added via the dashboard). */
+const SHARED_ADMIN_PASSWORD_HASH = '$2b$10$annSLz7Qc09G2i439kjpEOWVqCySyEtHAJSDGueXJTyeyVw34jaZ2'
+
+/** Resolve an admin user from the built-in config or DB-added extra emails. */
+export async function getAdminUserByEmail(email: string): Promise<AdminUser | null> {
+	const normalized = email.toLowerCase()
+	const base = ADMIN_USERS.find(u => u.email.toLowerCase() === normalized)
+	if (base) return base
+
+	const extras = await getConfigValue<string[]>(EXTRA_ADMIN_EMAILS_KEY, [])
+	if (extras.includes(normalized)) {
+		return {
+			email: normalized,
+			passwordHash: SHARED_ADMIN_PASSWORD_HASH,
+			fullName: 'MSSN Admin',
+			role: 'admin'
+		}
+	}
+	return null
+}
+
+/** All admin emails (built-in + DB-added). */
+export async function getAllAdminEmails(): Promise<string[]> {
+	const extras = await getConfigValue<string[]>(EXTRA_ADMIN_EMAILS_KEY, [])
+	return [...new Set([...ADMIN_USERS.map(u => u.email.toLowerCase()), ...extras])]
+}
+
+/** Add an admin by email (uses the shared password). Returns false if already present. */
+export async function addAdminEmail(email: string): Promise<boolean> {
+	const normalized = email.toLowerCase()
+	const extras = await getConfigValue<string[]>(EXTRA_ADMIN_EMAILS_KEY, [])
+	if (extras.includes(normalized) || ADMIN_USERS.some(u => u.email.toLowerCase() === normalized)) {
+		return false
+	}
+	extras.push(normalized)
+	await setConfigValue(EXTRA_ADMIN_EMAILS_KEY, extras)
+	return true
+}
+
+/** Remove a DB-added admin by email. Returns false if it's a built-in or not found. */
+export async function removeAdminEmail(email: string): Promise<boolean> {
+	const normalized = email.toLowerCase()
+	if (ADMIN_USERS.some(u => u.email.toLowerCase() === normalized)) {
+		return false
+	}
+	const extras = await getConfigValue<string[]>(EXTRA_ADMIN_EMAILS_KEY, [])
+	const next = extras.filter(e => e !== normalized)
+	if (next.length === extras.length) {
+		return false
+	}
+	await setConfigValue(EXTRA_ADMIN_EMAILS_KEY, next)
+	return true
+}
 
 function generateOTP(): string {
 	const digits = '0123456789'
@@ -24,7 +82,7 @@ export async function verifyAdminCredentials(
 	email: string,
 	password: string
 ): Promise<Omit<AdminUser, 'passwordHash'> | null> {
-	const user = ADMIN_USERS.find(u => u.email.toLowerCase() === email.toLowerCase())
+	const user = await getAdminUserByEmail(email)
 	if (!user) {
 		logger.warn({ email }, 'Login attempt with unknown email')
 		return null

@@ -6,7 +6,11 @@ import {
 	createOTP,
 	verifyOTP,
 	generateJWT,
-	verifyJWT
+	verifyJWT,
+	getAdminUserByEmail,
+	getAllAdminEmails,
+	addAdminEmail,
+	removeAdminEmail
 } from '../services/admin-auth'
 import { sendEmailWithContent } from '../services/email/brevo'
 import { brandEmail } from '../services/email/template'
@@ -84,8 +88,7 @@ adminAuth.post('/verify-otp', zValidator('json', verifyOtpSchema), async c => {
 		}
 
 		// Find user info for JWT
-		const { ADMIN_USERS } = await import('../config/admin-users')
-		const user = ADMIN_USERS.find(u => u.email.toLowerCase() === email.toLowerCase())
+		const user = await getAdminUserByEmail(email)
 		if (!user) {
 			return errorResponse(c, 'User not found', 'USER_NOT_FOUND', 404)
 		}
@@ -127,6 +130,66 @@ adminAuth.get('/validate', async c => {
 	}
 
 	return successResponse(c, { user })
+})
+
+// GET /admin-auth/admins — list all admin emails (requires a valid JWT)
+adminAuth.get('/admins', async c => {
+	const authHeader = c.req.header('Authorization')
+	const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
+	if (!token) {
+		return errorResponse(c, 'No token provided', 'NO_TOKEN', 401)
+	}
+	const user = await verifyJWT(token)
+	if (!user) {
+		return errorResponse(c, 'Invalid or expired token', 'INVALID_TOKEN', 401)
+	}
+
+	const emails = await getAllAdminEmails()
+	return successResponse(c, { admins: emails })
+})
+
+// POST /admin-auth/admins — add an admin by email (same shared password)
+adminAuth.post('/admins', zValidator('json', z.object({ email: z.string().email('Invalid email format') })), async c => {
+	const authHeader = c.req.header('Authorization')
+	const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
+	if (!token) {
+		return errorResponse(c, 'No token provided', 'NO_TOKEN', 401)
+	}
+	const user = await verifyJWT(token)
+	if (!user) {
+		return errorResponse(c, 'Invalid or expired token', 'INVALID_TOKEN', 401)
+	}
+
+	const { email } = c.req.valid('json')
+	const added = await addAdminEmail(email)
+	if (!added) {
+		return errorResponse(c, 'This email is already an admin', 'ALREADY_ADMIN', 409)
+	}
+
+	logger.info({ email, addedBy: user.email }, 'Admin added via dashboard')
+	return successResponse(c, { message: 'Admin added successfully', email: email.toLowerCase() })
+})
+
+// DELETE /admin-auth/admins/:email — remove a dashboard-added admin
+adminAuth.delete('/admins/:email', async c => {
+	const authHeader = c.req.header('Authorization')
+	const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
+	if (!token) {
+		return errorResponse(c, 'No token provided', 'NO_TOKEN', 401)
+	}
+	const user = await verifyJWT(token)
+	if (!user) {
+		return errorResponse(c, 'Invalid or expired token', 'INVALID_TOKEN', 401)
+	}
+
+	const email = decodeURIComponent(c.req.param('email'))
+	const removed = await removeAdminEmail(email)
+	if (!removed) {
+		return errorResponse(c, 'Cannot remove this admin (built-in or not found)', 'NOT_REMOVABLE', 400)
+	}
+
+	logger.info({ email, removedBy: user.email }, 'Admin removed via dashboard')
+	return successResponse(c, { message: 'Admin removed successfully' })
 })
 
 export default adminAuth

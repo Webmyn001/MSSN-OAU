@@ -47,6 +47,13 @@
 				{ label: 'Annual Dues', href: '/annual-dues', icon: CreditCard },
 				{ label: 'Musollahs', href: '/mosques', icon: Building2 },
 			]
+		},
+		{
+			label: 'Settings',
+			icon: ShieldCheck,
+			items: [
+				{ label: 'Admins', href: '/admins', icon: ShieldCheck },
+			]
 		}
 	];
 
