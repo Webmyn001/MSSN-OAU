@@ -11,6 +11,7 @@
 	let loading = $state(false);
 	let success = $state(false);
 	let resending = $state(false);
+	let retrying = $state(false);
 	let secondsLeft = $state(60);
 
 	function startCountdown() {
@@ -39,9 +40,10 @@
 	async function handleVerify(e: Event) {
 		e.preventDefault();
 		loading = true;
+		retrying = false;
 
 		try {
-			const data = await verifyOTP(email, code);
+			const data = await verifyOTP(email, code, () => (retrying = true));
 			if (data.success) {
 				storeAuth(data.data.token, data.data.user);
 				sessionStorage.removeItem('mssn_pending_email');
@@ -53,15 +55,17 @@
 				toast('error', data.error || 'Invalid code');
 			}
 		} catch {
-			toast('error', 'Cannot reach server.');
+			toast('error', 'The server is starting up. Please wait a moment and try again.');
 		} finally {
 			loading = false;
+			retrying = false;
 		}
 	}
 
 	async function handleResend() {
 		if (resending) return;
 		resending = true;
+		retrying = false;
 		try {
 			const password = typeof window !== 'undefined' ? (sessionStorage.getItem('mssn_pending_password') || '') : '';
 			if (!email || !password) {
@@ -69,7 +73,7 @@
 				goto('/login');
 				return;
 			}
-			const data = await login(email, password);
+			const data = await login(email, password, () => (retrying = true));
 			if (data.success) {
 				code = '';
 				sessionStorage.setItem('mssn_otp_dev', data.data?.otp || '');
@@ -80,9 +84,10 @@
 				goto('/login');
 			}
 		} catch {
-			toast('error', 'Cannot reach server.');
+			toast('error', 'The server is starting up. Please wait a moment and try again.');
 		} finally {
 			resending = false;
+			retrying = false;
 		}
 	}
 
@@ -175,7 +180,7 @@
 					>
 						{#if loading}
 							<Loader2 class="w-4 h-4 animate-spin" />
-							<span>Verifying...</span>
+							<span>{retrying ? 'Server is waking up, retrying...' : 'Verifying...'}</span>
 						{:else}
 							<span>Verify & Sign In</span>
 						{/if}
@@ -190,7 +195,7 @@
 						>
 							{#if resending}
 								<Loader2 class="w-4 h-4 animate-spin" />
-								<span>Sending new code...</span>
+								<span>{retrying ? 'Server is waking up, retrying...' : 'Sending new code...'}</span>
 							{:else}
 								<RefreshCw class="w-4 h-4" />
 								<span>Resend Code</span>

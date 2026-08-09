@@ -8,15 +8,17 @@
 	let password = $state('');
 	let loading = $state(false);
 	let showPassword = $state(false);
+	let retrying = $state(false);
 
 	const patternUrl = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='1'/%3E%3Cpath d='M30 10L50 30L30 50L10 30Z' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3Ccircle cx='30' cy='30' r='4' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3C/svg%3E")`;
 
 	async function handleLogin(e: Event) {
 		e.preventDefault();
 		loading = true;
+		retrying = false;
 
 		try {
-			const data = await login(email, password);
+			const data = await login(email, password, () => (retrying = true));
 			if (data.success) {
 				sessionStorage.setItem('mssn_pending_email', email);
 				sessionStorage.setItem('mssn_pending_password', password);
@@ -26,9 +28,10 @@
 				toast('error', data.error || 'Invalid credentials');
 			}
 		} catch {
-			toast('error', 'Cannot reach server. Make sure the API is running.');
+			toast('error', 'The server is starting up. Please wait a moment and try again.');
 		} finally {
 			loading = false;
+			retrying = false;
 		}
 	}
 </script>
@@ -118,12 +121,12 @@
 						disabled={loading || !email || !password}
 						class="w-full py-3 rounded-xl bg-primary-800 hover:bg-primary-700 active:bg-primary-900 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md shadow-primary-900/20 transition-all flex items-center justify-center gap-2"
 					>
-						{#if loading}
-							<Loader2 class="w-4 h-4 animate-spin" />
-							<span>Signing in...</span>
-						{:else}
-							<span>Sign in</span>
-						{/if}
+					{#if loading}
+						<Loader2 class="w-4 h-4 animate-spin" />
+						<span>{retrying ? 'Server is waking up, retrying...' : 'Signing in...'}</span>
+					{:else}
+						<span>Sign in</span>
+					{/if}
 					</button>
 				</form>
 			</div>
