@@ -1,52 +1,39 @@
 import { Hono } from 'hono'
 import { successResponse, errorResponse } from '../lib/response'
 import { logger } from '../lib/logger'
-import * as fs from 'fs'
-import * as path from 'path'
+import { getConfigValue, setConfigValue } from '../services/config-store'
 
-const ALUMNI_FILE = path.join(process.cwd(), 'data', 'alumni.json')
+const ALUMNI_KEY = 'alumni'
 
-const defaultData = { sessions: [] }
-
-function ensureDataDir() {
-	const dir = path.dirname(ALUMNI_FILE)
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, { recursive: true })
-	}
+export interface AlumniMember {
+	id?: string
+	name: string
+	position: string
+	gender?: string
+	session?: string
+	department?: string
+	phone?: string
+	photo?: string
 }
 
-function readAlumniData() {
-	try {
-		ensureDataDir()
-		if (fs.existsSync(ALUMNI_FILE)) {
-			const raw = fs.readFileSync(ALUMNI_FILE, 'utf-8')
-			const parsed = JSON.parse(raw)
-			if (parsed && Array.isArray(parsed.sessions)) {
-				return parsed
-			}
-		}
-	} catch (e) {
-		logger.error({ e }, 'Failed reading alumni JSON file')
-	}
-	return defaultData
+export interface AlumniSession {
+	session: string
+	start_year?: number
+	end_year?: number
+	members: AlumniMember[]
 }
 
-function writeAlumniData(data: unknown): boolean {
-	try {
-		ensureDataDir()
-		fs.writeFileSync(ALUMNI_FILE, JSON.stringify(data, null, 2), 'utf-8')
-		return true
-	} catch (e) {
-		logger.error({ e }, 'Failed writing alumni JSON file')
-		return false
-	}
+export interface AlumniData {
+	sessions: AlumniSession[]
 }
+
+const defaultData: AlumniData = { sessions: [] }
 
 const publicAlumniRoute = new Hono()
 
-publicAlumniRoute.get('/', c => {
+publicAlumniRoute.get('/', async c => {
 	try {
-		const data = readAlumniData()
+		const data = await getConfigValue<AlumniData>(ALUMNI_KEY, defaultData)
 		return successResponse(c, { alumni: data })
 	} catch (error) {
 		logger.error({ error }, 'Failed getting alumni data')
@@ -61,10 +48,7 @@ publicAlumniRoute.put('/', async c => {
 			return errorResponse(c, 'Invalid alumni data: must contain a "sessions" array', 'VALIDATION_ERROR', 400)
 		}
 
-		const saved = writeAlumniData(body)
-		if (!saved) {
-			return errorResponse(c, 'Failed to save alumni data', 'WRITE_ERROR', 500)
-		}
+		await setConfigValue(ALUMNI_KEY, body)
 
 		logger.info('Alumni data updated')
 		return successResponse(c, { message: 'Alumni data saved successfully' })

@@ -1,52 +1,30 @@
 import { Hono } from 'hono'
 import { successResponse, errorResponse } from '../lib/response'
 import { logger } from '../lib/logger'
-import * as fs from 'fs'
-import * as path from 'path'
+import { getConfigValue, setConfigValue } from '../services/config-store'
 
-const ADVISORS_FILE = path.join(process.cwd(), 'data', 'advisors.json')
+const ADVISORS_KEY = 'advisors'
 
-const defaultData = { advisors: [] }
-
-function ensureDataDir() {
-	const dir = path.dirname(ADVISORS_FILE)
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, { recursive: true })
-	}
+export interface AdvisorEntry {
+	id?: string
+	name: string
+	title: string
+	bio?: string
+	photo?: string | null
+	priority?: number
 }
 
-function readAdvisorsData() {
-	try {
-		ensureDataDir()
-		if (fs.existsSync(ADVISORS_FILE)) {
-			const raw = fs.readFileSync(ADVISORS_FILE, 'utf-8')
-			const parsed = JSON.parse(raw)
-			if (parsed && Array.isArray(parsed.advisors)) {
-				return parsed
-			}
-		}
-	} catch (e) {
-		logger.error({ e }, 'Failed reading advisors JSON file')
-	}
-	return defaultData
+export interface AdvisorsData {
+	advisors: AdvisorEntry[]
 }
 
-function writeAdvisorsData(data: unknown): boolean {
-	try {
-		ensureDataDir()
-		fs.writeFileSync(ADVISORS_FILE, JSON.stringify(data, null, 2), 'utf-8')
-		return true
-	} catch (e) {
-		logger.error({ e }, 'Failed writing advisors JSON file')
-		return false
-	}
-}
+const defaultData: AdvisorsData = { advisors: [] }
 
 const publicAdvisorsRoute = new Hono()
 
-publicAdvisorsRoute.get('/', c => {
+publicAdvisorsRoute.get('/', async c => {
 	try {
-		const data = readAdvisorsData()
+		const data = await getConfigValue<AdvisorsData>(ADVISORS_KEY, defaultData)
 		return successResponse(c, data)
 	} catch (error) {
 		logger.error({ error }, 'Failed getting advisors data')
@@ -61,10 +39,7 @@ publicAdvisorsRoute.put('/', async c => {
 			return errorResponse(c, 'Invalid advisors data: must contain an "advisors" array', 'VALIDATION_ERROR', 400)
 		}
 
-		const saved = writeAdvisorsData(body)
-		if (!saved) {
-			return errorResponse(c, 'Failed to save advisors data', 'WRITE_ERROR', 500)
-		}
+		await setConfigValue(ADVISORS_KEY, body)
 
 		logger.info('Advisors data updated')
 		return successResponse(c, { message: 'Advisors data saved successfully' })

@@ -1,53 +1,30 @@
 import { Hono } from 'hono'
 import { successResponse, errorResponse } from '../lib/response'
 import { logger } from '../lib/logger'
-import * as fs from 'fs'
-import * as path from 'path'
+import { getConfigValue, setConfigValue } from '../services/config-store'
 
-const SUGGESTION_FILE = path.join(process.cwd(), 'data', 'suggestions.json')
+const SUGGESTION_KEY = 'suggestions'
 
-const defaultData = { suggestions: [] }
-
-function ensureDataDir() {
-	const dir = path.dirname(SUGGESTION_FILE)
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, { recursive: true })
-	}
+interface SuggestionEntry {
+	id: string
+	title: string
+	description: string
+	status: string
+	submittedAt: string
 }
 
-function readSuggestionData() {
-	try {
-		ensureDataDir()
-		if (fs.existsSync(SUGGESTION_FILE)) {
-			const raw = fs.readFileSync(SUGGESTION_FILE, 'utf-8')
-			const parsed = JSON.parse(raw)
-			if (parsed && Array.isArray(parsed.suggestions)) {
-				return parsed
-			}
-		}
-	} catch (e) {
-		logger.error({ e }, 'Failed reading suggestion JSON file')
-	}
-	return defaultData
+interface SuggestionData {
+	suggestions: SuggestionEntry[]
 }
 
-function writeSuggestionData(data: unknown): boolean {
-	try {
-		ensureDataDir()
-		fs.writeFileSync(SUGGESTION_FILE, JSON.stringify(data, null, 2), 'utf-8')
-		return true
-	} catch (e) {
-		logger.error({ e }, 'Failed writing suggestion JSON file')
-		return false
-	}
-}
+const defaultData: SuggestionData = { suggestions: [] }
 
 const publicSuggestionRoute = new Hono()
 
 // GET /public/suggestions — return all suggestions
-publicSuggestionRoute.get('/', c => {
+publicSuggestionRoute.get('/', async c => {
 	try {
-		const data = readSuggestionData()
+		const data = await getConfigValue<SuggestionData>(SUGGESTION_KEY, defaultData)
 		return successResponse(c, data)
 	} catch (error) {
 		logger.error({ error }, 'Failed getting suggestion data')
@@ -63,10 +40,7 @@ publicSuggestionRoute.put('/', async c => {
 			return errorResponse(c, 'Invalid data: must contain a "suggestions" array', 'VALIDATION_ERROR', 400)
 		}
 
-		const saved = writeSuggestionData(body)
-		if (!saved) {
-			return errorResponse(c, 'Failed to save suggestion data', 'WRITE_ERROR', 500)
-		}
+		await setConfigValue(SUGGESTION_KEY, body)
 
 		logger.info('Suggestion data updated via admin dashboard')
 		return successResponse(c, { message: 'Suggestion data saved successfully' })

@@ -1,10 +1,9 @@
 import { Hono } from 'hono'
 import { successResponse, errorResponse } from '../lib/response'
 import { logger } from '../lib/logger'
-import * as fs from 'fs'
-import * as path from 'path'
+import { getConfigValue, setConfigValue } from '../services/config-store'
 
-const MOSQUES_FILE = path.join(process.cwd(), 'data', 'mosques.json')
+const MOSQUES_KEY = 'mosques'
 
 export interface MosqueEntry {
 	id: string
@@ -25,46 +24,12 @@ const defaultMosques: MosquesPayload = {
 	updatedAt: ''
 }
 
-function ensureDataDir() {
-	const dir = path.dirname(MOSQUES_FILE)
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, { recursive: true })
-	}
-}
-
-function readMosquesData(): MosquesPayload {
-	try {
-		ensureDataDir()
-		if (fs.existsSync(MOSQUES_FILE)) {
-			const raw = fs.readFileSync(MOSQUES_FILE, 'utf-8')
-			const parsed = JSON.parse(raw)
-			if (parsed && Array.isArray(parsed.mosques)) {
-				return parsed
-			}
-		}
-	} catch (e) {
-		logger.error({ e }, 'Failed reading mosques JSON file')
-	}
-	return defaultMosques
-}
-
-function writeMosquesData(data: MosquesPayload): boolean {
-	try {
-		ensureDataDir()
-		fs.writeFileSync(MOSQUES_FILE, JSON.stringify(data, null, 2), 'utf-8')
-		return true
-	} catch (e) {
-		logger.error({ e }, 'Failed writing mosques JSON file')
-		return false
-	}
-}
-
 const publicMosquesRoute = new Hono()
 
 // GET /public/mosques
-publicMosquesRoute.get('/', c => {
+publicMosquesRoute.get('/', async c => {
 	try {
-		const data = readMosquesData()
+		const data = await getConfigValue<MosquesPayload>(MOSQUES_KEY, defaultMosques)
 		return successResponse(c, data)
 	} catch (error) {
 		logger.error({ error }, 'Failed getting mosques')
@@ -82,10 +47,7 @@ publicMosquesRoute.put('/', async c => {
 
 		body.updatedAt = new Date().toISOString()
 
-		const saved = writeMosquesData(body)
-		if (!saved) {
-			return errorResponse(c, 'Failed to save mosques', 'WRITE_ERROR', 500)
-		}
+		await setConfigValue(MOSQUES_KEY, body)
 
 		logger.info('Mosques updated via admin dashboard')
 		return successResponse(c, { message: 'Mosques updated successfully', data: body })

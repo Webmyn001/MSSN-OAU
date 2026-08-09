@@ -1,53 +1,34 @@
 import { Hono } from 'hono'
 import { successResponse, errorResponse } from '../lib/response'
 import { logger } from '../lib/logger'
-import * as fs from 'fs'
-import * as path from 'path'
+import { getConfigValue, setConfigValue } from '../services/config-store'
 
-const CONTACT_FILE = path.join(process.cwd(), 'data', 'contacts.json')
+const CONTACT_KEY = 'contacts'
 
-const defaultData = { entries: [] }
-
-function ensureDataDir() {
-	const dir = path.dirname(CONTACT_FILE)
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, { recursive: true })
-	}
+export interface ContactEntry {
+	id: string
+	fname: string
+	lname: string
+	email?: string
+	phone: string
+	message: string
+	submittedAt: string
+	status: 'new' | 'read' | 'replied' | 'archived'
+	notes?: string
 }
 
-function readContactData() {
-	try {
-		ensureDataDir()
-		if (fs.existsSync(CONTACT_FILE)) {
-			const raw = fs.readFileSync(CONTACT_FILE, 'utf-8')
-			const parsed = JSON.parse(raw)
-			if (parsed && Array.isArray(parsed.entries)) {
-				return parsed
-			}
-		}
-	} catch (e) {
-		logger.error({ e }, 'Failed reading contact JSON file')
-	}
-	return defaultData
+interface ContactData {
+	entries: ContactEntry[]
 }
 
-function writeContactData(data: unknown): boolean {
-	try {
-		ensureDataDir()
-		fs.writeFileSync(CONTACT_FILE, JSON.stringify(data, null, 2), 'utf-8')
-		return true
-	} catch (e) {
-		logger.error({ e }, 'Failed writing contact JSON file')
-		return false
-	}
-}
+const defaultData: ContactData = { entries: [] }
 
 const publicContactRoute = new Hono()
 
 // GET /public/contact — return all entries
-publicContactRoute.get('/', c => {
+publicContactRoute.get('/', async c => {
 	try {
-		const data = readContactData()
+		const data = await getConfigValue<ContactData>(CONTACT_KEY, defaultData)
 		return successResponse(c, data)
 	} catch (error) {
 		logger.error({ error }, 'Failed getting contact data')
@@ -65,9 +46,9 @@ publicContactRoute.post('/', async c => {
 			return errorResponse(c, 'First name, last name, phone, and message are required', 'VALIDATION_ERROR', 400)
 		}
 
-		const data = readContactData()
+		const data = await getConfigValue<ContactData>(CONTACT_KEY, defaultData)
 
-		const entry = {
+		const entry: ContactEntry = {
 			id: `contact-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
 			fname: fname.trim(),
 			lname: lname.trim(),
@@ -75,11 +56,11 @@ publicContactRoute.post('/', async c => {
 			phone: phone.trim(),
 			message: message.trim(),
 			submittedAt: new Date().toISOString(),
-			status: 'new' as const
+			status: 'new'
 		}
 
 		data.entries.unshift(entry)
-		writeContactData(data)
+		await setConfigValue(CONTACT_KEY, data)
 
 		logger.info({ id: entry.id }, 'New contact form submission')
 		return successResponse(c, { entry, message: 'Your message has been sent successfully. We will get back to you soon.' })
@@ -97,10 +78,7 @@ publicContactRoute.put('/', async c => {
 			return errorResponse(c, 'Invalid data: must contain an "entries" array', 'VALIDATION_ERROR', 400)
 		}
 
-		const saved = writeContactData(body)
-		if (!saved) {
-			return errorResponse(c, 'Failed to save contact data', 'WRITE_ERROR', 500)
-		}
+		await setConfigValue(CONTACT_KEY, body)
 
 		logger.info('Contact data updated via admin dashboard')
 		return successResponse(c, { message: 'Contact data saved successfully' })

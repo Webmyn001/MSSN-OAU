@@ -1,10 +1,9 @@
 import { Hono } from 'hono'
 import { successResponse, errorResponse } from '../lib/response'
 import { logger } from '../lib/logger'
-import * as fs from 'fs'
-import * as path from 'path'
+import { getConfigValue, setConfigValue } from '../services/config-store'
 
-const PRAYER_TIMES_FILE = path.join(process.cwd(), 'data', 'prayer-times.json')
+const PRAYER_TIMES_KEY = 'prayer_times'
 
 export interface PrayerTimeItem {
 	adhan: string
@@ -27,59 +26,25 @@ export interface PrayerTimesPayload {
 }
 
 const defaultPrayerTimes: PrayerTimesPayload = {
-	hijriDate: "27 Muharram, 1446AH",
-	shortHijriDate: "27/01/1446AH",
+	hijriDate: "18 Ṣafar, 1448AH",
+	shortHijriDate: "18/02/1448AH",
 	isCustomHijri: false,
 	prayer_times: {
-		subhi: { adhan: "05:15 AM", iqamah: "05:35 AM" },
-		dhuhr: { adhan: "01:00 PM", iqamah: "01:25 PM" },
-		asr: { adhan: "04:15 PM", iqamah: "04:30 PM" },
-		maghrib: { adhan: "06:45 PM", iqamah: "06:50 PM" },
-		isha: { adhan: "08:00 PM", iqamah: "08:15 PM" },
-		jumuah: { adhan: "01:00 PM", iqamah: "01:45 PM" }
-	}
-}
-
-function ensureDataDir() {
-	const dir = path.dirname(PRAYER_TIMES_FILE)
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, { recursive: true })
-	}
-}
-
-function readPrayerTimesData(): PrayerTimesPayload {
-	try {
-		ensureDataDir()
-		if (fs.existsSync(PRAYER_TIMES_FILE)) {
-			const raw = fs.readFileSync(PRAYER_TIMES_FILE, 'utf-8')
-			const parsed = JSON.parse(raw)
-			if (parsed && parsed.prayer_times) {
-				return parsed
-			}
-		}
-	} catch (e) {
-		logger.error({ e }, 'Failed reading prayer times JSON file')
-	}
-	return defaultPrayerTimes
-}
-
-function writePrayerTimesData(data: PrayerTimesPayload): boolean {
-	try {
-		ensureDataDir()
-		fs.writeFileSync(PRAYER_TIMES_FILE, JSON.stringify(data, null, 2), 'utf-8')
-		return true
-	} catch (e) {
-		logger.error({ e }, 'Failed writing prayer times JSON file')
-		return false
+		subhi: { adhan: "05:20 AM", iqamah: "05:40 AM" },
+		dhuhr: { adhan: "01:00 PM", iqamah: "01:15 PM" },
+		asr: { adhan: "04:15 PM", iqamah: "04:25 PM" },
+		maghrib: { adhan: "07:00 PM", iqamah: "07:05 PM" },
+		isha: { adhan: "08:15 PM", iqamah: "08:25 PM" },
+		jumuah: { adhan: "01:00 PM", iqamah: "02:15 PM" }
 	}
 }
 
 const publicPrayerTimesRoute = new Hono()
 
 // GET /public/prayer-times
-publicPrayerTimesRoute.get('/', c => {
+publicPrayerTimesRoute.get('/', async c => {
 	try {
-		const data = readPrayerTimesData()
+		const data = await getConfigValue<PrayerTimesPayload>(PRAYER_TIMES_KEY, defaultPrayerTimes)
 		return successResponse(c, data)
 	} catch (error) {
 		logger.error({ error }, 'Failed getting prayer times')
@@ -97,10 +62,7 @@ publicPrayerTimesRoute.put('/', async c => {
 
 		body.updatedAt = new Date().toISOString()
 
-		const saved = writePrayerTimesData(body)
-		if (!saved) {
-			return errorResponse(c, 'Failed to save prayer times', 'WRITE_ERROR', 500)
-		}
+		await setConfigValue(PRAYER_TIMES_KEY, body)
 
 		logger.info('Prayer times updated via admin dashboard')
 		return successResponse(c, body)
