@@ -111,7 +111,7 @@
             alt: 'MSSNOAU - Muslim Students Society of Nigeria, OAU Branch'
         }
     ]}
-    keywords="MSSN, MSSNOAU, Muslim Students Society, Obafemi Awolowo University, OAU, Islamic organization, Muslim community, prayer times, Islamic events, donate to MSSN, Great Ife"
+    keywords="MSSN, MSSNOAU, Muslim Students Society, Obafemi Awolowo University, OAU, Islamic organization, Muslim community, prayer times, Islamic events, donate to MSSN, Great Ifẹ̀"
     schema={{
         "@type": "WebPage",
         "@id": `${SITE_URL}/#webpage`,

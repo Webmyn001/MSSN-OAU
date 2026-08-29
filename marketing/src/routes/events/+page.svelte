@@ -304,7 +304,7 @@
                         address: {
                             "@type": "PostalAddress",
                             streetAddress: "Obafemi Awolowo University",
-                            addressLocality: "Ile-Ife",
+                            addressLocality: "Ilé-Ifẹ̀",
                             addressRegion: "Osun",
                             postalCode: "200211",
                             addressCountry: "NG"
@@ -376,7 +376,7 @@
                             address: {
                                 "@type": "PostalAddress",
                                 streetAddress: "Obafemi Awolowo University",
-                                addressLocality: "Ile-Ife",
+                                addressLocality: "Ilé-Ifẹ̀",
                                 addressRegion: "Osun",
                                 postalCode: "200211",
                                 addressCountry: "NG"

@@ -41,7 +41,7 @@
                 <span in:fly={{ y: 30, duration: 800, delay: 300 }}>We are Great</span>
                 <span class="inline-block relative oau mt-2">
                     <span class="relative z-10 yoruba text-[#28145B] inline-block" in:fly={{ y: 30, duration: 800, delay: 600 }}>
-                        Ife's
+                        Ifẹ̀'s
                         <svg
                             class="absolute left-0 bottom-0 w-full opacity-70"
                             style="height: 10px; transform: translateY(7px);"
@@ -233,7 +233,7 @@
                     
                     <!-- Caption with proper design system styling -->
                     <div class="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-auto backdrop-blur-md bg-white/30 border border-white/30 rounded-lg px-4 py-2 transform transition-all duration-500 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0">
-                        <p class="text-[#28145B] font-medium text-sm md:text-base">Central Mosque of Unity, OAU Ile-Ife</p>
+                        <p class="text-[#28145B] font-medium text-sm md:text-base">Central Mosque of Unity, OAU Ilé-Ifẹ̀</p>
                     </div>
                 </div>
             </div>

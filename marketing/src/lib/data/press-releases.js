@@ -18,7 +18,7 @@ export const samplePressReleaseData = {
 			id: 'pr-2',
 			title: 'MSSN OAU Ramadan Lecture Series Records Massive Turnout',
 			summary: 'The annual Ramadan lecture series attracted over 500 Muslim students and staff, featuring renowned Islamic scholars.',
-			content: '<p>The 2025 Ramadan Lecture Series organized by MSSN OAU recorded an impressive turnout of over 500 participants, including students, staff, and members of the Ile-Ife Muslim community.</p><p>The series, which held throughout the month of Ramadan, featured distinguished Islamic scholars who delivered lectures on various aspects of Islamic faith and practice.</p><p>MSSN OAU expresses gratitude to all sponsors, volunteers, and participants who made the event a success.</p>',
+			content: '<p>The 2025 Ramadan Lecture Series organized by MSSN OAU recorded an impressive turnout of over 500 participants, including students, staff, and members of the Ilé-Ifẹ̀ Muslim community.</p><p>The series, which held throughout the month of Ramadan, featured distinguished Islamic scholars who delivered lectures on various aspects of Islamic faith and practice.</p><p>MSSN OAU expresses gratitude to all sponsors, volunteers, and participants who made the event a success.</p>',
 			image: '/images/madrasah.webp',
 			date: '2025-04-10',
 			author: 'Islamic Affairs Board',

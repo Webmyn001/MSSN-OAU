@@ -176,7 +176,7 @@
                         Prayer Times
                     </h1>
                     <p class="text-primary-700 dark:text-primary-300 font-secondary text-lg">
-                        For all musollahs at OAU, Ile-Ife.
+                        For all musollahs at OAU, Ilé-Ifẹ̀.
                     </p>
                 </div>
 
@@ -236,7 +236,7 @@
 				<div class="absolute inset-0">
 					<img
 						src="/images/bg-1.webp"
-						alt="Central Mosque of Unity, OAU Ile-Ife"
+						alt="Central Mosque of Unity, OAU Ilé-Ifẹ̀"
 						loading="lazy"
 						class="w-full h-full object-cover object-center"
 					/>

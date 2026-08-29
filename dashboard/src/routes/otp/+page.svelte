@@ -119,7 +119,7 @@
 			</p>
 			<div class="mt-5 lg:mt-8 flex items-center justify-center gap-3">
 				<div class="h-px w-10 lg:w-12 bg-primary-400/40"></div>
-				<span class="text-primary-300 text-[10px] lg:text-xs font-semibold tracking-widest uppercase">Great Ife</span>
+				<span class="text-primary-300 text-[10px] lg:text-xs font-semibold tracking-widest uppercase">Great Ifẹ̀</span>
 				<div class="h-px w-10 lg:w-12 bg-primary-400/40"></div>
 			</div>
 		</div>

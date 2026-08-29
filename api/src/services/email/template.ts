@@ -50,7 +50,7 @@ export function emailFooter(): string {
 			<tr>
 				<td align="center" style="padding:20px 24px;">
 					<div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:11px; color:${BRAND.muted}; line-height:1.7;">
-						MSSN OAU Secretariat &middot; Fajuyi Hall &middot; Obafemi Awolowo University &middot; Ile-Ife, Osun State, Nigeria<br/>
+						MSSN OAU Secretariat &middot; Fajuyi Hall &middot; Obafemi Awolowo University &middot; Ilé-Ifẹ̀, Osun State, Nigeria<br/>
 						<a href="${EMAIL_SITE_URL}" style="color:${BRAND.primary}; text-decoration:none;">mssn-oau.vercel.app</a>
 					</div>
 				</td>
