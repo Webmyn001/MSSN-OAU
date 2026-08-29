@@ -2,7 +2,7 @@
     import { Image } from '$lib/components/ui/image';
     import { fly, scale } from 'svelte/transition';
     import { onMount } from 'svelte';
-    import { GraduationCap, ArrowRight, Phone, Mail, MessageSquareText, Smartphone, X } from '@lucide/svelte';
+    import { GraduationCap, ArrowRight, Mail, MessageSquareText, X } from '@lucide/svelte';
     import { browser } from '$app/environment';
     import { API_BASE } from '$lib/api/base';
 
@@ -229,24 +229,12 @@
                 <div class="space-y-2 text-xs border-t pt-3">
                     {#if selectedMember.phone}
                         <a
-                            href={`tel:${selectedMember.phone}`}
-                            class="flex items-center text-green-700 hover:underline justify-start font-medium"
-                        >
-                            <Phone class="h-4 w-4 mr-2.5 shrink-0 text-green-600" /> Call: {selectedMember.phone}
-                        </a>
-                        <a
                             href={`https://wa.me/${selectedMember.phone.replace(/\D/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             class="flex items-center text-green-700 hover:underline justify-start font-medium"
                         >
                             <MessageSquareText class="h-4 w-4 mr-2.5 shrink-0 text-green-600" /> Chat on WhatsApp
-                        </a>
-                        <a
-                            href={`sms:${selectedMember.phone}`}
-                            class="flex items-center text-green-700 hover:underline justify-start font-medium"
-                        >
-                            <Smartphone class="h-4 w-4 mr-2.5 shrink-0 text-green-600" /> Send SMS
                         </a>
                     {/if}
                     {#if selectedMember.email}

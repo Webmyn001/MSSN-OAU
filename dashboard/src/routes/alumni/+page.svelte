@@ -274,7 +274,7 @@
 									{/if}
 									<div class="flex flex-wrap gap-1.5 mt-1.5">
 										{#if member?.phone}
-											<a href={`tel:${member.phone}`} class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200 hover:bg-green-100">Call</a>
+											<a href={`https://wa.me/${member.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200 hover:bg-green-100">Chat</a>
 										{/if}
 										{#if member?.email}
 											<a href={`mailto:${member.email}`} class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200 hover:bg-green-100">Email</a>

@@ -3,7 +3,7 @@
     import SEO from '$lib/components/SEO.svelte';
     import { fly } from 'svelte/transition';
     import { onMount } from 'svelte';
-    import { GraduationCap, Phone, Mail, MessageSquareText, Smartphone, X } from '@lucide/svelte';
+    import { GraduationCap, Mail, MessageSquareText, X } from '@lucide/svelte';
     import { browser } from '$app/environment';
     import { API_BASE } from '$lib/api/base';
 
@@ -147,8 +147,8 @@
                                             {/if}
                                             <div class="flex flex-wrap gap-1.5 mt-1.5">
                                                 {#if member?.phone}
-                                                    <a href={`tel:${member.phone}`} onclick={(e) => e.stopPropagation()}
-                                                        class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200 hover:bg-green-100 no-underline">Call</a>
+                                                    <a href={`https://wa.me/${member.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" onclick={(e) => e.stopPropagation()}
+                                                        class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200 hover:bg-green-100 no-underline">Chat</a>
                                                 {/if}
                                                 {#if member?.email}
                                                     <a href={`mailto:${member.email}`} onclick={(e) => e.stopPropagation()}
@@ -213,14 +213,8 @@
 
                 <div class="space-y-2 text-xs border-t pt-3">
                     {#if selectedMember.phone}
-                        <a href={`tel:${selectedMember.phone}`} class="flex items-center text-green-700 hover:underline justify-start font-medium">
-                            <Phone class="h-4 w-4 mr-2.5 shrink-0 text-green-600" /> Call: {selectedMember.phone}
-                        </a>
                         <a href={`https://wa.me/${selectedMember.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" class="flex items-center text-green-700 hover:underline justify-start font-medium">
                             <MessageSquareText class="h-4 w-4 mr-2.5 shrink-0 text-green-600" /> Chat on WhatsApp
-                        </a>
-                        <a href={`sms:${selectedMember.phone}`} class="flex items-center text-green-700 hover:underline justify-start font-medium">
-                            <Smartphone class="h-4 w-4 mr-2.5 shrink-0 text-green-600" /> Send SMS
                         </a>
                     {/if}
                     {#if selectedMember.email}
