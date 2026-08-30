@@ -17,8 +17,8 @@ const BRAND = {
 
 // Logo asset deployed alongside the marketing site. PNG is used for maximum
 // email client compatibility (Outlook/GMail render webp inconsistently).
-export const EMAIL_LOGO_URL = 'https://mssn-oau.vercel.app/mssn-logo.png'
-export const EMAIL_SITE_URL = 'https://mssn-oau.vercel.app'
+export const EMAIL_LOGO_URL = 'https://mssnoau.org/mssn-logo.png'
+export const EMAIL_SITE_URL = 'https://mssnoau.org'
 
 export function emailHeader(title: string): string {
 	return `
@@ -51,7 +51,7 @@ export function emailFooter(): string {
 				<td align="center" style="padding:20px 24px;">
 					<div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:11px; color:${BRAND.muted}; line-height:1.7;">
 						MSSN OAU Secretariat &middot; Fajuyi Hall &middot; Obafemi Awolowo University &middot; Ilé-Ifẹ̀, Osun State, Nigeria<br/>
-						<a href="${EMAIL_SITE_URL}" style="color:${BRAND.primary}; text-decoration:none;">mssn-oau.vercel.app</a>
+						<a href="${EMAIL_SITE_URL}" style="color:${BRAND.primary}; text-decoration:none;">mssnoau.org</a>
 					</div>
 				</td>
 			</tr>
