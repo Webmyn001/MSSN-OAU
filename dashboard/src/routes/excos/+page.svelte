@@ -47,6 +47,10 @@
 	let formModalMode = $state<'add' | 'edit'>('add');
 	let editingMemberId = $state<string | null>(null);
 
+	// Add New Session Modal State
+	let isSessionModalOpen = $state<boolean>(false);
+	let newSessionValue = $state<string>('');
+
 	// Form fields
 	let formSession = $state<string>('');
 	let formCommittee = $state<string>('Executive Council');
@@ -99,6 +103,16 @@
 	const currentSessionObj = $derived(
 		excosData.sessions.find((s) => s.session === selectedSession)
 	);
+
+	// Available academic sessions as dropdown suggestions (matching alumni page pattern)
+	const currentYear = new Date().getFullYear();
+	const sessionOptions = $derived.by(() => {
+		const options: string[] = [];
+		for (let y = currentYear + 1; y >= 2015; y--) {
+			options.push(`${y}/${y + 1}`);
+		}
+		return options;
+	});
 
 	// Available committees in selected session
 	const availableCommittees = $derived(() => {
@@ -321,6 +335,47 @@
 		if (successMsg) toast('success', successMsg);
 	}
 
+	// Open Modal to create a brand-new empty session (previous sessions stay untouched)
+	function openAddSession() {
+		const nextYear = new Date().getFullYear();
+		newSessionValue = `${nextYear}/${nextYear + 1}`;
+		isSessionModalOpen = true;
+	}
+
+	// Save new empty session
+	async function handleSaveSession(e: Event) {
+		e.preventDefault();
+		const session = newSessionValue.trim();
+		if (!session) {
+			toast('error', 'Session is required.');
+			return;
+		}
+		if (excosData.sessions.some((s) => s.session === session)) {
+			toast('error', `The ${session} session already exists.`);
+			return;
+		}
+		const startYear = parseInt(session.split('/')[0]) || new Date().getFullYear();
+		const dataCopy: ExcosData = JSON.parse(JSON.stringify(excosData));
+		dataCopy.sessions.unshift({
+			session,
+			start_year: startYear,
+			end_year: startYear + 1,
+			executives: []
+		});
+		excosData = dataCopy;
+		sortSessionsNewestFirst();
+		selectedSession = session;
+		selectedCommittee = 'All';
+		jsonText = JSON.stringify(excosData, null, 2);
+		isSessionModalOpen = false;
+
+		isSaving = true;
+		toast('success', 'Saving & syncing to marketing site…');
+		await saveExcosData(excosData);
+		isSaving = false;
+		toast('success', `✅ New ${session} session created — previous sessions unchanged. Add executives to it now.`);
+	}
+
 	// Delete Member
 	function requestDeleteMember(committee: string, memberId: string, memberName: string) {
 		confirmState = {
@@ -456,18 +511,26 @@
 								<option value={sessionObj.session}>{sessionObj.session} Session</option>
 							{/each}
 						</select>
-						<button
-							onclick={requestDeleteSession}
-							disabled={excosData.sessions.length <= 1 || !selectedSession}
-							title="Delete this whole session (all committees & members)"
-							class="flex items-center gap-1.5 shrink-0 px-2.5 py-2 rounded-xl text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-						>
-							<Trash2 class="w-3.5 h-3.5" />
-							<span class="hidden sm:inline">Delete Session</span>
-						</button>
+<button
+						onclick={openAddSession}
+						title="Create a new academic session (previous sessions stay untouched)"
+						class="flex items-center gap-1.5 shrink-0 px-2.5 py-2 rounded-xl text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 transition-colors"
+					>
+						<Plus class="w-3.5 h-3.5" />
+						<span class="hidden sm:inline">Add Session</span>
+					</button>
+					<button
+						onclick={requestDeleteSession}
+						disabled={excosData.sessions.length <= 1 || !selectedSession}
+						title="Delete this whole session (all committees & members)"
+						class="flex items-center gap-1.5 shrink-0 px-2.5 py-2 rounded-xl text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+					>
+						<Trash2 class="w-3.5 h-3.5" />
+						<span class="hidden sm:inline">Delete Session</span>
+					</button>
 					</div>
 					<p class="text-[11px] text-gray-500 mt-1.5">
-						Switch sessions above to view or manage executives from previous years.
+						Add a new session to start a new exco year, or switch between sessions above to manage executives from previous years.
 					</p>
 				</div>
 
@@ -747,8 +810,14 @@
 							required
 							placeholder="2024/2025"
 							bind:value={formSession}
+							list="exco-session-datalist"
 							class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
 						/>
+						<datalist id="exco-session-datalist">
+{#each sessionOptions as opt}
+								<option value={opt}></option>
+							{/each}
+						</datalist>
 					</div>
 
 					<div>
@@ -868,6 +937,62 @@
 						class="px-5 py-2 rounded-full bg-green-700 hover:bg-green-800 text-white font-bold shadow-md"
 					>
 						Save Member
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!-- MODAL 3: ADD NEW SESSION (KEEPS PREVIOUS SESSIONS INTACT) -->
+{#if isSessionModalOpen}
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+		<div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-gray-100 text-xs">
+			<div class="flex items-center justify-between pb-3 border-b border-gray-100">
+				<h3 class="text-base font-bold text-green-950 flex items-center gap-2">
+					<Plus class="w-5 h-5 text-green-700" />
+					Add New Session
+				</h3>
+				<button onclick={() => (isSessionModalOpen = false)} class="text-gray-400 hover:text-gray-700">
+					<X class="w-5 h-5" />
+				</button>
+			</div>
+
+			<form onsubmit={handleSaveSession} class="space-y-3">
+				<div>
+					<label for="new-session" class="block font-semibold text-gray-700 mb-1">Academic Session *</label>
+					<input
+						id="new-session"
+						type="text"
+						required
+						placeholder="e.g. 2025/2026"
+						bind:value={newSessionValue}
+						list="exco-session-datalist"
+						class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
+					/>
+					<datalist id="exco-session-datalist">
+						{#each sessionOptions as opt}
+							<option value={opt}></option>
+						{/each}
+					</datalist>
+					<p class="text-[11px] text-gray-500 mt-1.5">
+						Creates a new empty session for its own exco year. All previous sessions remain untouched.
+					</p>
+				</div>
+
+				<div class="flex items-center justify-end space-x-2 pt-3 border-t border-gray-100">
+					<button
+						type="button"
+						onclick={() => (isSessionModalOpen = false)}
+						class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 font-semibold"
+					>
+						Cancel
+					</button>
+					<button
+						type="submit"
+						class="px-5 py-2 rounded-full bg-green-700 hover:bg-green-800 text-white font-bold shadow-md"
+					>
+						Create Session
 					</button>
 				</div>
 			</form>
