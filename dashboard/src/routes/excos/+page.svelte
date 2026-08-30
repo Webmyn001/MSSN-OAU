@@ -71,7 +71,9 @@
 		open: boolean;
 		title: string;
 		message: string;
-		action: () => Promise<void>;
+		confirmLabel?: string;
+		cancelLabel?: string;
+		action: () => Promise<void> | void;
 	} | null>(null);
 
 	onMount(async () => {
@@ -170,29 +172,72 @@
 
 	// --- Actions & Handlers ---
 
-	// Apply & Save JSON
-	async function handleApplyJson() {
+	// Apply & Save JSON - validates first, then confirms before replacing the whole dataset
+	function requestApplyJson() {
 		jsonError = null;
+		let parsed: any;
 		try {
-			const parsed = JSON.parse(jsonText);
+			parsed = JSON.parse(jsonText);
 			if (!parsed || !Array.isArray(parsed.sessions) || parsed.sessions.length === 0) {
 				throw new Error('Invalid JSON: Must contain a "sessions" array with executive data.');
 			}
+		} catch (err: any) {
+			jsonError = err.message || 'Invalid JSON format';
+			toast('error', `JSON Error: ${jsonError}`);
+			return;
+		}
+
+		const newSessions: string[] = parsed.sessions.map((s: any) => String(s?.session)).filter(Boolean);
+		const existingSessions: string[] = excosData.sessions.map((s) => s.session).filter(Boolean);
+		const removed = existingSessions.filter((s) => !newSessions.includes(s));
+		const added = newSessions.filter((s) => !existingSessions.includes(s));
+
+		if (removed.length === 0 && added.length === 0) {
+			handleApplyJsonSave(parsed);
+			return;
+		}
+
+		confirmState = {
+			open: true,
+			title: removed.length > 0 ? 'This JSON will REMOVE sessions!' : 'Apply JSON?',
+			message:
+				removed.length > 0
+					? `Applying this JSON REPLACES the entire session list. ${removed.length} session(s) currently on the site will be REMOVED: ${removed.join(
+							', '
+					  )}. ${added.length > 0 ? `New session(s) added: ${added.join(', ')}. ` : ''}Make sure the JSON below includes every session you want to keep before continuing.`
+					: `This will add or update these session(s): ${added.join(', ')}. No current sessions will be removed. Continue?`,
+			confirmLabel: 'Yes, Apply & Save',
+			cancelLabel: 'No, Cancel',
+			action: () => handleApplyJsonSave(parsed)
+		};
+	}
+
+	// Actually apply & save a parsed JSON payload
+	async function handleApplyJsonSave(parsed: ExcosData) {
+		isSaving = true;
+		toast('success', 'Saving & syncing to marketing site…');
+		try {
 			excosData = parsed;
 			sortSessionsNewestFirst();
 			if (excosData.sessions.length > 0 && !excosData.sessions.some((s) => s.session === selectedSession)) {
 				selectedSession = excosData.sessions[0].session;
 			}
-			isSaving = true;
-			toast('success', 'Saving & syncing to marketing site…');
+			jsonText = JSON.stringify(excosData, null, 2);
 			await saveExcosData(parsed);
-			isSaving = false;
 			toast('success', '✅ JSON saved & synced! The marketing site will now reflect these changes.');
 		} catch (err: any) {
 			isSaving = false;
 			jsonError = err.message || 'Invalid JSON format';
 			toast('error', `JSON Error: ${jsonError}`);
 		}
+		isSaving = false;
+	}
+
+	// Reset the JSON editor back to the current live data (discards any stale paste)
+	function resetJsonToCurrent() {
+		jsonText = JSON.stringify(excosData, null, 2);
+		jsonError = null;
+		toast('success', 'JSON editor reset to the current live data.');
 	}
 
 	// Reset dataset to empty
@@ -672,13 +717,29 @@
 
 					<div class="flex items-center space-x-2">
 						<button
-							onclick={handleApplyJson}
+							onclick={resetJsonToCurrent}
+							class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-full text-xs font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-all shadow-sm"
+							title="Reload the editor with the current live data (discards any stale paste)"
+						>
+							<RotateCcw class="w-4 h-4" />
+							<span>Reset to Current</span>
+						</button>
+						<button
+							onclick={requestApplyJson}
 							class="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full text-xs font-bold bg-green-700 hover:bg-green-800 text-white shadow-md transition-all"
+							title="Validates the JSON, then asks for confirmation before replacing the session list"
 						>
 							<Save class="w-4 h-4" />
 							<span>Apply & Save JSON</span>
 						</button>
 					</div>
+				</div>
+
+				<div class="p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 text-xs flex items-start space-x-2">
+					<AlertCircle class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+					<span>
+						<strong>Heads up:</strong> Applying JSON REPLACES the entire session list with exactly what's in the box below. Any session not present here will be removed from the site — before applying, you'll be asked to confirm. Use "Reset to Current" if you've pasted stale data.
+					</span>
 				</div>
 
 				{#if jsonError}
@@ -1005,8 +1066,8 @@
 	open={confirmState?.open ?? false}
 	title={confirmState?.title ?? 'Are you sure?'}
 	message={confirmState?.message ?? ''}
-	confirmLabel="Yes, Delete"
-	cancelLabel="No, Cancel"
+	confirmLabel={confirmState?.confirmLabel ?? 'Yes, Delete'}
+	cancelLabel={confirmState?.cancelLabel ?? 'No, Cancel'}
 	onconfirm={() => {
 		const action = confirmState?.action;
 		confirmState = null;
