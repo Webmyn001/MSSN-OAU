@@ -41,6 +41,9 @@
 	// JSON Editor State
 	let jsonText = $state<string>('');
 	let jsonError = $state<string | null>(null);
+	// When false (default), JSON applies MERGE into current sessions (nothing is removed).
+	// When true, JSON replaces ALL sessions (advanced).
+	let jsonReplaceMode = $state(false);
 
 	// Member Add/Edit Form Modal State
 	let isFormModalOpen = $state<boolean>(false);
@@ -172,62 +175,107 @@
 
 	// --- Actions & Handlers ---
 
-	// Apply & Save JSON - validates first, then confirms before replacing the whole dataset
+	// Accept either { "sessions": [...] }, a single session object, or a bare array of sessions
+	function toSessionArray(parsed: any): any[] {
+		if (!parsed) return [];
+		if (Array.isArray(parsed.sessions)) return parsed.sessions;
+		if (Array.isArray(parsed)) return parsed;
+		if (parsed.session && Array.isArray(parsed.executives)) return [parsed];
+		return [];
+	}
+
+	// Apply & Save JSON - validates first, then confirms the plan before saving.
+	// Default mode merges: existing sessions are always kept, pasted sessions are added/updated.
 	function requestApplyJson() {
 		jsonError = null;
 		let parsed: any;
 		try {
 			parsed = JSON.parse(jsonText);
-			if (!parsed || !Array.isArray(parsed.sessions) || parsed.sessions.length === 0) {
-				throw new Error('Invalid JSON: Must contain a "sessions" array with executive data.');
-			}
 		} catch (err: any) {
 			jsonError = err.message || 'Invalid JSON format';
 			toast('error', `JSON Error: ${jsonError}`);
 			return;
 		}
 
-		const newSessions: string[] = parsed.sessions.map((s: any) => String(s?.session)).filter(Boolean);
-		const existingSessions: string[] = excosData.sessions.map((s) => s.session).filter(Boolean);
-		const removed = existingSessions.filter((s) => !newSessions.includes(s));
-		const added = newSessions.filter((s) => !existingSessions.includes(s));
-
-		if (removed.length === 0 && added.length === 0) {
-			handleApplyJsonSave(parsed);
+		const incoming = toSessionArray(parsed).filter((s) => s?.session?.trim());
+		if (incoming.length === 0) {
+			jsonError =
+				'No sessions found in the JSON. Paste a session block like { "session": "2025/2026", "executives": [...] } or { "sessions": [ ... ] }.';
+			toast('error', `JSON Error: ${jsonError}`);
 			return;
 		}
 
+		const newNames: string[] = incoming.map((s) => String(s.session).trim());
+		const existingNames: string[] = excosData.sessions.map((s) => s.session);
+		const added = newNames.filter((s) => !existingNames.includes(s));
+		const updated = newNames.filter((s) => existingNames.includes(s));
+		const removed = jsonReplaceMode ? existingNames.filter((s) => !newNames.includes(s)) : [];
+
+		if (!jsonReplaceMode && updated.length === 0 && added.length === 0) {
+			toast('success', 'The JSON matches the current data — nothing to change.');
+			return;
+		}
+
+		const message = jsonReplaceMode
+			? `${removed.length > 0 ? `⚠ ${removed.length} current session(s) will be REMOVED: ${removed.join(', ')}. ` : ''}${
+					added.length > 0 ? `New session(s) added: ${added.join(', ')}. ` : ''
+				}${updated.length > 0 ? `Updated: ${updated.join(', ')}.` : ''}Only sessions in the JSON box will remain.`
+			: `Existing sessions are kept. Added: ${added.length > 0 ? added.join(', ') : 'none'}. ${
+					updated.length > 0 ? `Updated (roster replaced): ${updated.join(', ')}.` : ''
+				} Continue?`;
+
 		confirmState = {
 			open: true,
-			title: removed.length > 0 ? 'This JSON will REMOVE sessions!' : 'Apply JSON?',
-			message:
-				removed.length > 0
-					? `Applying this JSON REPLACES the entire session list. ${removed.length} session(s) currently on the site will be REMOVED: ${removed.join(
-							', '
-					  )}. ${added.length > 0 ? `New session(s) added: ${added.join(', ')}. ` : ''}Make sure the JSON below includes every session you want to keep before continuing.`
-					: `This will add or update these session(s): ${added.join(', ')}. No current sessions will be removed. Continue?`,
-			confirmLabel: 'Yes, Apply & Save',
+			title: jsonReplaceMode && removed.length > 0 ? 'This will REMOVE sessions!' : 'Apply JSON?',
+			message,
+			confirmLabel: jsonReplaceMode ? 'Yes, Apply & Save' : 'Yes, Merge & Save',
 			cancelLabel: 'No, Cancel',
 			action: () => handleApplyJsonSave(parsed)
 		};
 	}
 
-	// Actually apply & save a parsed JSON payload
-	async function handleApplyJsonSave(parsed: ExcosData) {
+	// Merge/replace parsed sessions into the current data, then sync to the marketing site
+	async function handleApplyJsonSave(parsed: any) {
+		const incoming = toSessionArray(parsed).filter((s) => s?.session?.trim());
+		if (incoming.length === 0) return;
 		isSaving = true;
 		toast('success', 'Saving & syncing to marketing site…');
 		try {
-			excosData = parsed;
+			// Start from the CURRENT live data so other sessions are never lost
+			const dataCopy: ExcosData = JSON.parse(JSON.stringify(excosData));
+
+			const keep = new Set<string>();
+			for (const s of incoming) {
+				const session = String(s.session).trim();
+				const startYear = parseInt(String(s.start_year)) || parseInt(session.split('/')[0]) || new Date().getFullYear();
+				const sessionObj: ExecutiveSession = {
+					session,
+					start_year: startYear,
+					end_year: parseInt(String(s.end_year)) || startYear + 1,
+					executives: Array.isArray(s.executives) ? s.executives : []
+				};
+				const idx = dataCopy.sessions.findIndex((x) => x.session === session);
+				if (idx === -1) dataCopy.sessions.push(sessionObj);
+				else dataCopy.sessions[idx] = sessionObj;
+				keep.add(session);
+			}
+
+			// Advanced replace mode: drop anyone not mentioned in the JSON
+			if (jsonReplaceMode) {
+				dataCopy.sessions = dataCopy.sessions.filter((s) => keep.has(s.session));
+			}
+
+			excosData = dataCopy;
 			sortSessionsNewestFirst();
 			if (excosData.sessions.length > 0 && !excosData.sessions.some((s) => s.session === selectedSession)) {
 				selectedSession = excosData.sessions[0].session;
 			}
+			selectedCommittee = 'All';
 			jsonText = JSON.stringify(excosData, null, 2);
-			await saveExcosData(parsed);
-			toast('success', '✅ JSON saved & synced! The marketing site will now reflect these changes.');
+			await saveExcosData(excosData);
+			toast('success', '✅ JSON applied & synced! Existing sessions were kept.');
 		} catch (err: any) {
-			isSaving = false;
-			jsonError = err.message || 'Invalid JSON format';
+			jsonError = err.message || 'Failed to apply JSON';
 			toast('error', `JSON Error: ${jsonError}`);
 		}
 		isSaving = false;
@@ -708,10 +756,10 @@
 					<div>
 						<h3 class="text-sm font-bold text-green-950 flex items-center gap-2">
 							<FileCode class="w-4 h-4 text-green-700" />
-							JSON Raw Data Editor
+							JSON Bulk Input (adds, never removes)
 						</h3>
 						<p class="text-xs text-gray-500">
-							Paste or edit the complete JSON payload, then click "Apply & Save JSON" to sync it to the site.
+							Paste one session block (e.g. <code class="bg-gray-100 px-1 rounded">&#123; "session": "2025/2026", "executives": [...] &#125;</code>) or <code class="bg-gray-100 px-1 rounded">&#123; "sessions": [...] &#125;</code>, then Apply. It is added to or updates the current sessions — everything else is kept.
 						</p>
 					</div>
 
@@ -738,9 +786,14 @@
 				<div class="p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 text-xs flex items-start space-x-2">
 					<AlertCircle class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
 					<span>
-						<strong>Heads up:</strong> Applying JSON REPLACES the entire session list with exactly what's in the box below. Any session not present here will be removed from the site — before applying, you'll be asked to confirm. Use "Reset to Current" if you've pasted stale data.
+						<strong>Default = merge:</strong> sessions already on the site are always kept. A pasted session is added (or replaces that same session's roster). Tick the box below only if you intentionally want to replace ALL sessions.
 					</span>
 				</div>
+
+				<label class="flex items-center gap-2 text-[11px] font-semibold text-amber-900 cursor-pointer select-none">
+					<input type="checkbox" bind:checked={jsonReplaceMode} class="accent-amber-600" />
+					Replace ALL sessions with the JSON above (advanced — removes anything not listed)
+				</label>
 
 				{#if jsonError}
 					<div class="p-3 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs flex items-center space-x-2">
