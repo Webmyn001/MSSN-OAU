@@ -229,7 +229,7 @@ export function ApplicationForm({
 							id="almh-masar"
 							name="masar"
 							required
-							className={inputClass}
+							className="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm appearance-none bg-white"
 							value={formData.masar}
 							onChange={(e) => update("masar", e.target.value)}
 						>

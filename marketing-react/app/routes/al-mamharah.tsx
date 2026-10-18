@@ -189,40 +189,24 @@ export default function AlMamharahPage() {
 					</div>
 
 					<div id="join" className="mt-14">
-						<Tabs value={tab} onValueChange={setTab}>
-							<TabsList className="mx-auto grid !h-auto w-full max-w-md grid-cols-2 gap-1 p-1">
-								<TabsTrigger
-									value="apply"
-									className="!h-auto !whitespace-normal px-2 py-2.5 text-center"
-								>
-									Apply
-								</TabsTrigger>
-								<TabsTrigger
-									value="enter"
-									className="!h-auto !whitespace-normal px-2 py-2.5 text-center"
-								>
-									<span className="flex flex-col items-center gap-0.5 leading-tight">
-										<span>Enter Programme</span>
-										<Arabic className="text-xs font-normal text-primary-600 sm:text-sm">
-											{ARABIC.enterProgramme}
-										</Arabic>
-									</span>
-								</TabsTrigger>
-							</TabsList>
-							<TabsContent value="apply" className="mt-6">
-								<div className="mx-auto max-w-2xl">
-									<ApplicationForm />
-								</div>
-							</TabsContent>
-							<TabsContent value="enter" className="mt-6">
-								<div className="mx-auto max-w-md">
-									<EnterProgramme />
-								</div>
-							</TabsContent>
-						</Tabs>
+						<div className="mx-auto mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
+							<a
+								href="#enter-programme"
+								className="inline-flex flex-col items-center gap-1.5 rounded-full bg-primary-700 px-10 py-4 text-white shadow-lg transition-colors hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+							>
+								<span className="text-xl font-semibold">Enter Programme</span>
+								<Arabic className="text-base font-medium text-white/90">{ARABIC.enterProgramme}</Arabic>
+							</a>
+						</div>
+						<div className="mx-auto max-w-2xl">
+							<ApplicationForm />
+						</div>
+						<div id="enter-programme" className="mx-auto mt-10 max-w-md">
+							<EnterProgramme />
+						</div>
 					</div>
 
-					<div className="mt-14 rounded-xl border border-primary-100 bg-primary-50/50 p-6">
+<div className="mt-14 rounded-xl border border-primary-100 bg-primary-50/50 p-6">
 						<h2 className="flex items-center gap-2 font-secondary text-lg font-semibold text-primary-800">
 							<Phone className="size-5" />
 							Need help?
