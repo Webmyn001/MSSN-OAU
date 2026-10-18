@@ -20,7 +20,12 @@ export async function adminAuthMiddleware(c: Context, next: Next) {
 		path === '/health' ||
 		path.startsWith('/public/') ||
 		path.startsWith('/admin-auth/') ||
-		path.startsWith('/auth/')
+		path.startsWith('/auth/') ||
+		// * Al-Mamharah routes enforce their own participant/manager auth.
+		// * Manager tokens are signed with a different secret, so they can never
+		// * be used to authenticate site-admin operations.
+		path === '/al-mamharah' ||
+		path.startsWith('/al-mamharah/')
 	) {
 		return next()
 	}

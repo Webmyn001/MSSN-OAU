@@ -62,7 +62,14 @@ const envSchema = z.object({
 	TWITTER_ACCESS_SECRET: z.string().optional(),
 	INSTAGRAM_ACCESS_TOKEN: z.string().optional(),
 	LINKEDIN_CLIENT_ID: z.string().optional(),
-	LINKEDIN_CLIENT_SECRET: z.string().optional()
+	LINKEDIN_CLIENT_SECRET: z.string().optional(),
+
+	// * Al-Mamharah programme (all optional — the primary manager can also be
+	// * bootstrapped in the database, and the JWT secret falls back to JWT_SECRET)
+	AL_MAMHARAH_MANAGER_EMAIL: z.string().email().optional(),
+	AL_MAMHARAH_MANAGER_PASSWORD: z.string().min(8).optional(),
+	AL_MAMHARAH_MANAGER_JWT_SECRET: z.string().min(16).optional(),
+	AL_MAMHARAH_SITE_URL: z.string().url().optional().default('https://mssnoau.org')
 })
 
 // * Infer the type from the schema

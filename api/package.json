@@ -20,7 +20,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test:db:up": "bun run scripts/test-cluster.ts up",
+    "test:db:down": "bun run scripts/test-cluster.ts down",
+    "test:al-mamharah": "bun run scripts/test-cluster.ts run"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",

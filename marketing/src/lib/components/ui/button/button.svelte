@@ -31,7 +31,7 @@
 	import { cn } from "$lib/utils.js";
 
 	let {
-		class: className,
+		class: className = "",
 		variant = "default",
 		size = "default",
 		ref = $bindable(null),

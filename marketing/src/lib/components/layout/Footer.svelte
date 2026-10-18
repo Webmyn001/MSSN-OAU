@@ -62,6 +62,9 @@
                            href="/programmes">Programmes</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
+                           href="/al-mamharah">Al-Mamharah</a></p>
+                    <p>
+                        <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
                             href="/events">Events</a></p>
                     <p>
                         <a class="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"

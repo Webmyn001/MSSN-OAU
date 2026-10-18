@@ -112,6 +112,9 @@ import publicAdvisorsRoute from './routes/public-advisors'
 import publicContactRoute from './routes/public-contact'
 import publicSuggestionRoute from './routes/public-suggestions'
 import adminAuthRoutes from './routes/admin-auth'
+import publicAlMamharahRoute from './routes/public-al-mamharah'
+import alMamharahParticipantRoute from './routes/al-mamharah-participant'
+import alMamharahManagerRoute from './routes/al-mamharah-manager'
 
 app.route('/admin-auth', adminAuthRoutes)
 app.route('/auth', authRoutes)
@@ -133,6 +136,9 @@ app.route('/public/alumni', publicAlumniRoute)
 app.route('/public/advisors', publicAdvisorsRoute)
 app.route('/public/contact', publicContactRoute)
 app.route('/public/suggestions', publicSuggestionRoute)
+app.route('/public/al-mamharah', publicAlMamharahRoute)
+app.route('/al-mamharah/participant', alMamharahParticipantRoute)
+app.route('/al-mamharah/manager', alMamharahManagerRoute)
 
 export default app
 

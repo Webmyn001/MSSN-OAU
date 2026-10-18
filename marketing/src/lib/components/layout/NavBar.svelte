@@ -235,6 +235,10 @@
 
                                         <div class="flex flex-col space-y-1 mt-3 lg:mt-0">
                                             <div class="px-3 py-2 text-xs font-semibold text-primary-600 uppercase tracking-wider">Resources</div>
+                                            <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/al-mamharah">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                                Al-Mamharah
+                                            </a>
                                             <a class="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors" href="/annual-dues">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 me-2 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                                                 Annual Dues

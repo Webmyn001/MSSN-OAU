@@ -17,5 +17,6 @@ export * from './newsletter'
 export * from './latest-news'
 export * from './blog-posts'
 export * from './programmes'
+export * from './al-mamharah'
 
 
