@@ -64,13 +64,13 @@ function NotFound() {
 			<div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
 			<div className="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
 			<div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-				<a
-					href="/events"
+				<Link
+					to="/events"
 					className="inline-flex items-center gap-2 text-sm text-primary-700 hover:text-primary-900 transition-colors mb-8"
 				>
 					<ArrowLeft className="h-4 w-4" />
 					Back to all events
-				</a>
+				</Link>
 				<div className="animate-fade-in">
 					<div className="flex flex-col items-center justify-center py-12">
 						<div className="bg-white/80 backdrop-blur-sm rounded-xl border border-primary-100 shadow p-8 text-center max-w-md w-full mx-auto">
@@ -83,7 +83,7 @@ function NotFound() {
 								removed or the URL might be incorrect.
 							</p>
 							<Button asChild variant="outline">
-								<a href="/events">Browse All Events</a>
+								<Link to="/events">Browse All Events</Link>
 							</Button>
 						</div>
 					</div>
@@ -190,13 +190,13 @@ export default function EventDetailPage() {
 				<div className="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl"></div>
 
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-					<a
-						href="/events"
+					<Link
+						to="/events"
 						className="inline-flex items-center gap-2 text-sm text-primary-700 hover:text-primary-900 transition-colors mb-8"
 					>
 						<ArrowLeft className="h-4 w-4" />
 						Back to all events
-					</a>
+					</Link>
 
 					<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 						<div className="lg:col-span-2 space-y-8">

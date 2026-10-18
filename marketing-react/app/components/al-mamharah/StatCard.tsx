@@ -1,3 +1,5 @@
+import { Arabic } from "./Arabic";
+
 type Tone = "primary" | "amber" | "emerald" | "slate" | "rose";
 
 const tones: Record<Tone, string> = {
@@ -10,6 +12,7 @@ const tones: Record<Tone, string> = {
 
 interface StatCardProps {
 	label: string;
+	labelAr?: string;
 	value: string | number;
 	hint?: string;
 	tone?: Tone;
@@ -18,10 +21,11 @@ interface StatCardProps {
 /**
  * Small metric tile used across the dashboard and manager overview.
  */
-export function StatCard({ label, value, hint = "", tone = "primary" }: StatCardProps) {
+export function StatCard({ label, labelAr = "", value, hint = "", tone = "primary" }: StatCardProps) {
 	return (
 		<div className={`rounded-xl border bg-gradient-to-br p-4 shadow-sm ${tones[tone]}`}>
 			<p className="text-xs font-medium uppercase tracking-wide opacity-80">{label}</p>
+			{labelAr ? <Arabic className="mt-0.5 block text-sm opacity-90">{labelAr}</Arabic> : null}
 			<p className="mt-1 font-secondary text-2xl font-bold">{value}</p>
 			{hint ? <p className="mt-0.5 text-xs opacity-70">{hint}</p> : null}
 		</div>

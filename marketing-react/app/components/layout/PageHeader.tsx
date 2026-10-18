@@ -3,15 +3,20 @@ import type { ReactNode } from "react";
 interface PageHeaderProps {
 	children?: ReactNode;
 	subtitle?: string;
+	allowOverflow?: boolean;
 }
 
 /**
  * Hero-style page header with a photo backdrop, gradient overlay, animated copy
  * and a decorative bottom curve.
  */
-export function PageHeader({ children, subtitle }: PageHeaderProps) {
+export function PageHeader({ children, subtitle, allowOverflow = false }: PageHeaderProps) {
 	return (
-		<div className="relative h-[20dvh] w-full overflow-hidden bg-[url('/images/bg-1.webp')] bg-cover bg-center bg-no-repeat sm:h-[30dvh] lg:h-[40dvh]">
+		<div
+			className={`relative h-[20dvh] w-full bg-[url('/images/bg-1.webp')] bg-cover bg-center bg-no-repeat sm:h-[30dvh] lg:h-[40dvh] ${
+				allowOverflow ? "overflow-visible" : "overflow-hidden"
+			}`}
+		>
 			{/* Enhanced gradient overlay with animation */}
 			<div className="absolute inset-0 h-full w-full">
 				<div

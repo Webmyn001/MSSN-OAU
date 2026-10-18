@@ -13,7 +13,9 @@ import {
 	masarLabel,
 	formatDateTime,
 	applicationStatusLabel,
+	applicationStatusArabic,
 } from "~/lib/data/al-mamharah";
+import { Arabic } from "~/components/al-mamharah/Arabic";
 
 const selectClass =
 	"rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-600 focus:ring-primary-600";
@@ -172,6 +174,9 @@ export function ApplicationsPanel({ token, onExpired }: { token: string; onExpir
 												}`}
 											>
 												{applicationStatusLabel(item.status)}
+												<Arabic className="ms-1 tracking-normal">
+													{applicationStatusArabic(item.status)}
+												</Arabic>
 											</span>
 										</div>
 										<p className="mt-1 text-sm text-gray-600">

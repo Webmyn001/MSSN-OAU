@@ -1,4 +1,4 @@
-import { useRouteLoaderData } from "react-router";
+import { Link, useRouteLoaderData } from "react-router";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { Image } from "~/components/ui/image";
@@ -47,9 +47,9 @@ export default function LatestNewsPage() {
 					{items.length > 0 ? (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 							{items.map((item) => (
-								<a
+								<Link
 									key={item.id}
-									href={`/latest-news/${item.id}`}
+									to={`/latest-news/${item.id}`}
 									className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col animate-fade-in"
 								>
 									{item.image ? (
@@ -96,7 +96,7 @@ export default function LatestNewsPage() {
 											<ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
 										</span>
 									</div>
-								</a>
+								</Link>
 							))}
 						</div>
 					) : (

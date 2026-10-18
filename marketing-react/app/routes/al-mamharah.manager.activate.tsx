@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { Seo } from "~/components/seo";
 import { Button } from "~/components/ui/button";
 import { CheckCircle2, AlertCircle, Loader2, ShieldCheck, KeyRound } from "lucide-react";
@@ -102,7 +102,7 @@ export default function ManagerActivatePage() {
 							</p>
 							<div className="mt-6">
 								<Button asChild className="w-full">
-									<a href="/al-mamharah/manager">Go to Manager sign in</a>
+									<Link to="/al-mamharah/manager">Go to Manager sign in</Link>
 								</Button>
 							</div>
 						</div>
@@ -120,7 +120,7 @@ export default function ManagerActivatePage() {
 							</p>
 							<div className="mt-6">
 								<Button asChild variant="outline" className="w-full">
-									<a href="/al-mamharah/manager">Manager sign in</a>
+									<Link to="/al-mamharah/manager">Manager sign in</Link>
 								</Button>
 							</div>
 						</div>

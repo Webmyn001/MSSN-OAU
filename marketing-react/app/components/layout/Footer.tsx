@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { Image } from "~/components/ui/image";
 import { API_BASE } from "~/lib/api/base";
@@ -83,9 +84,9 @@ export function Footer() {
 
 				<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
 					<div className="col-span-full lg:col-span-1">
-						<a
+						<Link
 							className="flex-none text-xl font-semibold focus:outline-none focus:opacity-80 group"
-							href="/"
+							to="/"
 							aria-label="MSSNOAU Logo"
 						>
 							<div className="relative">
@@ -98,7 +99,7 @@ export function Footer() {
 								/>
 								<div className="absolute -bottom-2 left-0 w-1/2 h-1 bg-primary-600 rounded-full" />
 							</div>
-						</a>
+						</Link>
 
 						<p className="mt-6 text-gray-600 text-sm leading-relaxed">
 							The Muslim Students' Society of Nigeria (MSSN) at Obafemi Awolowo University (Great
@@ -115,12 +116,12 @@ export function Footer() {
 						<div className="mt-3 grid space-y-3 font-secondary">
 							{ABOUT_LINKS.map((link) => (
 								<p key={link.href}>
-									<a
+									<Link
 										className="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-										href={link.href}
+										to={link.href}
 									>
 										{link.label}
-									</a>
+									</Link>
 								</p>
 							))}
 						</div>
@@ -134,12 +135,23 @@ export function Footer() {
 						<div className="mt-3 grid space-y-3 font-secondary">
 							{QUICK_LINKS.map((link) => (
 								<p key={link.href}>
-									<a
-										className="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
-										href={link.href}
-									>
-										{link.label}
-									</a>
+									{link.href.startsWith("http") ? (
+										<a
+											className="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
+											href={link.href}
+											target="_blank"
+											rel="noreferrer"
+										>
+											{link.label}
+										</a>
+									) : (
+										<Link
+											className="inline-flex gap-x-2 text-gray-700 hover:text-primary-700 transition-colors"
+											to={link.href}
+										>
+											{link.label}
+										</Link>
+									)}
 								</p>
 							))}
 						</div>

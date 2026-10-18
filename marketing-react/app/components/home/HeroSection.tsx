@@ -36,8 +36,8 @@ export function HeroSection() {
 						className="text-primary-900 oau my-6 text-pretty text-4xl font-bold lg:text-6xl xl:text-7xl text-center tracking-tight"
 						id="hero-text"
 					>
-						<span>We are Great</span>
-						<span className="inline-block relative oau mt-2">
+						<span>We are Great</span>{" "}
+						<span className="relative inline-block oau">
 							<span className="relative z-10 yoruba text-[#28145B] inline-block">
 								Ifẹ̀&apos;s
 								<svg

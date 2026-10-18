@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { SITE_URL } from "~/lib/config";
@@ -68,12 +69,12 @@ export default function HowToRegisterPaidEventsPage() {
 					<p className="text-gray-700 font-tertiary leading-relaxed">
 						If at any point something does not look right, or you are unsure about a payment
 						request, please reach out through the{" "}
-						<a
-							href="/contact"
+						<Link
+							to="/contact"
 							className="text-primary-700 underline decoration-primary-300 hover:text-primary-800"
 						>
 							Contact Us
-						</a>{" "}
+						</Link>{" "}
 						page before proceeding.
 					</p>
 				</div>
@@ -85,12 +86,12 @@ export default function HowToRegisterPaidEventsPage() {
 						</h2>
 						<p className="text-gray-700 font-tertiary leading-relaxed">
 							Open the{" "}
-							<a
-								href="/events"
+							<Link
+								to="/events"
 								className="text-primary-700 underline decoration-primary-300 hover:text-primary-800"
 							>
 								Events
-							</a>{" "}
+							</Link>{" "}
 							page from the main navigation. This page lists all upcoming and recent
 							programmes organized by MSSN OAU.
 						</p>
@@ -258,12 +259,12 @@ export default function HowToRegisterPaidEventsPage() {
 						</li>
 						<li>
 							Or use the{" "}
-							<a
-								href="/contact"
+							<Link
+								to="/contact"
 								className="text-primary-700 underline decoration-primary-300 hover:text-primary-800"
 							>
 								Contact Us
-							</a>{" "}
+							</Link>{" "}
 							page to reach MSSN OAU directly.
 						</li>
 					</ul>

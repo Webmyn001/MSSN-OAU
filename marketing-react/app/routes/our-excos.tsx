@@ -105,6 +105,16 @@ export default function OurExcosPage() {
 		return () => document.removeEventListener("mousedown", onDocClick);
 	}, []);
 
+	useEffect(() => {
+		setSelectedCommittee(null);
+	}, [selectedSession]);
+
+	useEffect(() => {
+		if (!selectedSession && sessions.length > 0) {
+			setSelectedSession(sessions[0]?.session);
+		}
+	}, [sessions, selectedSession]);
+
 	const currentSession = selectedSession
 		? sessions.find((s) => s.session === selectedSession)
 		: undefined;
@@ -214,7 +224,10 @@ export default function OurExcosPage() {
 				]}
 			/>
 
-			<PageHeader subtitle="The student leaders steering MSSN OAU through this session — meet the hands on deck.">
+			<PageHeader
+				allowOverflow
+				subtitle="The student leaders steering MSSN OAU through this session — meet the hands on deck."
+			>
 				<div className="relative">
 					<h1 className="relative z-10 animate-fade-in">
 						Our Executives

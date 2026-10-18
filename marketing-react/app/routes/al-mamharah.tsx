@@ -14,11 +14,13 @@ import {
 	Sparkles,
 } from "lucide-react";
 import { getProgrammeInfo } from "~/lib/api/al-mamharah";
+import { Arabic } from "~/components/al-mamharah/Arabic";
 import {
 	PROGRAMME_INFO,
 	PROGRAMME_CONTACTS,
 	PROGRAMME_GUIDELINES,
 	MASAR_OPTIONS,
+	ARABIC,
 	formatISODate,
 	phaseLabel,
 } from "~/lib/data/al-mamharah";
@@ -107,6 +109,30 @@ export default function AlMamharahPage() {
 						<p className="mt-6 text-base leading-relaxed text-gray-700 sm:text-lg">
 							{PROGRAMME_INFO.description}
 						</p>
+						<Arabic className="mt-2 block text-lg font-medium text-primary-700">
+							{ARABIC.quranRevision}
+						</Arabic>
+					</div>
+
+					<div className="animate-fade-in mt-10 overflow-hidden rounded-2xl border border-primary-100 shadow-sm">
+						<div className="relative">
+							<img
+								src="/images/al-mamharah/mushaf.webp"
+								alt="An open Qur'an (mushaf) resting open"
+								className="h-52 w-full object-cover object-center sm:h-72 lg:h-80"
+								loading="lazy"
+								decoding="async"
+							/>
+							<div className="absolute inset-0 bg-gradient-to-t from-primary-950/75 via-primary-900/20 to-transparent" />
+							<div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+								<Arabic className="block text-xl font-semibold text-white sm:text-2xl">
+									{ARABIC.quranRevision}
+								</Arabic>
+								<p className="mt-1 text-sm text-white/85">
+									Qur'an revision &amp; retention — one day at a time.
+								</p>
+							</div>
+						</div>
 					</div>
 
 					<div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -133,6 +159,7 @@ export default function AlMamharahPage() {
 					<div className="mt-14">
 						<h2 className="text-center font-secondary text-xl font-bold text-primary-800 sm:text-2xl">
 							Choose your masār
+							<Arabic className="ms-2 font-normal text-primary-600">{ARABIC.masar}</Arabic>
 						</h2>
 						<p className="mx-auto mt-2 max-w-2xl text-center text-sm text-gray-600">
 							Your masār is your daily revision target for the programme. Pick the pace you can
@@ -163,9 +190,24 @@ export default function AlMamharahPage() {
 
 					<div id="join" className="mt-14">
 						<Tabs value={tab} onValueChange={setTab}>
-							<TabsList className="mx-auto grid w-full max-w-md grid-cols-2">
-								<TabsTrigger value="apply">Apply</TabsTrigger>
-								<TabsTrigger value="enter">Enter Programme</TabsTrigger>
+							<TabsList className="mx-auto grid !h-auto w-full max-w-md grid-cols-2 gap-1 p-1">
+								<TabsTrigger
+									value="apply"
+									className="!h-auto !whitespace-normal px-2 py-2.5 text-center"
+								>
+									Apply
+								</TabsTrigger>
+								<TabsTrigger
+									value="enter"
+									className="!h-auto !whitespace-normal px-2 py-2.5 text-center"
+								>
+									<span className="flex flex-col items-center gap-0.5 leading-tight">
+										<span>Enter Programme</span>
+										<Arabic className="text-xs font-normal text-primary-600 sm:text-sm">
+											{ARABIC.enterProgramme}
+										</Arabic>
+									</span>
+								</TabsTrigger>
 							</TabsList>
 							<TabsContent value="apply" className="mt-6">
 								<div className="mx-auto max-w-2xl">

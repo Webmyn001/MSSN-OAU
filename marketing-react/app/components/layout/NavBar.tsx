@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Image } from "~/components/ui/image";
 
 const NAV_LINKS = [
@@ -189,7 +189,7 @@ export function NavBar() {
 				<div className="relative lg:flex lg:items-center">
 					<div className="flex items-center justify-between w-full lg:w-auto">
 						<div className="relative flex items-center">
-							<a className="flex-none flex items-center gap-2 py-2" href="/" aria-label="MSSNOAU">
+							<Link className="flex-none flex items-center gap-2 py-2" to="/" aria-label="MSSNOAU">
 								<div className="relative">
 									<Image
 										src="/mssn-logo.webp"
@@ -205,7 +205,7 @@ export function NavBar() {
 								<span className="sr-only">
 									Muslim Students Society of Nigeria, OAU Branch
 								</span>
-							</a>
+							</Link>
 						</div>
 
 							<button
@@ -256,27 +256,27 @@ export function NavBar() {
 						>
 							<div className="flex flex-col gap-y-3 lg:gap-y-0 mt-5 lg:flex-row lg:items-center lg:justify-end lg:mt-0 lg:ps-5">
 								{NAV_LINKS.map((link) => (
-									<a
+									<Link
 										key={link.path}
 										className={`lg:px-3 lg:py-5 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center ${
 											isActive(link.path) ? "text-primary-700" : ""
 										}`}
-										href={link.path}
+										to={link.path}
 										aria-current={isActive(link.path) ? "page" : undefined}
 									>
 										<span>{link.label}</span>
 										{isActive(link.path) ? (
 											<div className="absolute bottom-0 left-0 w-full h-1 bg-primary-600 hidden lg:block" />
 										) : null}
-									</a>
+									</Link>
 								))}
 
-								<a
+								<Link
 									className="lg:px-3 lg:py-5 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center"
-									href="/#prayer-times"
+									to="/#prayer-times"
 								>
 									<span>Prayer Times</span>
-								</a>
+								</Link>
 
 								<div className="relative" ref={dropdownRef}>
 									<button
@@ -320,14 +320,14 @@ export function NavBar() {
 															{group.title}
 														</div>
 														{group.links.map((item) => (
-															<a
+															<Link
 																key={item.href}
 																className="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors"
-																href={item.href}
+																to={item.href}
 															>
 																{item.icon}
 																{item.label}
-															</a>
+															</Link>
 														))}
 													</div>
 												))}
@@ -338,18 +338,18 @@ export function NavBar() {
 									) : null}
 								</div>
 
-								<a
+								<Link
 									className={`lg:px-3 lg:py-5 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center ${
 										isActive("/contact") ? "text-primary-700" : ""
 									}`}
-									href="/contact"
+									to="/contact"
 									aria-current={isActive("/contact") ? "page" : undefined}
 								>
 									<span>Contact Us</span>
 									{isActive("/contact") ? (
 										<div className="absolute bottom-0 left-0 w-full h-1 bg-primary-600 hidden lg:block" />
 									) : null}
-								</a>
+								</Link>
 							</div>
 						</div>
 					) : null}

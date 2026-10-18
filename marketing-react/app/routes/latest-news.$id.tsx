@@ -1,4 +1,4 @@
-import { useParams, useRouteLoaderData } from "react-router";
+import { Link, useParams, useRouteLoaderData } from "react-router";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { Calendar, User, Tag, ArrowLeft } from "lucide-react";
@@ -29,9 +29,9 @@ export default function LatestNewsDetailPage() {
 				<PageHeader>Not Found</PageHeader>
 				<div className="py-20 text-center">
 					<p className="text-gray-500 mb-4">This news item could not be found.</p>
-					<a href="/" className="text-green-700 hover:text-green-800 font-medium text-sm">
+					<Link to="/" className="text-green-700 hover:text-green-800 font-medium text-sm">
 						Return to Home
-					</a>
+					</Link>
 				</div>
 			</>
 		);
@@ -57,12 +57,12 @@ export default function LatestNewsDetailPage() {
 
 				<div className="max-w-3xl mx-auto px-5 sm:px-10 relative z-10">
 					<div className="animate-fade-in">
-						<a
-							href="/#latest-news"
+						<Link
+							to="/#latest-news"
 							className="inline-flex items-center gap-1.5 text-sm text-primary-700 hover:text-primary-800 font-medium mb-6 transition-colors"
 						>
 							<ArrowLeft className="w-4 h-4" /> Back to Home
-						</a>
+						</Link>
 
 						<div className="flex items-center gap-3 flex-wrap mb-4">
 							{item.category ? (

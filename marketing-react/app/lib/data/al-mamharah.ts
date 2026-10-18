@@ -25,6 +25,27 @@ export const PROGRAMME_INFO: ProgrammeInfo = {
 	timezone: "Africa/Lagos",
 };
 
+// * Arabic labels rendered alongside the English UI.
+export const ARABIC = {
+	alMamharah: "الممهرة",
+	quranRevision: "مراجعة القرآن",
+	todaysRevision: "مراجعة اليوم",
+	revisionCompleted: "تم إكمال المراجعة",
+	myProgress: "إنجازاتي",
+	revisionHistory: "سجل المراجعة",
+	currentStreak: "سلسلة الإنجاز",
+	longestStreak: "أطول سلسلة",
+	leaderboard: "لوحة المتصدرين",
+	leadingParticipants: "المتصدرون",
+	masar: "مساري",
+	dashboard: "لوحة التحكم",
+	enterProgramme: "الدخول إلى البرنامج",
+	programmeManagement: "إدارة البرنامج",
+	applicationStatus: "حالة الطلب",
+	approved: "مقبول",
+	underReview: "قيد المراجعة",
+} as const;
+
 export interface ProgrammeContact {
 	name: string;
 	phone: string;
@@ -99,10 +120,20 @@ export const TASK_LABELS: Record<string, string> = {
 };
 
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {
-	PENDING: "Pending",
+	PENDING: "Under Review",
 	APPROVED: "Approved",
 	REJECTED: "Rejected",
 };
+
+export const APPLICATION_STATUS_ARABIC: Record<string, string> = {
+	PENDING: "قيد المراجعة",
+	APPROVED: "مقبول",
+	REJECTED: "مرفوض",
+};
+
+export function applicationStatusArabic(value: string | null | undefined): string {
+	return APPLICATION_STATUS_ARABIC[value ?? ""] ?? "";
+}
 
 export const PARTICIPANT_STATUS_LABELS: Record<string, string> = {
 	ACTIVE: "Active",

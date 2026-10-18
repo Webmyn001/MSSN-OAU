@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { StatCard } from "~/components/al-mamharah/StatCard";
+import { ARABIC } from "~/lib/data/al-mamharah";
 import { Loader2, AlertCircle, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { getOverview, AlMamharahError } from "~/lib/api/al-mamharah";
@@ -70,8 +71,8 @@ export function OverviewPanel({ token, onExpired }: { token: string; onExpired: 
 				</h3>
 				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					<StatCard label="Total" value={data.applications.total} tone="primary" />
-					<StatCard label="Pending" value={data.applications.pending} tone="amber" />
-					<StatCard label="Approved" value={data.applications.approved} tone="emerald" />
+					<StatCard label="Pending" labelAr={ARABIC.underReview} value={data.applications.pending} tone="amber" />
+					<StatCard label="Approved" labelAr={ARABIC.approved} value={data.applications.approved} tone="emerald" />
 					<StatCard label="Rejected" value={data.applications.rejected} tone="rose" />
 				</div>
 			</div>

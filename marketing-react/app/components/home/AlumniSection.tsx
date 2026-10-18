@@ -122,7 +122,7 @@ export function AlumniSection({ sessions: initialSessions = [] }: AlumniSectionP
 						No alumni data available yet.
 					</div>
 				) : (
-					<div className="space-y-10">
+					<div className="mx-auto max-w-4xl space-y-8 sm:space-y-10">
 						{pastLeaders.map((leader) => (
 							<div
 								key={leader.session}

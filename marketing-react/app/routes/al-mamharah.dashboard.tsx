@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Seo } from "~/components/seo";
 import { Button } from "~/components/ui/button";
 import { StatCard } from "~/components/al-mamharah/StatCard";
@@ -28,7 +28,8 @@ import {
 	clearParticipantSession,
 	AlMamharahError,
 } from "~/lib/api/al-mamharah";
-import { masarLabel, masarDaily, taskLabel, formatISODate, phaseLabel } from "~/lib/data/al-mamharah";
+import { masarLabel, masarDaily, taskLabel, formatISODate, phaseLabel, ARABIC } from "~/lib/data/al-mamharah";
+import { Arabic } from "~/components/al-mamharah/Arabic";
 
 export default function AlMamharahDashboardPage() {
 	const navigate = useNavigate();
@@ -139,7 +140,7 @@ export default function AlMamharahDashboardPage() {
 							</p>
 							<div className="mt-6">
 								<Button asChild className="w-full">
-									<a href="/al-mamharah/#join">Go to Enter Programme</a>
+									<Link to="/al-mamharah/#join">Go to Enter Programme</Link>
 								</Button>
 							</div>
 						</div>
@@ -161,9 +162,12 @@ export default function AlMamharahDashboardPage() {
 									<h1 className="font-secondary text-2xl font-bold text-primary-800 sm:text-3xl">
 										{report.participant.displayName}
 									</h1>
-									<p className="mt-1 text-sm text-gray-600">
-										{masarLabel(report.participant.masar)} ·{" "}
-										{masarDaily(report.participant.masar)}
+									<p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-sm text-gray-600">
+										<Arabic className="text-primary-600">{ARABIC.masar}</Arabic>
+										<span>
+											· {masarLabel(report.participant.masar)} ·{" "}
+											{masarDaily(report.participant.masar)}
+										</span>
 									</p>
 								</div>
 								<div className="flex items-center gap-2">
@@ -176,6 +180,9 @@ export default function AlMamharahDashboardPage() {
 													: "ACTIVE",
 										)}
 									</span>
+									<Arabic className="rounded-full border border-primary-100 bg-primary-50/70 px-3 py-1 text-xs text-primary-700">
+										{ARABIC.dashboard}
+									</Arabic>
 									<Button variant="outline" size="sm" onClick={logout}>
 										<LogOut className="size-4" />
 										Log out
@@ -188,15 +195,40 @@ export default function AlMamharahDashboardPage() {
 								{formatISODate(report.programme.end)} · Today: {formatISODate(report.today)}
 							</p>
 
-							<div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+							<div className="mt-6 overflow-hidden rounded-xl border border-primary-100 shadow-sm">
+								<div className="relative">
+									<img
+										src="/images/al-mamharah/mushaf-illuminated.webp"
+										alt="Illuminated Qur'an manuscript frontispiece"
+										className="h-36 w-full object-cover object-top sm:h-44"
+										loading="lazy"
+										decoding="async"
+									/>
+									<div className="absolute inset-0 bg-gradient-to-r from-primary-950/80 via-primary-900/30 to-transparent" />
+									<div className="absolute inset-y-0 left-0 flex flex-col justify-center p-4 sm:p-6">
+										<Arabic className="text-lg font-semibold text-white sm:text-xl">
+											{ARABIC.dashboard}
+										</Arabic>
+										<p className="mt-1 text-xs text-white/80">Your muroja'ah at a glance.</p>
+									</div>
+								</div>
+							</div>
+
+							<h2 className="mt-8 flex items-baseline gap-2 font-secondary text-lg font-semibold text-primary-800">
+							My Progress
+							<Arabic className="text-primary-600">{ARABIC.myProgress}</Arabic>
+						</h2>
+						<div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
 								<StatCard
 									label="Current streak"
+									labelAr={ARABIC.currentStreak}
 									value={report.stats.current}
 									hint="consecutive days"
 									tone="amber"
 								/>
 								<StatCard
 									label="Longest streak"
+									labelAr={ARABIC.longestStreak}
 									value={report.stats.longest}
 									hint="personal best"
 									tone="emerald"
@@ -221,7 +253,7 @@ export default function AlMamharahDashboardPage() {
 										<div className="flex items-center justify-between">
 											<h2 className="flex items-center gap-2 font-secondary text-lg font-semibold text-primary-800">
 												<Target className="size-5" />
-												Today's task
+												Today's Revision <Arabic className="text-primary-600">{ARABIC.todaysRevision}</Arabic>
 											</h2>
 											<span className="text-xs text-gray-500">
 												{formatISODate(report.today)}
@@ -299,8 +331,9 @@ export default function AlMamharahDashboardPage() {
 									</div>
 
 									<div className="mt-6 rounded-xl border border-primary-100 bg-white/90 p-5 shadow-sm">
-										<h2 className="font-secondary text-lg font-semibold text-primary-800">
-											Recent activity
+										<h2 className="flex items-baseline gap-2 font-secondary text-lg font-semibold text-primary-800">
+											Revision History
+											<Arabic className="text-primary-600">{ARABIC.revisionHistory}</Arabic>
 										</h2>
 										{report.completions.length === 0 ? (
 											<p className="mt-3 text-sm text-gray-500">
@@ -361,9 +394,12 @@ export default function AlMamharahDashboardPage() {
 										<h2 className="flex items-center gap-2 font-secondary text-lg font-semibold text-primary-800">
 											<Trophy className="size-5 text-amber-500" />
 											Leaderboard
+											<Arabic className="text-primary-600">{ARABIC.leaderboard}</Arabic>
 										</h2>
-										<p className="mb-2 mt-1 text-xs text-gray-500">
-											{leaderboard?.totalParticipants ?? 0} active participants
+										<p className="mb-2 mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-gray-500">
+											<span className="font-medium text-gray-600">Leading Participants</span>
+											<Arabic className="text-primary-600">{ARABIC.leadingParticipants}</Arabic>
+											<span>· {leaderboard?.totalParticipants ?? 0} active</span>
 										</p>
 										<Leaderboard
 											entries={leaderboard?.entries ?? []}

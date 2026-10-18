@@ -48,29 +48,41 @@ export function PrayerTimeCard({
 			<div className={`absolute inset-0 bg-gradient-to-br ${gradientColor}`} />
 			<div className="absolute inset-0 bg-black/25" />
 
-			<div className="relative z-10 p-4 sm:p-5 flex flex-col gap-3">
+			<div className="relative z-10 flex h-full min-h-[126px] flex-col justify-between gap-3 p-3.5 sm:p-5">
 				<div className="flex items-center justify-between gap-2">
-					<div className="flex items-center gap-2">
-						<span className="text-2xl">{icon}</span>
-						<h3 className="font-primary font-bold text-white text-base sm:text-lg">{prayerName}</h3>
+					<div className="flex min-w-0 items-center gap-2">
+						<span className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-base backdrop-blur-sm sm:size-9">
+							{icon}
+						</span>
+						<h3 className="truncate font-primary text-sm font-bold leading-tight text-white drop-shadow sm:text-lg">
+							{prayerName}
+						</h3>
 					</div>
 					{isUpcoming ? (
-						<span className="text-[10px] font-bold uppercase tracking-wide bg-amber-400 text-amber-950 rounded-full px-2 py-0.5">
+						<span className="hidden shrink-0 items-center rounded-full bg-amber-400/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black sm:inline-flex">
 							Next
 						</span>
 					) : null}
 				</div>
 
-				<div className="grid grid-cols-2 gap-2">
-					<div className="rounded-xl bg-black/35 backdrop-blur-sm border border-white/15 px-2 py-1.5 text-center">
-						<p className="text-[9px] font-semibold uppercase tracking-widest text-white/60">Adhan</p>
-						<p className="text-white font-primary font-semibold text-sm tabular-nums whitespace-nowrap">
+				<div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+					<div className="min-w-0 rounded-xl border border-white/15 bg-black/35 px-1.5 py-1.5 text-center backdrop-blur-sm sm:px-2.5 sm:py-2">
+						<p className="truncate text-[8px] font-semibold uppercase tracking-widest text-white/60 sm:text-[9px]">
+							Adhan
+						</p>
+						<p className="whitespace-nowrap font-primary text-[11px] font-semibold tabular-nums text-white sm:text-sm">
 							{adhan}
 						</p>
 					</div>
-					<div className="rounded-xl bg-white/15 backdrop-blur-sm border border-white/25 px-2 py-1.5 text-center">
-						<p className="text-[9px] font-semibold uppercase tracking-widest text-white/60">Iqamah</p>
-						<p className="text-white font-primary font-semibold text-sm tabular-nums whitespace-nowrap">
+					<div
+						className={`min-w-0 rounded-xl border px-1.5 py-1.5 text-center backdrop-blur-sm sm:px-2.5 sm:py-2 ${
+							isUpcoming ? "border-amber-300/40 bg-amber-300/25" : "border-white/25 bg-white/15"
+						}`}
+					>
+						<p className="truncate text-[8px] font-semibold uppercase tracking-widest text-white/60 sm:text-[9px]">
+							Iqamah
+						</p>
+						<p className="whitespace-nowrap font-primary text-[11px] font-semibold tabular-nums text-white sm:text-sm">
 							{iqamah}
 						</p>
 					</div>

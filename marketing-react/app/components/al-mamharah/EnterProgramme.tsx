@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "~/components/ui/button";
+import { Arabic } from "~/components/al-mamharah/Arabic";
 import { Loader2, KeyRound, ArrowLeft, AlertCircle, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -9,6 +10,7 @@ import {
 	verifyEnterCode,
 	saveParticipantSession,
 } from "~/lib/api/al-mamharah";
+import { ARABIC } from "~/lib/data/al-mamharah";
 
 const inputClass =
 	"py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm";
@@ -99,8 +101,9 @@ export function EnterProgramme() {
 			id="enter"
 			className="flex flex-col rounded-xl border border-gray-200 bg-white/90 p-4 shadow-md backdrop-blur-sm sm:p-6 lg:p-8"
 		>
-			<h2 className="mb-2 font-secondary text-xl font-semibold text-primary-700">
-				Enter Programme
+			<h2 className="mb-2 flex flex-col gap-0.5 font-secondary text-xl font-semibold text-primary-700 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-2">
+				<span>Enter Programme</span>
+				<Arabic className="text-base text-primary-600 sm:text-xl">{ARABIC.enterProgramme}</Arabic>
 			</h2>
 			<p className="mb-6 text-sm text-gray-600">
 				Approved participants can access their dashboard here. Enter your full name, then the code

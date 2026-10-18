@@ -13,6 +13,7 @@ import "./app.css";
 import { Toaster } from "~/components/ui/sonner";
 import { NavBar } from "~/components/layout/NavBar";
 import { Footer } from "~/components/layout/Footer";
+import { useEffect } from "react";
 import { ORGANIZATION } from "~/lib/config";
 import { loadSiteData } from "~/lib/api/site-data";
 import type { SiteData } from "~/lib/api/site-data";
@@ -45,6 +46,10 @@ export async function loader(_args: Route.LoaderArgs): Promise<{ site: SiteData 
     "alumni",
   ]);
   return { site };
+}
+
+export function shouldRevalidate() {
+  return false;
 }
 
 function OrganizationJsonLd({ origin }: { origin: string }) {
@@ -184,6 +189,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const { site } = useLoaderData<typeof loader>();
   const origin = ORGANIZATION.url;
+
+  // The legacy SvelteKit app registered a service worker that caches stale assets.
+  // This app does not use one, so proactively unregister any leftover workers/caches.
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => registrations.forEach((registration) => registration.unregister()))
+        .catch(() => {});
+    }
+    if (typeof caches !== "undefined") {
+      caches
+        .keys()
+        .then((keys) => keys.forEach((key) => caches.delete(key)))
+        .catch(() => {});
+    }
+  }, []);
 
   const maintenance = site?.info?.maintenance && site?.info?.maintenance_ends;
 
