@@ -8,6 +8,7 @@ export default [
   route("events", "routes/events.tsx"),
   route("events/how-to-register-paid-events-online", "routes/events.how-to-register-paid-events-online.tsx"),
   route("events/:slug", "routes/events.$slug.tsx"),
+  route("annual-dues", "routes/annual-dues.tsx"),
   route("alumni", "routes/alumni.tsx"),
   route("our-advisors", "routes/our-advisors.tsx"),
   route("our-excos", "routes/our-excos.tsx"),
