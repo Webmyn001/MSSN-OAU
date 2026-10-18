@@ -2,38 +2,34 @@
 
 This repository contains the **MSSN Website** project with multiple services:
 
-- **Marketing Site** (`marketing/`): SvelteKit frontend for public-facing pages
+- **Marketing Site** (`marketing-react/`): React Router v7 frontend for public-facing pages (SSR)
 - **API Service** (`api/`): Hono-based API service (Bun runtime)
-- **Dashboard** (`dashboard/`): SvelteKit dashboard for Exco members
+- **Dashboard** (`dashboard-react/`): React Router v7 single-page dashboard for Exco members
 
 ### Documentation
 
 - **[API Specification](./API_SPECIFICATION.md)**: Complete API endpoint documentation based on PRD requirements
 - **Project Structure**:
-  - `marketing/`: SvelteKit app entrypoint and routes
-  - `api/`: Hono API service with Bun runtime
-  - `dashboard/`: Exco dashboard application
-  - **Root**: Shared configuration (e.g. `.gitignore`, `CHANGELOG.md`, `API_SPECIFICATION.md`)
+  - `marketing-react/`: React Router marketing app (SSR)
+  - `dashboard-react/`: React Router Exco dashboard (SPA)
+  - `api/`: Hono API service (Bun runtime)
+  - `research/`: Reference notes and specifications
 
 ### Development
 
-- **Install dependencies**:
+Each app is self-contained; install and run from its own directory:
 
 ```bash
-cd marketing
+cd marketing-react   # or dashboard-react
 npm install
-```
-
-- **Run the dev server**:
-
-```bash
-cd marketing
 npm run dev
 ```
 
+### Deployment
+
+- `marketing-react/` and `dashboard-react/` deploy to Vercel (see each app's `vercel.json`).
+- `api/` is the Hono/Bun backend service.
+
 ### Notes
 
-- Environment files (`.env*`), `node_modules/`, SvelteKit build output (`.svelte-kit/`, `build/`, `dist/`), and IDE metadata are intentionally ignored at the root and in `marketing/`.
-- Format and tooling configuration for the app (Prettier, `.npmrc`, etc.) live inside `marketing/` to keep concerns scoped to the SvelteKit project.
-
-
+- Environment files (`.env*`), `node_modules/`, and build output (`build/`, `dist/`, `.vercel/`) are intentionally ignored.
