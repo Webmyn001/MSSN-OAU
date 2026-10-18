@@ -227,6 +227,41 @@
 	}
 }
 
+/* React replacements for the Svelte `fade` / `fly` transitions. */
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fly-in {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-fade-in {
+	animation-name: fade-in;
+	animation-timing-function: ease-out;
+	animation-duration: 1s;
+	animation-fill-mode: both;
+}
+
+.animate-fly-in {
+	animation-name: fly-in;
+	animation-timing-function: ease-out;
+	animation-duration: 0.8s;
+	animation-fill-mode: both;
+}
+
 html {
 	scroll-behavior: smooth;
 }
