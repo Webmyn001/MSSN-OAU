@@ -1,0 +1,10 @@
+# robots.txt for MSSNOAU.org
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://mssnoau.org/sitemap.xml
+
+# Prevent crawling of auth pages
+Disallow: /auth/
+Disallow: /api/ 

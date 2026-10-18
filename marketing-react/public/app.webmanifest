@@ -1,0 +1,71 @@
+{
+  "name": "MSSNOAU - Muslim Students Society of Nigeria, Obafemi Awolowo University",
+  "short_name": "MSSNOAU",
+  "description": "Official website of the Muslim Students Society of Nigeria, Obafemi Awolowo University Branch",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#046c4e",
+  "icons": [
+    {
+      "src": "/mssn-logo.webp",
+      "sizes": "72x72",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mssn-logo@2x.webp",
+      "sizes": "96x96",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Events",
+      "short_name": "Events",
+      "description": "View upcoming MSSNOAU events",
+      "url": "/events",
+      "icons": [{ "src": "/mssn-logo.webp", "sizes": "192x192" }]
+    },
+    {
+      "name": "Blog",
+      "short_name": "Blog",
+      "description": "Read our latest articles",
+      "url": "/blog",
+      "icons": [{ "src": "/mssn-logo.webp", "sizes": "192x192" }]
+    }
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "portrait-primary",
+  "categories": ["education", "religious", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "/screenshots/home-screen.webp",
+      "sizes": "1170x2532",
+      "type": "image/webp",
+      "platform": "narrow",
+      "label": "Homescreen of MSSNOAU Website"
+    },
+    {
+      "src": "/screenshots/events-page.webp",
+      "sizes": "1170x2532",
+      "type": "image/webp", 
+      "platform": "narrow",
+      "label": "Events page"
+    }
+  ]
+} 
