@@ -4,10 +4,10 @@ import { z } from 'zod'
 
 export const alMamharahMasarSchema = z.enum([
 	'THREE_PAGES',
+	'TWO_PAGES',
 	'FOUR_PAGES',
 	'ONE_JUZ',
 	'THREE_JUZ',
-	'FOUR_JUZ',
 	'FIVE_JUZ',
 	'KHATM'
 ])

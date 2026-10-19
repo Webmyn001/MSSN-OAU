@@ -189,13 +189,32 @@ export default function AlMamharahPage() {
 					</div>
 
 					<div id="join" className="mt-14">
-						<div className="mx-auto mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
+						<div className="mx-auto mb-8 flex justify-center">
 							<a
 								href="#enter-programme"
-								className="inline-flex flex-col items-center gap-1.5 rounded-full bg-primary-700 px-10 py-4 text-white shadow-lg transition-colors hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+								className="group inline-flex items-center gap-3 rounded-full bg-primary-700 px-6 py-2.5 text-white shadow-md transition-all duration-300 hover:bg-primary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:px-7"
 							>
-								<span className="text-xl font-semibold">Enter Programme</span>
-								<Arabic className="text-base font-medium text-white/90">{ARABIC.enterProgramme}</Arabic>
+								<span className="flex flex-col items-start gap-0.5 text-left leading-tight">
+									<span className="text-sm font-semibold tracking-wide sm:text-base">
+										Enter Programme
+									</span>
+									<Arabic className="text-[11px] font-medium text-white/75 sm:text-xs">
+										{ARABIC.enterProgramme}
+									</Arabic>
+								</span>
+								<svg
+									className="size-4 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								>
+									<path d="M5 12h14" />
+									<path d="m12 5 7 7-7 7" />
+								</svg>
 							</a>
 						</div>
 						<div className="mx-auto max-w-2xl">

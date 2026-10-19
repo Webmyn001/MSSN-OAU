@@ -83,6 +83,13 @@ export const MASAR_OPTIONS: MasarOption[] = [
 		description: "A steady, sustainable pace for steady revision — ideal alongside a full academic load.",
 	},
 	{
+		value: "TWO_PAGES",
+		label: "2 Pages Daily",
+		labelAr: "صفحتان",
+		daily: "2 pages daily",
+		description: "A lighter daily target for those balancing a heavy schedule or starting revision.",
+	},
+	{
 		value: "FOUR_PAGES",
 		label: "4 Pages Daily",
 		labelAr: "٤ صفحات",
@@ -102,13 +109,6 @@ export const MASAR_OPTIONS: MasarOption[] = [
 		labelAr: "٣ أجزاء",
 		daily: "3 ajzā' daily",
 		description: "An intensive track for ḥuffāẓ with substantial daily capacity.",
-	},
-	{
-		value: "FOUR_JUZ",
-		label: "4 Ajzā' Daily",
-		labelAr: "٤ أجزاء",
-		daily: "4 ajzā' daily",
-		description: "A high-intensity track for those who can maintain four ajzā' of revision daily.",
 	},
 	{
 		value: "FIVE_JUZ",

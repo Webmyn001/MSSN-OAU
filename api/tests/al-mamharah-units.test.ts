@@ -129,10 +129,10 @@ describe('rankEntries', () => {
 describe('dailyTargetFromMasar', () => {
 	test('maps each masār to its daily target', () => {
 		expect(dailyTargetFromMasar('THREE_PAGES').pages).toBe(3)
+		expect(dailyTargetFromMasar('TWO_PAGES').pages).toBe(2)
 		expect(dailyTargetFromMasar('FOUR_PAGES').pages).toBe(4)
 		expect(dailyTargetFromMasar('ONE_JUZ').juz).toBe(1)
 		expect(dailyTargetFromMasar('THREE_JUZ').juz).toBe(3)
-		expect(dailyTargetFromMasar('FOUR_JUZ').juz).toBe(4)
 		expect(dailyTargetFromMasar('FIVE_JUZ').juz).toBe(5)
 		expect(dailyTargetFromMasar('KHATM').label).toBe('Full khatm')
 	})

@@ -19,10 +19,10 @@ import {
 // * Selected masār (revision targets)
 export const alMamharahMasarEnum = pgEnum('al_mamharah_masar', [
 	'THREE_PAGES',
+	'TWO_PAGES',
 	'FOUR_PAGES',
 	'ONE_JUZ',
 	'THREE_JUZ',
-	'FOUR_JUZ',
 	'FIVE_JUZ',
 	'KHATM'
 ])

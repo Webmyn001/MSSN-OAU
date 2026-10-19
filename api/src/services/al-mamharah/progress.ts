@@ -26,14 +26,14 @@ export function dailyTargetFromMasar(masar: AlMamharahMasar): DailyTarget {
 	switch (masar) {
 		case 'THREE_PAGES':
 			return { label: '3 pages daily', pages: 3, juz: null }
+		case 'TWO_PAGES':
+			return { label: '2 pages daily', pages: 2, juz: null }
 		case 'FOUR_PAGES':
 			return { label: '4 pages daily', pages: 4, juz: null }
 		case 'ONE_JUZ':
 			return { label: '1 juzʼ daily', pages: null, juz: 1 }
 		case 'THREE_JUZ':
 			return { label: '3 ajzāʼ daily', pages: null, juz: 3 }
-		case 'FOUR_JUZ':
-			return { label: '4 ajzāʼ daily', pages: null, juz: 4 }
 		case 'FIVE_JUZ':
 			return { label: '5 ajzāʼ daily', pages: null, juz: 5 }
 		case 'KHATM':
