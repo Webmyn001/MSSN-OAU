@@ -198,9 +198,9 @@ export default function AlMamharahDashboardPage() {
 							<div className="mt-6 overflow-hidden rounded-xl border border-primary-100 shadow-sm">
 								<div className="relative">
 									<img
-										src="/images/al-mamharah/mushaf-illuminated.webp"
-										alt="Illuminated Qur'an manuscript frontispiece"
-										className="h-36 w-full object-cover object-top sm:h-44"
+										src="/images/al-mamharah/mushaf.webp"
+										alt="An open Qur'an (mushaf) resting open"
+										className="h-36 w-full object-cover object-center sm:h-44"
 										loading="lazy"
 										decoding="async"
 									/>
@@ -248,7 +248,7 @@ export default function AlMamharahDashboardPage() {
 							</div>
 
 							<div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-5">
-								<div className="lg:col-span-3">
+								<div className="lg:col-span-2">
 									<div className="rounded-xl border border-primary-100 bg-white/90 p-5 shadow-sm">
 										<div className="flex items-center justify-between">
 											<h2 className="flex items-center gap-2 font-secondary text-lg font-semibold text-primary-800">
@@ -389,7 +389,7 @@ export default function AlMamharahDashboardPage() {
 									</div>
 								</div>
 
-								<div className="lg:col-span-2">
+								<div className="lg:col-span-3">
 									<div className="rounded-xl border border-primary-100 bg-white/90 p-5 shadow-sm">
 										<h2 className="flex items-center gap-2 font-secondary text-lg font-semibold text-primary-800">
 											<Trophy className="size-5 text-amber-500" />

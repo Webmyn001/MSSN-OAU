@@ -32,7 +32,7 @@ const NOT_VERIFIED_MESSAGE =
 const NOT_VERIFIED_MESSAGE_AR =
 	'لم يتم التحقق من مشاركتك بعد. يُرجى التواصل مع مدير البرنامج للمساعدة.'
 
-const CODE_EXPIRY_MINUTES = 10
+const CODE_EXPIRY_MINUTES = 30
 
 /** GET /public/al-mamharah/info — programme window and current phase. */
 publicAlMamharahRoute.get('/info', async c => {

@@ -17,8 +17,9 @@ const BRAND = {
 
 // Logo asset deployed alongside the marketing site. PNG is used for maximum
 // email client compatibility (Outlook/GMail render webp inconsistently).
-export const EMAIL_LOGO_URL = 'https://mssnoau.org/mssn-logo.png'
-export const EMAIL_SITE_URL = 'https://mssnoau.org'
+// * Served from the Vercel deployment while the mssnoau.org domain is offline.
+export const EMAIL_LOGO_URL = 'https://mssn-oau.vercel.app/mssn-logo.png'
+export const EMAIL_SITE_URL = 'https://mssn-oau.vercel.app'
 
 export function emailHeader(title: string): string {
 	return `

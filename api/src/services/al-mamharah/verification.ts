@@ -18,7 +18,7 @@ import { brandEmail } from '../email/template'
 // * Codes are stored hashed (SHA-256) and expire; sessions are 30-day
 // * database-backed tokens granted only after a successful code check.
 
-const CODE_EXPIRY_MS = 10 * 60 * 1000
+const CODE_EXPIRY_MS = 30 * 60 * 1000
 const MAX_CODE_ATTEMPTS = 5
 const PARTICIPANT_SESSION_MS = 30 * 24 * 60 * 60 * 1000
 
