@@ -336,6 +336,10 @@ export function revokeManager(id: string, token: string | undefined = getManager
 	return request(`/al-mamharah/manager/managers/${id}/revoke`, { method: "POST", token });
 }
 
+export function deleteManager(id: string, token: string | undefined = getManagerToken()) {
+	return request(`/al-mamharah/manager/managers/${id}`, { method: "DELETE", token });
+}
+
 export function getSettings(token: string | undefined = getManagerToken()) {
 	return request("/al-mamharah/manager/settings", { token });
 }

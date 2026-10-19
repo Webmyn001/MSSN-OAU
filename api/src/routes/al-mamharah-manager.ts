@@ -44,6 +44,7 @@ import { isValidISODate, todayInTimeZone } from '../services/al-mamharah/dates'
 import {
 	activateManager,
 	authenticateManager,
+	deleteManager,
 	generateManagerToken,
 	isManagerLoginAvailable,
 	inviteManager,
@@ -396,6 +397,17 @@ alMamharahManagerRoute.post('/managers/:id/revoke', async c => {
 		manager: { id: manager.id, email: manager.email, status: manager.status },
 		message: 'Manager access revoked.'
 	})
+})
+
+/** DELETE /managers/:id — permanently delete a REVOKED manager (primary only). */
+alMamharahManagerRoute.delete('/managers/:id', async c => {
+	const primary = requirePrimaryManager(c)
+	await deleteManager(c.req.param('id'), {
+		managerId: primary.id,
+		role: primary.role,
+		email: primary.email
+	})
+	return successResponse(c, { message: 'Manager deleted permanently.' })
 })
 
 /** GET /settings — programme settings. */

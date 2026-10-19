@@ -83,6 +83,9 @@ export function toISODateValue(value: string | Date): ISODate {
 export async function completionDatesByParticipant(
 	participantIds?: string[]
 ): Promise<Map<string, ISODate[]>> {
+	// * Guard: an empty id list would generate `IN ('')`, which Postgres rejects
+	// * as invalid uuid syntax (22P02) → 500. Return an empty map instead.
+	if (participantIds && participantIds.length === 0) return new Map()
 	const conditions = participantIds
 		? inArray(alMamharahCompletions.participantId, participantIds)
 		: undefined
@@ -232,7 +235,7 @@ export async function listParticipants(
 	])
 
 	const ids = rows.map(r => r.participant.id)
-	const dates = await completionDatesByParticipant(ids.length > 0 ? ids : [''])
+	const dates = await completionDatesByParticipant(ids)
 	const items = rows.map(row =>
 		mapWithStats(
 			row.participant,

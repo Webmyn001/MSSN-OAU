@@ -12,6 +12,7 @@ import {
 	Download,
 	Plus,
 	BadgeCheck,
+	RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -65,6 +66,12 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 		} catch (err) {
 			if (err instanceof AlMamharahError && (err.status === 401 || err.status === 403)) {
 				onExpired();
+				return;
+			}
+			if (err instanceof AlMamharahError && (err.status >= 500 || err.status === 0)) {
+				setError(
+					"Participants aren't available right now. The server may be starting up — please try again in a moment."
+				);
 				return;
 			}
 			setError(err instanceof Error ? err.message : "Unable to load participants.");
@@ -224,9 +231,12 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 					<Loader2 className="size-8 animate-spin text-primary-600" />
 				</div>
 			) : error ? (
-				<div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-					<AlertCircle className="size-4" />
-					<p>{error}</p>
+				<div className="flex flex-wrap items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+					<AlertCircle className="size-4 shrink-0" />
+					<p className="min-w-0 flex-1">{error}</p>
+					<Button variant="outline" size="sm" onClick={() => load()}>
+						<RefreshCw className="size-3.5" /> Retry
+					</Button>
 				</div>
 			) : items.length === 0 ? (
 				<p className="py-16 text-center text-sm text-gray-500">No participants found.</p>

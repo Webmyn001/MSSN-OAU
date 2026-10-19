@@ -61,25 +61,33 @@ export default function AlMamharahManagerPage() {
 
 	useEffect(() => {
 		const existing = getManagerToken();
-		if (!existing) {
+		const cached = getManagerInfo();
+		if (!existing || !cached) {
+			// No stored session — show the login form immediately.
+			if (existing) clearManagerSession();
 			setChecking(false);
 			return;
 		}
+		// Render the dashboard from the cached session right away so a slow /
+		// cold-starting API never blocks the page. Validate in the background
+		// and only sign out on a real auth failure (not network errors).
+		setToken(existing);
+		setManager(cached);
+		setChecking(false);
 		let cancelled = false;
 		getManagerMe(existing)
 			.then((result) => {
 				if (cancelled) return;
-				setToken(existing);
-				setManager(result.data ?? getManagerInfo());
+				if (result.data) setManager(result.data);
 			})
 			.catch((err) => {
 				if (cancelled) return;
-				if (err instanceof AlMamharahError) {
+				if (err instanceof AlMamharahError && (err.status === 401 || err.status === 403)) {
 					clearManagerSession();
+					setToken(null);
+					setManager(null);
+					toast.error("Your session has expired. Please sign in again.");
 				}
-			})
-			.finally(() => {
-				if (!cancelled) setChecking(false);
 			});
 		return () => {
 			cancelled = true;
@@ -147,7 +155,11 @@ export default function AlMamharahManagerPage() {
 										<LeaderboardPanel token={token} onExpired={onExpired} />
 									</TabsContent>
 									<TabsContent value="managers" className="mt-6">
-										<ManagersPanel token={token} onExpired={onExpired} />
+										<ManagersPanel
+											token={token}
+											onExpired={onExpired}
+											isPrimary={manager?.role === "PRIMARY"}
+										/>
 									</TabsContent>
 									<TabsContent value="settings" className="mt-6">
 										<SettingsPanel token={token} onExpired={onExpired} />

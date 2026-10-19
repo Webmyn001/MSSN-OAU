@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Button } from "~/components/ui/button";
-import { Loader2, AlertCircle, UserPlus, Send, UserX, Copy, ShieldAlert } from "lucide-react";
+import { Loader2, AlertCircle, UserPlus, Send, UserX, Copy, ShieldAlert, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
 	listManagers,
 	inviteManager,
 	resendManagerInvite,
 	revokeManager,
+	deleteManager,
 	AlMamharahError,
 } from "~/lib/api/al-mamharah";
 import { managerStatusLabel, managerRoleLabel, formatDateTime } from "~/lib/data/al-mamharah";
@@ -15,7 +16,15 @@ import { managerStatusLabel, managerRoleLabel, formatDateTime } from "~/lib/data
 const inputClass =
 	"rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-600 focus:ring-primary-600";
 
-export function ManagersPanel({ token, onExpired }: { token: string; onExpired: () => void }) {
+export function ManagersPanel({
+	token,
+	onExpired,
+	isPrimary = false,
+}: {
+	token: string;
+	onExpired: () => void;
+	isPrimary?: boolean;
+}) {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [managers, setManagers] = useState<any[]>([]);
@@ -93,6 +102,25 @@ export function ManagersPanel({ token, onExpired }: { token: string; onExpired: 
 		}
 	}
 
+	async function remove(manager: any) {
+		if (
+			!window.confirm(
+				`Permanently delete ${manager.fullName || manager.email}? This cannot be undone.`
+			)
+		)
+			return;
+		setActing(manager.id);
+		try {
+			await deleteManager(manager.id, token);
+			toast.success("Manager deleted.");
+			await load();
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Could not delete this manager.");
+		} finally {
+			setActing(null);
+		}
+	}
+
 	async function copyLink() {
 		if (!lastLink) return;
 		try {
@@ -110,7 +138,8 @@ export function ManagersPanel({ token, onExpired }: { token: string; onExpired: 
 					<UserPlus className="size-4 text-primary-600" /> Invite a manager
 				</h3>
 				<p className="mt-1 text-xs text-gray-500">
-					Only the primary manager can invite, resend or revoke manager access.
+					Only the primary manager can invite, resend or revoke manager access. Revoked
+					managers can then be deleted permanently.
 				</p>
 				<form onSubmit={invite} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
 					<input
@@ -212,16 +241,32 @@ export function ManagersPanel({ token, onExpired }: { token: string; onExpired: 
 											Resend
 										</Button>
 									) : null}
-									{manager.status !== "REVOKED" ? (
-										<Button
-											variant="outline"
-											size="sm"
-											onClick={() => revoke(manager)}
-											disabled={acting === manager.id}
-										>
-											<UserX className="size-4" /> Revoke
-										</Button>
-									) : null}
+								{manager.status !== "REVOKED" ? (
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => revoke(manager)}
+										disabled={acting === manager.id}
+									>
+										<UserX className="size-4" /> Revoke
+									</Button>
+								) : null}
+								{isPrimary && manager.status === "REVOKED" && manager.role !== "PRIMARY" ? (
+									<Button
+										variant="outline"
+										size="sm"
+										className="border-red-200 text-red-600 hover:bg-red-50"
+										onClick={() => remove(manager)}
+										disabled={acting === manager.id}
+									>
+										{acting === manager.id ? (
+											<Loader2 className="size-4 animate-spin" />
+										) : (
+											<Trash2 className="size-4" />
+										)}
+										Delete
+									</Button>
+								) : null}
 								</div>
 							</li>
 						))}

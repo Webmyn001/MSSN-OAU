@@ -331,6 +331,46 @@ export async function revokeManager(
 	return updated
 }
 
+/**
+ * Permanently deletes a manager. Only the PRIMARY manager may do this, and
+ * only REVOKED managers can be deleted (revoke first). Tokens are cascade-
+ * deleted via the FK, but we clear them explicitly for clarity.
+ */
+export async function deleteManager(
+	managerId: string,
+	actor: { managerId: string; role: AlMamharahManagerRole; email: string }
+): Promise<void> {
+	if (actor.role !== 'PRIMARY') {
+		throw new AuthorizationError('Only the primary Programme Manager can delete managers')
+	}
+
+	const [manager] = await db
+		.select()
+		.from(alMamharahManagers)
+		.where(eq(alMamharahManagers.id, managerId))
+		.limit(1)
+	if (!manager) throw new NotFoundError('Manager not found')
+	if (manager.role === 'PRIMARY') {
+		throw new AuthorizationError('The primary Programme Manager cannot be deleted')
+	}
+	if (manager.status !== 'REVOKED') {
+		throw new ConflictError('Revoke this manager before deleting them')
+	}
+
+	await db.delete(alMamharahManagerTokens).where(eq(alMamharahManagerTokens.managerId, managerId))
+	await db.delete(alMamharahManagers).where(eq(alMamharahManagers.id, managerId))
+
+	await recordAudit({
+		actorType: 'MANAGER',
+		actor: actor.email,
+		action: 'MANAGER_DELETED',
+		entity: 'manager',
+		entityId: managerId,
+		details: { email: manager.email }
+	})
+	logger.warn({ managerId, actorEmail: actor.email }, 'Al-Mamharah manager deleted')
+}
+
 export interface ManagerListItem {
 	id: string
 	email: string
