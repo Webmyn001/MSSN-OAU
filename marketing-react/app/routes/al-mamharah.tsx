@@ -192,18 +192,18 @@ export default function AlMamharahPage() {
 						<div className="mx-auto mb-8 flex justify-center">
 							<a
 								href="#enter-programme"
-								className="group inline-flex items-center gap-3 rounded-full bg-primary-700 px-6 py-2.5 text-white shadow-md transition-all duration-300 hover:bg-primary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:px-7"
+								className="group inline-flex items-center gap-2.5 rounded-2xl border border-primary-200 bg-white px-6 py-3 text-primary-800 shadow-sm transition-all duration-300 hover:border-primary-300 hover:bg-primary-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:px-8"
 							>
-								<span className="flex flex-col items-start gap-0.5 text-left leading-tight">
+								<span className="flex flex-col items-center gap-0.5 text-center leading-tight">
 									<span className="text-sm font-semibold tracking-wide sm:text-base">
 										Enter Programme
 									</span>
-									<Arabic className="text-[11px] font-medium text-white/75 sm:text-xs">
+									<Arabic className="text-[11px] font-medium text-primary-600 sm:text-xs">
 										{ARABIC.enterProgramme}
 									</Arabic>
 								</span>
 								<svg
-									className="size-4 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5"
+									className="size-4 shrink-0 text-primary-600 transition-transform duration-300 group-hover:translate-x-0.5"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 24 24"
 									fill="none"
