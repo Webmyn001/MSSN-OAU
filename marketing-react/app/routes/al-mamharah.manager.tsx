@@ -123,9 +123,9 @@ export default function AlMamharahManagerPage() {
 
 							<div className="mt-6">
 								<Tabs value={tab} onValueChange={setTab}>
-									<TabsList className="h-auto w-full flex-wrap justify-start gap-1 p-1">
+									<TabsList className="h-auto w-full gap-0.5 overflow-x-auto p-1 sm:flex-wrap sm:justify-start">
 										{tabs.map((t) => (
-											<TabsTrigger key={t.value} value={t.value}>
+											<TabsTrigger key={t.value} value={t.value} className="min-h-[44px] px-3 py-2 text-xs whitespace-nowrap sm:text-sm">
 												{t.label}
 											</TabsTrigger>
 										))}

@@ -314,9 +314,13 @@ export default function EventsPage() {
 					Our Events
 					<br />
 					<Tabs value={mode} onValueChange={(v) => setMode(v as "upcoming" | "past")} className="mt-4">
-						<TabsList className="grid w-full grid-cols-2 max-w-xs mx-auto bg-primary-50/50 backdrop-blur-sm rounded-lg p-1">
-							<TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-							<TabsTrigger value="past">Last 12 Months</TabsTrigger>
+						<TabsList className="grid w-full grid-cols-2 mx-auto max-w-xs rounded-lg bg-primary-50/50 p-0.5 backdrop-blur-sm sm:p-1">
+							<TabsTrigger value="upcoming" className="min-h-[44px] text-xs whitespace-nowrap sm:text-sm">
+								Upcoming
+							</TabsTrigger>
+							<TabsTrigger value="past" className="min-h-[44px] text-xs whitespace-nowrap sm:text-sm">
+								Last 12 Months
+							</TabsTrigger>
 						</TabsList>
 					</Tabs>
 				</div>
