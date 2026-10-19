@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouteLoaderData } from "react-router";
 import {
 	CalendarDays,
 	MapPin,
@@ -23,7 +22,7 @@ import slugify from "~/lib/utils/slugify";
 import { SITE_URL } from "~/lib/config";
 import { API_BASE } from "~/lib/api/base";
 import { mapEvent, type ApiEvent, type Event } from "~/lib/utils/events";
-import type { loader as rootLoader } from "~/root";
+import { useSiteData } from "~/lib/hooks/useSiteData";
 
 interface ProcessedEvents {
 	upcoming: Event[];
@@ -130,8 +129,7 @@ function processEvents(eventsArray: Event[] | undefined): ProcessedEvents {
 }
 
 export default function EventsPage() {
-	const root = useRouteLoaderData<typeof rootLoader>("root");
-	const rawEvents = (root?.site?.events ?? []) as ApiEvent[];
+	const [rawEvents] = useSiteData<ApiEvent[]>("events", []);
 
 	const allEvents = useMemo(() => processEvents(rawEvents.map(mapEvent)), [rawEvents]);
 	const [mode, setMode] = useState<"upcoming" | "past">("upcoming");

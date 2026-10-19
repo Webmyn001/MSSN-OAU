@@ -1,9 +1,9 @@
-import { Link, useParams, useRouteLoaderData } from "react-router";
+import { Link, useParams } from "react-router";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { Calendar, User, Tag, ArrowLeft } from "lucide-react";
 import { formatNewsDate } from "./latest-news";
-import type { loader as rootLoader } from "~/root";
+import { useSiteData } from "~/lib/hooks/useSiteData";
 
 interface NewsItem {
 	id: string;
@@ -19,8 +19,7 @@ interface NewsItem {
 
 export default function LatestNewsDetailPage() {
 	const { id } = useParams();
-	const root = useRouteLoaderData<typeof rootLoader>("root");
-	const items = (root?.site?.latestNews ?? []) as NewsItem[];
+	const [items] = useSiteData<NewsItem[]>("latestNews", []);
 	const item = items.find((n) => n.id === id) || null;
 
 	if (!item) {

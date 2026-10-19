@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams, useRouteLoaderData } from "react-router";
+import { Link, useParams } from "react-router";
 import { toast } from "sonner";
 import {
 	ArrowLeft,
@@ -19,7 +19,7 @@ import { Button } from "~/components/ui/button";
 import { API_BASE } from "~/lib/api/base";
 import { mapEventDetail, type ApiEvent, type Event } from "~/lib/utils/events";
 import slugify from "~/lib/utils/slugify";
-import type { loader as rootLoader } from "~/root";
+import { useSiteData } from "~/lib/hooks/useSiteData";
 
 function formatEventDate(dateString: string) {
 	const date = new Date(dateString);
@@ -95,8 +95,7 @@ function NotFound() {
 
 export default function EventDetailPage() {
 	const { slug } = useParams();
-	const root = useRouteLoaderData<typeof rootLoader>("root");
-	const rawEvents = (root?.site?.events ?? []) as ApiEvent[];
+	const [rawEvents] = useSiteData<ApiEvent[]>("events", []);
 	const events = rawEvents.map(mapEventDetail);
 	const eventData: Event | null =
 		events.find((e) => e.id === slug || e.slug === slug || slugify(e.title) === slug) ?? null;

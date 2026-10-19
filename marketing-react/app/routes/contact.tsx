@@ -1,4 +1,3 @@
-import { useRouteLoaderData } from "react-router";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { ContactForm } from "~/components/forms/ContactForm";
@@ -9,12 +8,11 @@ import {
 	AccordionTrigger,
 } from "~/components/ui/accordion";
 import { ORGANIZATION } from "~/lib/config";
-import type { loader as rootLoader } from "~/root";
+import { useSiteData } from "~/lib/hooks/useSiteData";
 
 export default function ContactPage() {
-	const root = useRouteLoaderData<typeof rootLoader>("root");
-	const info = root?.site?.info;
-	const faqs = info?.faqs ?? [];
+	const [info] = useSiteData("info", {} as any);
+	const faqs = ((info as any)?.faqs ?? []) as { question: string; answer: string }[];
 
 	const contactPageSchema = {
 		"@type": "ContactPage",

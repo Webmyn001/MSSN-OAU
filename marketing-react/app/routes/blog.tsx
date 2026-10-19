@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from "react";
-import { useRouteLoaderData } from "react-router";
 import { toast } from "sonner";
 import { Calendar, Mail, Send, ExternalLink, Search, ChevronDown } from "lucide-react";
 import { Seo } from "~/components/seo";
@@ -7,7 +6,7 @@ import { PageHeader } from "~/components/layout/PageHeader";
 import { Image } from "~/components/ui/image";
 import { formatDate } from "~/lib/utils/dates";
 import { API_BASE } from "~/lib/api/base";
-import type { loader as rootLoader } from "~/root";
+import { useSiteData } from "~/lib/hooks/useSiteData";
 
 interface BlogPost {
 	id: number;
@@ -32,8 +31,7 @@ function safeParse(json: any): any[] {
 }
 
 export default function BlogPage() {
-	const root = useRouteLoaderData<typeof rootLoader>("root");
-	const rawPosts = (root?.site?.posts ?? []) as any[];
+	const [rawPosts] = useSiteData<any[]>("posts", []);
 
 	const posts: BlogPost[] = rawPosts.map((p) => ({
 		id: p.wpId,

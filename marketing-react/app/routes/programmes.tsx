@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useRouteLoaderData } from "react-router";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { ResponsiveModal } from "~/components/layout/ResponsiveModal";
 import { Button } from "~/components/ui/button";
 import { Loader2, ChevronRight, Info } from "lucide-react";
-import type { loader as rootLoader } from "~/root";
+import { useSiteData } from "~/lib/hooks/useSiteData";
 
 interface ProgrammeScheduleItem {
 	day: string;
@@ -32,8 +31,7 @@ export interface Programme {
 }
 
 export default function ProgrammesPage() {
-	const root = useRouteLoaderData<typeof rootLoader>("root");
-	const programmes = (root?.site?.programmes ?? []) as Programme[];
+	const [programmes] = useSiteData<Programme[]>("programmes", []);
 
 	const [hoveredProgramme, setHoveredProgramme] = useState<Programme | null>(null);
 	const [selectedProgramme, setSelectedProgramme] = useState<Programme | null>(null);

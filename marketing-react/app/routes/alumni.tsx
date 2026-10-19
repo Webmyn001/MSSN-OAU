@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { useRouteLoaderData } from "react-router";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { GraduationCap, Mail, MessageSquareText, X } from "lucide-react";
 import { API_BASE } from "~/lib/api/base";
-import type { loader as rootLoader } from "~/root";
+import { useSiteData } from "~/lib/hooks/useSiteData";
 
 interface AlumniMember {
 	name?: string;
@@ -39,8 +38,8 @@ function sortSessionsNewestFirst(list: any[]): any[] {
 }
 
 export default function AlumniPage() {
-	const root = useRouteLoaderData<typeof rootLoader>("root");
-	const initial = (root?.site?.alumni?.sessions ?? []) as any[];
+	const [alumniData] = useSiteData<{ sessions: any[] }>("alumni", { sessions: [] });
+	const initial = alumniData?.sessions ?? [];
 
 	const [sessions, setSessions] = useState<any[]>(() => sortSessionsNewestFirst(initial));
 	const [loading, setLoading] = useState(true);

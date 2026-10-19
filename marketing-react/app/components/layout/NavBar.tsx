@@ -258,7 +258,7 @@ export function NavBar() {
 								{NAV_LINKS.map((link) => (
 									<Link
 										key={link.path}
-										className={`lg:px-3 lg:py-5 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center ${
+										className={`py-3 lg:py-5 px-2 lg:px-3 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center min-h-[44px] ${
 											isActive(link.path) ? "text-primary-700" : ""
 										}`}
 										to={link.path}
@@ -272,7 +272,7 @@ export function NavBar() {
 								))}
 
 								<Link
-									className="lg:px-3 lg:py-5 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center"
+									className="py-3 lg:py-5 px-2 lg:px-3 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center min-h-[44px]"
 									to="/#prayer-times"
 								>
 									<span>Prayer Times</span>
@@ -281,7 +281,7 @@ export function NavBar() {
 								<div className="relative" ref={dropdownRef}>
 									<button
 										type="button"
-										className="lg:px-3 lg:py-5 flex items-center w-full font-secondary font-medium text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200"
+										className="lg:px-3 lg:py-5 flex items-center w-full font-secondary font-medium text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 min-h-[44px]"
 										onClick={() => setIsDropdownOpen((v) => !v)}
 										aria-expanded={isDropdownOpen}
 										aria-haspopup="true"
@@ -305,7 +305,7 @@ export function NavBar() {
 
 									{isDropdownOpen ? (
 										<div
-											className="absolute z-[52] right-0 mt-2 w-64 lg:w-auto bg-white/95 backdrop-blur-md shadow-[0_15px_35px_-5px_rgba(0,0,0,0.15)] border border-primary-100/50 rounded-xl py-3 px-3 transition-all duration-300 transform origin-top-right"
+											className="absolute z-[52] right-0 mt-2 w-72 sm:w-80 lg:w-auto bg-white/95 backdrop-blur-md shadow-[0_15px_35px_-5px_rgba(0,0,0,0.15)] border border-primary-100/50 rounded-xl py-3 px-3 transition-all duration-300 transform origin-top-right"
 											role="menu"
 										>
 											<div className="lg:grid lg:grid-cols-3 lg:gap-4 lg:min-w-[600px]">
@@ -322,7 +322,7 @@ export function NavBar() {
 														{group.links.map((item) => (
 															<Link
 																key={item.href}
-																className="flex items-center py-2 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+																className="flex items-center py-2.5 px-3 rounded-lg text-sm font-primary text-gray-800 hover:bg-primary-50 hover:text-primary-700 transition-colors min-h-[44px]"
 																to={item.href}
 															>
 																{item.icon}
@@ -339,7 +339,7 @@ export function NavBar() {
 								</div>
 
 								<Link
-									className={`lg:px-3 lg:py-5 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center ${
+									className={`py-3 lg:py-5 px-2 lg:px-3 font-medium font-secondary relative text-gray-700 hover:text-primary-700 transition-colors ease-in-out duration-200 flex gap-1.5 items-center min-h-[44px] ${
 										isActive("/contact") ? "text-primary-700" : ""
 									}`}
 									to="/contact"

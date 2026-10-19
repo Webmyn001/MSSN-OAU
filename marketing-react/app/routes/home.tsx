@@ -1,5 +1,5 @@
-import { useRouteLoaderData } from "react-router";
-import type { loader as rootLoader } from "~/root";
+import { useEffect, useState } from "react";
+import { API_BASE } from "~/lib/api/base";
 import { Seo } from "~/components/seo";
 import { SITE_URL } from "~/lib/config";
 import { mapHomeEvent } from "~/lib/utils/events";
@@ -33,18 +33,82 @@ function mapPost(p: any) {
 }
 
 export default function Home() {
-	const root = useRouteLoaderData<typeof rootLoader>("root");
-	const site = root?.site;
+	const [events, setEvents] = useState<any[]>([]);
+	const [latestNews, setLatestNews] = useState<any[]>([]);
+	const [posts, setPosts] = useState<any[]>([]);
+	const [programmes, setProgrammes] = useState<any[]>([]);
+	const [mosques, setMosques] = useState<any[]>([]);
+	const [alumniSessions, setAlumniSessions] = useState<any[]>([]);
+	const [prayerInfo, setPrayerInfo] = useState<any>(null);
+	const [prayerTimesUpdatedAt, setPrayerTimesUpdatedAt] = useState("");
+	const [hijriDate, setHijriDate] = useState("");
+	const [shortHijriDate, setShortHijriDate] = useState("");
+	const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-	const events = ((site?.events ?? []) as any[]).slice(0, 3).map(mapHomeEvent);
-	const latestNews = ((site?.latestNews ?? []) as any[]).slice(0, 3);
-	const posts = [...((site?.posts ?? []) as any[])]
+	useEffect(() => {
+		let cancelled = false;
+		async function fetchHomeData() {
+			const [eventsRes, newsRes, postsRes, programmesRes, mosquesRes, alumniRes, prayerRes] =
+				await Promise.allSettled([
+					fetch(`${API_BASE}/public/events`),
+					fetch(`${API_BASE}/public/latest-news`),
+					fetch(`${API_BASE}/public/blog-posts/approved`),
+					fetch(`${API_BASE}/public/programmes`),
+					fetch(`${API_BASE}/public/mosques`),
+					fetch(`${API_BASE}/public/alumni`),
+					fetch(`${API_BASE}/public/prayer-times`),
+				]);
+
+			if (cancelled) return;
+
+			if (eventsRes.status === "fulfilled" && eventsRes.value.ok) {
+				const body = await eventsRes.value.json();
+				if (!cancelled && body?.data?.events) setEvents(body.data.events);
+			}
+			if (newsRes.status === "fulfilled" && newsRes.value.ok) {
+				const body = await newsRes.value.json();
+				if (!cancelled && body?.data?.items) setLatestNews(body.data.items);
+			}
+			if (postsRes.status === "fulfilled" && postsRes.value.ok) {
+				const body = await postsRes.value.json();
+				if (!cancelled && body?.data?.posts) setPosts(body.data.posts);
+			}
+			if (programmesRes.status === "fulfilled" && programmesRes.value.ok) {
+				const body = await programmesRes.value.json();
+				if (!cancelled && body?.data?.programmes) setProgrammes(body.data.programmes);
+			}
+			if (mosquesRes.status === "fulfilled" && mosquesRes.value.ok) {
+				const body = await mosquesRes.value.json();
+				if (!cancelled && body?.data?.mosques) setMosques(body.data.mosques);
+			}
+			if (alumniRes.status === "fulfilled" && alumniRes.value.ok) {
+				const body = await alumniRes.value.json();
+				if (!cancelled && body?.data?.alumni?.sessions) setAlumniSessions(body.data.alumni.sessions);
+			}
+			if (prayerRes.status === "fulfilled" && prayerRes.value.ok) {
+				const body = await prayerRes.value.json();
+				if (!cancelled && body?.data) {
+					setPrayerInfo(body.data.prayer_times ?? null);
+					setPrayerTimesUpdatedAt(body.data.updatedAt || "");
+					setHijriDate(body.data.hijriDate || "");
+					setShortHijriDate(body.data.shortHijriDate || "");
+				}
+			}
+			if (!cancelled) setIsDataLoaded(true);
+		}
+		fetchHomeData();
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	const mappedEvents = events.slice(0, 3).map(mapHomeEvent);
+	const mappedPosts = [...posts]
 		.sort((a, b) => new Date(b.approvedAt || 0).getTime() - new Date(a.approvedAt || 0).getTime())
 		.slice(0, 3)
 		.map(mapPost);
-	const programmes = ((site?.programmes ?? []) as any[]).slice(0, 4);
-	const mosques = (site?.mosques ?? []) as any[];
-	const info = site?.info;
+	const slicedProgrammes = programmes.slice(0, 4);
+	const slicedLatestNews = latestNews.slice(0, 3);
 
 	const homeImages = [
 		"/images/bg-1.webp",
@@ -63,14 +127,12 @@ export default function Home() {
 		"/images/woman_6.webp",
 		"/images/man_7.webp",
 		"/images/woman_7.webp",
-		...programmes.map((p) => p.image).filter(Boolean),
-		...((site?.events ?? []) as any[]).map((e) => e.image || e.imageUrl).filter(Boolean),
-		...latestNews.map((n) => n.image).filter(Boolean),
-		...posts.map((p) => p.featured_image).filter(Boolean),
+		...slicedProgrammes.map((p) => p.image).filter(Boolean),
+		...events.map((e) => e.image || e.imageUrl).filter(Boolean),
+		...slicedLatestNews.map((n) => n.image).filter(Boolean),
+		...mappedPosts.map((p) => p.featured_image).filter(Boolean),
 		...mosques.flatMap((m) => (m.images || []).slice(0, 1)),
-		...(((site?.alumni?.sessions ?? []) as any[]) || [])
-			.flatMap((s) => [s.ameer?.photo, s.ameerah?.photo])
-			.filter(Boolean),
+		...alumniSessions.flatMap((s) => [s.ameer?.photo, s.ameerah?.photo]).filter(Boolean),
 	];
 
 	return (
@@ -102,23 +164,23 @@ export default function Home() {
 
 			<HeroSection />
 
-			<Programmes programmes={programmes} />
+			<Programmes programmes={slicedProgrammes} />
 
 			<PrayerTimesSection
-				prayerTimes={info?.prayer_times ?? null}
-				prayerTimesUpdatedAt={info?.prayerTimesUpdatedAt ?? ""}
-				hijriDate={info?.hijriDate ?? ""}
-				shortHijriDate={info?.shortHijriDate ?? ""}
+				prayerTimes={prayerInfo}
+				prayerTimesUpdatedAt={prayerTimesUpdatedAt}
+				hijriDate={hijriDate}
+				shortHijriDate={shortHijriDate}
 				mosques={mosques}
 			/>
 
-			<LatestNewsSection items={latestNews} />
+			<LatestNewsSection items={slicedLatestNews} />
 
-			<UpcomingEvents events={events} />
+			<UpcomingEvents events={mappedEvents} />
 
-			<BlogSection posts={posts} />
+			<BlogSection posts={mappedPosts} />
 
-			<AlumniSection sessions={(site?.alumni?.sessions ?? []) as any[]} />
+			<AlumniSection sessions={alumniSessions} />
 
 			<SuggestionsSection />
 

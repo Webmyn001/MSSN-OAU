@@ -15,8 +15,8 @@ import { NavBar } from "~/components/layout/NavBar";
 import { Footer } from "~/components/layout/Footer";
 import { useEffect } from "react";
 import { ORGANIZATION } from "~/lib/config";
-import { loadSiteData } from "~/lib/api/site-data";
 import type { SiteData } from "~/lib/api/site-data";
+import { exampleInfo } from "~/lib/mocks/info";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.ico" },
@@ -36,16 +36,19 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export async function loader(_args: Route.LoaderArgs): Promise<{ site: SiteData }> {
-  const site = await loadSiteData(fetch, [
-    "info",
-    "events",
-    "programmes",
-    "mosques",
-    "latestNews",
-    "posts",
-    "alumni",
-  ]);
-  return { site };
+  return {
+    site: {
+      info: { ...exampleInfo },
+      events: [],
+      programmes: [],
+      mosques: [],
+      latestNews: [],
+      posts: [],
+      advisors: [],
+      alumni: { sessions: [] },
+      excos: { sessions: [] },
+    },
+  };
 }
 
 export function shouldRevalidate() {

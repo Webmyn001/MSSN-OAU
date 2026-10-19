@@ -237,30 +237,30 @@ export default function OurExcosPage() {
 				<br />
 				{sessions.length > 0 ? (
 					<div>
-						<div ref={selectorRef} className="relative flex justify-center">
+						<div ref={selectorRef} className="relative flex justify-center w-full px-4">
 							<button
 								type="button"
 								onClick={() => setSessionSelectorOpen((v) => !v)}
-								className="group inline-flex items-center bg-white/20 hover:bg-white/30 border border-white/20 p-1 ps-4 rounded-full shadow-lg transition-all duration-300 mx-auto mt-4"
+								className="group inline-flex items-center justify-between bg-white/20 hover:bg-white/30 border border-white/20 p-1 ps-4 pe-1 rounded-full shadow-lg transition-all duration-300 mx-auto mt-4 w-full max-w-md"
 							>
-								<span className="me-2 text-white text-sm font-medium">
+								<span className="me-2 text-white text-sm font-medium truncate">
 									{selectedSession || "Choose Session"}
 								</span>
-								<span className="group-hover:bg-white/30 py-1.5 px-2.5 flex justify-center items-center rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300">
-									<ChevronDown className="shrink-0 size-4 transition-transform duration-300 group-hover:rotate-180" />
+								<span className="group-hover:bg-white/30 py-2 px-3 flex justify-center items-center rounded-full bg-white/20 font-semibold text-white text-sm transition-all duration-300 shrink-0">
+									<ChevronDown className="shrink-0 size-5 transition-transform duration-300 group-hover:rotate-180" />
 								</span>
 							</button>
 
 							{sessionSelectorOpen ? (
-								<div className="absolute top-full mt-2 w-[300px] z-50 rounded-xl border border-green-100 shadow-xl bg-white overflow-hidden text-left">
+								<div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-md z-50 rounded-xl border border-green-100 shadow-xl bg-white overflow-hidden text-left">
 									<input
 										type="search"
 										value={sessionQuery}
 										onChange={(e) => setSessionQuery(e.target.value)}
 										placeholder="Search Session..."
-										className="w-full px-4 py-2.5 text-sm border-b border-green-100 outline-none"
+										className="w-full px-4 py-3 text-sm border-b border-green-100 outline-none"
 									/>
-									<div className="max-h-[300px] overflow-y-auto p-1">
+									<div className="max-h-[50vh] overflow-y-auto p-2">
 										{filteredSessions.length > 0 ? (
 											filteredSessions.map((sessionItem) => (
 												<button
@@ -271,7 +271,7 @@ export default function OurExcosPage() {
 														setSessionSelectorOpen(false);
 														setSessionQuery("");
 													}}
-													className="w-full text-left px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-green-900"
+													className="w-full text-left px-4 py-3.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-900 min-h-[48px] flex items-center"
 												>
 													{sessionItem.session}
 												</button>
