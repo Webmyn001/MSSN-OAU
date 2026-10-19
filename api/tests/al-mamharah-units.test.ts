@@ -132,7 +132,9 @@ describe('dailyTargetFromMasar', () => {
 		expect(dailyTargetFromMasar('FOUR_PAGES').pages).toBe(4)
 		expect(dailyTargetFromMasar('ONE_JUZ').juz).toBe(1)
 		expect(dailyTargetFromMasar('THREE_JUZ').juz).toBe(3)
+		expect(dailyTargetFromMasar('FOUR_JUZ').juz).toBe(4)
 		expect(dailyTargetFromMasar('FIVE_JUZ').juz).toBe(5)
+		expect(dailyTargetFromMasar('KHATM').label).toBe('Full khatm')
 	})
 })
 

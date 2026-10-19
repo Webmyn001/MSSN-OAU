@@ -1,7 +1,7 @@
 CREATE TYPE "public"."al_mamharah_application_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED');--> statement-breakpoint
 CREATE TYPE "public"."al_mamharah_manager_role" AS ENUM('PRIMARY', 'MANAGER');--> statement-breakpoint
 CREATE TYPE "public"."al_mamharah_manager_status" AS ENUM('PENDING', 'ACTIVE', 'REVOKED');--> statement-breakpoint
-CREATE TYPE "public"."al_mamharah_masar" AS ENUM('THREE_PAGES', 'FOUR_PAGES', 'ONE_JUZ', 'THREE_JUZ', 'FIVE_JUZ');--> statement-breakpoint
+CREATE TYPE "public"."al_mamharah_masar" AS ENUM('THREE_PAGES', 'FOUR_PAGES', 'ONE_JUZ', 'THREE_JUZ', 'FOUR_JUZ', 'FIVE_JUZ', 'KHATM');--> statement-breakpoint
 CREATE TYPE "public"."al_mamharah_participant_status" AS ENUM('ACTIVE', 'SUSPENDED');--> statement-breakpoint
 CREATE TYPE "public"."al_mamharah_task_type" AS ENUM('MUROJAAH', 'TAJWEED_QIRAAT');--> statement-breakpoint
 CREATE TABLE "al_mamharah_applications" (

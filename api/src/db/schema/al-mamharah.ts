@@ -22,7 +22,9 @@ export const alMamharahMasarEnum = pgEnum('al_mamharah_masar', [
 	'FOUR_PAGES',
 	'ONE_JUZ',
 	'THREE_JUZ',
-	'FIVE_JUZ'
+	'FOUR_JUZ',
+	'FIVE_JUZ',
+	'KHATM'
 ])
 
 // * Application review status

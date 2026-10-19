@@ -7,7 +7,9 @@ export const alMamharahMasarSchema = z.enum([
 	'FOUR_PAGES',
 	'ONE_JUZ',
 	'THREE_JUZ',
-	'FIVE_JUZ'
+	'FOUR_JUZ',
+	'FIVE_JUZ',
+	'KHATM'
 ])
 
 export const alMamharahTaskTypeSchema = z.enum(['MUROJAAH', 'TAJWEED_QIRAAT'])
