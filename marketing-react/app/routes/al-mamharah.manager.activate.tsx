@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Seo } from "~/components/seo";
 import { Button } from "~/components/ui/button";
-import { CheckCircle2, AlertCircle, Loader2, ShieldCheck, KeyRound } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2, ShieldCheck, KeyRound, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { validateActivation, activateManager } from "~/lib/api/al-mamharah";
 
@@ -23,6 +23,8 @@ export default function ManagerActivatePage() {
 	const [submitting, setSubmitting] = useState(false);
 	const [formError, setFormError] = useState<string | null>(null);
 	const [done, setDone] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirm, setShowConfirm] = useState(false);
 
 	useEffect(() => {
 		if (!token) {
@@ -160,17 +162,27 @@ export default function ManagerActivatePage() {
 									>
 										Password
 									</label>
-									<input
-										id="act-password"
-										type="password"
-										required
-										minLength={8}
-										autoComplete="new-password"
-										className={inputClass}
-										value={password}
-										onChange={(e) => setPassword(e.target.value)}
-										placeholder="At least 8 characters"
-									/>
+									<div className="relative">
+										<input
+											id="act-password"
+											type={showPassword ? "text" : "password"}
+											required
+											minLength={8}
+											autoComplete="new-password"
+											className={`${inputClass} pr-11`}
+											value={password}
+											onChange={(e) => setPassword(e.target.value)}
+											placeholder="At least 8 characters"
+										/>
+										<button
+											type="button"
+											onClick={() => setShowPassword((prev) => !prev)}
+											className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-r-lg"
+											aria-label={showPassword ? "Hide password" : "Show password"}
+										>
+											{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+										</button>
+									</div>
 								</div>
 								<div>
 									<label
@@ -179,17 +191,27 @@ export default function ManagerActivatePage() {
 									>
 										Confirm password
 									</label>
-									<input
-										id="act-confirm"
-										type="password"
-										required
-										minLength={8}
-										autoComplete="new-password"
-										className={inputClass}
-										value={confirmPassword}
-										onChange={(e) => setConfirmPassword(e.target.value)}
-										placeholder="Re-enter your password"
-									/>
+									<div className="relative">
+										<input
+											id="act-confirm"
+											type={showConfirm ? "text" : "password"}
+											required
+											minLength={8}
+											autoComplete="new-password"
+											className={`${inputClass} pr-11`}
+											value={confirmPassword}
+											onChange={(e) => setConfirmPassword(e.target.value)}
+											placeholder="Re-enter your password"
+										/>
+										<button
+											type="button"
+											onClick={() => setShowConfirm((prev) => !prev)}
+											className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-r-lg"
+											aria-label={showConfirm ? "Hide password" : "Show password"}
+										>
+											{showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+										</button>
+									</div>
 								</div>
 
 								{formError ? (

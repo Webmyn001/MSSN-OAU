@@ -96,6 +96,36 @@ export function EnterProgramme() {
 		setFormError(null);
 	}
 
+	async function resendCode() {
+		setFormError(null);
+		if (fullName.trim().length < 2) {
+			back();
+			return;
+		}
+		setIsSubmitting(true);
+		try {
+			const result = await enterProgramme(fullName.trim());
+			const data = result.data ?? {};
+			if (data.status === "code_sent") {
+				setInfoMessage(data.message ?? "A new 6-digit code has been sent to your email.");
+				setDevCode(data.devCode ?? null);
+				toast.success("A new code has been sent.");
+			} else {
+				setNotVerified({
+					message: data.message ?? "Your participation has not yet been verified.",
+					messageAr: data.messageAr ?? "",
+				});
+			}
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Something went wrong. Please try again.";
+			setFormError(message);
+			toast.error(message);
+		} finally {
+			setIsSubmitting(false);
+		}
+	}
+
 	return (
 		<div
 			id="enter"
@@ -224,6 +254,14 @@ export function EnterProgramme() {
 							Back
 						</Button>
 					</div>
+					<button
+						type="button"
+						onClick={resendCode}
+						disabled={isSubmitting}
+						className="mt-1 text-center text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline disabled:opacity-50 disabled:pointer-events-none"
+					>
+						Didn't receive the code? Resend it
+					</button>
 				</form>
 			)}
 		</div>
