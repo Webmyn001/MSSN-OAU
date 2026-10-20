@@ -23,6 +23,8 @@ export interface ApplicationInput {
 	faculty: string
 	department: string
 	masar: AlMamharahMasar
+	startSurah?: string
+	startPage?: number
 	confirmedMemorisation: boolean
 	confirmedTajweed: boolean
 	agreedGuidelines: boolean
@@ -43,6 +45,8 @@ export async function submitApplication(input: ApplicationInput): Promise<AlMamh
 		faculty: input.faculty.trim(),
 		department: input.department.trim(),
 		masar: input.masar,
+		startSurah: input.startSurah?.trim() || null,
+		startPage: input.startPage ?? null,
 		confirmedMemorisation: true,
 		confirmedTajweed: true,
 		agreedGuidelines: true,
@@ -195,6 +199,8 @@ export async function approveApplication(
 				email: application.email,
 				masar: application.masar,
 				startDate,
+				startSurah: application.startSurah,
+				startPage: application.startPage,
 				status: 'ACTIVE'
 			})
 			.returning()

@@ -70,6 +70,9 @@ export const alMamharahApplications = pgTable(
 		faculty: varchar('faculty', { length: 150 }).notNull(),
 		department: varchar('department', { length: 150 }).notNull(),
 		masar: alMamharahMasarEnum('masar').notNull(),
+		// * Where the applicant wants to start revising (mushaf position)
+		startSurah: varchar('start_surah', { length: 100 }),
+		startPage: integer('start_page'),
 		confirmedMemorisation: boolean('confirmed_memorisation').notNull().default(false),
 		confirmedTajweed: boolean('confirmed_tajweed').notNull().default(false),
 		agreedGuidelines: boolean('agreed_guidelines').notNull().default(false),
@@ -103,6 +106,12 @@ export const alMamharahParticipants = pgTable(
 		masar: alMamharahMasarEnum('masar').notNull(),
 		// * First eligible programme day for this participant
 		startDate: date('start_date').notNull(),
+		// * Where the student began revising — drives the positional daily target.
+		startSurah: varchar('start_surah', { length: 100 }),
+		startPage: integer('start_page'),
+		// * bcrypt hash; null = student has never set a password and must go
+		// * through the OTP "enter programme" flow to establish one.
+		passwordHash: text('password_hash'),
 		status: alMamharahParticipantStatusEnum('status').notNull().default('ACTIVE'),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()

@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { submitApplication } from "~/lib/api/al-mamharah";
-import { MASAR_OPTIONS } from "~/lib/data/al-mamharah";
+import { MASAR_OPTIONS, START_OPTIONS, startPageForSurah } from "~/lib/data/al-mamharah";
 
 const inputClass =
 	"py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm";
@@ -18,6 +18,7 @@ interface FormData {
 	faculty: string;
 	department: string;
 	masar: string;
+	startSurah: string;
 	confirmedMemorisation: boolean;
 	confirmedTajweed: boolean;
 	agreedGuidelines: boolean;
@@ -31,6 +32,7 @@ const initialForm: FormData = {
 	faculty: "",
 	department: "",
 	masar: "",
+	startSurah: "",
 	confirmedMemorisation: false,
 	confirmedTajweed: false,
 	agreedGuidelines: false,
@@ -77,6 +79,8 @@ export function ApplicationForm({
 				faculty: formData.faculty.trim(),
 				department: formData.department.trim(),
 				masar: formData.masar,
+				startSurah: formData.startSurah || undefined,
+				startPage: formData.startSurah ? startPageForSurah(formData.startSurah) : undefined,
 				confirmedMemorisation: formData.confirmedMemorisation,
 				confirmedTajweed: formData.confirmedTajweed,
 				agreedGuidelines: formData.agreedGuidelines,
@@ -244,6 +248,29 @@ export function ApplicationForm({
 						</select>
 					</div>
 
+					<div>
+						<label className={labelClass} htmlFor="almh-startSurah">
+							Where would you like to start revising? <span className="text-gray-400">(optional)</span>
+						</label>
+						<select
+							id="almh-startSurah"
+							name="startSurah"
+							className="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm appearance-none bg-white"
+							value={formData.startSurah}
+							onChange={(e) => update("startSurah", e.target.value)}
+						>
+							<option value="">Not sure — start from Al-Fātiḥah</option>
+							{START_OPTIONS.map((option) => (
+								<option key={option.value} value={option.value}>
+									{option.value} (pg {option.page})
+								</option>
+							))}
+						</select>
+						<p className="mt-1 text-xs text-gray-500">
+							Your daily target will be shown from this point in the mushaf.
+						</p>
+					</div>
+
 					<div className="space-y-3 rounded-lg border border-primary-100 bg-primary-50/50 p-4">
 						<label className="flex cursor-pointer items-start gap-3 text-sm text-gray-700">
 							<input
@@ -252,7 +279,7 @@ export function ApplicationForm({
 								checked={formData.confirmedMemorisation}
 								onChange={(e) => update("confirmedMemorisation", e.target.checked)}
 							/>
-							<span>I confirm that I have completed the memorisation of the Qurʼān.</span>
+							<span>I confirm that I have memorised at least 15 ajzāʼ of the Qurʼān.</span>
 						</label>
 						<label className="flex cursor-pointer items-start gap-3 text-sm text-gray-700">
 							<input

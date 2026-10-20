@@ -260,6 +260,30 @@ export default function AlMamharahDashboardPage() {
 											</span>
 										</div>
 
+										{report.dailyTarget ? (
+											<div className="mt-3 rounded-lg border border-primary-100 bg-primary-50/60 px-3 py-2">
+												<p className="text-xs font-medium uppercase tracking-wide text-primary-600">
+													Your daily target
+												</p>
+												<p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm font-semibold text-primary-800">
+													{report.dailyTarget.fromPage && report.dailyTarget.toPage ? (
+														<>
+															<span>Surat {report.dailyTarget.surah}</span>
+															<span className="text-primary-400">·</span>
+															<span className="font-mono">
+																pg {report.dailyTarget.fromPage}
+																{report.dailyTarget.toPage !== report.dailyTarget.fromPage
+																	? `–${report.dailyTarget.toPage}`
+																	: ""}
+															</span>
+														</>
+													) : (
+														<span>{report.dailyTarget.label}</span>
+													)}
+												</p>
+											</div>
+										) : null}
+
 										{!report.todayEligible ? (
 											<div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
 												Today is not an eligible day for your programme window.

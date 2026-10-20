@@ -18,6 +18,10 @@ export interface AlMamharahSettings {
 	tasks: AlMamharahTaskType[]
 	// * Tasks that must be completed for a day to count toward the streak
 	streakTasks: AlMamharahTaskType[]
+	// * Whether new applications are accepted (managers toggle this)
+	acceptingApplications: boolean
+	// * Auto-suspend a participant once they miss this many days in a calendar month
+	maxMissedDaysPerMonth: number
 }
 
 // * Official programme information (initial phase: 18 Oct – 18 Nov 2026)
@@ -26,7 +30,9 @@ export const DEFAULT_SETTINGS: AlMamharahSettings = {
 	end: '2026-11-18',
 	timezone: 'Africa/Lagos',
 	tasks: ['MUROJAAH'],
-	streakTasks: ['MUROJAAH']
+	streakTasks: ['MUROJAAH'],
+	acceptingApplications: true,
+	maxMissedDaysPerMonth: 4
 }
 
 const TASK_TYPES: AlMamharahTaskType[] = ['MUROJAAH', 'TAJWEED_QIRAAT']
@@ -57,6 +63,15 @@ export function normalizeSettings(
 	if (merged.tasks.length === 0) merged.tasks = [...DEFAULT_SETTINGS.tasks]
 	merged.streakTasks = filterTasks(merged.streakTasks).filter(t => merged.tasks.includes(t))
 	if (merged.streakTasks.length === 0) merged.streakTasks = [...merged.tasks]
+	merged.acceptingApplications =
+		typeof merged.acceptingApplications === 'boolean'
+			? merged.acceptingApplications
+			: DEFAULT_SETTINGS.acceptingApplications
+	const missed = Number(merged.maxMissedDaysPerMonth)
+	merged.maxMissedDaysPerMonth =
+		Number.isFinite(missed) && missed >= 1 && missed <= 31
+			? Math.floor(missed)
+			: DEFAULT_SETTINGS.maxMissedDaysPerMonth
 	return merged
 }
 

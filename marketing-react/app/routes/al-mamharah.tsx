@@ -217,9 +217,25 @@ export default function AlMamharahPage() {
 								</svg>
 							</a>
 						</div>
-						<div className="mx-auto max-w-2xl">
+					<div className="mx-auto max-w-2xl">
+						{info?.acceptingApplications === false ? (
+							<div
+								id="apply"
+								className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center"
+							>
+								<h3 className="font-secondary text-lg font-semibold text-amber-800">
+									Applications are currently closed
+								</h3>
+								<p className="mt-2 text-sm text-amber-700">
+									New applications for this phase of Al-Mamharah are not being accepted right
+									now. If you have already been approved, sign in below to access your
+									dashboard.
+								</p>
+							</div>
+						) : (
 							<ApplicationForm />
-						</div>
+						)}
+					</div>
 						<div id="enter-programme" className="mx-auto mt-10 max-w-md">
 							<EnterProgramme />
 						</div>

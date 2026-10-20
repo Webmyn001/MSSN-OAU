@@ -131,6 +131,32 @@ export const TASK_LABELS: Record<string, string> = {
 	TAJWEED_QIRAAT: "Tajwīd & Qirāʼah",
 };
 
+export interface StartOption {
+	value: string; // surah name
+	page: number; // starting page in the standard Hafs mushaf
+}
+
+// * Curated list of common starting surahs (not all 114) so the daily target
+// * can show a page like "Suratul Baqarah pg 1". Page numbers use the
+// * standard Hafs (Madinah) mushaf; the same map lives in the API's mushaf.ts.
+export const START_OPTIONS: StartOption[] = [
+	{ value: "Al-Fātiḥah", page: 1 },
+	{ value: "Al-Baqarah", page: 2 },
+	{ value: "Āl ʿImrān", page: 50 },
+	{ value: "An-Nisāʾ", page: 77 },
+	{ value: "Al-Māʾidah", page: 106 },
+	{ value: "Al-Kahf", page: 293 },
+	{ value: "Yā-Sīn", page: 440 },
+	{ value: "Ar-Raḥmān", page: 531 },
+	{ value: "Al-Mulk", page: 562 },
+	{ value: "Al-Ikhlāṣ", page: 604 },
+];
+
+/** Starting page for a curated surah name (undefined if not in the list). */
+export function startPageForSurah(name: string): number | undefined {
+	return START_OPTIONS.find((o) => o.value === name)?.page;
+}
+
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {
 	PENDING: "Under Review",
 	APPROVED: "Approved",

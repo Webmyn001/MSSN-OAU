@@ -123,10 +123,25 @@ export function enterProgramme(fullName: string) {
 	return request("/public/al-mamharah/enter", { method: "POST", body: { fullName } });
 }
 
-export function verifyEnterCode(fullName: string, code: string) {
+export function verifyEnterCode(fullName: string, code: string, password?: string) {
 	return request("/public/al-mamharah/enter/verify", {
 		method: "POST",
-		body: { fullName, code },
+		body: { fullName, code, ...(password ? { password } : {}) },
+	});
+}
+
+export function loginParticipant(fullName: string, password: string) {
+	return request("/public/al-mamharah/login", { method: "POST", body: { fullName, password } });
+}
+
+export function forgotParticipantPassword(fullName: string) {
+	return request("/public/al-mamharah/forgot-password", { method: "POST", body: { fullName } });
+}
+
+export function resetParticipantPassword(fullName: string, code: string, password: string) {
+	return request("/public/al-mamharah/reset-password", {
+		method: "POST",
+		body: { fullName, code, password },
 	});
 }
 
@@ -282,6 +297,13 @@ export function setParticipantStatus(
 	return request(`/al-mamharah/manager/participants/${id}/status`, {
 		method: "POST",
 		body: notes ? { status, notes } : { status },
+		token,
+	});
+}
+
+export function suspendInactiveParticipants(token: string | undefined = getManagerToken()) {
+	return request("/al-mamharah/manager/participants/suspend-inactive", {
+		method: "POST",
 		token,
 	});
 }

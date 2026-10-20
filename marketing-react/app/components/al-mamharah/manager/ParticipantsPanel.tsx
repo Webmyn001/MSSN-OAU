@@ -19,6 +19,7 @@ import {
 	listParticipants,
 	getParticipantDetail,
 	setParticipantStatus,
+	suspendInactiveParticipants,
 	backfillCompletion,
 	fetchCsv,
 	AlMamharahError,
@@ -55,6 +56,22 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 	const [bfTask, setBfTask] = useState("MUROJAAH");
 	const [bfNote, setBfNote] = useState("");
 	const [bfBusy, setBfBusy] = useState(false);
+	const [sweeping, setSweeping] = useState(false);
+
+	async function sweepInactive() {
+		if (!window.confirm("Suspend everyone who has missed the monthly limit?")) return;
+		setSweeping(true);
+		try {
+			const result = await suspendInactiveParticipants(token);
+			const count = result.data?.suspended?.length ?? 0;
+			toast.success(result.data?.message ?? `${count} participant(s) suspended.`);
+			await load();
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Sweep failed.");
+		} finally {
+			setSweeping(false);
+		}
+	}
 
 	async function load() {
 		setLoading(true);
@@ -223,6 +240,14 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 				</div>
 				<Button variant="outline" size="sm" onClick={exportCsv}>
 					<Download className="size-4" /> CSV
+				</Button>
+				<Button variant="outline" size="sm" onClick={sweepInactive} disabled={sweeping}>
+					{sweeping ? (
+						<Loader2 className="size-4 animate-spin" />
+					) : (
+						<UserX className="size-4" />
+					)}
+					Suspend inactive
 				</Button>
 			</div>
 

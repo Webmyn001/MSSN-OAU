@@ -33,7 +33,12 @@ export const submitApplicationSchema = z.object({
 	faculty: z.string().trim().min(2, 'Faculty is required').max(150),
 	department: z.string().trim().min(2, 'Department is required').max(150),
 	masar: alMamharahMasarSchema,
-	confirmedMemorisation: requiredConfirmation("Please confirm that you have memorised the Qur'an"),
+	// * Optional personalised start position (drives the daily target)
+	startSurah: z.string().trim().min(1).max(100).optional(),
+	startPage: z.number().int().min(1).max(604).optional(),
+	confirmedMemorisation: requiredConfirmation(
+		'Please confirm that you have memorised at least 15 ajzāʼ of the Qurʼān'
+	),
 	confirmedTajweed: requiredConfirmation('Please confirm that you have studied tajwīd'),
 	agreedGuidelines: requiredConfirmation('Please agree to the programme guidelines')
 })
@@ -47,7 +52,34 @@ export const verifyEnterCodeSchema = z.object({
 	code: z
 		.string()
 		.trim()
-		.regex(/^\d{6}$/, 'Enter the 6-digit code from your email')
+		.regex(/^\d{6}$/, 'Enter the 6-digit code from your email'),
+	// * On the first login (no password yet) the student picks a password here.
+	password: z
+		.string()
+		.min(8, 'Password must be at least 8 characters')
+		.max(128, 'Password is too long')
+		.optional()
+})
+
+export const participantLoginSchema = z.object({
+	fullName: z.string().trim().min(2, 'Enter your full name').max(255),
+	password: z.string().min(1, 'Password is required')
+})
+
+export const forgotPasswordSchema = z.object({
+	fullName: z.string().trim().min(2, 'Enter your full name').max(255)
+})
+
+export const resetPasswordSchema = z.object({
+	fullName: z.string().trim().min(2, 'Enter your full name').max(255),
+	code: z
+		.string()
+		.trim()
+		.regex(/^\d{6}$/, 'Enter the 6-digit code from your email'),
+	password: z
+		.string()
+		.min(8, 'Password must be at least 8 characters')
+		.max(128, 'Password is too long')
 })
 
 // * --- Participant ----------------------------------------------------------
@@ -112,7 +144,9 @@ export const programmeSettingsSchema = z.object({
 	end: isoDateSchema,
 	timezone: z.string().trim().min(1).max(64),
 	tasks: z.array(alMamharahTaskTypeSchema).min(1),
-	streakTasks: z.array(alMamharahTaskTypeSchema).min(1)
+	streakTasks: z.array(alMamharahTaskTypeSchema).min(1),
+	acceptingApplications: z.boolean().optional(),
+	maxMissedDaysPerMonth: z.number().int().min(1).max(31).optional()
 })
 
 export const listApplicationsQuerySchema = z.object({

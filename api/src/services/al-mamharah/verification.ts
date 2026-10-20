@@ -33,17 +33,20 @@ function generateCode(): string {
 
 /**
  * Issues a fresh verification code for a participant, invalidating any
- * previous unused code. Returns the plain code (for emailing) — only the
- * hash is persisted.
+ * previous unused code with the same purpose. Returns the plain code (for
+ * emailing) — only the hash is persisted.
  */
-export async function issueVerificationCode(participantId: string): Promise<string> {
+export async function issueVerificationCode(
+	participantId: string,
+	purpose: 'ENTER_PROGRAMME' | 'RESET_PASSWORD' = 'ENTER_PROGRAMME'
+): Promise<string> {
 	await db
 		.update(alMamharahVerificationCodes)
 		.set({ usedAt: new Date() })
 		.where(
 			and(
 				eq(alMamharahVerificationCodes.participantId, participantId),
-				eq(alMamharahVerificationCodes.purpose, 'ENTER_PROGRAMME'),
+				eq(alMamharahVerificationCodes.purpose, purpose),
 				isNull(alMamharahVerificationCodes.usedAt)
 			)
 		)
@@ -52,11 +55,11 @@ export async function issueVerificationCode(participantId: string): Promise<stri
 	await db.insert(alMamharahVerificationCodes).values({
 		participantId,
 		codeHash: hashCode(code),
-		purpose: 'ENTER_PROGRAMME',
+		purpose,
 		expiresAt: new Date(Date.now() + CODE_EXPIRY_MS)
 	})
 
-	logger.info({ participantId }, 'Al-Mamharah verification code issued')
+	logger.info({ participantId, purpose }, 'Al-Mamharah verification code issued')
 	return code
 }
 
@@ -64,14 +67,18 @@ export async function issueVerificationCode(participantId: string): Promise<stri
  * Checks a verification code. Failed attempts are counted (max 5, after which
  * the code is burned). A used or expired code always fails.
  */
-export async function verifyParticipantCode(participantId: string, code: string): Promise<boolean> {
+export async function verifyParticipantCode(
+	participantId: string,
+	code: string,
+	purpose: 'ENTER_PROGRAMME' | 'RESET_PASSWORD' = 'ENTER_PROGRAMME'
+): Promise<boolean> {
 	const [record] = await db
 		.select()
 		.from(alMamharahVerificationCodes)
 		.where(
 			and(
 				eq(alMamharahVerificationCodes.participantId, participantId),
-				eq(alMamharahVerificationCodes.purpose, 'ENTER_PROGRAMME'),
+				eq(alMamharahVerificationCodes.purpose, purpose),
 				isNull(alMamharahVerificationCodes.usedAt),
 				gt(alMamharahVerificationCodes.expiresAt, new Date())
 			)

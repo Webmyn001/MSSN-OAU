@@ -35,6 +35,8 @@ export function SettingsPanel({
 	const [timezone, setTimezone] = useState("");
 	const [tasks, setTasks] = useState<string[]>([]);
 	const [streakTasks, setStreakTasks] = useState<string[]>([]);
+	const [acceptingApplications, setAcceptingApplications] = useState(true);
+	const [maxMissedDaysPerMonth, setMaxMissedDaysPerMonth] = useState(4);
 
 	async function load() {
 		setLoading(true);
@@ -47,6 +49,8 @@ export function SettingsPanel({
 			setTimezone(s.timezone);
 			setTasks([...s.tasks]);
 			setStreakTasks([...s.streakTasks]);
+			setAcceptingApplications(s.acceptingApplications ?? true);
+			setMaxMissedDaysPerMonth(s.maxMissedDaysPerMonth ?? 4);
 		} catch (err) {
 			if (err instanceof AlMamharahError && (err.status === 401 || err.status === 403)) {
 				onExpired();
@@ -67,7 +71,15 @@ export function SettingsPanel({
 		setSaved(false);
 		try {
 			const result = await updateSettings(
-				{ start, end, timezone: timezone.trim(), tasks, streakTasks },
+				{
+					start,
+					end,
+					timezone: timezone.trim(),
+					tasks,
+					streakTasks,
+					acceptingApplications,
+					maxMissedDaysPerMonth,
+				},
 				token
 			);
 			toast.success("Settings saved.");
@@ -188,6 +200,43 @@ export function SettingsPanel({
 							{TASK_LABELS[task]}
 						</label>
 					))}
+				</div>
+			</div>
+
+			<div>
+				<h3 className="font-secondary text-base font-semibold text-gray-800">Applications</h3>
+				<p className="mt-1 text-xs text-gray-500">
+					When closed, new applications are blocked and the public form is hidden.
+				</p>
+				<label className="mt-3 flex cursor-pointer items-center gap-3 text-sm text-gray-700">
+					<input
+						type="checkbox"
+						className="size-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
+						checked={acceptingApplications}
+						onChange={(e) => setAcceptingApplications(e.target.checked)}
+					/>
+					Accepting new applications
+				</label>
+			</div>
+
+			<div>
+				<h3 className="font-secondary text-base font-semibold text-gray-800">Auto-suspension</h3>
+				<p className="mt-1 text-xs text-gray-500">
+					Participants who miss this many days in a calendar month are suspended automatically.
+				</p>
+				<div className="mt-3 max-w-xs">
+					<label className="mb-1 block text-xs font-medium text-gray-600" htmlFor="set-missed">
+						Max missed days per month
+					</label>
+					<input
+						id="set-missed"
+						type="number"
+						min={1}
+						max={31}
+						className={inputClass}
+						value={maxMissedDaysPerMonth}
+						onChange={(e) => setMaxMissedDaysPerMonth(Number(e.target.value))}
+					/>
 				</div>
 			</div>
 

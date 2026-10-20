@@ -71,6 +71,13 @@
       "when": 1792444175950,
       "tag": "0009_add_two_pages_and_khatm_enum",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792515979245,
+      "tag": "0010_al_mamharah_password_and_start_position",
+      "breakpoints": true
     }
   ]
 }

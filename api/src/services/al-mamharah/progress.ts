@@ -9,8 +9,9 @@ import {
 } from '../../db/schema'
 import { NotFoundError, ValidationError } from '../../lib/errors'
 import { recordAudit } from './audit'
-import { isValidISODate, todayInTimeZone, type ISODate, type StreakStats } from './dates'
+import { diffDays, isValidISODate, todayInTimeZone, type ISODate, type StreakStats } from './dates'
 import { computeParticipantStats, participantWindowStart, toISODateValue } from './participants'
+import { clampPage, pageRangeLabel, surahAtPage } from './mushaf'
 import { getSettings, type AlMamharahSettings } from './settings'
 
 // * Daily Muroja'ah recording and participant-facing progress reports.
@@ -19,6 +20,32 @@ export interface DailyTarget {
 	label: string
 	pages: number | null
 	juz: number | null
+	// * Positional details (present when the participant has a start position)
+	surah?: string | null
+	fromPage?: number | null
+	toPage?: number | null
+}
+
+/** Pages covered per day by a masār (juz-based masār use ~20 pages per juz). */
+export function masarPagesPerDay(masar: AlMamharahMasar): number | null {
+	switch (masar) {
+		case 'TWO_PAGES':
+			return 2
+		case 'THREE_PAGES':
+			return 3
+		case 'FOUR_PAGES':
+			return 4
+		case 'ONE_JUZ':
+			return 20
+		case 'THREE_JUZ':
+			return 60
+		case 'FIVE_JUZ':
+			return 100
+		case 'KHATM':
+			return null
+		default:
+			return null
+	}
 }
 
 /** Derives the daily memorisation target from the participant's selected masār. */
@@ -40,6 +67,35 @@ export function dailyTargetFromMasar(masar: AlMamharahMasar): DailyTarget {
 			return { label: 'Full khatm', pages: null, juz: null }
 		default:
 			return { label: "Daily muroja'ah", pages: null, juz: null }
+	}
+}
+
+/**
+ * Builds the participant's positional daily target, e.g. "Al-Baqarah · pg 2–4",
+ * by advancing from their chosen start page by the masār's daily page count.
+ * Falls back to the plain masār label when no start position is recorded.
+ */
+export function positionalDailyTarget(
+	participant: Pick<AlMamharahParticipant, 'masar' | 'startSurah' | 'startPage' | 'startDate'>,
+	settings: AlMamharahSettings,
+	today: ISODate
+): DailyTarget {
+	const base = dailyTargetFromMasar(participant.masar)
+	const pagesPerDay = masarPagesPerDay(participant.masar)
+	if (!participant.startPage || !pagesPerDay) return base
+
+	const windowStart = participantWindowStart(toISODateValue(participant.startDate), settings)
+	// * Day index counts from the participant's first eligible day up to today.
+	const dayIndex = Math.max(0, diffDays(windowStart, today))
+	const fromPage = clampPage(participant.startPage + dayIndex * pagesPerDay)
+	const toPage = clampPage(fromPage + pagesPerDay - 1)
+
+	return {
+		...base,
+		surah: surahAtPage(fromPage).name,
+		fromPage,
+		toPage,
+		label: `${base.label} · ${pageRangeLabel(fromPage, toPage)}`
 	}
 }
 
@@ -246,7 +302,7 @@ export async function getParticipantReport(
 		todayEligible:
 			today >= participantWindowStart(toISODateValue(participant.startDate), settings) &&
 			today <= settings.end,
-		dailyTarget: dailyTargetFromMasar(participant.masar),
+		dailyTarget: positionalDailyTarget(participant, settings, today),
 		stats,
 		tasks: settings.tasks.map(taskType => ({
 			taskType,

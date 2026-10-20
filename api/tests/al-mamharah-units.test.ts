@@ -7,7 +7,8 @@ import {
 	rankEntries,
 	todayInTimeZone
 } from '../src/services/al-mamharah/dates'
-import { dailyTargetFromMasar } from '../src/services/al-mamharah/progress'
+import { dailyTargetFromMasar, masarPagesPerDay, positionalDailyTarget } from '../src/services/al-mamharah/progress'
+import { clampPage, pageRangeLabel, surahAtPage } from '../src/services/al-mamharah/mushaf'
 import { normalizeSettings, DEFAULT_SETTINGS } from '../src/services/al-mamharah/settings'
 import { normalizePersonName } from '../src/services/al-mamharah/applications'
 
@@ -168,10 +169,103 @@ describe('normalizeSettings', () => {
 		})
 		expect(settings.end).toBe('2026-11-18')
 	})
+
+	test('defaults acceptingApplications and clamps maxMissedDaysPerMonth', () => {
+		const settings = normalizeSettings({
+			...DEFAULT_SETTINGS,
+			maxMissedDaysPerMonth: 0
+		})
+		expect(settings.acceptingApplications).toBe(true)
+		expect(settings.maxMissedDaysPerMonth).toBe(4)
+
+		const closed = normalizeSettings({
+			...DEFAULT_SETTINGS,
+			acceptingApplications: false,
+			maxMissedDaysPerMonth: 7
+		})
+		expect(closed.acceptingApplications).toBe(false)
+		expect(closed.maxMissedDaysPerMonth).toBe(7)
+	})
 })
 
 describe('normalizePersonName', () => {
 	test('trims and collapses whitespace', () => {
 		expect(normalizePersonName('  Abdur  Rahmān   Bello ')).toBe('Abdur Rahmān Bello')
+	})
+})
+
+describe('mushaf page map', () => {
+	test('resolves the surah containing a page', () => {
+		expect(surahAtPage(1).name).toBe('Al-Fātiḥah')
+		expect(surahAtPage(2).name).toBe('Al-Baqarah')
+		expect(surahAtPage(50).name).toBe('Āl ʿImrān')
+		expect(surahAtPage(604).name).toBe('An-Nās')
+	})
+
+	test('clamps pages into the mushaf range', () => {
+		expect(clampPage(0)).toBe(1)
+		expect(clampPage(999)).toBe(604)
+		expect(clampPage(300)).toBe(300)
+	})
+
+	test('formats a page range label', () => {
+		expect(pageRangeLabel(2, 4)).toBe('Al-Baqarah · pg 2–4')
+		expect(pageRangeLabel(440, 440)).toBe('Yā-Sīn · pg 440')
+	})
+})
+
+describe('masarPagesPerDay', () => {
+	test('maps masār to pages per day', () => {
+		expect(masarPagesPerDay('TWO_PAGES')).toBe(2)
+		expect(masarPagesPerDay('ONE_JUZ')).toBe(20)
+		expect(masarPagesPerDay('FIVE_JUZ')).toBe(100)
+		expect(masarPagesPerDay('KHATM')).toBeNull()
+	})
+})
+
+describe('positionalDailyTarget', () => {
+	const settings = { ...DEFAULT_SETTINGS }
+
+	test('advances from the start page by the daily page count', () => {
+		const target = positionalDailyTarget(
+			{
+				masar: 'THREE_PAGES',
+				startSurah: 'Al-Baqarah',
+				startPage: 2,
+				startDate: '2026-10-18'
+			},
+			settings,
+			'2026-10-18'
+		)
+		expect(target.fromPage).toBe(2)
+		expect(target.toPage).toBe(4)
+		expect(target.surah).toBe('Al-Baqarah')
+		expect(target.label).toContain('Al-Baqarah · pg 2–4')
+	})
+
+	test('moves forward on later days', () => {
+		const target = positionalDailyTarget(
+			{
+				masar: 'TWO_PAGES',
+				startSurah: 'Al-Fātiḥah',
+				startPage: 1,
+				startDate: '2026-10-18'
+			},
+			settings,
+			'2026-10-19'
+		)
+		// * day index 1 → pages 3–4 (still Al-Baqarah)
+		expect(target.fromPage).toBe(3)
+		expect(target.toPage).toBe(4)
+	})
+
+	test('falls back to the plain masār label without a start page', () => {
+		const target = positionalDailyTarget(
+			{ masar: 'THREE_PAGES', startSurah: null, startPage: null, startDate: '2026-10-18' },
+			settings,
+			'2026-10-18'
+		)
+		expect(target.fromPage).toBeUndefined()
+		expect(target.label).toBe('3 pages daily')
 	})
 })

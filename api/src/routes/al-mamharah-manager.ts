@@ -38,6 +38,7 @@ import {
 	setParticipantStatus
 } from '../services/al-mamharah/participants'
 import { deleteCompletion, recordCompletion } from '../services/al-mamharah/progress'
+import { enforceMissedDaySuspension } from '../services/al-mamharah/participant-auth'
 import { listAudit, recordAudit } from '../services/al-mamharah/audit'
 import { getSettings, saveSettings } from '../services/al-mamharah/settings'
 import { isValidISODate, todayInTimeZone } from '../services/al-mamharah/dates'
@@ -275,6 +276,26 @@ alMamharahManagerRoute.post(
 		})
 	}
 )
+
+/** POST /participants/suspend-inactive — auto-suspend members over the missed-day limit. */
+alMamharahManagerRoute.post('/participants/suspend-inactive', async c => {
+	requireManager(c)
+	const settings = await getSettings()
+	const result = await enforceMissedDaySuspension(settings)
+	return successResponse(c, {
+		checked: result.checked,
+		threshold: settings.maxMissedDaysPerMonth,
+		suspended: result.suspended.map(p => ({
+			id: p.id,
+			displayName: p.displayName,
+			status: p.status
+		})),
+		message:
+			result.suspended.length === 0
+				? 'No participants were over the missed-day limit.'
+				: `${result.suspended.length} participant(s) suspended for missing ${settings.maxMissedDaysPerMonth}+ days this month.`
+	})
+})
 
 /** GET /daily-progress — completion status for a given day. */
 alMamharahManagerRoute.get(
