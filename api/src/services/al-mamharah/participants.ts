@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
+import { and, count, desc, eq, ilike, inArray, isNotNull, or, sql } from 'drizzle-orm'
 import { db } from '../../lib/db'
 import {
 	alMamharahApplications,
@@ -81,14 +81,17 @@ export function toISODateValue(value: string | Date): ISODate {
  * a set of participant ids) so statistics can be computed without N+1 queries.
  */
 export async function completionDatesByParticipant(
-	participantIds?: string[]
+	participantIds?: string[],
+	taskType?: AlMamharahTaskType
 ): Promise<Map<string, ISODate[]>> {
 	// * Guard: an empty id list would generate `IN ('')`, which Postgres rejects
 	// * as invalid uuid syntax (22P02) → 500. Return an empty map instead.
 	if (participantIds && participantIds.length === 0) return new Map()
-	const conditions = participantIds
-		? inArray(alMamharahCompletions.participantId, participantIds)
-		: undefined
+	const conditions = []
+	if (participantIds) {
+		conditions.push(inArray(alMamharahCompletions.participantId, participantIds))
+	}
+	if (taskType) conditions.push(eq(alMamharahCompletions.taskType, taskType))
 	const rows = await db
 		.select({
 			participantId: alMamharahCompletions.participantId,
@@ -96,7 +99,7 @@ export async function completionDatesByParticipant(
 			taskType: alMamharahCompletions.taskType
 		})
 		.from(alMamharahCompletions)
-		.where(conditions)
+		.where(conditions.length > 0 ? and(...conditions) : undefined)
 
 	const grouped = new Map<string, ISODate[]>()
 	for (const row of rows) {
@@ -143,6 +146,8 @@ export interface ParticipantWithStats {
 	startDate: string
 	status: AlMamharahParticipantStatus
 	createdAt: Date
+	// * Optional tajweed track (null = muroja'ah only)
+	tajweedTrack: string | null
 	application: ParticipantApplicationInfo
 	stats: StreakStats
 }
@@ -160,6 +165,7 @@ function mapWithStats(
 		startDate: toISODateValue(participant.startDate),
 		status: participant.status,
 		createdAt: participant.createdAt,
+		tajweedTrack: participant.tajweedTrack,
 		application: {
 			matricNumber: application?.matricNumber ?? '',
 			faculty: application?.faculty ?? '',
@@ -262,6 +268,8 @@ export interface ParticipantDetail extends ParticipantWithStats {
 	recentCompletions: {
 		date: ISODate
 		taskType: AlMamharahTaskType
+		matn: string | null
+		lineNumber: number | null
 		verified: boolean
 		note: string | null
 	}[]
@@ -301,6 +309,8 @@ export async function getParticipantDetail(participantId: string): Promise<Parti
 		recentCompletions: completions.map(c => ({
 			date: toISODateValue(c.programmeDate),
 			taskType: c.taskType,
+			matn: c.matn,
+			lineNumber: c.lineNumber,
 			verified: c.verified,
 			note: c.note
 		}))
@@ -362,33 +372,60 @@ export interface LeaderboardEntry {
 	longest: number
 	total: number
 	todayCompleted: boolean
+	/** Set on the tajweed board so students can see each other's matn. */
+	tajweedTrack?: string | null
 }
+
+/** Which activity the leaderboard ranks. */
+export type LeaderboardScope = 'OVERALL' | 'QURAN' | 'TAJWEED'
 
 export interface LeaderboardResult {
 	entries: LeaderboardEntry[]
 	self: LeaderboardEntry | null
 	today: ISODate
 	totalParticipants: number
+	scope: LeaderboardScope
+}
+
+const SCOPE_TASK: Record<LeaderboardScope, AlMamharahTaskType | undefined> = {
+	OVERALL: undefined,
+	QURAN: 'MUROJAAH',
+	TAJWEED: 'TAJWEED_QIRAAT'
 }
 
 /**
  * Leaderboard for authenticated participants: ranked by current streak, then
  * longest streak, then total completed days. Only display names and streak
  * statistics are exposed — no emails, phones or matriculation numbers.
+ *
+ * Scopes: OVERALL counts every recorded day, QURAN ranks the muroja'ah alone
+ * and TAJWEED ranks only participants with a tajweed track by their line
+ * register.
  */
 export async function getLeaderboard(
 	selfParticipantId: string | null,
-	options: { limit?: number } = {}
+	options: { limit?: number; scope?: LeaderboardScope } = {}
 ): Promise<LeaderboardResult> {
 	const settings = await getSettings()
 	const today = todayInTimeZone(settings.timezone)
+	const scope: LeaderboardScope = options.scope ?? 'OVERALL'
 
 	const participants = await db
 		.select()
 		.from(alMamharahParticipants)
-		.where(eq(alMamharahParticipants.status, 'ACTIVE'))
+		.where(
+			scope === 'TAJWEED'
+				? and(
+						eq(alMamharahParticipants.status, 'ACTIVE'),
+						isNotNull(alMamharahParticipants.tajweedTrack)
+					)
+				: eq(alMamharahParticipants.status, 'ACTIVE')
+		)
 
-	const dates = await completionDatesByParticipant(participants.map(p => p.id))
+	const dates = await completionDatesByParticipant(
+		participants.map(p => p.id),
+		SCOPE_TASK[scope]
+	)
 
 	const ranked = rankEntries(
 		participants.map(p => {
@@ -399,7 +436,8 @@ export async function getLeaderboard(
 				current: stats.current,
 				longest: stats.longest,
 				total: stats.total,
-				todayCompleted: stats.todayCompleted
+				todayCompleted: stats.todayCompleted,
+				tajweedTrack: p.tajweedTrack
 			}
 		})
 	)
@@ -412,7 +450,8 @@ export async function getLeaderboard(
 		entries,
 		self: selfEntry,
 		today,
-		totalParticipants: participants.length
+		totalParticipants: participants.length,
+		scope
 	}
 }
 

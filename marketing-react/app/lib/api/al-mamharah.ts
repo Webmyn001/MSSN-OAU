@@ -173,7 +173,12 @@ export function getParticipantDashboard(token: string | undefined = getParticipa
 }
 
 export function recordToday(
-	payload: { taskType?: string; note?: string } = {},
+	payload: {
+		taskType?: string;
+		matn?: string;
+		lineNumber?: number;
+		note?: string;
+	} = {},
 	token: string | undefined = getParticipantToken(),
 ) {
 	return request("/al-mamharah/participant/complete", { method: "POST", body: payload, token });
@@ -189,8 +194,39 @@ export function undoToday(completionId: string, token: string | undefined = getP
 export function getParticipantLeaderboard(
 	limit = 50,
 	token: string | undefined = getParticipantToken(),
+	scope: "OVERALL" | "QURAN" | "TAJWEED" = "OVERALL",
 ) {
-	return request(`/al-mamharah/participant/leaderboard?limit=${limit}`, { token });
+	return request(`/al-mamharah/participant/leaderboard?limit=${limit}&scope=${scope}`, { token });
+}
+
+export function getTajweedStatus(token: string | undefined = getParticipantToken()) {
+	return request("/al-mamharah/participant/tajweed", { token });
+}
+
+export function getPlacementQuiz(token: string | undefined = getParticipantToken()) {
+	return request("/al-mamharah/participant/tajweed/quiz", { token });
+}
+
+export function submitPlacementQuiz(
+	answers: { questionId: string; choice: number }[],
+	token: string | undefined = getParticipantToken(),
+) {
+	return request("/al-mamharah/participant/tajweed/quiz", {
+		method: "POST",
+		body: { answers },
+		token,
+	});
+}
+
+export function chooseTajweedTrack(
+	track: string | null,
+	token: string | undefined = getParticipantToken(),
+) {
+	return request("/al-mamharah/participant/tajweed", {
+		method: "PUT",
+		body: { track },
+		token,
+	});
 }
 
 export async function logoutParticipant(token: string | undefined = getParticipantToken()) {
@@ -332,8 +368,23 @@ export function deleteCompletion(
 	});
 }
 
-export function getManagerLeaderboard(token: string | undefined = getManagerToken()) {
-	return request("/al-mamharah/manager/leaderboard", { token });
+export function getManagerLeaderboard(
+	scope: "OVERALL" | "QURAN" | "TAJWEED" = "OVERALL",
+	token: string | undefined = getManagerToken(),
+) {
+	return request(`/al-mamharah/manager/leaderboard?limit=200&scope=${scope}`, { token });
+}
+
+export function setParticipantTajweed(
+	id: string,
+	payload: { track: string | null; skipPlacement?: boolean },
+	token: string | undefined = getManagerToken(),
+) {
+	return request(`/al-mamharah/manager/participants/${id}/tajweed`, {
+		method: "PUT",
+		body: payload,
+		token,
+	});
 }
 
 export function listManagers(token: string | undefined = getManagerToken()) {

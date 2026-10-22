@@ -16,6 +16,8 @@ import {
 	Target,
 	BadgeCheck,
 	BookOpen,
+	GraduationCap,
+	BookMarked,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -26,9 +28,21 @@ import {
 	undoToday,
 	logoutParticipant,
 	clearParticipantSession,
+	getPlacementQuiz,
+	submitPlacementQuiz,
+	chooseTajweedTrack,
 	AlMamharahError,
 } from "~/lib/api/al-mamharah";
-import { masarLabel, masarDaily, taskLabel, formatISODate, phaseLabel, ARABIC } from "~/lib/data/al-mamharah";
+import {
+	masarLabel,
+	masarDaily,
+	taskLabel,
+	formatISODate,
+	phaseLabel,
+	ARABIC,
+	TAJWEED_TRACK_OPTIONS,
+	tajweedTrackLabel,
+} from "~/lib/data/al-mamharah";
 import { Arabic } from "~/components/al-mamharah/Arabic";
 
 export default function AlMamharahDashboardPage() {
@@ -41,6 +55,13 @@ export default function AlMamharahDashboardPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [busy, setBusy] = useState<string | null>(null);
 	const [note, setNote] = useState("");
+	const [scope, setScope] = useState<"OVERALL" | "QURAN" | "TAJWEED">("OVERALL");
+	const [quiz, setQuiz] = useState<any>(null);
+	const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
+	const [quizResult, setQuizResult] = useState<any>(null);
+	const [quizBusy, setQuizBusy] = useState(false);
+	const [lineInput, setLineInput] = useState("");
+	const [trackBusy, setTrackBusy] = useState(false);
 
 	const load = useCallback(async () => {
 		const token = getParticipantToken();
@@ -52,12 +73,8 @@ export default function AlMamharahDashboardPage() {
 		setLoading(true);
 		setError(null);
 		try {
-			const [dashboard, board] = await Promise.all([
-				getParticipantDashboard(token),
-				getParticipantLeaderboard(50, token),
-			]);
+			const dashboard = await getParticipantDashboard(token);
 			setReport(dashboard.data);
-			setLeaderboard(board.data);
 		} catch (err) {
 			if (err instanceof AlMamharahError && (err.status === 401 || err.status === 403)) {
 				clearParticipantSession();
@@ -74,6 +91,21 @@ export default function AlMamharahDashboardPage() {
 		load();
 	}, [load]);
 
+	const loadBoard = useCallback(async (nextScope: "OVERALL" | "QURAN" | "TAJWEED") => {
+		const token = getParticipantToken();
+		if (!token) return;
+		try {
+			const board = await getParticipantLeaderboard(50, token, nextScope);
+			setLeaderboard(board.data);
+		} catch {
+			// * A failed board refresh must never block the dashboard.
+		}
+	}, []);
+
+	useEffect(() => {
+		if (report) loadBoard(scope);
+	}, [scope, report, loadBoard]);
+
 	async function complete(taskType: string) {
 		setBusy(taskType);
 		try {
@@ -83,6 +115,96 @@ export default function AlMamharahDashboardPage() {
 			await load();
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Could not record your entry.");
+		} finally {
+			setBusy(null);
+		}
+	}
+
+	async function startQuiz() {
+		setQuizBusy(true);
+		setQuizResult(null);
+		setQuizAnswers({});
+		try {
+			const res = await getPlacementQuiz();
+			setQuiz(res.data);
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : "Could not load the placement check.",
+			);
+		} finally {
+			setQuizBusy(false);
+		}
+	}
+
+	async function submitQuizAnswers() {
+		if (!quiz) return;
+		const answers = quiz.questions
+			.map((question: any) => ({ questionId: question.id, choice: quizAnswers[question.id] }))
+			.filter((answer: any) => Number.isInteger(answer.choice));
+		if (answers.length !== quiz.questions.length) {
+			toast.error("Please answer every question.");
+			return;
+		}
+		setQuizBusy(true);
+		try {
+			const res = await submitPlacementQuiz(answers);
+			setQuizResult(res.data);
+			if (res.data?.passed) {
+				toast.success("Placement passed — you can now record your daily line.");
+				setQuiz(null);
+				setQuizAnswers({});
+				await load();
+			} else {
+				toast.error(
+					res.data?.recommendation?.message ?? "Not quite yet — please try again.",
+				);
+			}
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Could not submit your answers.");
+		} finally {
+			setQuizBusy(false);
+		}
+	}
+
+	async function moveTrack(track: string | null) {
+		setTrackBusy(true);
+		try {
+			await chooseTajweedTrack(track);
+			setQuiz(null);
+			setQuizResult(null);
+			setQuizAnswers({});
+			toast.success(
+				track
+					? `Tajweed track set to ${tajweedTrackLabel(track)}.`
+					: "Tajweed track removed — you will only record muroja'ah.",
+			);
+			await load();
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Could not change your tajweed track.");
+		} finally {
+			setTrackBusy(false);
+		}
+	}
+
+	async function recordTajweedLine() {
+		if (!report?.tajweed?.track) return;
+		const lineNumber = lineInput.trim() ? Number(lineInput) : undefined;
+		if (lineNumber !== undefined && (!Number.isInteger(lineNumber) || lineNumber < 1)) {
+			toast.error("Enter a valid line number.");
+			return;
+		}
+		setBusy("TAJWEED_QIRAAT");
+		try {
+			const result = await recordToday({
+				taskType: "TAJWEED_QIRAAT",
+				matn: report.tajweed.track,
+				lineNumber,
+			});
+			toast.success(result.data?.message ?? "Line recorded.");
+			setLineInput("");
+			await load();
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Could not record your line.");
 		} finally {
 			setBusy(null);
 		}
@@ -193,6 +315,126 @@ export default function AlMamharahDashboardPage() {
 								Programme window: {formatISODate(report.programme.start)} –{" "}
 								{formatISODate(report.programme.end)} · Today: {formatISODate(report.today)}
 							</p>
+
+							{report.tajweed?.track && !report.tajweed.placementPassed ? (
+								<div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/70 p-5">
+									<h2 className="flex items-center gap-2 font-secondary text-lg font-semibold text-amber-900">
+										<GraduationCap className="size-5" />
+										Placement check
+									</h2>
+									<p className="mt-1 text-sm text-amber-900">
+										To study <strong>{report.tajweed.label}</strong>, you must have
+										mastered{" "}
+										<strong>{report.tajweed.prerequisite?.label}</strong>. Answer the
+										questions below to confirm your placement.
+									</p>
+
+									{quizResult && !quizResult.passed ? (
+										<div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+											{quizResult.recommendation?.message ??
+												`You scored ${quizResult.correct}/${quizResult.total}.`}{" "}
+											You may retake the check, or move down to{" "}
+											{report.tajweed.prerequisite?.label}.
+										</div>
+									) : null}
+
+									{quiz ? (
+										<div className="mt-4 space-y-4">
+											{quiz.questions.map((question: any, index: number) => (
+												<fieldset key={question.id}>
+													<legend className="text-sm font-medium text-gray-800">
+														{index + 1}. {question.question}
+													</legend>
+													<div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+														{question.options.map((option: string, optionIndex: number) => (
+															<label
+																key={optionIndex}
+																className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:border-primary-300"
+															>
+																<input
+																	type="radio"
+																	name={`almh-quiz-${question.id}`}
+																	className="size-4 border-gray-300 text-primary-600 focus:ring-primary-600"
+																	checked={quizAnswers[question.id] === optionIndex}
+																	onChange={() =>
+																		setQuizAnswers((prev) => ({
+																			...prev,
+																			[question.id]: optionIndex,
+																		}))
+																	}
+																/>
+																<span>{option}</span>
+															</label>
+														))}
+													</div>
+												</fieldset>
+											))}
+											<div className="flex flex-wrap gap-2">
+												<Button onClick={submitQuizAnswers} disabled={quizBusy}>
+													{quizBusy ? (
+														<Loader2 className="size-4 animate-spin" />
+													) : null}
+													Submit answers
+												</Button>
+												<Button variant="outline" onClick={startQuiz} disabled={quizBusy}>
+													New questions
+												</Button>
+												<Button
+													variant="ghost"
+													onClick={() =>
+														moveTrack(report.tajweed.prerequisite?.track ?? null)
+													}
+													disabled={trackBusy}
+												>
+													Move me to {report.tajweed.prerequisite?.label}
+												</Button>
+											</div>
+										</div>
+									) : (
+										<Button className="mt-3" onClick={startQuiz} disabled={quizBusy}>
+											{quizBusy ? (
+												<Loader2 className="size-4 animate-spin" />
+											) : (
+												<GraduationCap className="size-4" />
+											)}
+											Start placement check
+										</Button>
+									)}
+								</div>
+							) : null}
+
+							{!report.tajweed?.track ? (
+								<div className="mt-6 rounded-xl border border-primary-100 bg-white/90 p-5 shadow-sm">
+									<h2 className="flex items-center gap-2 font-secondary text-lg font-semibold text-primary-800">
+										<BookMarked className="size-5" />
+										Optional tajweed track
+									</h2>
+									<p className="mt-1 text-sm text-gray-600">
+										Study one of the three mutūn alongside your muroja&apos;ah — one line
+										per day. This is optional and does not change your muroja&apos;ah
+										streak.
+									</p>
+									<div className="mt-3 flex flex-wrap gap-2">
+										{TAJWEED_TRACK_OPTIONS.map((option) => (
+											<Button
+												key={option.value}
+												variant="outline"
+												size="sm"
+												onClick={() => moveTrack(option.value)}
+												disabled={trackBusy}
+											>
+												{option.label} · {option.lines} lines
+											</Button>
+										))}
+									</div>
+									{TAJWEED_TRACK_OPTIONS.some((option) => option.prerequisite) ? (
+										<p className="mt-2 text-xs text-gray-500">
+											Al-Jazariyyah and Shaṭibiyyah require passing a short placement
+											check on the preceding matn first.
+										</p>
+									) : null}
+								</div>
+							) : null}
 
 							<div className="mt-6 overflow-hidden rounded-xl border border-primary-100 shadow-sm">
 								<div className="relative">
@@ -353,6 +595,68 @@ export default function AlMamharahDashboardPage() {
 												) : null}
 											</div>
 										)}
+
+										{report.tajweed?.track && report.tajweed.placementPassed ? (
+											<div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
+												<div className="flex items-center justify-between gap-2">
+													<div>
+														<p className="text-sm font-medium text-gray-800">
+															{report.tajweed.label}
+														</p>
+														<p className="text-xs text-gray-500">
+															Line {report.tajweed.completedLines} of{" "}
+															{report.tajweed.totalLines} · one line per day
+														</p>
+													</div>
+													{report.tajweed.completed ? (
+														<span className="text-xs font-medium text-emerald-600">
+															Matn completed
+														</span>
+													) : report.tajweed.todayRecorded ? (
+														<span className="text-xs font-medium text-emerald-600">
+															Line {report.tajweed.todayLine} recorded
+														</span>
+													) : null}
+												</div>
+												{!report.tajweed.completed && !report.tajweed.todayRecorded ? (
+													<div className="mt-2 flex flex-wrap items-end gap-2">
+														<div>
+															<label
+																className="mb-1 block text-[11px] font-medium text-gray-500"
+																htmlFor="almh-line"
+															>
+																Line
+															</label>
+															<input
+																id="almh-line"
+																type="number"
+																min={report.tajweed.nextLine ?? 1}
+																max={report.tajweed.totalLines}
+																className="w-24 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-600 focus:ring-primary-600"
+																value={lineInput}
+																onChange={(e) => setLineInput(e.target.value)}
+																placeholder={String(report.tajweed.nextLine ?? "")}
+															/>
+														</div>
+														<Button
+															size="sm"
+															onClick={recordTajweedLine}
+															disabled={busy === "TAJWEED_QIRAAT"}
+														>
+															{busy === "TAJWEED_QIRAAT" ? (
+																<Loader2 className="size-4 animate-spin" />
+															) : (
+																<BookMarked className="size-4" />
+															)}
+															Record line {lineInput || report.tajweed.nextLine}
+														</Button>
+													</div>
+												) : null}
+												<p className="mt-2 text-[11px] text-gray-500">
+													Optional — does not affect your muroja&apos;ah streak.
+												</p>
+											</div>
+										) : null}
 									</div>
 
 									<div className="mt-6 rounded-xl border border-primary-100 bg-white/90 p-5 shadow-sm">
@@ -378,6 +682,14 @@ export default function AlMamharahDashboardPage() {
 																</span>
 																<span className="text-xs text-gray-500">
 																	{taskLabel(completion.taskType)}
+																	{completion.taskType === "TAJWEED_QIRAAT" &&
+																	completion.matn
+																		? ` · ${tajweedTrackLabel(completion.matn)}${
+																				completion.lineNumber
+																					? ` · line ${completion.lineNumber}`
+																					: ""
+																			}`
+																		: ""}
 																</span>
 																{completion.verified ? (
 																	<span className="inline-flex items-center gap-0.5 text-[10px] font-semibold uppercase text-emerald-600">
@@ -421,15 +733,49 @@ export default function AlMamharahDashboardPage() {
 											Leaderboard
 											<Arabic className="text-primary-600">{ARABIC.leaderboard}</Arabic>
 										</h2>
-										<p className="mb-2 mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-gray-500">
-											<span className="font-medium text-gray-600">Leading Participants</span>
-											<Arabic className="text-primary-600">{ARABIC.leadingParticipants}</Arabic>
-											<span>· {leaderboard?.totalParticipants ?? 0} active</span>
-										</p>
+										<div className="mb-3 mt-3 flex flex-wrap items-center justify-between gap-2">
+											<div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5">
+												{(
+													[
+														["OVERALL", "Overall"],
+														["QURAN", "Qur'an"],
+														["TAJWEED", "Tajweed"],
+													] as const
+												).map(([value, label]) => (
+													<button
+														key={value}
+														type="button"
+														onClick={() => setScope(value)}
+														className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+															scope === value
+																? "bg-white text-primary-700 shadow-sm"
+																: "text-gray-500 hover:text-gray-700"
+														}`}
+													>
+														{label}
+													</button>
+												))}
+											</div>
+											<span className="text-xs text-gray-500">
+												{leaderboard?.totalParticipants ?? 0}{" "}
+												{scope === "TAJWEED" ? "on a tajweed track" : "active"}
+											</span>
+										</div>
 										<Leaderboard
 											entries={leaderboard?.entries ?? []}
 											selfId={report.participant.id}
-											emptyText="No rankings yet."
+											caption={
+												scope === "TAJWEED"
+													? "Ranked by tajweed line streak, then longest streak, then total lines."
+													: "Ranked by current streak, then longest streak, then total days."
+											}
+											emptyText={
+												scope === "TAJWEED"
+													? "No tajweed lines recorded yet."
+													: scope === "QURAN"
+														? "No muroja'ah records yet."
+														: "No rankings yet."
+											}
 										/>
 										{leaderboard?.self &&
 										leaderboard.self.rank > (leaderboard.entries?.length ?? 0) ? (

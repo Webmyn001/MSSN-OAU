@@ -88,6 +88,7 @@ publicAlMamharahRoute.post('/', zValidator('json', submitApplicationSchema), asy
 		startSurah: input.startSurah,
 		startPage: input.startPage,
 		startDirection: input.startDirection,
+		tajweedTrack: input.tajweedTrack,
 		confirmedMemorisation: input.confirmedMemorisation,
 		confirmedTajweed: input.confirmedTajweed,
 		agreedGuidelines: input.agreedGuidelines

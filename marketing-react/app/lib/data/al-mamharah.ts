@@ -303,6 +303,57 @@ export function startDirectionLabel(value: string | null | undefined): string {
 	return startDirectionOption(value)?.label ?? "";
 }
 
+// * --- Optional tajweed track ------------------------------------------------
+// * Ladder: Tuhfatul Atfal → Muqaddimah Al-Jazariyyah → Shaṭibiyyah. Students
+// * record one line per day from their matn, alongside the muroja'ah.
+
+export type TajweedTrackValue = "TUHFATUL_ATFAL" | "JAZARIYYAH" | "SHAATIBIYYAH";
+
+export interface TajweedTrackOption {
+	value: TajweedTrackValue;
+	label: string;
+	arabic: string;
+	lines: number;
+	prerequisite: TajweedTrackValue | null;
+}
+
+export const TAJWEED_TRACK_OPTIONS: TajweedTrackOption[] = [
+	{
+		value: "TUHFATUL_ATFAL",
+		label: "Tuhfatul Atfal",
+		arabic: "تحفة الأطفال",
+		lines: 61,
+		prerequisite: null,
+	},
+	{
+		value: "JAZARIYYAH",
+		label: "Muqaddimah Al-Jazariyyah",
+		arabic: "المقدمة الجزرية",
+		lines: 107,
+		prerequisite: "TUHFATUL_ATFAL",
+	},
+	{
+		value: "SHAATIBIYYAH",
+		label: "Shaṭibiyyah",
+		arabic: "الشاطبية",
+		lines: 1173,
+		prerequisite: "JAZARIYYAH",
+	},
+];
+
+export function tajweedTrackOption(value: string | null | undefined) {
+	return TAJWEED_TRACK_OPTIONS.find((o) => o.value === value);
+}
+
+export function tajweedTrackLabel(value: string | null | undefined): string {
+	return tajweedTrackOption(value)?.label ?? "";
+}
+
+export function tajweedPrerequisiteLabel(value: string | null | undefined): string {
+	const option = tajweedTrackOption(value);
+	return option?.prerequisite ? tajweedTrackLabel(option.prerequisite) : "";
+}
+
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {
 	PENDING: "Under Review",
 	APPROVED: "Approved",

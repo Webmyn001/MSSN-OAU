@@ -11,6 +11,7 @@ import {
 } from "~/lib/api/al-mamharah";
 import {
 	masarLabel,
+	tajweedTrackLabel,
 	formatDateTime,
 	applicationStatusLabel,
 	applicationStatusArabic,
@@ -185,7 +186,12 @@ export function ApplicationsPanel({ token, onExpired }: { token: string; onExpir
 										<p className="text-sm text-gray-600">
 											{item.matricNumber} · {item.department}, {item.faculty}
 										</p>
-										<p className="mt-1 text-xs text-primary-600">{masarLabel(item.masar)}</p>
+										<p className="mt-1 text-xs text-primary-600">
+											{masarLabel(item.masar)}
+											{item.tajweedTrack
+												? ` · Tajweed: ${tajweedTrackLabel(item.tajweedTrack)}`
+												: ""}
+										</p>
 										<p className="mt-1 text-xs text-gray-400">
 											Submitted {formatDateTime(item.createdAt)}
 											{item.reviewedBy

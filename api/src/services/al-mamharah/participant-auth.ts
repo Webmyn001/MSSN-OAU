@@ -85,6 +85,9 @@ export async function monthMissedDays(
 		.where(
 			and(
 				eq(alMamharahCompletions.participantId, participant.id),
+				// * Only the core muroja'ah keeps a day "present": the optional
+				// * tajweed line must not rescue a missed muroja'ah day.
+				eq(alMamharahCompletions.taskType, 'MUROJAAH'),
 				sql`${alMamharahCompletions.programmeDate} >= ${monthStart}`,
 				sql`${alMamharahCompletions.programmeDate} <= ${today}`
 			)

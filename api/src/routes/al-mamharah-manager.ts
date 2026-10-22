@@ -13,6 +13,7 @@ import {
 	deleteCompletionSchema,
 	exportQuerySchema,
 	inviteManagerSchema,
+	leaderboardQuerySchema,
 	listApplicationsQuerySchema,
 	listParticipantsQuerySchema,
 	managerCompletionSchema,
@@ -20,6 +21,7 @@ import {
 	programmeSettingsSchema,
 	rejectApplicationSchema,
 	resetProgrammeSchema,
+	setParticipantTajweedSchema,
 	updateParticipantStatusSchema
 } from '../schemas/al-mamharah'
 import {
@@ -43,6 +45,7 @@ import { enforceMissedDaySuspension } from '../services/al-mamharah/participant-
 import { listAudit, recordAudit } from '../services/al-mamharah/audit'
 import { getSettings, saveSettings } from '../services/al-mamharah/settings'
 import { resetProgramme } from '../services/al-mamharah/reset'
+import { setTajweedTrackByManager } from '../services/al-mamharah/placement'
 import { isValidISODate, todayInTimeZone } from '../services/al-mamharah/dates'
 import {
 	activateManager,
@@ -279,6 +282,30 @@ alMamharahManagerRoute.post(
 	}
 )
 
+/** PUT /participants/:id/tajweed — set the optional tajweed track (override). */
+alMamharahManagerRoute.put(
+	'/participants/:id/tajweed',
+	zValidator('json', setParticipantTajweedSchema),
+	async c => {
+		const manager = requireManager(c)
+		const { track, skipPlacement } = c.req.valid('json')
+		const participant = await getParticipantById(c.req.param('id'))
+		const updated = await setTajweedTrackByManager(participant, track, manager.email, {
+			skipPlacement
+		})
+		return successResponse(c, {
+			participant: {
+				id: updated.id,
+				tajweedTrack: updated.tajweedTrack,
+				tajweedPlacementPassedAt: updated.tajweedPlacementPassedAt
+			},
+			message: track
+				? 'Tajweed track updated.'
+				: 'Tajweed track removed. The participant only records muroja\'ah.'
+		})
+	}
+)
+
 /** POST /participants/suspend-inactive — auto-suspend members over the missed-day limit. */
 alMamharahManagerRoute.post('/participants/suspend-inactive', async c => {
 	requireManager(c)
@@ -325,6 +352,8 @@ alMamharahManagerRoute.post(
 			{
 				date: input.date,
 				taskType: input.taskType,
+				matn: input.matn,
+				lineNumber: input.lineNumber,
 				note: input.note,
 				verified: input.verified ?? true
 			},
@@ -355,10 +384,15 @@ alMamharahManagerRoute.delete(
 )
 
 /** GET /leaderboard — same ranking participants see (for manager auditing). */
-alMamharahManagerRoute.get('/leaderboard', async c => {
-	const leaderboard = await getLeaderboard(null, { limit: 200 })
-	return successResponse(c, leaderboard)
-})
+alMamharahManagerRoute.get(
+	'/leaderboard',
+	zValidator('query', leaderboardQuerySchema),
+	async c => {
+		const { limit, scope } = c.req.valid('query')
+		const leaderboard = await getLeaderboard(null, { limit, scope })
+		return successResponse(c, leaderboard)
+	}
+)
 
 /** GET /managers — list managers (never exposes hashes). */
 alMamharahManagerRoute.get('/managers', async c => {

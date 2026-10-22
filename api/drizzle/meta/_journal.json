@@ -85,6 +85,13 @@
       "when": 1792659739002,
       "tag": "0011_al_mamharah_start_direction",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792690252325,
+      "tag": "0012_al_mamharah_tajweed_tracks",
+      "breakpoints": true
     }
   ]
 }

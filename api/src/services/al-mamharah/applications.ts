@@ -26,6 +26,8 @@ export interface ApplicationInput {
 	startSurah?: string
 	startPage?: number
 	startDirection?: string
+	// * Optional tajweed track (TUHFATUL_ATFAL | JAZARIYYAH | SHAATIBIYYAH)
+	tajweedTrack?: string
 	confirmedMemorisation: boolean
 	confirmedTajweed: boolean
 	agreedGuidelines: boolean
@@ -49,6 +51,7 @@ export async function submitApplication(input: ApplicationInput): Promise<AlMamh
 		startSurah: input.startSurah?.trim() || null,
 		startPage: input.startPage ?? null,
 		startDirection: input.startDirection?.trim() || null,
+		tajweedTrack: input.tajweedTrack?.trim() || null,
 		confirmedMemorisation: true,
 		confirmedTajweed: true,
 		agreedGuidelines: true,
@@ -204,6 +207,7 @@ export async function approveApplication(
 				startSurah: application.startSurah,
 				startPage: application.startPage,
 				startDirection: application.startDirection,
+				tajweedTrack: application.tajweedTrack,
 				status: 'ACTIVE'
 			})
 			.returning()

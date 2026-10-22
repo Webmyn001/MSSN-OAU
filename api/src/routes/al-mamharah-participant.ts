@@ -4,18 +4,28 @@ import { successResponse, errorResponse } from '../lib/response'
 import { NotFoundError, AuthorizationError } from '../lib/errors'
 import { logger } from '../lib/logger'
 import { participantAuth, requireParticipant } from '../middleware/al-mamharah'
-import { recordCompletionSchema } from '../schemas/al-mamharah'
+import {
+	chooseTajweedTrackSchema,
+	leaderboardQuerySchema,
+	placementQuizAnswersSchema,
+	recordCompletionSchema
+} from '../schemas/al-mamharah'
 import {
 	deleteCompletion,
 	getParticipantReport,
 	listCompletions,
 	recordCompletion
 } from '../services/al-mamharah/progress'
-import { getLeaderboard } from '../services/al-mamharah/participants'
-import { leaderboardQuerySchema } from '../schemas/al-mamharah'
+import { getLeaderboard, getParticipantById } from '../services/al-mamharah/participants'
 import { revokeParticipantSession } from '../services/al-mamharah/verification'
 import { getSettings } from '../services/al-mamharah/settings'
 import { todayInTimeZone } from '../services/al-mamharah/dates'
+import {
+	buildPlacementQuiz,
+	chooseTajweedTrack,
+	getTajweedStatus,
+	submitPlacementQuiz
+} from '../services/al-mamharah/placement'
 
 // * Participant dashboard endpoints — all require a participant session.
 
@@ -39,20 +49,30 @@ alMamharahParticipantRoute.post(
 		const input = c.req.valid('json')
 		const result = await recordCompletion(
 			participant,
-			{ taskType: input.taskType, note: input.note },
+			{
+				taskType: input.taskType,
+				matn: input.matn,
+				lineNumber: input.lineNumber,
+				note: input.note
+			},
 			{ allowPast: false }
 		)
 
+		const isTajweed = result.completion.taskType === 'TAJWEED_QIRAAT'
 		return successResponse(
 			c,
 			{
 				alreadyRecorded: result.alreadyRecorded,
 				date: result.date,
 				taskType: result.completion.taskType,
+				matn: result.completion.matn,
+				lineNumber: result.completion.lineNumber,
 				stats: result.stats,
 				message: result.alreadyRecorded
 					? 'You already recorded this task today.'
-					: "Jazākallāhu khayran! Today's muroja'ah has been recorded."
+					: isTajweed
+						? `Line ${result.completion.lineNumber} recorded. Jazākallāhu khayran!`
+						: "Jazākallāhu khayran! Today's muroja'ah has been recorded."
 			},
 			undefined,
 			result.alreadyRecorded ? 200 : 201
@@ -105,9 +125,49 @@ alMamharahParticipantRoute.get(
 	zValidator('query', leaderboardQuerySchema),
 	async c => {
 		const participant = requireParticipant(c)
-		const { limit } = c.req.valid('query')
-		const leaderboard = await getLeaderboard(participant.id, { limit })
+		const { limit, scope } = c.req.valid('query')
+		const leaderboard = await getLeaderboard(participant.id, { limit, scope })
 		return successResponse(c, leaderboard)
+	}
+)
+
+/** GET /tajweed — optional tajweed track status and line progress. */
+alMamharahParticipantRoute.get('/tajweed', async c => {
+	const participant = requireParticipant(c)
+	const status = await getTajweedStatus(participant)
+	return successResponse(c, status)
+})
+
+/** GET /tajweed/quiz — placement quiz on the preceding matn. */
+alMamharahParticipantRoute.get('/tajweed/quiz', async c => {
+	const participant = requireParticipant(c)
+	const quiz = buildPlacementQuiz(participant)
+	return successResponse(c, quiz)
+})
+
+/** POST /tajweed/quiz — grade the placement attempt. */
+alMamharahParticipantRoute.post(
+	'/tajweed/quiz',
+	zValidator('json', placementQuizAnswersSchema),
+	async c => {
+		const participant = requireParticipant(c)
+		const { answers } = c.req.valid('json')
+		const result = await submitPlacementQuiz(participant, answers)
+		const fresh = await getParticipantById(participant.id)
+		const status = await getTajweedStatus(fresh)
+		return successResponse(c, { ...result, status })
+	}
+)
+
+/** PUT /tajweed — choose or change the optional tajweed track (null = none). */
+alMamharahParticipantRoute.put(
+	'/tajweed',
+	zValidator('json', chooseTajweedTrackSchema),
+	async c => {
+		const participant = requireParticipant(c)
+		const { track } = c.req.valid('json')
+		const status = await chooseTajweedTrack(participant, track)
+		return successResponse(c, status)
 	}
 )
 

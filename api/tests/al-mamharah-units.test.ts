@@ -11,6 +11,18 @@ import { dailyTargetFromMasar, masarPagesPerDay, positionalDailyTarget } from '.
 import { clampPage, pageRangeLabel, surahAtPage } from '../src/services/al-mamharah/mushaf'
 import { normalizeSettings, DEFAULT_SETTINGS } from '../src/services/al-mamharah/settings'
 import { normalizePersonName } from '../src/services/al-mamharah/applications'
+import {
+	MATN_INFO,
+	QUIZ_BANK,
+	QUIZ_LENGTH,
+	gradeQuiz,
+	normalizeTajweedTrack,
+	prerequisiteFor,
+	sampleQuiz,
+	tajweedTrackLabel,
+	type QuizAnswer
+} from '../src/services/al-mamharah/tajweed'
+import { needsPlacementQuiz } from '../src/services/al-mamharah/placement'
 
 // * Pure-function tests — no database required.
 
@@ -355,5 +367,96 @@ describe('positionalDailyTarget', () => {
 		)
 		expect(target.fromPage).toBeUndefined()
 		expect(target.label).toBe('Full khatm')
+	})
+})
+
+describe('tajweed tracks', () => {
+	test('exposes the three mutūn with their lengths and prerequisites', () => {
+		expect(MATN_INFO.TUHFATUL_ATFAL.lines).toBe(61)
+		expect(MATN_INFO.JAZARIYYAH.lines).toBe(107)
+		expect(MATN_INFO.SHAATIBIYYAH.lines).toBe(1173)
+		expect(MATN_INFO.TUHFATUL_ATFAL.prerequisite).toBeNull()
+		expect(MATN_INFO.JAZARIYYAH.prerequisite).toBe('TUHFATUL_ATFAL')
+		expect(MATN_INFO.SHAATIBIYYAH.prerequisite).toBe('JAZARIYYAH')
+	})
+
+	test('normalises and labels tracks', () => {
+		expect(normalizeTajweedTrack('JAZARIYYAH')).toBe('JAZARIYYAH')
+		expect(normalizeTajweedTrack('nope')).toBeNull()
+		expect(normalizeTajweedTrack(null)).toBeNull()
+		expect(tajweedTrackLabel('SHAATIBIYYAH')).toBe(MATN_INFO.SHAATIBIYYAH.label)
+		expect(tajweedTrackLabel(null)).toBeNull()
+		expect(prerequisiteFor('JAZARIYYAH')).toBe('TUHFATUL_ATFAL')
+		expect(prerequisiteFor('TUHFATUL_ATFAL')).toBeNull()
+	})
+
+	test('requires a placement quiz only for the upper two matns', () => {
+		expect(needsPlacementQuiz({ tajweedTrack: null, tajweedPlacementPassedAt: null })).toBe(false)
+		expect(
+			needsPlacementQuiz({ tajweedTrack: 'TUHFATUL_ATFAL', tajweedPlacementPassedAt: null })
+		).toBe(false)
+		expect(needsPlacementQuiz({ tajweedTrack: 'JAZARIYYAH', tajweedPlacementPassedAt: null })).toBe(
+			true
+		)
+		expect(
+			needsPlacementQuiz({
+				tajweedTrack: 'JAZARIYYAH',
+				tajweedPlacementPassedAt: new Date()
+			})
+		).toBe(false)
+		expect(
+			needsPlacementQuiz({ tajweedTrack: 'SHAATIBIYYAH', tajweedPlacementPassedAt: null })
+		).toBe(true)
+	})
+
+	test('serves two distinct questions from the correct bank', () => {
+		const quiz = sampleQuiz('TUHFATUL_ATFAL')
+		expect(quiz).toHaveLength(QUIZ_LENGTH)
+		expect(new Set(quiz.map(q => q.id)).size).toBe(QUIZ_LENGTH)
+		for (const question of quiz) {
+			expect(QUIZ_BANK.TUHFATUL_ATFAL.some(q => q.id === question.id)).toBe(true)
+			expect(question.options.length).toBeGreaterThanOrEqual(2)
+		}
+	})
+})
+
+describe('placement grading', () => {
+	const correctAnswers = (prerequisite: 'TUHFATUL_ATFAL' | 'JAZARIYYAH'): QuizAnswer[] =>
+		QUIZ_BANK[prerequisite].slice(0, QUIZ_LENGTH).map(q => ({
+			questionId: q.id,
+			choice: q.answer
+		}))
+
+	test('passes only when both answers are correct', () => {
+		expect(gradeQuiz('TUHFATUL_ATFAL', correctAnswers('TUHFATUL_ATFAL'))).toEqual({
+			passed: true,
+			correct: 2,
+			total: 2
+		})
+
+		const wrong = correctAnswers('TUHFATUL_ATFAL')
+		wrong[1] = { ...wrong[1], choice: (wrong[1].choice + 1) % 4 }
+		expect(gradeQuiz('TUHFATUL_ATFAL', wrong)).toEqual({
+			passed: false,
+			correct: 1,
+			total: 2
+		})
+	})
+
+	test('cannot be passed with a single answer', () => {
+		const answers = correctAnswers('JAZARIYYAH')
+		expect(gradeQuiz('JAZARIYYAH', answers.slice(0, 1)).passed).toBe(false)
+	})
+
+	test('ignores duplicate or unknown question ids', () => {
+		const answers = correctAnswers('JAZARIYYAH')
+		const duplicated: QuizAnswer[] = [answers[0], answers[0]]
+		expect(gradeQuiz('JAZARIYYAH', duplicated).passed).toBe(false)
+
+		const unknown: QuizAnswer[] = [
+			answers[0],
+			{ questionId: 'does-not-exist', choice: 0 }
+		]
+		expect(gradeQuiz('JAZARIYYAH', unknown).passed).toBe(false)
 	})
 })

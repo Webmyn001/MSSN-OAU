@@ -13,6 +13,16 @@ import { diffDays, isValidISODate, todayInTimeZone, type ISODate, type StreakSta
 import { computeParticipantStats, participantWindowStart, toISODateValue } from './participants'
 import { clampPage, pageRangeLabel, surahAtPage } from './mushaf'
 import { getSettings, type AlMamharahSettings } from './settings'
+import {
+	MATN_INFO,
+	normalizeTajweedTrack
+} from './tajweed'
+import {
+	getTajweedStatus,
+	needsPlacementQuiz,
+	tajweedLineStats,
+	type TajweedStatus
+} from './placement'
 
 // * Daily Muroja'ah recording and participant-facing progress reports.
 
@@ -120,6 +130,9 @@ export interface RecordCompletionInput {
 	// * Defaults to "today" in the programme timezone
 	date?: string
 	taskType?: AlMamharahTaskType
+	// * Tajweed line register (taskType = TAJWEED_QIRAAT)
+	matn?: string
+	lineNumber?: number
 	note?: string
 	verified?: boolean
 	verifiedBy?: string
@@ -160,8 +173,38 @@ export async function recordCompletion(
 	}
 
 	const taskType = input.taskType ?? 'MUROJAAH'
-	if (!settings.tasks.includes(taskType)) {
+	// * The tajweed register is optional, so it is allowed even when the
+	// * programme does not list TAJWEED_QIRAAT among its required tasks.
+	if (taskType !== 'TAJWEED_QIRAAT' && !settings.tasks.includes(taskType)) {
 		throw new ValidationError('This task is not part of the programme')
+	}
+
+	let matn: string | null = null
+	let lineNumber: number | null = null
+	if (taskType === 'TAJWEED_QIRAAT') {
+		const track = normalizeTajweedTrack(participant.tajweedTrack)
+		if (!track) {
+			throw new ValidationError('Choose a tajweed track before recording a line')
+		}
+		if (needsPlacementQuiz(participant)) {
+			throw new ValidationError('Complete the placement check for your tajweed track first')
+		}
+		if (input.matn && normalizeTajweedTrack(input.matn) !== track) {
+			throw new ValidationError('This line does not match your tajweed track')
+		}
+
+		const info = MATN_INFO[track]
+		const stats = await tajweedLineStats(participant.id)
+		if (stats.lastLine >= info.lines) {
+			throw new ValidationError(`You have completed ${info.label} — barakallāhu fīk.`)
+		}
+		const nextLine = stats.lastLine + 1
+		const requested = input.lineNumber ?? nextLine
+		if (!Number.isInteger(requested) || requested < nextLine || requested > info.lines) {
+			throw new ValidationError(`Record line ${nextLine} next (up to line ${info.lines}).`)
+		}
+		matn = track
+		lineNumber = requested
 	}
 
 	const inserted = await db
@@ -170,6 +213,8 @@ export async function recordCompletion(
 			participantId: participant.id,
 			programmeDate: date,
 			taskType,
+			matn,
+			lineNumber,
 			verified: input.verified ?? false,
 			verifiedBy: input.verifiedBy ?? options.manager ?? null,
 			note: input.note?.trim() || null
@@ -223,6 +268,8 @@ export interface CompletionEntry {
 	id: string
 	date: ISODate
 	taskType: AlMamharahTaskType
+	matn: string | null
+	lineNumber: number | null
 	verified: boolean
 	verifiedBy: string | null
 	note: string | null
@@ -249,6 +296,8 @@ export async function listCompletions(
 		id: row.id,
 		date: toISODateValue(row.programmeDate),
 		taskType: row.taskType,
+		matn: row.matn,
+		lineNumber: row.lineNumber,
 		verified: row.verified,
 		verifiedBy: row.verifiedBy,
 		note: row.note,
@@ -269,6 +318,7 @@ export interface ParticipantReport {
 		masar: AlMamharahMasar
 		startDate: ISODate
 		status: AlMamharahParticipant['status']
+		tajweedTrack: string | null
 	}
 	programme: {
 		start: ISODate
@@ -282,6 +332,7 @@ export interface ParticipantReport {
 	dailyTarget: DailyTarget
 	stats: StreakStats
 	tasks: TaskStatus[]
+	tajweed: TajweedStatus
 	completions: CompletionEntry[]
 }
 
@@ -299,6 +350,7 @@ export async function getParticipantReport(
 	})
 
 	const todayTasks = new Set(completions.filter(c => c.date === today).map(c => c.taskType))
+	const tajweed = await getTajweedStatus(participant, settings, today)
 
 	return {
 		participant: {
@@ -306,7 +358,8 @@ export async function getParticipantReport(
 			displayName: participant.displayName,
 			masar: participant.masar,
 			startDate: toISODateValue(participant.startDate),
-			status: participant.status
+			status: participant.status,
+			tajweedTrack: participant.tajweedTrack
 		},
 		programme: {
 			start: settings.start,
@@ -326,6 +379,7 @@ export async function getParticipantReport(
 			completedToday: todayTasks.has(taskType),
 			requiredForStreak: settings.streakTasks.includes(taskType)
 		})),
+		tajweed,
 		completions
 	}
 }

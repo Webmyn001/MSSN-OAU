@@ -21,13 +21,16 @@ import {
 	setParticipantStatus,
 	suspendInactiveParticipants,
 	backfillCompletion,
+	setParticipantTajweed,
 	fetchCsv,
 	AlMamharahError,
 } from "~/lib/api/al-mamharah";
 import {
 	MASAR_OPTIONS,
+	TAJWEED_TRACK_OPTIONS,
 	masarLabel,
 	taskLabel,
+	tajweedTrackLabel,
 	formatISODate,
 	participantStatusLabel,
 } from "~/lib/data/al-mamharah";
@@ -57,6 +60,8 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 	const [bfNote, setBfNote] = useState("");
 	const [bfBusy, setBfBusy] = useState(false);
 	const [sweeping, setSweeping] = useState(false);
+	const [tajweedDraft, setTajweedDraft] = useState("");
+	const [tajweedBusy, setTajweedBusy] = useState(false);
 
 	async function sweepInactive() {
 		if (!window.confirm("Suspend everyone who has missed the monthly limit?")) return;
@@ -112,6 +117,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 		try {
 			const result = await getParticipantDetail(id, token);
 			setDetail(result.data);
+			setTajweedDraft(result.data?.tajweedTrack ?? "");
 		} catch {
 			/* ignore */
 		} finally {
@@ -134,11 +140,30 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 		try {
 			const result = await getParticipantDetail(id, token);
 			setDetail(result.data);
+			setTajweedDraft(result.data?.tajweedTrack ?? "");
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Unable to load details.");
 			setOpenId(null);
 		} finally {
 			setDetailLoading(false);
+		}
+	}
+
+	async function saveTajweed(participantId: string) {
+		setTajweedBusy(true);
+		try {
+			await setParticipantTajweed(
+				participantId,
+				{ track: tajweedDraft || null, skipPlacement: true },
+				token,
+			);
+			toast.success("Tajweed track updated.");
+			await load();
+			if (openId === participantId) await refreshDetail(participantId);
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Could not update the track.");
+		} finally {
+			setTajweedBusy(false);
 		}
 	}
 
@@ -301,6 +326,9 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 										</p>
 										<p className="text-xs text-primary-600">
 											{masarLabel(p.masar)} · started {formatISODate(p.startDate)}
+											{p.tajweedTrack
+												? ` · Tajweed: ${tajweedTrackLabel(p.tajweedTrack)}`
+												: ""}
 										</p>
 										<div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500">
 											<span>
@@ -364,7 +392,16 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 																	className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-1.5 text-xs"
 																>
 																	<span className="text-gray-700">{formatISODate(c.date)}</span>
-																	<span className="text-gray-500">{taskLabel(c.taskType)}</span>
+																	<span className="text-gray-500">
+																		{taskLabel(c.taskType)}
+																		{c.taskType === "TAJWEED_QIRAAT" && c.matn
+																			? ` · ${tajweedTrackLabel(c.matn)}${
+																					c.lineNumber
+																						? ` · line ${c.lineNumber}`
+																						: ""
+																				}`
+																			: ""}
+																	</span>
 																	{c.verified ? (
 																		<span className="font-semibold uppercase text-emerald-600">
 																			verified
@@ -436,6 +473,40 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 																<Plus className="size-4" />
 															)}
 															Record
+														</Button>
+													</div>
+												</div>
+												<div className="rounded-lg border border-gray-200 p-4 lg:col-span-2">
+													<h4 className="mb-1 text-sm font-semibold text-gray-700">
+														Tajweed track (optional)
+													</h4>
+													<p className="mb-3 text-xs text-gray-500">
+														Setting a track here skips the placement check — use it when
+														you have verified the participant&apos;s level yourself.
+													</p>
+													<div className="flex flex-wrap items-center gap-2">
+														<select
+															className={`${fieldClass} w-auto`}
+															value={tajweedDraft}
+															onChange={(e) => setTajweedDraft(e.target.value)}
+														>
+															<option value="">None — muroja&apos;ah only</option>
+															{TAJWEED_TRACK_OPTIONS.map((option) => (
+																<option key={option.value} value={option.value}>
+																	{option.label}
+																</option>
+															))}
+														</select>
+														<Button
+															size="sm"
+															variant="outline"
+															onClick={() => saveTajweed(p.id)}
+															disabled={tajweedBusy}
+														>
+															{tajweedBusy ? (
+																<Loader2 className="size-4 animate-spin" />
+															) : null}
+															Save track
 														</Button>
 													</div>
 												</div>

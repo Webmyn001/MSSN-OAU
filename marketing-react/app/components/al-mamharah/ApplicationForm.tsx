@@ -4,7 +4,13 @@ import { Button } from "~/components/ui/button";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { submitApplication } from "~/lib/api/al-mamharah";
-import { MASAR_OPTIONS, START_OPTIONS, START_DIRECTION_OPTIONS, startPageForSurah } from "~/lib/data/al-mamharah";
+import {
+	MASAR_OPTIONS,
+	START_OPTIONS,
+	START_DIRECTION_OPTIONS,
+	TAJWEED_TRACK_OPTIONS,
+	startPageForSurah,
+} from "~/lib/data/al-mamharah";
 
 const inputClass =
 	"py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm";
@@ -20,6 +26,7 @@ interface FormData {
 	masar: string;
 	startSurah: string;
 	startDirection: string;
+	tajweedTrack: string;
 	confirmedMemorisation: boolean;
 	confirmedTajweed: boolean;
 	agreedGuidelines: boolean;
@@ -35,6 +42,7 @@ const initialForm: FormData = {
 	masar: "",
 	startSurah: "",
 	startDirection: "",
+	tajweedTrack: "",
 	confirmedMemorisation: false,
 	confirmedTajweed: false,
 	agreedGuidelines: false,
@@ -92,6 +100,7 @@ export function ApplicationForm({
 				startSurah: formData.startSurah,
 				startPage: startPageForSurah(formData.startSurah),
 				startDirection: formData.startDirection,
+				tajweedTrack: formData.tajweedTrack || undefined,
 				confirmedMemorisation: formData.confirmedMemorisation,
 				confirmedTajweed: formData.confirmedTajweed,
 				agreedGuidelines: formData.agreedGuidelines,
@@ -310,6 +319,31 @@ export function ApplicationForm({
 						<p className="mt-1 text-xs text-gray-500">
 							Upward moves toward the end of the mushaf; downward walks back toward the
 							beginning.
+						</p>
+					</div>
+
+					<div>
+						<label className={labelClass} htmlFor="almh-tajweedTrack">
+							Tajweed track <span className="font-normal text-gray-400">(optional)</span>
+						</label>
+						<select
+							id="almh-tajweedTrack"
+							name="tajweedTrack"
+							className="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm appearance-none bg-white"
+							value={formData.tajweedTrack}
+							onChange={(e) => update("tajweedTrack", e.target.value)}
+						>
+							<option value="">None — muroja&apos;ah only</option>
+							{TAJWEED_TRACK_OPTIONS.map((option) => (
+								<option key={option.value} value={option.value}>
+									{option.label} · {option.lines} lines
+								</option>
+							))}
+						</select>
+						<p className="mt-1 text-xs text-gray-500">
+							Optional. You will record one line per day from your matn alongside the
+							muroja&apos;ah. Choosing Al-Jazariyyah or Shaṭibiyyah requires a short placement
+							check on the preceding matn after approval.
 						</p>
 					</div>
 

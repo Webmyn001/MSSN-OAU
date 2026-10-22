@@ -16,6 +16,16 @@ export const alMamharahTaskTypeSchema = z.enum(['MUROJAAH', 'TAJWEED_QIRAAT'])
 
 export const alMamharahParticipantStatusSchema = z.enum(['ACTIVE', 'SUSPENDED'])
 
+// * Optional tajweed track. The three mutūn form a ladder: Tuhfatul Atfal →
+// * Muqaddimah Al-Jazariyyah → Shaṭibiyyah.
+export const alMamharahTajweedTrackSchema = z.enum([
+	'TUHFATUL_ATFAL',
+	'JAZARIYYAH',
+	'SHAATIBIYYAH'
+])
+
+export const alMamharahLeaderboardScopeSchema = z.enum(['OVERALL', 'QURAN', 'TAJWEED'])
+
 export const alMamharahApplicationStatusSchema = z.enum(['PENDING', 'APPROVED', 'REJECTED'])
 
 // * Revision track. UPWARD advances toward the end of the mushaf, DOWNWARD
@@ -48,6 +58,8 @@ export const submitApplicationSchema = z.object({
 	startSurah: z.string().trim().min(1).max(100).optional(),
 	startPage: z.number().int().min(1).max(604).optional(),
 	startDirection: alMamharahStartDirectionSchema.optional(),
+	// * Optional tajweed track (may be omitted / "none").
+	tajweedTrack: alMamharahTajweedTrackSchema.optional(),
 	confirmedMemorisation: requiredConfirmation(
 		'Please confirm that you have memorised at least 15 ajzāʼ of the Qurʼān'
 	),
@@ -98,7 +110,27 @@ export const resetPasswordSchema = z.object({
 
 export const recordCompletionSchema = z.object({
 	taskType: alMamharahTaskTypeSchema.optional(),
+	// * Tajweed line register (optional, only for TAJWEED_QIRAAT)
+	matn: alMamharahTajweedTrackSchema.optional(),
+	lineNumber: z.number().int().min(1).max(10000).optional(),
 	note: z.string().trim().max(500).optional()
+})
+
+// * Placement check (2 MCQs on the preceding matn).
+export const placementQuizAnswersSchema = z.object({
+	answers: z
+		.array(
+			z.object({
+				questionId: z.string().trim().min(1).max(50),
+				choice: z.number().int().min(0).max(9)
+			})
+		)
+		.min(1)
+		.max(10)
+})
+
+export const chooseTajweedTrackSchema = z.object({
+	track: alMamharahTajweedTrackSchema.nullable()
 })
 
 export const deleteOwnCompletionSchema = z.object({
@@ -139,10 +171,19 @@ export const updateParticipantStatusSchema = z.object({
 	notes: z.string().trim().max(500).optional()
 })
 
+export const setParticipantTajweedSchema = z.object({
+	track: alMamharahTajweedTrackSchema.nullable(),
+	// * Managers may skip the placement quiz (defaults to true).
+	skipPlacement: z.boolean().optional()
+})
+
 export const managerCompletionSchema = z.object({
 	participantId: z.string().uuid(),
 	date: isoDateSchema,
 	taskType: alMamharahTaskTypeSchema.optional(),
+	// * Tajweed line register (optional; defaults to the next line)
+	matn: alMamharahTajweedTrackSchema.optional(),
+	lineNumber: z.number().int().min(1).max(10000).optional(),
 	verified: z.boolean().optional(),
 	note: z.string().trim().max(500).optional()
 })
@@ -185,7 +226,8 @@ export const listParticipantsQuerySchema = z.object({
 })
 
 export const leaderboardQuerySchema = z.object({
-	limit: z.coerce.number().int().positive().max(200).default(50)
+	limit: z.coerce.number().int().positive().max(200).default(50),
+	scope: alMamharahLeaderboardScopeSchema.default('OVERALL')
 })
 
 export const dailyProgressQuerySchema = z.object({

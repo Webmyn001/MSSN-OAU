@@ -1,4 +1,5 @@
 import { Trophy, Flame, Medal } from "lucide-react";
+import { tajweedTrackLabel } from "~/lib/data/al-mamharah";
 
 export interface LeaderboardEntry {
 	rank: number;
@@ -8,12 +9,14 @@ export interface LeaderboardEntry {
 	longest: number;
 	total: number;
 	todayCompleted?: boolean;
+	tajweedTrack?: string | null;
 }
 
 interface LeaderboardProps {
 	entries?: LeaderboardEntry[];
 	selfId?: string | null;
 	emptyText?: string;
+	caption?: string;
 }
 
 function rankStyles(rank: number): string {
@@ -27,6 +30,7 @@ export function Leaderboard({
 	entries = [],
 	selfId = null,
 	emptyText = "No participants are ranked yet.",
+	caption = "Ranked by current streak, then longest streak, then total days.",
 }: LeaderboardProps) {
 	if (entries.length === 0) {
 		return <p className="py-8 text-center text-sm text-gray-500">{emptyText}</p>;
@@ -63,11 +67,16 @@ export function Leaderboard({
 									</span>
 								</td>
 								<td className="px-3 py-2">
-									<div className="flex items-center gap-2">
+									<div className="flex flex-wrap items-center gap-2">
 										<span className="font-medium text-gray-800">{entry.displayName}</span>
 										{entry.participantId === selfId ? (
 											<span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-700">
 												You
+											</span>
+										) : null}
+										{entry.tajweedTrack ? (
+											<span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+												{tajweedTrackLabel(entry.tajweedTrack)}
 											</span>
 										) : null}
 										{entry.todayCompleted ? (
@@ -87,7 +96,7 @@ export function Leaderboard({
 			</div>
 			<p className="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
 				<Trophy className="size-3.5 text-amber-500" />
-				Ranked by current streak, then longest streak, then total days.
+				{caption}
 			</p>
 		</>
 	);
