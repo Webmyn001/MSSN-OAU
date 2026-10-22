@@ -132,29 +132,175 @@ export const TASK_LABELS: Record<string, string> = {
 };
 
 export interface StartOption {
+	number: number; // surah number (1-114)
 	value: string; // surah name
 	page: number; // starting page in the standard Hafs mushaf
 }
 
-// * Curated list of common starting surahs (not all 114) so the daily target
-// * can show a page like "Suratul Baqarah pg 1". Page numbers use the
-// * standard Hafs (Madinah) mushaf; the same map lives in the API's mushaf.ts.
-export const START_OPTIONS: StartOption[] = [
-	{ value: "Al-Fātiḥah", page: 1 },
-	{ value: "Al-Baqarah", page: 2 },
-	{ value: "Āl ʿImrān", page: 50 },
-	{ value: "An-Nisāʾ", page: 77 },
-	{ value: "Al-Māʾidah", page: 106 },
-	{ value: "Al-Kahf", page: 293 },
-	{ value: "Yā-Sīn", page: 440 },
-	{ value: "Ar-Raḥmān", page: 531 },
-	{ value: "Al-Mulk", page: 562 },
-	{ value: "Al-Ikhlāṣ", page: 604 },
+export const TOTAL_MUSHAF_PAGES = 604;
+
+// * All 114 surahs with the page each begins on in the standard Hafs (Madinah)
+// * mushaf; mirrors the API's services/al-mamharah/mushaf.ts. The daily target
+// * label ("Surat Al-Baqarah · pg 2–4") is derived from these pages.
+const SURAH_PAGES: [number, string, number][] = [
+	[1, "Al-Fātiḥah", 1],
+	[2, "Al-Baqarah", 2],
+	[3, "Āl ʿImrān", 50],
+	[4, "An-Nisāʾ", 77],
+	[5, "Al-Māʾidah", 106],
+	[6, "Al-Anʿām", 128],
+	[7, "Al-Aʿrāf", 151],
+	[8, "Al-Anfāl", 177],
+	[9, "At-Tawbah", 187],
+	[10, "Yūnus", 208],
+	[11, "Hūd", 221],
+	[12, "Yūsuf", 235],
+	[13, "Ar-Raʿd", 249],
+	[14, "Ibrāhīm", 255],
+	[15, "Al-Ḥijr", 262],
+	[16, "An-Naḥl", 267],
+	[17, "Al-Isrāʾ", 282],
+	[18, "Al-Kahf", 293],
+	[19, "Maryam", 305],
+	[20, "Ṭā-Hā", 312],
+	[21, "Al-Anbiyāʾ", 322],
+	[22, "Al-Ḥajj", 332],
+	[23, "Al-Muʾminūn", 342],
+	[24, "An-Nūr", 350],
+	[25, "Al-Furqān", 359],
+	[26, "Ash-Shuʿarāʾ", 367],
+	[27, "An-Naml", 377],
+	[28, "Al-Qaṣaṣ", 385],
+	[29, "Al-ʿAnkabūt", 396],
+	[30, "Ar-Rūm", 404],
+	[31, "Luqmān", 411],
+	[32, "As-Sajdah", 415],
+	[33, "Al-Aḥzāb", 418],
+	[34, "Sabaʾ", 428],
+	[35, "Fāṭir", 434],
+	[36, "Yā-Sīn", 440],
+	[37, "Aṣ-Ṣāffāt", 446],
+	[38, "Ṣād", 453],
+	[39, "Az-Zumar", 458],
+	[40, "Ghāfir", 467],
+	[41, "Fuṣṣilat", 477],
+	[42, "Ash-Shūrā", 483],
+	[43, "Az-Zukhruf", 489],
+	[44, "Ad-Dukhān", 496],
+	[45, "Al-Jāthiyah", 499],
+	[46, "Al-Aḥqāf", 502],
+	[47, "Muḥammad", 507],
+	[48, "Al-Fatḥ", 511],
+	[49, "Al-Ḥujurāt", 515],
+	[50, "Qāf", 518],
+	[51, "Adh-Dhāriyāt", 520],
+	[52, "Aṭ-Ṭūr", 523],
+	[53, "An-Najm", 526],
+	[54, "Al-Qamar", 528],
+	[55, "Ar-Raḥmān", 531],
+	[56, "Al-Wāqiʿah", 534],
+	[57, "Al-Ḥadīd", 537],
+	[58, "Al-Mujādilah", 542],
+	[59, "Al-Ḥashr", 545],
+	[60, "Al-Mumtaḥanah", 549],
+	[61, "Aṣ-Ṣaff", 551],
+	[62, "Al-Jumuʿah", 553],
+	[63, "Al-Munāfiqūn", 554],
+	[64, "At-Taghābun", 556],
+	[65, "Aṭ-Ṭalāq", 558],
+	[66, "Aṭ-Ṭaḥrīm", 560],
+	[67, "Al-Mulk", 562],
+	[68, "Al-Qalam", 564],
+	[69, "Al-Ḥāqqah", 566],
+	[70, "Al-Maʿārij", 568],
+	[71, "Nūḥ", 570],
+	[72, "Al-Jinn", 572],
+	[73, "Al-Muzzammil", 574],
+	[74, "Al-Muddaththir", 575],
+	[75, "Al-Qiyāmah", 577],
+	[76, "Al-Insān", 578],
+	[77, "Al-Mursalāt", 580],
+	[78, "An-Nabaʾ", 582],
+	[79, "An-Nāziʿāt", 583],
+	[80, "ʿAbasa", 585],
+	[81, "At-Takwīr", 587],
+	[82, "Al-Infiṭār", 587],
+	[83, "Al-Muṭaffifīn", 589],
+	[84, "Al-Inshiqāq", 591],
+	[85, "Al-Burūj", 591],
+	[86, "Aṭ-Ṭāriq", 593],
+	[87, "Al-Aʿlā", 594],
+	[88, "Al-Ghāshiyah", 595],
+	[89, "Al-Fajr", 596],
+	[90, "Al-Balad", 597],
+	[91, "Ash-Shams", 598],
+	[92, "Al-Layl", 598],
+	[93, "Aḍ-Ḍuḥā", 599],
+	[94, "Ash-Sharḥ", 599],
+	[95, "At-Tīn", 600],
+	[96, "Al-ʿAlaq", 600],
+	[97, "Al-Qadr", 601],
+	[98, "Al-Bayyinah", 601],
+	[99, "Az-Zalzalah", 602],
+	[100, "Al-ʿĀdiyāt", 602],
+	[101, "Al-Qāriʿah", 603],
+	[102, "At-Takāthur", 603],
+	[103, "Al-ʿAṣr", 604],
+	[104, "Al-Humazah", 604],
+	[105, "Al-Fīl", 604],
+	[106, "Quraysh", 604],
+	[107, "Al-Māʿūn", 604],
+	[108, "Al-Kawthar", 604],
+	[109, "Al-Kāfirūn", 604],
+	[110, "An-Naṣr", 604],
+	[111, "Al-Masad", 604],
+	[112, "Al-Ikhlāṣ", 604],
+	[113, "Al-Falaq", 604],
+	[114, "An-Nās", 604],
 ];
 
-/** Starting page for a curated surah name (undefined if not in the list). */
+export const START_OPTIONS: StartOption[] = SURAH_PAGES.map(([number, value, page]) => ({
+	number,
+	value,
+	page,
+}));
+
+/** Starting page for a surah name (undefined if the name is unknown). */
 export function startPageForSurah(name: string): number | undefined {
 	return START_OPTIONS.find((o) => o.value === name)?.page;
+}
+
+// * --- Revision direction ----------------------------------------------------
+//
+// * The revision track must be one of these four paths. `upward` advances
+// * toward the end of the mushaf; `downward` walks back toward the beginning,
+// * so the daily target counts pages down.
+
+export type StartDirectionValue =
+	| "BAQARAH_DOWNWARD"
+	| "KAHF_UPWARD"
+	| "KAHF_DOWNWARD"
+	| "NAS_UPWARD";
+
+export interface StartDirectionOption {
+	value: StartDirectionValue;
+	label: string;
+	direction: "UP" | "DOWN";
+}
+
+export const START_DIRECTION_OPTIONS: StartDirectionOption[] = [
+	{ value: "BAQARAH_DOWNWARD", label: "From Al-Baqarah downward", direction: "DOWN" },
+	{ value: "KAHF_UPWARD", label: "From Al-Kahf upward", direction: "UP" },
+	{ value: "KAHF_DOWNWARD", label: "From Al-Kahf downward", direction: "DOWN" },
+	{ value: "NAS_UPWARD", label: "From An-Nās upward", direction: "UP" },
+];
+
+export function startDirectionOption(value: string | null | undefined) {
+	return START_DIRECTION_OPTIONS.find((o) => o.value === value);
+}
+
+export function startDirectionLabel(value: string | null | undefined): string {
+	return startDirectionOption(value)?.label ?? "";
 }
 
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {

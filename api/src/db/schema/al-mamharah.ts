@@ -73,6 +73,8 @@ export const alMamharahApplications = pgTable(
 		// * Where the applicant wants to start revising (mushaf position)
 		startSurah: varchar('start_surah', { length: 100 }),
 		startPage: integer('start_page'),
+		// * Revision track: BAQARAH_UPWARD | KAHF_UPWARD | KAHF_DOWNWARD | NAS_DOWNWARD
+		startDirection: varchar('start_direction', { length: 30 }),
 		confirmedMemorisation: boolean('confirmed_memorisation').notNull().default(false),
 		confirmedTajweed: boolean('confirmed_tajweed').notNull().default(false),
 		agreedGuidelines: boolean('agreed_guidelines').notNull().default(false),
@@ -109,6 +111,8 @@ export const alMamharahParticipants = pgTable(
 		// * Where the student began revising — drives the positional daily target.
 		startSurah: varchar('start_surah', { length: 100 }),
 		startPage: integer('start_page'),
+		// * Revision track (see alMamharahApplications.startDirection)
+		startDirection: varchar('start_direction', { length: 30 }),
 		// * bcrypt hash; null = student has never set a password and must go
 		// * through the OTP "enter programme" flow to establish one.
 		passwordHash: text('password_hash'),

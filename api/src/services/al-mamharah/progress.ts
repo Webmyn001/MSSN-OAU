@@ -73,22 +73,39 @@ export function dailyTargetFromMasar(masar: AlMamharahMasar): DailyTarget {
 /**
  * Builds the participant's positional daily target, e.g. "Al-Baqarah · pg 2–4",
  * by advancing from their chosen start page by the masār's daily page count.
- * Falls back to the plain masār label when no start position is recorded.
+ *
+ * `startDirection` decides the way the track runs:
+ *  - upward (`KAHF_UPWARD` / `NAS_UPWARD`) moves toward the end of the mushaf;
+ *  - downward (`BAQARAH_DOWNWARD` / `KAHF_DOWNWARD`) walks back toward the
+ *    beginning, so the target counts pages down.
+ *
+ * Participants approved before start positions existed default to page 1
+ * (Al-Fātiḥah) so every dashboard still shows a concrete surah and page.
  */
 export function positionalDailyTarget(
-	participant: Pick<AlMamharahParticipant, 'masar' | 'startSurah' | 'startPage' | 'startDate'>,
+	participant: Pick<
+		AlMamharahParticipant,
+		'masar' | 'startSurah' | 'startPage' | 'startDirection' | 'startDate'
+	>,
 	settings: AlMamharahSettings,
 	today: ISODate
 ): DailyTarget {
 	const base = dailyTargetFromMasar(participant.masar)
 	const pagesPerDay = masarPagesPerDay(participant.masar)
-	if (!participant.startPage || !pagesPerDay) return base
+	if (!pagesPerDay) return base
 
+	const startPage = clampPage(participant.startPage ?? 1)
+	const downward = participant.startDirection?.endsWith('DOWNWARD') ?? false
 	const windowStart = participantWindowStart(toISODateValue(participant.startDate), settings)
 	// * Day index counts from the participant's first eligible day up to today.
 	const dayIndex = Math.max(0, diffDays(windowStart, today))
-	const fromPage = clampPage(participant.startPage + dayIndex * pagesPerDay)
-	const toPage = clampPage(fromPage + pagesPerDay - 1)
+
+	// * Upward: [first, first + pages - 1]. Downward: [last - pages + 1, last].
+	const edge = downward
+		? clampPage(startPage - dayIndex * pagesPerDay)
+		: clampPage(startPage + dayIndex * pagesPerDay)
+	const fromPage = clampPage(downward ? edge - pagesPerDay + 1 : edge)
+	const toPage = clampPage(downward ? edge : edge + pagesPerDay - 1)
 
 	return {
 		...base,

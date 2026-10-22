@@ -25,6 +25,7 @@ export interface ApplicationInput {
 	masar: AlMamharahMasar
 	startSurah?: string
 	startPage?: number
+	startDirection?: string
 	confirmedMemorisation: boolean
 	confirmedTajweed: boolean
 	agreedGuidelines: boolean
@@ -47,6 +48,7 @@ export async function submitApplication(input: ApplicationInput): Promise<AlMamh
 		masar: input.masar,
 		startSurah: input.startSurah?.trim() || null,
 		startPage: input.startPage ?? null,
+		startDirection: input.startDirection?.trim() || null,
 		confirmedMemorisation: true,
 		confirmedTajweed: true,
 		agreedGuidelines: true,
@@ -201,6 +203,7 @@ export async function approveApplication(
 				startDate,
 				startSurah: application.startSurah,
 				startPage: application.startPage,
+				startDirection: application.startDirection,
 				status: 'ACTIVE'
 			})
 			.returning()

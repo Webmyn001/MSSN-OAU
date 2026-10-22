@@ -11,6 +11,8 @@ import {
 	MailCheck,
 	Lock,
 	Send,
+	Eye,
+	EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -20,6 +22,7 @@ import {
 	forgotParticipantPassword,
 	resetParticipantPassword,
 	saveParticipantSession,
+	AlMamharahError,
 } from "~/lib/api/al-mamharah";
 import { ARABIC } from "~/lib/data/al-mamharah";
 
@@ -27,19 +30,21 @@ const inputClass =
 	"py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm";
 const labelClass = "block mb-2 text-sm text-gray-700 font-medium font-primary";
 
-// * Password-based student access. OTP is only used on the first login (to
-// * establish a password) and for the forgotten-password reset.
+// * Password-based student access, mirroring the manager login. Students sign
+// * in with their full name + password; OTP by email is only used to set a
+// * password the first time or to reset a forgotten one.
 
-type View = "name" | "password" | "setup" | "forgot" | "reset";
+type View = "login" | "setup" | "forgot" | "reset";
 
 export function EnterProgramme() {
 	const navigate = useNavigate();
 
-	const [view, setView] = useState<View>("name");
+	const [view, setView] = useState<View>("login");
 	const [fullName, setFullName] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [code, setCode] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [formError, setFormError] = useState<string | null>(null);
 	const [notVerified, setNotVerified] = useState<{
@@ -62,11 +67,12 @@ export function EnterProgramme() {
 		setCode("");
 		setPassword("");
 		setConfirmPassword("");
+		setShowPassword(false);
 	}
 
-	function backToName() {
+	function backToLogin() {
 		resetLocal();
-		setView("name");
+		setView("login");
 	}
 
 	function finish(token: string | undefined, participant: any) {
@@ -79,8 +85,8 @@ export function EnterProgramme() {
 		void navigate("/al-mamharah/dashboard");
 	}
 
-	async function requestCode(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
+	/** Sends a first-time setup code to the email on the student's application. */
+	async function beginSetup() {
 		setFormError(null);
 		setNotVerified(null);
 		if (fullName.trim().length < 2) {
@@ -91,16 +97,25 @@ export function EnterProgramme() {
 		try {
 			const result = await enterProgramme(fullName.trim());
 			const data = result.data ?? {};
-			if (data.status === "password_required") {
-				setView("password");
-			} else if (data.status === "code_sent") {
+			if (data.status === "code_sent") {
 				setView("setup");
+				setCode("");
+				setPassword("");
+				setConfirmPassword("");
 				setInfoMessage(
 					data.message ?? "A 6-digit code has been sent to your email."
 				);
 				setDevCode(data.devCode ?? null);
 				toast.success("Verification code sent.");
+			} else if (data.status === "password_required") {
+				setView("login");
+				setPassword("");
+				setInfoMessage(
+					"This account already has a password. Sign in with it below, or use \u201cForgotten your password?\u201d to reset it."
+				);
+				toast.info("This account already has a password.");
 			} else {
+				setView("login");
 				setNotVerified({
 					message: data.message ?? "Your participation has not yet been verified.",
 					messageAr: data.messageAr ?? "",
@@ -115,11 +130,19 @@ export function EnterProgramme() {
 		}
 	}
 
-	async function submitPassword(event: FormEvent<HTMLFormElement>) {
+	/** Returning student: full name + the password set on first login. */
+	async function submitLogin(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setFormError(null);
+		setNotVerified(null);
+		if (fullName.trim().length < 2) {
+			startError("Please enter your full name exactly as submitted.");
+			return;
+		}
 		if (!password) {
-			startError("Enter your password.");
+			startError(
+				"Enter your password, or use \u201cFirst time here?\u201d below if you haven't set one yet."
+			);
 			return;
 		}
 		setIsSubmitting(true);
@@ -128,6 +151,12 @@ export function EnterProgramme() {
 			const { token, participant } = result.data ?? {};
 			finish(token, participant);
 		} catch (error) {
+			// * No password yet - email a setup code and move them to the setup step.
+			if (error instanceof AlMamharahError && error.code === "PASSWORD_NOT_SET") {
+				setIsSubmitting(false);
+				await beginSetup();
+				return;
+			}
 			startError(
 				error instanceof Error ? error.message : "Incorrect name or password."
 			);
@@ -180,6 +209,9 @@ export function EnterProgramme() {
 			const result = await forgotParticipantPassword(fullName.trim());
 			const data = result.data ?? {};
 			setView("reset");
+			setCode("");
+			setPassword("");
+			setConfirmPassword("");
 			setInfoMessage(
 				data.message ?? "If that name is on the approved list, a reset code has been emailed."
 			);
@@ -223,7 +255,7 @@ export function EnterProgramme() {
 	async function resendCode() {
 		setFormError(null);
 		if (fullName.trim().length < 2) {
-			backToName();
+			backToLogin();
 			return;
 		}
 		setIsSubmitting(true);
@@ -236,13 +268,13 @@ export function EnterProgramme() {
 				toast.success("A new code has been sent.");
 			} else if (data.status === "password_required") {
 				toast.error("This account already has a password. Please sign in with it.");
-				setView("password");
+				setView("login");
 			} else {
 				setNotVerified({
 					message: data.message ?? "Your participation has not yet been verified.",
 					messageAr: data.messageAr ?? "",
 				});
-				setView("name");
+				setView("login");
 			}
 		} catch (error) {
 			startError(
@@ -256,7 +288,7 @@ export function EnterProgramme() {
 	async function resendResetCode() {
 		setFormError(null);
 		if (fullName.trim().length < 2) {
-			backToName();
+			backToLogin();
 			return;
 		}
 		setIsSubmitting(true);
@@ -281,6 +313,16 @@ export function EnterProgramme() {
 			<div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
 				<AlertCircle className="mt-0.5 size-4 shrink-0" />
 				<p>{formError}</p>
+			</div>
+		);
+	}
+
+	function infoBox() {
+		if (!infoMessage) return null;
+		return (
+			<div className="flex items-start gap-2 rounded-lg border border-primary-100 bg-primary-50/60 p-3 text-sm text-primary-800">
+				<MailCheck className="mt-0.5 size-4 shrink-0" />
+				<p>{infoMessage}</p>
 			</div>
 		);
 	}
@@ -315,50 +357,58 @@ export function EnterProgramme() {
 		);
 	}
 
-	function passwordFields(showConfirm = true) {
+	function newPasswordFields() {
 		return (
 			<>
 				<div>
 					<label className={labelClass} htmlFor="almh-new-password">
 						New password <span className="text-red-500">*</span>
 					</label>
+					<div className="relative">
+						<input
+							id="almh-new-password"
+							name="password"
+							type={showPassword ? "text" : "password"}
+							required
+							minLength={8}
+							autoComplete="new-password"
+							className={`${inputClass} pr-11`}
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder="At least 8 characters"
+						/>
+						<button
+							type="button"
+							onClick={() => setShowPassword((v) => !v)}
+							aria-label={showPassword ? "Hide password" : "Show password"}
+							className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+						>
+							{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+						</button>
+					</div>
+				</div>
+				<div>
+					<label className={labelClass} htmlFor="almh-confirm-password">
+						Confirm password <span className="text-red-500">*</span>
+					</label>
 					<input
-						id="almh-new-password"
-						name="password"
-						type="password"
+						id="almh-confirm-password"
+						name="confirmPassword"
+						type={showPassword ? "text" : "password"}
 						required
 						minLength={8}
 						autoComplete="new-password"
 						className={inputClass}
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						placeholder="At least 8 characters"
+						value={confirmPassword}
+						onChange={(e) => setConfirmPassword(e.target.value)}
+						placeholder="Re-enter your password"
 					/>
 				</div>
-				{showConfirm ? (
-					<div>
-						<label className={labelClass} htmlFor="almh-confirm-password">
-							Confirm password <span className="text-red-500">*</span>
-						</label>
-						<input
-							id="almh-confirm-password"
-							name="confirmPassword"
-							type="password"
-							required
-							minLength={8}
-							autoComplete="new-password"
-							className={inputClass}
-							value={confirmPassword}
-							onChange={(e) => setConfirmPassword(e.target.value)}
-							placeholder="Re-enter your password"
-						/>
-					</div>
-				) : null}
 			</>
 		);
 	}
 
-	function nameField() {
+	function nameField(readOnly = false) {
 		return (
 			<div>
 				<label className={labelClass} htmlFor="almh-enter-name">
@@ -369,8 +419,9 @@ export function EnterProgramme() {
 					name="fullName"
 					type="text"
 					required
+					readOnly={readOnly}
 					autoComplete="name"
-					className={inputClass}
+					className={`${inputClass}${readOnly ? " bg-gray-50 text-gray-600" : ""}`}
 					value={fullName}
 					onChange={(e) => setFullName(e.target.value)}
 					placeholder="Exactly as on your application"
@@ -421,16 +472,27 @@ export function EnterProgramme() {
 		);
 	}
 
+	function linkButton(label: string, onClick: () => void, disabled = false) {
+		return (
+			<button
+				type="button"
+				onClick={onClick}
+				disabled={disabled}
+				className="text-center text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline disabled:opacity-50 disabled:pointer-events-none"
+			>
+				{label}
+			</button>
+		);
+	}
+
 	const subtitle =
-		view === "password"
-			? "Enter your password to access your dashboard."
+		view === "login"
+			? "Sign in with your full name and the password you set up."
 			: view === "setup"
 				? "First time signing in? Enter the code we emailed you, then choose a password."
 				: view === "forgot"
-					? "We'll email you a code to set a new password."
-					: view === "reset"
-						? "Enter the reset code from your email, then choose a new password."
-						: "Approved participants can access their dashboard here. Sign in with your name and password.";
+					? "We'll email you a code so you can set a new password."
+					: "Enter the reset code from your email, then choose a new password.";
 
 	return (
 		<div
@@ -443,83 +505,61 @@ export function EnterProgramme() {
 			</h2>
 			<p className="mb-6 text-sm text-gray-600">{subtitle}</p>
 
-			{view === "name" ? (
-				<form onSubmit={requestCode} className="grid gap-4">
-					{nameField()}
-					{notVerifiedBox()}
-					{errorBox()}
-					{submitButton("Continue", "Checking...", <KeyRound className="mr-2 size-4" />)}
-					<button
-						type="button"
-						onClick={() => {
-							resetLocal();
-							setView("forgot");
-						}}
-						className="mt-1 text-center text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline"
-					>
-						Forgotten your password?
-					</button>
-				</form>
-			) : view === "password" ? (
-				<form onSubmit={submitPassword} className="grid gap-4">
+			{view === "login" ? (
+				<form onSubmit={submitLogin} className="grid gap-4">
+					{infoBox()}
 					{nameField()}
 					<div>
 						<label className={labelClass} htmlFor="almh-password">
 							Password <span className="text-red-500">*</span>
 						</label>
-						<input
-							id="almh-password"
-							name="password"
-							type="password"
-							required
-							autoComplete="current-password"
-							className={inputClass}
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							placeholder="Your password"
-						/>
+						<div className="relative">
+							<input
+								id="almh-password"
+								name="password"
+								type={showPassword ? "text" : "password"}
+								required
+								autoComplete="current-password"
+								className={`${inputClass} pr-11`}
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								placeholder="Your password"
+							/>
+							<button
+								type="button"
+								onClick={() => setShowPassword((v) => !v)}
+								aria-label={showPassword ? "Hide password" : "Show password"}
+								className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+							>
+								{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+							</button>
+						</div>
 					</div>
+					{notVerifiedBox()}
 					{errorBox()}
-					<div className="flex flex-col gap-2 sm:flex-row">
-						<Button type="submit" className="flex-1" disabled={isSubmitting}>
-							{isSubmitting ? (
-								<>
-									<Loader2 className="mr-2 size-4 animate-spin" />
-									<span>Signing in...</span>
-								</>
-							) : (
-								<>
-									<Lock className="mr-2 size-4" />
-									<span>Sign in</span>
-								</>
-							)}
-						</Button>
-						<Button type="button" variant="outline" onClick={backToName} className="sm:w-auto">
-							<ArrowLeft className="mr-2 size-4" />
-							Back
-						</Button>
-					</div>
-					<button
-						type="button"
-						onClick={() => {
+					{submitButton("Sign in", "Signing in...", <Lock className="mr-2 size-4" />)}
+					<div className="flex flex-col items-center gap-2 border-t border-gray-100 pt-3">
+						{linkButton(
+							"First time here? Get a code to set your password",
+							() => {
+								resetLocal();
+								void beginSetup();
+							},
+							isSubmitting
+						)}
+						{linkButton("Forgotten your password?", () => {
 							resetLocal();
 							setView("forgot");
-						}}
-						className="mt-1 text-center text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline"
-					>
-						Forgotten your password?
-					</button>
+						})}
+					</div>
 				</form>
 			) : view === "setup" ? (
 				<form onSubmit={submitSetup} className="grid gap-4">
-					<div className="flex items-start gap-2 rounded-lg border border-primary-100 bg-primary-50/60 p-3 text-sm text-primary-800">
-						<MailCheck className="mt-0.5 size-4 shrink-0" />
-						<p>{infoMessage}</p>
-					</div>
+					{infoBox()}
 					{devCodeBox()}
-					{nameField()}
+					{nameField(true)}
 					{codeField()}
-					{passwordFields(true)}
+					{newPasswordFields()}
 					{errorBox()}
 					<div className="flex flex-col gap-2 sm:flex-row">
 						<Button type="submit" className="flex-1" disabled={isSubmitting}>
@@ -535,40 +575,30 @@ export function EnterProgramme() {
 								</>
 							)}
 						</Button>
-						<Button type="button" variant="outline" onClick={backToName} className="sm:w-auto">
+						<Button type="button" variant="outline" onClick={backToLogin} className="sm:w-auto">
 							<ArrowLeft className="mr-2 size-4" />
 							Back
 						</Button>
 					</div>
-					<button
-						type="button"
-						onClick={resendCode}
-						disabled={isSubmitting}
-						className="mt-1 text-center text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline disabled:opacity-50 disabled:pointer-events-none"
-					>
-						Didn't receive the code? Resend it
-					</button>
+					{linkButton("Didn't receive the code? Resend it", () => void resendCode(), isSubmitting)}
 				</form>
 			) : view === "forgot" ? (
 				<form onSubmit={requestReset} className="grid gap-4">
 					{nameField()}
 					{errorBox()}
 					{submitButton("Send reset code", "Sending...", <Send className="mr-2 size-4" />)}
-					<Button type="button" variant="outline" onClick={backToName} className="w-full">
+					<Button type="button" variant="outline" onClick={backToLogin} className="w-full">
 						<ArrowLeft className="mr-2 size-4" />
 						Back to sign in
 					</Button>
 				</form>
 			) : (
 				<form onSubmit={submitReset} className="grid gap-4">
-					<div className="flex items-start gap-2 rounded-lg border border-primary-100 bg-primary-50/60 p-3 text-sm text-primary-800">
-						<MailCheck className="mt-0.5 size-4 shrink-0" />
-						<p>{infoMessage}</p>
-					</div>
+					{infoBox()}
 					{devCodeBox()}
-					{nameField()}
+					{nameField(true)}
 					{codeField("Reset code")}
-					{passwordFields(true)}
+					{newPasswordFields()}
 					{errorBox()}
 					<div className="flex flex-col gap-2 sm:flex-row">
 						<Button type="submit" className="flex-1" disabled={isSubmitting}>
@@ -584,19 +614,16 @@ export function EnterProgramme() {
 								</>
 							)}
 						</Button>
-						<Button type="button" variant="outline" onClick={backToName} className="sm:w-auto">
+						<Button type="button" variant="outline" onClick={backToLogin} className="sm:w-auto">
 							<ArrowLeft className="mr-2 size-4" />
 							Back
 						</Button>
 					</div>
-					<button
-						type="button"
-						onClick={resendResetCode}
-						disabled={isSubmitting}
-						className="mt-1 text-center text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline disabled:opacity-50 disabled:pointer-events-none"
-					>
-						Didn't receive the code? Resend it
-					</button>
+					{linkButton(
+						"Didn't receive the code? Resend it",
+						() => void resendResetCode(),
+						isSubmitting
+					)}
 				</form>
 			)}
 		</div>

@@ -78,6 +78,13 @@
       "when": 1792515979245,
       "tag": "0010_al_mamharah_password_and_start_position",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792659739002,
+      "tag": "0011_al_mamharah_start_direction",
+      "breakpoints": true
     }
   ]
 }

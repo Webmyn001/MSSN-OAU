@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { submitApplication } from "~/lib/api/al-mamharah";
-import { MASAR_OPTIONS, START_OPTIONS, startPageForSurah } from "~/lib/data/al-mamharah";
+import { MASAR_OPTIONS, START_OPTIONS, START_DIRECTION_OPTIONS, startPageForSurah } from "~/lib/data/al-mamharah";
 
 const inputClass =
 	"py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm";
@@ -19,6 +19,7 @@ interface FormData {
 	department: string;
 	masar: string;
 	startSurah: string;
+	startDirection: string;
 	confirmedMemorisation: boolean;
 	confirmedTajweed: boolean;
 	agreedGuidelines: boolean;
@@ -33,6 +34,7 @@ const initialForm: FormData = {
 	department: "",
 	masar: "",
 	startSurah: "",
+	startDirection: "",
 	confirmedMemorisation: false,
 	confirmedTajweed: false,
 	agreedGuidelines: false,
@@ -60,6 +62,14 @@ export function ApplicationForm({
 			setFormError("Please choose a masār (revision track).");
 			return;
 		}
+		if (!formData.startSurah) {
+			setFormError("Please choose where you would like to start revising.");
+			return;
+		}
+		if (!formData.startDirection) {
+			setFormError("Please choose your revision direction.");
+			return;
+		}
 		if (
 			!formData.confirmedMemorisation ||
 			!formData.confirmedTajweed ||
@@ -79,8 +89,9 @@ export function ApplicationForm({
 				faculty: formData.faculty.trim(),
 				department: formData.department.trim(),
 				masar: formData.masar,
-				startSurah: formData.startSurah || undefined,
-				startPage: formData.startSurah ? startPageForSurah(formData.startSurah) : undefined,
+				startSurah: formData.startSurah,
+				startPage: startPageForSurah(formData.startSurah),
+				startDirection: formData.startDirection,
 				confirmedMemorisation: formData.confirmedMemorisation,
 				confirmedTajweed: formData.confirmedTajweed,
 				agreedGuidelines: formData.agreedGuidelines,
@@ -242,7 +253,7 @@ export function ApplicationForm({
 							</option>
 							{MASAR_OPTIONS.map((option) => (
 								<option key={option.value} value={option.value}>
-									{option.label} — {option.daily}
+									{option.label}
 								</option>
 							))}
 						</select>
@@ -250,24 +261,55 @@ export function ApplicationForm({
 
 					<div>
 						<label className={labelClass} htmlFor="almh-startSurah">
-							Where would you like to start revising? <span className="text-gray-400">(optional)</span>
+							Where would you like to start revising?{" "}
+							<span className="text-red-500">*</span>
 						</label>
 						<select
 							id="almh-startSurah"
 							name="startSurah"
+							required
 							className="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm appearance-none bg-white"
 							value={formData.startSurah}
 							onChange={(e) => update("startSurah", e.target.value)}
 						>
-							<option value="">Not sure — start from Al-Fātiḥah</option>
+							<option value="" disabled>
+								Select a surah
+							</option>
 							{START_OPTIONS.map((option) => (
-								<option key={option.value} value={option.value}>
-									{option.value} (pg {option.page})
+								<option key={option.number} value={option.value}>
+									{option.number}. {option.value} (pg {option.page})
 								</option>
 							))}
 						</select>
 						<p className="mt-1 text-xs text-gray-500">
 							Your daily target will be shown from this point in the mushaf.
+						</p>
+					</div>
+
+					<div>
+						<label className={labelClass} htmlFor="almh-startDirection">
+							Revision direction <span className="text-red-500">*</span>
+						</label>
+						<select
+							id="almh-startDirection"
+							name="startDirection"
+							required
+							className="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm appearance-none bg-white"
+							value={formData.startDirection}
+							onChange={(e) => update("startDirection", e.target.value)}
+						>
+							<option value="" disabled>
+								Select your track
+							</option>
+							{START_DIRECTION_OPTIONS.map((option) => (
+								<option key={option.value} value={option.value}>
+									{option.label}
+								</option>
+							))}
+						</select>
+						<p className="mt-1 text-xs text-gray-500">
+							Upward moves toward the end of the mushaf; downward walks back toward the
+							beginning.
 						</p>
 					</div>
 

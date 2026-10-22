@@ -164,10 +164,9 @@ export default function AlMamharahDashboardPage() {
 									</h1>
 									<p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-sm text-gray-600">
 										<Arabic className="text-primary-600">{ARABIC.masar}</Arabic>
-										<span>
-											· {masarLabel(report.participant.masar)} ·{" "}
-											{masarDaily(report.participant.masar)}
-										</span>
+											<span>
+												· {masarLabel(report.participant.masar)}
+											</span>
 									</p>
 								</div>
 								<div className="flex items-center gap-2">
@@ -265,22 +264,24 @@ export default function AlMamharahDashboardPage() {
 												<p className="text-xs font-medium uppercase tracking-wide text-primary-600">
 													Your daily target
 												</p>
-												<p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm font-semibold text-primary-800">
-													{report.dailyTarget.fromPage && report.dailyTarget.toPage ? (
-														<>
-															<span>Surat {report.dailyTarget.surah}</span>
-															<span className="text-primary-400">·</span>
-															<span className="font-mono">
-																pg {report.dailyTarget.fromPage}
-																{report.dailyTarget.toPage !== report.dailyTarget.fromPage
-																	? `–${report.dailyTarget.toPage}`
-																	: ""}
-															</span>
-														</>
-													) : (
-														<span>{report.dailyTarget.label}</span>
-													)}
-												</p>
+											<p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm font-semibold text-primary-800">
+												<span>{masarDaily(report.participant.masar)}</span>
+												{report.dailyTarget.fromPage && report.dailyTarget.toPage ? (
+													<>
+														<span className="text-primary-400">·</span>
+														<span>
+															Surat {report.dailyTarget.surah}
+														</span>
+														<span className="text-primary-400">·</span>
+														<span className="font-mono">
+															pg {report.dailyTarget.fromPage}
+															{report.dailyTarget.toPage !== report.dailyTarget.fromPage
+																? `–${report.dailyTarget.toPage}`
+																: ""}
+														</span>
+													</>
+												) : null}
+											</p>
 											</div>
 										) : null}
 

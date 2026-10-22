@@ -18,6 +18,15 @@ export const alMamharahParticipantStatusSchema = z.enum(['ACTIVE', 'SUSPENDED'])
 
 export const alMamharahApplicationStatusSchema = z.enum(['PENDING', 'APPROVED', 'REJECTED'])
 
+// * Revision track. UPWARD advances toward the end of the mushaf, DOWNWARD
+// * walks back toward the beginning (daily target counts pages down).
+export const alMamharahStartDirectionSchema = z.enum([
+	'BAQARAH_DOWNWARD',
+	'KAHF_UPWARD',
+	'KAHF_DOWNWARD',
+	'NAS_UPWARD'
+])
+
 const isoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected a YYYY-MM-DD date')
 
 const requiredConfirmation = (message: string) =>
@@ -33,9 +42,12 @@ export const submitApplicationSchema = z.object({
 	faculty: z.string().trim().min(2, 'Faculty is required').max(150),
 	department: z.string().trim().min(2, 'Department is required').max(150),
 	masar: alMamharahMasarSchema,
-	// * Optional personalised start position (drives the daily target)
+	// * Personalised start position + direction (drive the daily target).
+	// * The form requires both; kept optional here so applications submitted
+	// * before this field existed can still be approved.
 	startSurah: z.string().trim().min(1).max(100).optional(),
 	startPage: z.number().int().min(1).max(604).optional(),
+	startDirection: alMamharahStartDirectionSchema.optional(),
 	confirmedMemorisation: requiredConfirmation(
 		'Please confirm that you have memorised at least 15 ajzāʼ of the Qurʼān'
 	),

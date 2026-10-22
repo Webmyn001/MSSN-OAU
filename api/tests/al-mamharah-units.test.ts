@@ -232,6 +232,7 @@ describe('positionalDailyTarget', () => {
 				masar: 'THREE_PAGES',
 				startSurah: 'Al-Baqarah',
 				startPage: 2,
+				startDirection: 'KAHF_UPWARD',
 				startDate: '2026-10-18'
 			},
 			settings,
@@ -249,6 +250,7 @@ describe('positionalDailyTarget', () => {
 				masar: 'TWO_PAGES',
 				startSurah: 'Al-Fātiḥah',
 				startPage: 1,
+				startDirection: 'KAHF_UPWARD',
 				startDate: '2026-10-18'
 			},
 			settings,
@@ -259,13 +261,99 @@ describe('positionalDailyTarget', () => {
 		expect(target.toPage).toBe(4)
 	})
 
-	test('falls back to the plain masār label without a start page', () => {
+	test('counts pages downward for the Kahf downward track', () => {
+		const day0 = positionalDailyTarget(
+			{
+				masar: 'THREE_PAGES',
+				startSurah: 'Al-Kahf',
+				startPage: 293,
+				startDirection: 'KAHF_DOWNWARD',
+				startDate: '2026-10-18'
+			},
+			settings,
+			'2026-10-18'
+		)
+		expect(day0.fromPage).toBe(291)
+		expect(day0.toPage).toBe(293)
+
+		const day2 = positionalDailyTarget(
+			{
+				masar: 'THREE_PAGES',
+				startSurah: 'Al-Kahf',
+				startPage: 293,
+				startDirection: 'KAHF_DOWNWARD',
+				startDate: '2026-10-18'
+			},
+			settings,
+			'2026-10-20'
+		)
+		expect(day2.fromPage).toBe(285)
+		expect(day2.toPage).toBe(287)
+	})
+
+	test('counts pages downward for the Baqarah downward track', () => {
 		const target = positionalDailyTarget(
-			{ masar: 'THREE_PAGES', startSurah: null, startPage: null, startDate: '2026-10-18' },
+			{
+				masar: 'THREE_PAGES',
+				startSurah: 'Al-Baqarah',
+				startPage: 2,
+				startDirection: 'BAQARAH_DOWNWARD',
+				startDate: '2026-10-18'
+			},
+			settings,
+			'2026-10-18'
+		)
+		// * clamped at the first page of the mushaf
+		expect(target.fromPage).toBe(1)
+		expect(target.toPage).toBe(2)
+	})
+
+	test('advances for the An-Nās upward track', () => {
+		const target = positionalDailyTarget(
+			{
+				masar: 'TWO_PAGES',
+				startSurah: 'An-Nās',
+				startPage: 600,
+				startDirection: 'NAS_UPWARD',
+				startDate: '2026-10-18'
+			},
+			settings,
+			'2026-10-18'
+		)
+		expect(target.fromPage).toBe(600)
+		expect(target.toPage).toBe(601)
+	})
+
+	test('defaults to Al-Fātiḥah when no start page is recorded', () => {
+		const target = positionalDailyTarget(
+			{
+				masar: 'THREE_PAGES',
+				startSurah: null,
+				startPage: null,
+				startDirection: null,
+				startDate: '2026-10-18'
+			},
+			settings,
+			'2026-10-18'
+		)
+		expect(target.fromPage).toBe(1)
+		expect(target.toPage).toBe(3)
+		expect(target.label).toContain('Al-Fātiḥah · pg 1–3')
+	})
+
+	test('keeps the plain label for khatm (no fixed page count)', () => {
+		const target = positionalDailyTarget(
+			{
+				masar: 'KHATM',
+				startSurah: 'Al-Baqarah',
+				startPage: 2,
+				startDirection: 'KAHF_UPWARD',
+				startDate: '2026-10-18'
+			},
 			settings,
 			'2026-10-18'
 		)
 		expect(target.fromPage).toBeUndefined()
-		expect(target.label).toBe('3 pages daily')
+		expect(target.label).toBe('Full khatm')
 	})
 })
