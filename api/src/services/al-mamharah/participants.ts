@@ -3,14 +3,16 @@ import { db } from '../../lib/db'
 import {
 	alMamharahApplications,
 	alMamharahCompletions,
+	alMamharahParticipantSessions,
 	alMamharahParticipants,
+	alMamharahVerificationCodes,
 	type AlMamharahApplication,
 	type AlMamharahMasar,
 	type AlMamharahParticipant,
 	type AlMamharahParticipantStatus,
 	type AlMamharahTaskType
 } from '../../db/schema'
-import { NotFoundError } from '../../lib/errors'
+import { NotFoundError, ValidationError } from '../../lib/errors'
 import { logger } from '../../lib/logger'
 import { normalizePersonName } from './applications'
 import { recordAudit } from './audit'
@@ -340,6 +342,75 @@ export async function setParticipantStatus(
 	})
 	logger.info({ participantId, status, actor }, 'Al-Mamharah participant status changed')
 	return updated
+}
+
+export interface DeletedParticipant {
+	id: string
+	displayName: string
+	email: string
+	completions: number
+	sessions: number
+}
+
+/**
+ * Permanently removes a suspended participant and their programme data.
+ * Accounts must be suspended first so deletion is always a deliberate,
+ * two-step action. The application record is kept for auditing/enrolment
+ * history; the person simply no longer has a dashboard or login.
+ */
+export async function deleteParticipant(
+	participantId: string,
+	{ actor }: { actor: string }
+): Promise<DeletedParticipant> {
+	const participant = await getParticipantById(participantId)
+	if (participant.status !== 'SUSPENDED') {
+		throw new ValidationError('Suspend the participant before deleting them')
+	}
+
+	const [completionCount] = await db
+		.select({ total: count() })
+		.from(alMamharahCompletions)
+		.where(eq(alMamharahCompletions.participantId, participantId))
+	const [sessionCount] = await db
+		.select({ total: count() })
+		.from(alMamharahParticipantSessions)
+		.where(eq(alMamharahParticipantSessions.participantId, participantId))
+
+	await db.transaction(async tx => {
+		await tx
+			.delete(alMamharahVerificationCodes)
+			.where(eq(alMamharahVerificationCodes.participantId, participantId))
+		await tx
+			.delete(alMamharahParticipantSessions)
+			.where(eq(alMamharahParticipantSessions.participantId, participantId))
+		await tx.delete(alMamharahCompletions).where(eq(alMamharahCompletions.participantId, participantId))
+		await tx.delete(alMamharahParticipants).where(eq(alMamharahParticipants.id, participantId))
+	})
+
+	const result: DeletedParticipant = {
+		id: participantId,
+		displayName: participant.displayName,
+		email: participant.email,
+		completions: Number(completionCount?.total ?? 0),
+		sessions: Number(sessionCount?.total ?? 0)
+	}
+
+	await recordAudit({
+		actorType: 'MANAGER',
+		actor,
+		action: 'PARTICIPANT_DELETED',
+		entity: 'participant',
+		entityId: participantId,
+		details: {
+			displayName: result.displayName,
+			email: result.email,
+			applicationId: participant.applicationId,
+			completions: result.completions,
+			sessions: result.sessions
+		}
+	})
+	logger.info({ participantId, actor }, 'Al-Mamharah participant deleted')
+	return result
 }
 
 export interface ParticipantCounts {

@@ -344,6 +344,13 @@ export function suspendInactiveParticipants(token: string | undefined = getManag
 	});
 }
 
+export function deleteParticipant(id: string, token: string | undefined = getManagerToken()) {
+	return request(`/al-mamharah/manager/participants/${id}`, {
+		method: "DELETE",
+		token,
+	});
+}
+
 export function getDailyProgress(date?: string, token: string | undefined = getManagerToken()) {
 	const query = date ? `?date=${encodeURIComponent(date)}` : "";
 	return request(`/al-mamharah/manager/daily-progress${query}`, { token });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
 	Loader2,
@@ -13,6 +13,7 @@ import {
 	Plus,
 	BadgeCheck,
 	RefreshCw,
+	Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -22,6 +23,7 @@ import {
 	suspendInactiveParticipants,
 	backfillCompletion,
 	setParticipantTajweed,
+	deleteParticipant,
 	fetchCsv,
 	AlMamharahError,
 } from "~/lib/api/al-mamharah";
@@ -54,6 +56,8 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 	const [detail, setDetail] = useState<any>(null);
 	const [detailLoading, setDetailLoading] = useState(false);
 	const [acting, setActing] = useState<string | null>(null);
+	const [deleting, setDeleting] = useState<string | null>(null);
+	const requestRef = useRef(0);
 
 	const [bfDate, setBfDate] = useState("");
 	const [bfTask, setBfTask] = useState("MUROJAAH");
@@ -78,14 +82,29 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 		}
 	}
 
-	async function load() {
+	async function load(
+		overrides: { page?: number; status?: string; masar?: string; search?: string } = {}
+	) {
+		// * Ignore responses from stale requests so quick filter changes never
+		// * leave the panel stuck on an older result.
+		const requestId = ++requestRef.current;
+		const nextPage = overrides.page ?? page;
+		const nextStatus = overrides.status ?? status;
+		const nextMasar = overrides.masar ?? masar;
+		const nextSearch = overrides.search ?? search;
+
 		setLoading(true);
 		setError(null);
 		try {
-			const result = await listParticipants({ page, limit: 20, status, masar, search }, token);
+			const result = await listParticipants(
+				{ page: nextPage, limit: 20, status: nextStatus, masar: nextMasar, search: nextSearch },
+				token
+			);
+			if (requestId !== requestRef.current) return;
 			setItems(result.data ?? []);
 			setMeta(result.meta?.pagination ?? { page: 1, total: 0, totalPages: 1 });
 		} catch (err) {
+			if (requestId !== requestRef.current) return;
 			if (err instanceof AlMamharahError && (err.status === 401 || err.status === 403)) {
 				onExpired();
 				return;
@@ -98,7 +117,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 			}
 			setError(err instanceof Error ? err.message : "Unable to load participants.");
 		} finally {
-			setLoading(false);
+			if (requestId === requestRef.current) setLoading(false);
 		}
 	}
 
@@ -107,9 +126,48 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	function applyFilters() {
+	function changeStatusFilter(value: string) {
+		setStatus(value);
 		setPage(1);
-		load();
+		load({ status: value, page: 1 });
+	}
+
+	function changeMasarFilter(value: string) {
+		setMasar(value);
+		setPage(1);
+		load({ masar: value, page: 1 });
+	}
+
+	function applySearch() {
+		setPage(1);
+		load({ page: 1 });
+	}
+
+	async function removeParticipant(participant: any) {
+		const confirmed = window.confirm(
+			`Permanently delete ${participant.displayName}?\n\nThis removes their completions, sessions and login. The application record is kept for auditing. This cannot be undone.`
+		);
+		if (!confirmed) return;
+		setDeleting(participant.id);
+		try {
+			await deleteParticipant(participant.id, token);
+			toast.success(`${participant.displayName} has been deleted.`);
+			if (openId === participant.id) {
+				setOpenId(null);
+				setDetail(null);
+			}
+			if (items.length === 1 && meta.page > 1) {
+				const previousPage = meta.page - 1;
+				setPage(previousPage);
+				await load({ page: previousPage });
+			} else {
+				await load();
+			}
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Could not delete the participant.");
+		} finally {
+			setDeleting(null);
+		}
 	}
 
 	async function refreshDetail(id: string) {
@@ -232,8 +290,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 				<select
 					className={selectClass}
 					value={status}
-					onChange={(e) => setStatus(e.target.value)}
-					onBlur={applyFilters}
+					onChange={(e) => changeStatusFilter(e.target.value)}
 				>
 					<option value="">All statuses</option>
 					<option value="ACTIVE">Active</option>
@@ -242,8 +299,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 				<select
 					className={selectClass}
 					value={masar}
-					onChange={(e) => setMasar(e.target.value)}
-					onBlur={applyFilters}
+					onChange={(e) => changeMasarFilter(e.target.value)}
 				>
 					<option value="">All masār</option>
 					{MASAR_OPTIONS.map((option) => (
@@ -260,7 +316,10 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 						placeholder="Search name, email, matric..."
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
-						onBlur={applyFilters}
+						onBlur={applySearch}
+						onKeyDown={(e) => {
+							if (e.key === "Enter") applySearch();
+						}}
 					/>
 				</div>
 				<Button variant="outline" size="sm" onClick={exportCsv}>
@@ -367,6 +426,21 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 											)}
 											{p.status === "ACTIVE" ? "Suspend" : "Activate"}
 										</Button>
+										{p.status === "SUSPENDED" ? (
+											<Button
+												variant="destructive"
+												size="sm"
+												onClick={() => removeParticipant(p)}
+												disabled={deleting === p.id}
+											>
+												{deleting === p.id ? (
+													<Loader2 className="size-4 animate-spin" />
+												) : (
+													<Trash2 className="size-4" />
+												)}
+												Delete
+											</Button>
+										) : null}
 									</div>
 								</div>
 
@@ -528,8 +602,9 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 								size="sm"
 								disabled={meta.page <= 1}
 								onClick={() => {
-									setPage(meta.page - 1);
-									load();
+									const previousPage = meta.page - 1;
+									setPage(previousPage);
+									load({ page: previousPage });
 								}}
 							>
 								<ChevronLeft className="size-4" /> Prev
@@ -539,8 +614,9 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 								size="sm"
 								disabled={meta.page >= meta.totalPages}
 								onClick={() => {
-									setPage(meta.page + 1);
-									load();
+									const nextPage = meta.page + 1;
+									setPage(nextPage);
+									load({ page: nextPage });
 								}}
 							>
 								Next <ChevronRight className="size-4" />

@@ -13,7 +13,7 @@ interface PageHeaderProps {
 export function PageHeader({ children, subtitle, allowOverflow = false }: PageHeaderProps) {
 	return (
 		<div
-			className={`relative h-[20dvh] w-full bg-[url('/images/bg-1.webp')] bg-cover bg-center bg-no-repeat sm:h-[30dvh] lg:h-[40dvh] ${
+			className={`relative w-full bg-[url('/images/bg-1.webp')] bg-cover bg-center bg-no-repeat ${
 				allowOverflow ? "overflow-visible" : "overflow-hidden"
 			}`}
 		>
@@ -34,9 +34,10 @@ export function PageHeader({ children, subtitle, allowOverflow = false }: PageHe
 				</div>
 			</div>
 
-			{/* Content with animation */}
-			<div className="relative z-[2] flex h-full w-full items-center justify-center">
-				<div className="flex flex-col items-center justify-center px-4 text-center">
+			{/* Content with animation — min-height (not a fixed height) keeps long
+			    titles and subtitles inside the hero on small screens. */}
+			<div className="relative z-[2] mx-auto flex min-h-[11rem] w-full max-w-4xl items-center justify-center px-4 py-10 sm:min-h-[15rem] sm:py-12 lg:min-h-[22rem]">
+				<div className="flex flex-col items-center justify-center text-center">
 					<h2
 						className="animate-fly-in font-secondary text-xl font-bold text-white drop-shadow-xl sm:text-2xl md:text-3xl lg:text-4xl"
 						style={{ animationDelay: "300ms" }}

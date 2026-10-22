@@ -38,7 +38,8 @@ import {
 	getParticipantDetail,
 	listParticipants,
 	participantCounts,
-	setParticipantStatus
+	setParticipantStatus,
+	deleteParticipant
 } from '../services/al-mamharah/participants'
 import { deleteCompletion, recordCompletion } from '../services/al-mamharah/progress'
 import { enforceMissedDaySuspension } from '../services/al-mamharah/participant-auth'
@@ -281,6 +282,16 @@ alMamharahManagerRoute.post(
 		})
 	}
 )
+
+/** DELETE /participants/:id — permanently remove a suspended participant. */
+alMamharahManagerRoute.delete('/participants/:id', async c => {
+	const manager = requireManager(c)
+	const result = await deleteParticipant(c.req.param('id'), { actor: manager.email })
+	return successResponse(c, {
+		deleted: result,
+		message: `${result.displayName} has been deleted.`
+	})
+})
 
 /** PUT /participants/:id/tajweed — set the optional tajweed track (override). */
 alMamharahManagerRoute.put(
