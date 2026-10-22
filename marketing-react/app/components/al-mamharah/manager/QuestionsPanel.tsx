@@ -27,6 +27,7 @@ import {
 	listPlacementQuestions,
 	createPlacementQuestion,
 	updatePlacementQuestion,
+	deletePlacementQuestion,
 	AlMamharahError,
 	type PlacementQuestion,
 	type PlacementQuestionInput,
@@ -73,6 +74,7 @@ export function QuestionsPanel({ token, onExpired }: { token: string; onExpired:
 	const [draft, setDraft] = useState<QuestionDraft | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [acting, setActing] = useState<string | null>(null);
+	const [deleting, setDeleting] = useState<string | null>(null);
 
 	async function load() {
 		setLoading(true);
@@ -141,6 +143,24 @@ export function QuestionsPanel({ token, onExpired }: { token: string; onExpired:
 			toast.error(err instanceof Error ? err.message : "Could not save the question.");
 		} finally {
 			setSaving(false);
+		}
+	}
+
+	async function deleteQuestion(question: PlacementQuestion) {
+		const confirmed = window.confirm(
+			`Delete this ${tajweedTrackLabel(question.track)} question?\n\n"${question.question}"\n\nThis cannot be undone.`,
+		);
+		if (!confirmed) return;
+
+		setDeleting(question.id);
+		try {
+			await deletePlacementQuestion(question.id, token);
+			setQuestions((current) => current.filter((item) => item.id !== question.id));
+			toast.success("Question deleted.");
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Could not delete the question.");
+		} finally {
+			setDeleting(null);
 		}
 	}
 
@@ -302,6 +322,20 @@ export function QuestionsPanel({ token, onExpired }: { token: string; onExpired:
 											<EyeOff className="size-4" />
 										) : (
 											<Eye className="size-4" />
+										)}
+									</Button>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="text-red-600 hover:bg-red-50 hover:text-red-700"
+										onClick={() => deleteQuestion(question)}
+										disabled={deleting === question.id || acting === question.id}
+										title="Delete question"
+									>
+										{deleting === question.id ? (
+											<Loader2 className="size-4 animate-spin" />
+										) : (
+											<Trash2 className="size-4" />
 										)}
 									</Button>
 								</div>

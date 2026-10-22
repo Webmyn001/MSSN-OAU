@@ -55,6 +55,7 @@ import {
 } from '../services/al-mamharah/placement'
 import {
 	createPlacementQuestion,
+	deletePlacementQuestion,
 	listPlacementQuestions,
 	updatePlacementQuestion
 } from '../services/al-mamharah/questions'
@@ -611,6 +612,21 @@ alMamharahManagerRoute.put(
 		return successResponse(c, question)
 	}
 )
+
+/** DELETE /questions/:id — permanently remove a placement question. */
+alMamharahManagerRoute.delete('/questions/:id', async c => {
+	const manager = requireManager(c)
+	const question = await deletePlacementQuestion(c.req.param('id'))
+	await recordAudit({
+		actorType: 'MANAGER',
+		actor: manager.email,
+		action: 'PLACEMENT_QUESTION_DELETED',
+		entity: 'placement_question',
+		entityId: question.id,
+		details: { track: question.track, question: question.question }
+	})
+	return successResponse(c, { deleted: question, message: 'Question deleted.' })
+})
 
 /** GET /export/applications.csv */
 alMamharahManagerRoute.get(

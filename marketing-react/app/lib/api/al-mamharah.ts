@@ -499,6 +499,19 @@ export function updatePlacementQuestion(
 	});
 }
 
+export function deletePlacementQuestion(
+	id: string,
+	token: string | undefined = getManagerToken(),
+) {
+	return request<{ deleted: PlacementQuestion; message: string }>(
+		`/al-mamharah/manager/questions/${id}`,
+		{
+			method: "DELETE",
+			token,
+		},
+	);
+}
+
 /**
  * CSV endpoints are downloads, so they need an authenticated fetch rather than
  * a plain anchor. Returns the raw Response for the caller to stream to disk.

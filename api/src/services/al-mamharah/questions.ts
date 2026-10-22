@@ -202,3 +202,34 @@ export async function updatePlacementQuestion(
 	if (!row) throw new NotFoundError('Question not found')
 	return toRecord(row)
 }
+
+export async function deletePlacementQuestion(id: string): Promise<PlacementQuestion> {
+	await ensureSeeded()
+	const [existing] = await db
+		.select()
+		.from(alMamharahPlacementQuestions)
+		.where(eq(alMamharahPlacementQuestions.id, id))
+	if (!existing) throw new NotFoundError('Question not found')
+
+	if (existing.active) {
+		const [row] = await db
+			.select({ total: count() })
+			.from(alMamharahPlacementQuestions)
+			.where(
+				and(
+					eq(alMamharahPlacementQuestions.track, existing.track),
+					eq(alMamharahPlacementQuestions.active, true)
+				)
+			)
+		if (Number(row?.total ?? 0) <= QUIZ_LENGTH) {
+			throw new ValidationError(`Keep at least ${QUIZ_LENGTH} active questions for this matn.`)
+		}
+	}
+
+	const [row] = await db
+		.delete(alMamharahPlacementQuestions)
+		.where(eq(alMamharahPlacementQuestions.id, id))
+		.returning()
+	if (!row) throw new NotFoundError('Question not found')
+	return toRecord(row)
+}
