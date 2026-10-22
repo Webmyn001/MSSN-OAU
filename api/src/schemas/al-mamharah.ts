@@ -2,9 +2,10 @@ import { z } from 'zod'
 
 // * Validation schemas for the Al-Mamharah programme API.
 
+// * Offered masāriy, ordered from the lightest daily load upward. TWO_PAGES was
+// * retired and is intentionally rejected for new applications.
 export const alMamharahMasarSchema = z.enum([
 	'THREE_PAGES',
-	'TWO_PAGES',
 	'FOUR_PAGES',
 	'ONE_JUZ',
 	'THREE_JUZ',

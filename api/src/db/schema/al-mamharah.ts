@@ -16,7 +16,9 @@ import {
 // * Al-Mamharah (الممهرة) — Qur'an revision & retention programme
 // * Organised by the Islamic Affairs Board (IAB), MSSN-OAU Branch
 
-// * Selected masār (revision targets)
+// * Selected masār (revision targets). TWO_PAGES is retired from the UI and
+// * rejected by the API schema, but it stays in the enum/database so records
+// * created before retirement keep rendering correctly.
 export const alMamharahMasarEnum = pgEnum('al_mamharah_masar', [
 	'THREE_PAGES',
 	'TWO_PAGES',

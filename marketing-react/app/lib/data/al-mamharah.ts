@@ -58,8 +58,11 @@ export const PROGRAMME_CONTACTS: ProgrammeContact[] = [
 ];
 
 export const PROGRAMME_GUIDELINES: string[] = [
-	"Record your daily muroja'ah on the dashboard before the day ends — a day only counts once it is recorded.",
-	"Your current streak counts consecutive days on which the required daily task is completed.",
+	"Record your daily muroja'ah on the dashboard before the day ends — a day only counts once it is recorded, and your streak counts consecutive recorded days.",
+	"Your masār sets your daily muroja'ah target. Choose the pace you can sustain for the whole programme window.",
+	"Tajweed is optional: you may study one of the three mutūn (Tuhfatul Atfal, Muqaddimah Al-Jazariyyah or Shaṭibiyyah) and record one line per day alongside your muroja'ah. A missed tajweed line alone never suspends you.",
+	"Choosing Al-Jazariyyah or Shaṭibiyyah requires passing a short 2-question placement check (MCQ) on the preceding matn after approval. You may retake it as many times as needed; if you do not pass, we recommend moving down to the lower matn.",
+	"Missing 4 programme days in a calendar month leads to automatic suspension. Only a recorded muroja'ah counts as attendance — a tajweed line alone does not keep the day.",
 	"Entries are self-reported but monitored by the Programme Manager and instructors. Please be honest.",
 	"You may undo today's entry yourself from the dashboard. Older corrections are handled by the Programme Manager.",
 	"Consistency is the goal — the programme is about retention and closeness to the Qurʼān, not competition.",
@@ -74,6 +77,8 @@ export interface MasarOption {
 	description: string;
 }
 
+// * Ordered from the lightest daily load upward. The retired TWO_PAGES masār is
+// * no longer offered, but legacy records still display their original label.
 export const MASAR_OPTIONS: MasarOption[] = [
 	{
 		value: "THREE_PAGES",
@@ -81,13 +86,6 @@ export const MASAR_OPTIONS: MasarOption[] = [
 		labelAr: "٣ صفحات",
 		daily: "3 pages daily",
 		description: "A steady, sustainable pace for steady revision — ideal alongside a full academic load.",
-	},
-	{
-		value: "TWO_PAGES",
-		label: "2 Pages Daily",
-		labelAr: "صفحتان",
-		daily: "2 pages daily",
-		description: "A lighter daily target for those balancing a heavy schedule or starting revision.",
 	},
 	{
 		value: "FOUR_PAGES",
@@ -386,16 +384,30 @@ export const MANAGER_ROLE_LABELS: Record<string, string> = {
 	MANAGER: "Manager",
 };
 
+// * Labels for masār values that are no longer offered but may exist on records
+// * created before they were retired (never shown in selectors).
+const LEGACY_MASAR_LABELS: Record<string, string> = {
+	TWO_PAGES: "2 Pages Daily",
+};
+
+const LEGACY_MASAR_DAILY: Record<string, string> = {
+	TWO_PAGES: "2 pages daily",
+};
+
 export function masarOption(value: string): MasarOption | undefined {
 	return MASAR_OPTIONS.find((option) => option.value === value);
 }
 
 export function masarLabel(value: string | null | undefined): string {
-	return masarOption(value ?? "")?.label ?? "Muroja'ah";
+	return (
+		masarOption(value ?? "")?.label ?? LEGACY_MASAR_LABELS[value ?? ""] ?? "Muroja'ah"
+	);
 }
 
 export function masarDaily(value: string | null | undefined): string {
-	return masarOption(value ?? "")?.daily ?? "Daily muroja'ah";
+	return (
+		masarOption(value ?? "")?.daily ?? LEGACY_MASAR_DAILY[value ?? ""] ?? "Daily muroja'ah"
+	);
 }
 
 export function taskLabel(value: string | null | undefined): string {
