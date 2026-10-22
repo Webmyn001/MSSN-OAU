@@ -174,6 +174,10 @@ export default function AlMamharahDashboardPage() {
 		await navigate("/al-mamharah");
 	}
 
+	const placementLocked = Boolean(
+		report?.tajweed?.requiresPlacement && !report.tajweed.placementPassed,
+	);
+
 	return (
 		<>
 			<Seo
@@ -214,18 +218,16 @@ export default function AlMamharahDashboardPage() {
 							</div>
 						</div>
 					) : report ? (
-						report.tajweed?.requiresPlacement && !report.tajweed.placementPassed ? (
-							<TajweedPlacement
-								displayName={report.participant.displayName}
-								trackLabel={report.tajweed.label}
-								prerequisiteTrack={report.tajweed.prerequisite?.track ?? ""}
-								prerequisiteLabel={report.tajweed.prerequisite?.label ?? ""}
-								onPassed={load}
-								onMovedDown={load}
-								onLogout={logout}
-							/>
-						) : (
 						<>
+							<div
+								className={
+									placementLocked
+										? "pointer-events-none select-none blur-sm"
+										: undefined
+								}
+								aria-hidden={placementLocked || undefined}
+								inert={placementLocked || undefined}
+							>
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<div>
 									<p className="text-sm text-primary-600">As salāmu ʿalaykum,</p>
@@ -604,8 +606,23 @@ export default function AlMamharahDashboardPage() {
 									</div>
 								</div>
 							</div>
+							</div>
+							{placementLocked ? (
+								<div className="fixed inset-0 z-50 overflow-y-auto bg-white/70 backdrop-blur-sm">
+									<div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+										<TajweedPlacement
+											displayName={report.participant.displayName}
+											trackLabel={report.tajweed.label}
+											prerequisiteTrack={report.tajweed.prerequisite?.track ?? ""}
+											prerequisiteLabel={report.tajweed.prerequisite?.label ?? ""}
+											onPassed={load}
+											onMovedDown={load}
+											onLogout={logout}
+										/>
+									</div>
+								</div>
+							) : null}
 						</>
-						)
 					) : null}
 				</div>
 			</section>
