@@ -203,8 +203,12 @@ export function getTajweedStatus(token: string | undefined = getParticipantToken
 	return request("/al-mamharah/participant/tajweed", { token });
 }
 
-export function getPlacementQuiz(token: string | undefined = getParticipantToken()) {
-	return request("/al-mamharah/participant/tajweed/quiz", { token });
+export function getPlacementQuiz(
+	exclude: string[] = [],
+	token: string | undefined = getParticipantToken(),
+) {
+	const query = exclude.length ? `?exclude=${encodeURIComponent(exclude.join(","))}` : "";
+	return request(`/al-mamharah/participant/tajweed/quiz${query}`, { token });
 }
 
 export function submitPlacementQuiz(

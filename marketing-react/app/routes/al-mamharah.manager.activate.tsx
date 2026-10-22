@@ -80,7 +80,7 @@ export default function ManagerActivatePage() {
 		<>
 			<Seo
 				title="Activate Manager Account"
-				description="Activate your Al-Mamharah Programme Manager account by setting a password."
+				description="Activate your Al Mamharah Programme Manager account by setting a password."
 				path="/al-mamharah/manager/activate/"
 			/>
 
@@ -201,7 +201,7 @@ export default function ManagerActivatePage() {
 											className={`${inputClass} pr-11`}
 											value={confirmPassword}
 											onChange={(e) => setConfirmPassword(e.target.value)}
-											placeholder="Re-enter your password"
+											placeholder="Enter your password again"
 										/>
 										<button
 											type="button"

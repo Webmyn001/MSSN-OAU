@@ -340,7 +340,7 @@ export async function setParticipantStatus(
 		entityId: participantId,
 		details: { notes: notes ?? null }
 	})
-	logger.info({ participantId, status, actor }, 'Al-Mamharah participant status changed')
+	logger.info({ participantId, status, actor }, 'Al Mamharah participant status changed')
 	return updated
 }
 
@@ -353,10 +353,10 @@ export interface DeletedParticipant {
 }
 
 /**
- * Permanently removes a suspended participant and their programme data.
- * Accounts must be suspended first so deletion is always a deliberate,
- * two-step action. The application record is kept for auditing/enrolment
- * history; the person simply no longer has a dashboard or login.
+ * Permanently removes a suspended participant, their application and their
+ * programme data. Accounts must be suspended first so deletion is always a
+ * deliberate two-step action, and the audit log keeps a record of what was
+ * removed after the rows are gone.
  */
 export async function deleteParticipant(
 	participantId: string,
@@ -385,6 +385,9 @@ export async function deleteParticipant(
 			.where(eq(alMamharahParticipantSessions.participantId, participantId))
 		await tx.delete(alMamharahCompletions).where(eq(alMamharahCompletions.participantId, participantId))
 		await tx.delete(alMamharahParticipants).where(eq(alMamharahParticipants.id, participantId))
+		await tx
+			.delete(alMamharahApplications)
+			.where(eq(alMamharahApplications.id, participant.applicationId))
 	})
 
 	const result: DeletedParticipant = {
@@ -405,11 +408,12 @@ export async function deleteParticipant(
 			displayName: result.displayName,
 			email: result.email,
 			applicationId: participant.applicationId,
+			applicationDeleted: true,
 			completions: result.completions,
 			sessions: result.sessions
 		}
 	})
-	logger.info({ participantId, actor }, 'Al-Mamharah participant deleted')
+	logger.info({ participantId, actor }, 'Al Mamharah participant deleted')
 	return result
 }
 

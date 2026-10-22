@@ -7,7 +7,11 @@ import {
 	rankEntries,
 	todayInTimeZone
 } from '../src/services/al-mamharah/dates'
-import { dailyTargetFromMasar, masarPagesPerDay, positionalDailyTarget } from '../src/services/al-mamharah/progress'
+import {
+	dailyTargetFromMasar,
+	masarPagesPerDay,
+	positionalDailyTarget
+} from '../src/services/al-mamharah/progress'
 import { clampPage, pageRangeLabel, surahAtPage } from '../src/services/al-mamharah/mushaf'
 import { normalizeSettings, DEFAULT_SETTINGS } from '../src/services/al-mamharah/settings'
 import { normalizePersonName } from '../src/services/al-mamharah/applications'
@@ -208,10 +212,10 @@ describe('normalizePersonName', () => {
 
 describe('mushaf page map', () => {
 	test('resolves the surah containing a page', () => {
-		expect(surahAtPage(1).name).toBe('Al-Fātiḥah')
-		expect(surahAtPage(2).name).toBe('Al-Baqarah')
+		expect(surahAtPage(1).name).toBe('Al Fātiḥah')
+		expect(surahAtPage(2).name).toBe('Al Baqarah')
 		expect(surahAtPage(50).name).toBe('Āl ʿImrān')
-		expect(surahAtPage(604).name).toBe('An-Nās')
+		expect(surahAtPage(604).name).toBe('An Nās')
 	})
 
 	test('clamps pages into the mushaf range', () => {
@@ -221,8 +225,8 @@ describe('mushaf page map', () => {
 	})
 
 	test('formats a page range label', () => {
-		expect(pageRangeLabel(2, 4)).toBe('Al-Baqarah · pg 2–4')
-		expect(pageRangeLabel(440, 440)).toBe('Yā-Sīn · pg 440')
+		expect(pageRangeLabel(2, 4)).toBe('Surah Al Baqarah, pages 2 to 4')
+		expect(pageRangeLabel(440, 440)).toBe('Surah Yā Sīn, page 440')
 	})
 })
 
@@ -242,7 +246,7 @@ describe('positionalDailyTarget', () => {
 		const target = positionalDailyTarget(
 			{
 				masar: 'THREE_PAGES',
-				startSurah: 'Al-Baqarah',
+				startSurah: 'Al Baqarah',
 				startPage: 2,
 				startDirection: 'KAHF_UPWARD',
 				startDate: '2026-10-18'
@@ -252,15 +256,15 @@ describe('positionalDailyTarget', () => {
 		)
 		expect(target.fromPage).toBe(2)
 		expect(target.toPage).toBe(4)
-		expect(target.surah).toBe('Al-Baqarah')
-		expect(target.label).toContain('Al-Baqarah · pg 2–4')
+		expect(target.surah).toBe('Al Baqarah')
+		expect(target.label).toContain('Surah Al Baqarah, pages 2 to 4')
 	})
 
 	test('moves forward on later days', () => {
 		const target = positionalDailyTarget(
 			{
 				masar: 'TWO_PAGES',
-				startSurah: 'Al-Fātiḥah',
+				startSurah: 'Al Fātiḥah',
 				startPage: 1,
 				startDirection: 'KAHF_UPWARD',
 				startDate: '2026-10-18'
@@ -268,7 +272,7 @@ describe('positionalDailyTarget', () => {
 			settings,
 			'2026-10-19'
 		)
-		// * day index 1 → pages 3–4 (still Al-Baqarah)
+		// * day index 1 → pages 3–4 (still Al Baqarah)
 		expect(target.fromPage).toBe(3)
 		expect(target.toPage).toBe(4)
 	})
@@ -277,7 +281,7 @@ describe('positionalDailyTarget', () => {
 		const day0 = positionalDailyTarget(
 			{
 				masar: 'THREE_PAGES',
-				startSurah: 'Al-Kahf',
+				startSurah: 'Al Kahf',
 				startPage: 293,
 				startDirection: 'KAHF_DOWNWARD',
 				startDate: '2026-10-18'
@@ -291,7 +295,7 @@ describe('positionalDailyTarget', () => {
 		const day2 = positionalDailyTarget(
 			{
 				masar: 'THREE_PAGES',
-				startSurah: 'Al-Kahf',
+				startSurah: 'Al Kahf',
 				startPage: 293,
 				startDirection: 'KAHF_DOWNWARD',
 				startDate: '2026-10-18'
@@ -307,7 +311,7 @@ describe('positionalDailyTarget', () => {
 		const target = positionalDailyTarget(
 			{
 				masar: 'THREE_PAGES',
-				startSurah: 'Al-Baqarah',
+				startSurah: 'Al Baqarah',
 				startPage: 2,
 				startDirection: 'BAQARAH_DOWNWARD',
 				startDate: '2026-10-18'
@@ -320,11 +324,11 @@ describe('positionalDailyTarget', () => {
 		expect(target.toPage).toBe(2)
 	})
 
-	test('advances for the An-Nās upward track', () => {
+	test('advances for the An Nās upward track', () => {
 		const target = positionalDailyTarget(
 			{
 				masar: 'TWO_PAGES',
-				startSurah: 'An-Nās',
+				startSurah: 'An Nās',
 				startPage: 600,
 				startDirection: 'NAS_UPWARD',
 				startDate: '2026-10-18'
@@ -336,7 +340,7 @@ describe('positionalDailyTarget', () => {
 		expect(target.toPage).toBe(601)
 	})
 
-	test('defaults to Al-Fātiḥah when no start page is recorded', () => {
+	test('defaults to Al Fātiḥah when no start page is recorded', () => {
 		const target = positionalDailyTarget(
 			{
 				masar: 'THREE_PAGES',
@@ -350,14 +354,14 @@ describe('positionalDailyTarget', () => {
 		)
 		expect(target.fromPage).toBe(1)
 		expect(target.toPage).toBe(3)
-		expect(target.label).toContain('Al-Fātiḥah · pg 1–3')
+		expect(target.label).toContain('Surah Al Fātiḥah, pages 1 to 3')
 	})
 
 	test('keeps the plain label for khatm (no fixed page count)', () => {
 		const target = positionalDailyTarget(
 			{
 				masar: 'KHATM',
-				startSurah: 'Al-Baqarah',
+				startSurah: 'Al Baqarah',
 				startPage: 2,
 				startDirection: 'KAHF_UPWARD',
 				startDate: '2026-10-18'
@@ -418,6 +422,20 @@ describe('tajweed tracks', () => {
 			expect(question.options.length).toBeGreaterThanOrEqual(2)
 		}
 	})
+
+	test('a retry never repeats the questions already answered', () => {
+		const first = sampleQuiz('TUHFATUL_ATFAL')
+		const next = sampleQuiz(
+			'TUHFATUL_ATFAL',
+			QUIZ_LENGTH,
+			first.map(q => q.id)
+		)
+		expect(next).toHaveLength(QUIZ_LENGTH)
+		const previous = new Set(first.map(q => q.id))
+		for (const question of next) {
+			expect(previous.has(question.id)).toBe(false)
+		}
+	})
 })
 
 describe('placement grading', () => {
@@ -453,10 +471,7 @@ describe('placement grading', () => {
 		const duplicated: QuizAnswer[] = [answers[0], answers[0]]
 		expect(gradeQuiz('JAZARIYYAH', duplicated).passed).toBe(false)
 
-		const unknown: QuizAnswer[] = [
-			answers[0],
-			{ questionId: 'does-not-exist', choice: 0 }
-		]
+		const unknown: QuizAnswer[] = [answers[0], { questionId: 'does-not-exist', choice: 0 }]
 		expect(gradeQuiz('JAZARIYYAH', unknown).passed).toBe(false)
 	})
 })

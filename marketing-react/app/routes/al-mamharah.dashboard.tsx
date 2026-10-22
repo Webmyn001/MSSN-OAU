@@ -4,6 +4,7 @@ import { Seo } from "~/components/seo";
 import { Button } from "~/components/ui/button";
 import { StatCard } from "~/components/al-mamharah/StatCard";
 import { Leaderboard } from "~/components/al-mamharah/Leaderboard";
+import { TajweedPlacement } from "~/components/al-mamharah/TajweedPlacement";
 import {
 	Loader2,
 	Flame,
@@ -16,7 +17,6 @@ import {
 	Target,
 	BadgeCheck,
 	BookOpen,
-	GraduationCap,
 	BookMarked,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -28,8 +28,6 @@ import {
 	undoToday,
 	logoutParticipant,
 	clearParticipantSession,
-	getPlacementQuiz,
-	submitPlacementQuiz,
 	chooseTajweedTrack,
 	AlMamharahError,
 } from "~/lib/api/al-mamharah";
@@ -56,10 +54,6 @@ export default function AlMamharahDashboardPage() {
 	const [busy, setBusy] = useState<string | null>(null);
 	const [note, setNote] = useState("");
 	const [scope, setScope] = useState<"OVERALL" | "QURAN" | "TAJWEED">("OVERALL");
-	const [quiz, setQuiz] = useState<any>(null);
-	const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
-	const [quizResult, setQuizResult] = useState<any>(null);
-	const [quizBusy, setQuizBusy] = useState(false);
 	const [lineInput, setLineInput] = useState("");
 	const [trackBusy, setTrackBusy] = useState(false);
 
@@ -120,63 +114,14 @@ export default function AlMamharahDashboardPage() {
 		}
 	}
 
-	async function startQuiz() {
-		setQuizBusy(true);
-		setQuizResult(null);
-		setQuizAnswers({});
-		try {
-			const res = await getPlacementQuiz();
-			setQuiz(res.data);
-		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : "Could not load the placement check.",
-			);
-		} finally {
-			setQuizBusy(false);
-		}
-	}
-
-	async function submitQuizAnswers() {
-		if (!quiz) return;
-		const answers = quiz.questions
-			.map((question: any) => ({ questionId: question.id, choice: quizAnswers[question.id] }))
-			.filter((answer: any) => Number.isInteger(answer.choice));
-		if (answers.length !== quiz.questions.length) {
-			toast.error("Please answer every question.");
-			return;
-		}
-		setQuizBusy(true);
-		try {
-			const res = await submitPlacementQuiz(answers);
-			setQuizResult(res.data);
-			if (res.data?.passed) {
-				toast.success("Placement passed — you can now record your daily line.");
-				setQuiz(null);
-				setQuizAnswers({});
-				await load();
-			} else {
-				toast.error(
-					res.data?.recommendation?.message ?? "Not quite yet — please try again.",
-				);
-			}
-		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Could not submit your answers.");
-		} finally {
-			setQuizBusy(false);
-		}
-	}
-
 	async function moveTrack(track: string | null) {
 		setTrackBusy(true);
 		try {
 			await chooseTajweedTrack(track);
-			setQuiz(null);
-			setQuizResult(null);
-			setQuizAnswers({});
 			toast.success(
 				track
 					? `Tajweed track set to ${tajweedTrackLabel(track)}.`
-					: "Tajweed track removed — you will only record muroja'ah.",
+					: "Tajweed track removed. You will only record muroja'ah.",
 			);
 			await load();
 		} catch (err) {
@@ -195,11 +140,7 @@ export default function AlMamharahDashboardPage() {
 		}
 		setBusy("TAJWEED_QIRAAT");
 		try {
-			const result = await recordToday({
-				taskType: "TAJWEED_QIRAAT",
-				matn: report.tajweed.track,
-				lineNumber,
-			});
+			const result = await recordToday({ taskType: "TAJWEED_QIRAAT", matn: report.tajweed.track, lineNumber });
 			toast.success(result.data?.message ?? "Line recorded.");
 			setLineInput("");
 			await load();
@@ -236,8 +177,8 @@ export default function AlMamharahDashboardPage() {
 	return (
 		<>
 			<Seo
-				title="Al-Mamharah Dashboard"
-				description="Record your daily muroja'ah, track your streak and see the Al-Mamharah leaderboard."
+				title="Al Mamharah Dashboard"
+				description="Record your daily muroja'ah, track your streak and see the Al Mamharah leaderboard."
 				path="/al-mamharah/dashboard/"
 			/>
 
@@ -254,15 +195,11 @@ export default function AlMamharahDashboardPage() {
 							<div className="mx-auto flex size-14 items-center justify-center rounded-full bg-primary-50 text-primary-700">
 								<BookOpen className="size-7" />
 							</div>
-							<h1 className="mt-4 font-secondary text-xl font-semibold text-primary-800">
-								Sign in to Al-Mamharah
-							</h1>
-							<p className="mt-2 text-sm text-gray-600">
-								You need to enter the programme to access your dashboard.
-							</p>
+							<h1 className="mt-4 font-secondary text-xl font-semibold text-primary-800">Sign in to Al Mamharah</h1>
+							<p className="mt-2 text-sm text-gray-600">You need to enter the programme to access your dashboard.</p>
 							<div className="mt-6">
 								<Button asChild className="w-full">
-									<Link to="/al-mamharah/#join">Go to Enter Programme</Link>
+									<Link to="/al-mamharah/#enter-programme">Go to Enter Programme</Link>
 								</Button>
 							</div>
 						</div>
@@ -277,18 +214,27 @@ export default function AlMamharahDashboardPage() {
 							</div>
 						</div>
 					) : report ? (
+						report.tajweed?.requiresPlacement && !report.tajweed.placementPassed ? (
+							<TajweedPlacement
+								displayName={report.participant.displayName}
+								trackLabel={report.tajweed.label}
+								prerequisiteTrack={report.tajweed.prerequisite?.track ?? ""}
+								prerequisiteLabel={report.tajweed.prerequisite?.label ?? ""}
+								onPassed={load}
+								onMovedDown={load}
+								onLogout={logout}
+							/>
+						) : (
 						<>
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<div>
-									<p className="text-sm text-primary-600">As-salāmu ʿalaykum,</p>
+									<p className="text-sm text-primary-600">As salāmu ʿalaykum,</p>
 									<h1 className="font-secondary text-2xl font-bold text-primary-800 sm:text-3xl">
 										{report.participant.displayName}
 									</h1>
 									<p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-sm text-gray-600">
 										<Arabic className="text-primary-600">{ARABIC.masar}</Arabic>
-											<span>
-												· {masarLabel(report.participant.masar)}
-											</span>
+										<span>· {masarLabel(report.participant.masar)}</span>
 									</p>
 								</div>
 								<div className="flex items-center gap-2">
@@ -312,96 +258,9 @@ export default function AlMamharahDashboardPage() {
 							</div>
 
 							<p className="mt-2 text-xs text-gray-500">
-								Programme window: {formatISODate(report.programme.start)} –{" "}
-								{formatISODate(report.programme.end)} · Today: {formatISODate(report.today)}
+								Programme window: {formatISODate(report.programme.start)} to {formatISODate(report.programme.end)}.
+								Today: {formatISODate(report.today)}
 							</p>
-
-							{report.tajweed?.track && !report.tajweed.placementPassed ? (
-								<div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/70 p-5">
-									<h2 className="flex items-center gap-2 font-secondary text-lg font-semibold text-amber-900">
-										<GraduationCap className="size-5" />
-										Placement check
-									</h2>
-									<p className="mt-1 text-sm text-amber-900">
-										To study <strong>{report.tajweed.label}</strong>, you must have
-										mastered{" "}
-										<strong>{report.tajweed.prerequisite?.label}</strong>. Answer the
-										questions below to confirm your placement.
-									</p>
-
-									{quizResult && !quizResult.passed ? (
-										<div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-											{quizResult.recommendation?.message ??
-												`You scored ${quizResult.correct}/${quizResult.total}.`}{" "}
-											You may retake the check, or move down to{" "}
-											{report.tajweed.prerequisite?.label}.
-										</div>
-									) : null}
-
-									{quiz ? (
-										<div className="mt-4 space-y-4">
-											{quiz.questions.map((question: any, index: number) => (
-												<fieldset key={question.id}>
-													<legend className="text-sm font-medium text-gray-800">
-														{index + 1}. {question.question}
-													</legend>
-													<div className="mt-2 grid gap-1.5 sm:grid-cols-2">
-														{question.options.map((option: string, optionIndex: number) => (
-															<label
-																key={optionIndex}
-																className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:border-primary-300"
-															>
-																<input
-																	type="radio"
-																	name={`almh-quiz-${question.id}`}
-																	className="size-4 border-gray-300 text-primary-600 focus:ring-primary-600"
-																	checked={quizAnswers[question.id] === optionIndex}
-																	onChange={() =>
-																		setQuizAnswers((prev) => ({
-																			...prev,
-																			[question.id]: optionIndex,
-																		}))
-																	}
-																/>
-																<span>{option}</span>
-															</label>
-														))}
-													</div>
-												</fieldset>
-											))}
-											<div className="flex flex-wrap gap-2">
-												<Button onClick={submitQuizAnswers} disabled={quizBusy}>
-													{quizBusy ? (
-														<Loader2 className="size-4 animate-spin" />
-													) : null}
-													Submit answers
-												</Button>
-												<Button variant="outline" onClick={startQuiz} disabled={quizBusy}>
-													New questions
-												</Button>
-												<Button
-													variant="ghost"
-													onClick={() =>
-														moveTrack(report.tajweed.prerequisite?.track ?? null)
-													}
-													disabled={trackBusy}
-												>
-													Move me to {report.tajweed.prerequisite?.label}
-												</Button>
-											</div>
-										</div>
-									) : (
-										<Button className="mt-3" onClick={startQuiz} disabled={quizBusy}>
-											{quizBusy ? (
-												<Loader2 className="size-4 animate-spin" />
-											) : (
-												<GraduationCap className="size-4" />
-											)}
-											Start placement check
-										</Button>
-									)}
-								</div>
-							) : null}
 
 							{!report.tajweed?.track ? (
 								<div className="mt-6 rounded-xl border border-primary-100 bg-white/90 p-5 shadow-sm">
@@ -410,9 +269,8 @@ export default function AlMamharahDashboardPage() {
 										Optional tajweed track
 									</h2>
 									<p className="mt-1 text-sm text-gray-600">
-										Study one of the three mutūn alongside your muroja&apos;ah — one line
-										per day. This is optional and does not change your muroja&apos;ah
-										streak.
+										Study one of the three mutūn alongside your muroja&apos;ah, one line per day. This is optional and
+										does not change your muroja&apos;ah streak.
 									</p>
 									<div className="mt-3 flex flex-wrap gap-2">
 										{TAJWEED_TRACK_OPTIONS.map((option) => (
@@ -423,14 +281,14 @@ export default function AlMamharahDashboardPage() {
 												onClick={() => moveTrack(option.value)}
 												disabled={trackBusy}
 											>
-												{option.label} · {option.lines} lines
+												{option.label}, {option.lines} lines
 											</Button>
 										))}
 									</div>
 									{TAJWEED_TRACK_OPTIONS.some((option) => option.prerequisite) ? (
 										<p className="mt-2 text-xs text-gray-500">
-											Al-Jazariyyah and Shaṭibiyyah require passing a short placement
-											check on the preceding matn first.
+											Al Jazariyyah and Shaṭibiyyah require passing a short placement check on the preceding matn
+											first.
 										</p>
 									) : null}
 								</div>
@@ -447,19 +305,17 @@ export default function AlMamharahDashboardPage() {
 									/>
 									<div className="absolute inset-0 bg-gradient-to-r from-primary-950/80 via-primary-900/30 to-transparent" />
 									<div className="absolute inset-y-0 left-0 flex flex-col justify-center p-4 sm:p-6">
-										<Arabic className="text-lg font-semibold text-white sm:text-xl">
-											{ARABIC.dashboard}
-										</Arabic>
+										<Arabic className="text-lg font-semibold text-white sm:text-xl">{ARABIC.dashboard}</Arabic>
 										<p className="mt-1 text-xs text-white/80">Your muroja'ah at a glance.</p>
 									</div>
 								</div>
 							</div>
 
 							<h2 className="mt-8 flex items-baseline gap-2 font-secondary text-lg font-semibold text-primary-800">
-							My Progress
-							<Arabic className="text-primary-600">{ARABIC.myProgress}</Arabic>
-						</h2>
-						<div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+								My Progress
+								<Arabic className="text-primary-600">{ARABIC.myProgress}</Arabic>
+							</h2>
+							<div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
 								<StatCard
 									label="Current streak"
 									labelAr={ARABIC.currentStreak}
@@ -474,12 +330,7 @@ export default function AlMamharahDashboardPage() {
 									hint="personal best"
 									tone="emerald"
 								/>
-								<StatCard
-									label="Total days"
-									value={report.stats.total}
-									hint="days recorded"
-									tone="primary"
-								/>
+								<StatCard label="Total days" value={report.stats.total} hint="days recorded" tone="primary" />
 								<StatCard
 									label="Completion"
 									value={`${Math.round((report.stats.completionRate ?? 0) * 100)}%`}
@@ -496,9 +347,7 @@ export default function AlMamharahDashboardPage() {
 												<Target className="size-5" />
 												Today's Revision <Arabic className="text-primary-600">{ARABIC.todaysRevision}</Arabic>
 											</h2>
-											<span className="text-xs text-gray-500">
-												{formatISODate(report.today)}
-											</span>
+											<span className="text-xs text-gray-500">{formatISODate(report.today)}</span>
 										</div>
 
 										{report.dailyTarget ? (
@@ -506,24 +355,21 @@ export default function AlMamharahDashboardPage() {
 												<p className="text-xs font-medium uppercase tracking-wide text-primary-600">
 													Your daily target
 												</p>
-											<p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm font-semibold text-primary-800">
-												<span>{masarDaily(report.participant.masar)}</span>
-												{report.dailyTarget.fromPage && report.dailyTarget.toPage ? (
-													<>
-														<span className="text-primary-400">·</span>
-														<span>
-															Surat {report.dailyTarget.surah}
-														</span>
-														<span className="text-primary-400">·</span>
-														<span className="font-mono">
-															pg {report.dailyTarget.fromPage}
-															{report.dailyTarget.toPage !== report.dailyTarget.fromPage
-																? `–${report.dailyTarget.toPage}`
-																: ""}
-														</span>
-													</>
-												) : null}
-											</p>
+												<p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm font-semibold text-primary-800">
+													<span>{masarDaily(report.participant.masar)}</span>
+													{report.dailyTarget.fromPage && report.dailyTarget.toPage ? (
+														<>
+															<span>,</span>
+															<span>Surah {report.dailyTarget.surah}</span>
+															<span>,</span>
+															<span className="font-mono">
+																{report.dailyTarget.toPage === report.dailyTarget.fromPage
+																	? `page ${report.dailyTarget.fromPage}`
+																	: `pages ${report.dailyTarget.fromPage} to ${report.dailyTarget.toPage}`}
+															</span>
+														</>
+													) : null}
+												</p>
 											</div>
 										) : null}
 
@@ -544,9 +390,7 @@ export default function AlMamharahDashboardPage() {
 															) : (
 																<span className="size-5 rounded-full border-2 border-gray-300" />
 															)}
-															<span className="text-sm font-medium text-gray-800">
-																{taskLabel(task.taskType)}
-															</span>
+															<span className="text-sm font-medium text-gray-800">{taskLabel(task.taskType)}</span>
 															{task.requiredForStreak ? (
 																<span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-700">
 																	Streak
@@ -554,9 +398,7 @@ export default function AlMamharahDashboardPage() {
 															) : null}
 														</div>
 														{task.completedToday ? (
-															<span className="text-xs font-medium text-emerald-600">
-																Recorded
-															</span>
+															<span className="text-xs font-medium text-emerald-600">Recorded</span>
 														) : (
 															<Button
 																size="sm"
@@ -576,10 +418,7 @@ export default function AlMamharahDashboardPage() {
 
 												{!report.stats.todayCompleted ? (
 													<div>
-														<label
-															className="mb-1 block text-xs font-medium text-gray-500"
-															htmlFor="almh-note"
-														>
+														<label className="mb-1 block text-xs font-medium text-gray-500" htmlFor="almh-note">
 															Optional note (e.g. what you revised)
 														</label>
 														<input
@@ -600,18 +439,13 @@ export default function AlMamharahDashboardPage() {
 											<div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
 												<div className="flex items-center justify-between gap-2">
 													<div>
-														<p className="text-sm font-medium text-gray-800">
-															{report.tajweed.label}
-														</p>
+														<p className="text-sm font-medium text-gray-800">{report.tajweed.label}</p>
 														<p className="text-xs text-gray-500">
-															Line {report.tajweed.completedLines} of{" "}
-															{report.tajweed.totalLines} · one line per day
+															Line {report.tajweed.completedLines} of {report.tajweed.totalLines}, one line per day
 														</p>
 													</div>
 													{report.tajweed.completed ? (
-														<span className="text-xs font-medium text-emerald-600">
-															Matn completed
-														</span>
+														<span className="text-xs font-medium text-emerald-600">Matn completed</span>
 													) : report.tajweed.todayRecorded ? (
 														<span className="text-xs font-medium text-emerald-600">
 															Line {report.tajweed.todayLine} recorded
@@ -621,10 +455,7 @@ export default function AlMamharahDashboardPage() {
 												{!report.tajweed.completed && !report.tajweed.todayRecorded ? (
 													<div className="mt-2 flex flex-wrap items-end gap-2">
 														<div>
-															<label
-																className="mb-1 block text-[11px] font-medium text-gray-500"
-																htmlFor="almh-line"
-															>
+															<label className="mb-1 block text-[11px] font-medium text-gray-500" htmlFor="almh-line">
 																Line
 															</label>
 															<input
@@ -638,11 +469,7 @@ export default function AlMamharahDashboardPage() {
 																placeholder={String(report.tajweed.nextLine ?? "")}
 															/>
 														</div>
-														<Button
-															size="sm"
-															onClick={recordTajweedLine}
-															disabled={busy === "TAJWEED_QIRAAT"}
-														>
+														<Button size="sm" onClick={recordTajweedLine} disabled={busy === "TAJWEED_QIRAAT"}>
 															{busy === "TAJWEED_QIRAAT" ? (
 																<Loader2 className="size-4 animate-spin" />
 															) : (
@@ -653,7 +480,7 @@ export default function AlMamharahDashboardPage() {
 													</div>
 												) : null}
 												<p className="mt-2 text-[11px] text-gray-500">
-													Optional — does not affect your muroja&apos;ah streak.
+													Optional and does not affect your muroja&apos;ah streak.
 												</p>
 											</div>
 										) : null}
@@ -666,15 +493,12 @@ export default function AlMamharahDashboardPage() {
 										</h2>
 										{report.completions.length === 0 ? (
 											<p className="mt-3 text-sm text-gray-500">
-												No entries yet — record today's muroja'ah to begin your streak.
+												No entries yet. Record today's muroja'ah to begin your streak.
 											</p>
 										) : (
 											<ul className="mt-3 divide-y divide-gray-100">
 												{report.completions.map((completion: any) => (
-													<li
-														key={completion.id}
-														className="flex items-center justify-between gap-3 py-2.5"
-													>
+													<li key={completion.id} className="flex items-center justify-between gap-3 py-2.5">
 														<div className="min-w-0">
 															<div className="flex items-center gap-2">
 																<span className="text-sm font-medium text-gray-800">
@@ -682,13 +506,8 @@ export default function AlMamharahDashboardPage() {
 																</span>
 																<span className="text-xs text-gray-500">
 																	{taskLabel(completion.taskType)}
-																	{completion.taskType === "TAJWEED_QIRAAT" &&
-																	completion.matn
-																		? ` · ${tajweedTrackLabel(completion.matn)}${
-																				completion.lineNumber
-																					? ` · line ${completion.lineNumber}`
-																					: ""
-																			}`
+																	{completion.taskType === "TAJWEED_QIRAAT" && completion.matn
+																		? `, ${tajweedTrackLabel(completion.matn)}${completion.lineNumber ? `, line ${completion.lineNumber}` : ""}`
 																		: ""}
 																</span>
 																{completion.verified ? (
@@ -699,9 +518,7 @@ export default function AlMamharahDashboardPage() {
 																) : null}
 															</div>
 															{completion.note ? (
-																<p className="truncate text-xs text-gray-500">
-																	{completion.note}
-																</p>
+																<p className="truncate text-xs text-gray-500">{completion.note}</p>
 															) : null}
 														</div>
 														{completion.date === report.today ? (
@@ -757,8 +574,7 @@ export default function AlMamharahDashboardPage() {
 												))}
 											</div>
 											<span className="text-xs text-gray-500">
-												{leaderboard?.totalParticipants ?? 0}{" "}
-												{scope === "TAJWEED" ? "on a tajweed track" : "active"}
+												{leaderboard?.totalParticipants ?? 0} {scope === "TAJWEED" ? "on a tajweed track" : "active"}
 											</span>
 										</div>
 										<Leaderboard
@@ -777,8 +593,7 @@ export default function AlMamharahDashboardPage() {
 														: "No rankings yet."
 											}
 										/>
-										{leaderboard?.self &&
-										leaderboard.self.rank > (leaderboard.entries?.length ?? 0) ? (
+										{leaderboard?.self && leaderboard.self.rank > (leaderboard.entries?.length ?? 0) ? (
 											<div className="mt-4 border-t border-gray-100 pt-3">
 												<p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-gray-500">
 													<Flame className="size-3.5 text-orange-500" /> Your position
@@ -790,6 +605,7 @@ export default function AlMamharahDashboardPage() {
 								</div>
 							</div>
 						</>
+						)
 					) : null}
 				</div>
 			</section>

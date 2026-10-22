@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-// * Validation schemas for the Al-Mamharah programme API.
+// * Validation schemas for the Al Mamharah programme API.
 
 // * Offered masāriy, ordered from the lightest daily load upward. TWO_PAGES was
 // * retired and is intentionally rejected for new applications.
@@ -18,7 +18,7 @@ export const alMamharahTaskTypeSchema = z.enum(['MUROJAAH', 'TAJWEED_QIRAAT'])
 export const alMamharahParticipantStatusSchema = z.enum(['ACTIVE', 'SUSPENDED'])
 
 // * Optional tajweed track. The three mutūn form a ladder: Tuhfatul Atfal →
-// * Muqaddimah Al-Jazariyyah → Shaṭibiyyah.
+// * Muqaddimah Al Jazariyyah → Shaṭibiyyah.
 export const alMamharahTajweedTrackSchema = z.enum([
 	'TUHFATUL_ATFAL',
 	'JAZARIYYAH',

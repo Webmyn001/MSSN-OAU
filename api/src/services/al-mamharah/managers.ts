@@ -18,7 +18,7 @@ import { recordAudit } from './audit'
 import { sendEmailWithContent } from '../email/brevo'
 import { brandEmail, emailButton } from '../email/template'
 
-// * Al-Mamharah Programme Manager authentication.
+// * Al Mamharah Programme Manager authentication.
 // *
 // * Manager JWTs are signed with a DEDICATED secret (derived from JWT_SECRET
 // * unless AL_MAMHARAH_MANAGER_JWT_SECRET is set) so they can never be replayed
@@ -67,7 +67,7 @@ export async function ensurePrimaryManager(): Promise<void> {
 	const password = env.AL_MAMHARAH_MANAGER_PASSWORD
 	if (!email || !password) {
 		logger.warn(
-			'Al-Mamharah primary manager not configured (set AL_MAMHARAH_MANAGER_EMAIL/PASSWORD or seed a PRIMARY manager)'
+			'Al Mamharah primary manager not configured (set AL_MAMHARAH_MANAGER_EMAIL/PASSWORD or seed a PRIMARY manager)'
 		)
 		return
 	}
@@ -84,7 +84,7 @@ export async function ensurePrimaryManager(): Promise<void> {
 		})
 		.onConflictDoNothing({ target: alMamharahManagers.email })
 
-	logger.info({ email }, 'Al-Mamharah primary manager bootstrapped from environment')
+	logger.info({ email }, 'Al Mamharah primary manager bootstrapped from environment')
 	await recordAudit({
 		actorType: 'SYSTEM',
 		action: 'PRIMARY_MANAGER_BOOTSTRAPPED',
@@ -121,13 +121,13 @@ export async function authenticateManager(
 		.limit(1)
 
 	if (!manager || manager.status !== 'ACTIVE' || !manager.passwordHash) {
-		logger.warn({ email }, 'Al-Mamharah manager login failed: no active manager')
+		logger.warn({ email }, 'Al Mamharah manager login failed: no active manager')
 		return null
 	}
 
 	const valid = await bcrypt.compare(password, manager.passwordHash)
 	if (!valid) {
-		logger.warn({ email }, 'Al-Mamharah manager login failed: wrong password')
+		logger.warn({ email }, 'Al Mamharah manager login failed: wrong password')
 		return null
 	}
 	return manager
@@ -327,7 +327,7 @@ export async function revokeManager(
 		entityId: managerId,
 		details: { email: manager.email }
 	})
-	logger.warn({ managerId, actorEmail }, 'Al-Mamharah manager revoked')
+	logger.warn({ managerId, actorEmail }, 'Al Mamharah manager revoked')
 	return updated
 }
 
@@ -368,7 +368,7 @@ export async function deleteManager(
 		entityId: managerId,
 		details: { email: manager.email }
 	})
-	logger.warn({ managerId, actorEmail: actor.email }, 'Al-Mamharah manager deleted')
+	logger.warn({ managerId, actorEmail: actor.email }, 'Al Mamharah manager deleted')
 }
 
 export interface ManagerListItem {
@@ -466,7 +466,7 @@ export async function activateManager(options: {
 		entity: 'manager',
 		entityId: manager.id
 	})
-	logger.info({ managerId: manager.id }, 'Al-Mamharah manager activated')
+	logger.info({ managerId: manager.id }, 'Al Mamharah manager activated')
 	return { manager }
 }
 
@@ -482,10 +482,10 @@ export async function sendManagerActivationEmail(
 	options: { token: string; invitedBy: string; fullName?: string | null }
 ): Promise<void> {
 	const link = managerActivationLink(options.token)
-	const subject = 'Al-Mamharah — Set up your Programme Manager account'
+	const subject = 'Al Mamharah: set up your Programme Manager account'
 	const content = `
 		<p style="margin:0 0 12px;">Assalāmu ʿalaykum${options.fullName ? ` ${options.fullName}` : ''},</p>
-		<p style="margin:0 0 8px;">You have been invited as a Programme Manager for Al-Mamharah (الممهرة), the Qur'an revision and retention programme.</p>
+		<p style="margin:0 0 8px;">You have been invited as a Programme Manager for Al Mamharah (الممهرة), the Qur'an revision and retention programme.</p>
 		<p style="margin:0 0 8px;">Click the button below to set your password and activate your account. The link expires in 7 days.</p>
 		${emailButton('Activate my account', link)}
 		<p style="margin:12px 0 8px; color:#6b7280; font-size:12px;">Or copy this link into your browser:<br/>${link}</p>

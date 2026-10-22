@@ -39,7 +39,7 @@ const benefits = [
 	{
 		icon: Trophy,
 		title: "Friendly motivation",
-		text: "A leaderboard celebrates consistency — not just speed — across all masār tracks.",
+		text: "A leaderboard celebrates consistency, not just speed, across all masār tracks.",
 	},
 	{
 		icon: Sparkles,
@@ -73,8 +73,8 @@ export default function AlMamharahPage() {
 	return (
 		<>
 			<Seo
-				title="Al-Mamharah — Qur'an Revision Programme"
-				description="Al-Mamharah (الممهرة) is a structured Qur'an revision and retention programme for the MSSN-OAU family. Apply, choose your daily masār, and track your muroja'ah."
+				title="Al Mamharah | Qur'an Revision Programme"
+				description="Al Mamharah (الممهرة) is a structured Qur'an revision and retention programme for the MSSN OAU family. Apply, choose your daily masār, and track your muroja'ah."
 				path="/al-mamharah/"
 				type="WebPage"
 				keywords={[
@@ -88,8 +88,8 @@ export default function AlMamharahPage() {
 				]}
 			/>
 
-			<PageHeader subtitle="A Qur'an revision & retention programme for the MSSN-OAU family — organised by the Islamic Affairs Board.">
-				Al-Mamharah · الممهرة
+			<PageHeader subtitle="A Qur'an revision and retention programme for the MSSN OAU family, organised by the Islamic Affairs Board.">
+				Al Mamharah · الممهرة
 			</PageHeader>
 
 			<section className="relative overflow-hidden py-10 sm:py-14">
@@ -101,7 +101,7 @@ export default function AlMamharahPage() {
 						<div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-primary-100 bg-primary-50/70 px-4 py-1.5 text-sm text-primary-700">
 							<CalendarDays className="size-4" />
 							<span>
-								{startLabel} – {endLabel}
+								{startLabel} to {endLabel}
 							</span>
 							<span className="text-primary-300">•</span>
 							<span>{phase}</span>
@@ -129,7 +129,7 @@ export default function AlMamharahPage() {
 									{ARABIC.quranRevision}
 								</Arabic>
 								<p className="mt-1 text-sm text-white/85">
-									Qur'an revision &amp; retention — one day at a time.
+									Qur'an revision and retention, one day at a time.
 								</p>
 							</div>
 						</div>
@@ -227,7 +227,7 @@ export default function AlMamharahPage() {
 									Applications are currently closed
 								</h3>
 								<p className="mt-2 text-sm text-amber-700">
-									New applications for this phase of Al-Mamharah are not being accepted right
+									New applications for this phase of Al Mamharah are not being accepted right
 									now. If you have already been approved, sign in below to access your
 									dashboard.
 								</p>

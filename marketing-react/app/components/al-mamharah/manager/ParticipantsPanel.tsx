@@ -111,7 +111,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 			}
 			if (err instanceof AlMamharahError && (err.status >= 500 || err.status === 0)) {
 				setError(
-					"Participants aren't available right now. The server may be starting up — please try again in a moment."
+					"Participants aren't available right now. The server may be starting up, so please try again in a moment."
 				);
 				return;
 			}
@@ -145,7 +145,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 
 	async function removeParticipant(participant: any) {
 		const confirmed = window.confirm(
-			`Permanently delete ${participant.displayName}?\n\nThis removes their completions, sessions and login. The application record is kept for auditing. This cannot be undone.`
+			`Permanently delete ${participant.displayName}?\n\nThis removes their application, completions, sessions and login. This cannot be undone.`
 		);
 		if (!confirmed) return;
 		setDeleting(participant.id);
@@ -230,7 +230,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 		setActing(participant.id);
 		try {
 			await setParticipantStatus(participant.id, next, undefined, token);
-			toast.success(next === "SUSPENDED" ? "Participant suspended." : "Participant re-activated.");
+			toast.success(next === "SUSPENDED" ? "Participant suspended." : "Participant activated again.");
 			await load();
 			if (openId === participant.id) await refreshDetail(participant.id);
 		} catch (err) {
@@ -555,7 +555,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 														Tajweed track (optional)
 													</h4>
 													<p className="mb-3 text-xs text-gray-500">
-														Setting a track here skips the placement check — use it when
+														Setting a track here skips the placement check. Use it when
 														you have verified the participant&apos;s level yourself.
 													</p>
 													<div className="flex flex-wrap items-center gap-2">
@@ -564,7 +564,7 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 															value={tajweedDraft}
 															onChange={(e) => setTajweedDraft(e.target.value)}
 														>
-															<option value="">None — muroja&apos;ah only</option>
+															<option value="">None, muroja&apos;ah only</option>
 															{TAJWEED_TRACK_OPTIONS.map((option) => (
 																<option key={option.value} value={option.value}>
 																	{option.label}

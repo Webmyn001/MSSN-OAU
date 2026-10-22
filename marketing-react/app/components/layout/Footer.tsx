@@ -10,7 +10,7 @@ const ABOUT_LINKS = [
 	{ href: "/our-excos", label: "Our Excos" },
 	{ href: "/our-advisors", label: "Our Advisors" },
 	{ href: "/programmes", label: "Programmes" },
-	{ href: "/al-mamharah", label: "Al-Mamharah" },
+	{ href: "/al-mamharah", label: "Al Mamharah" },
 	{ href: "/events", label: "Events" },
 	{ href: "/contact", label: "FAQs & Contact Us" },
 ];

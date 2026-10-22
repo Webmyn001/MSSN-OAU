@@ -1,9 +1,9 @@
-// * Al-Mamharah tajweed tracks: three mutūn studied alongside the muroja'ah.
+// * Al Mamharah tajweed tracks: three mutūn studied alongside the muroja'ah.
 // * The track is optional. JAZARIYYAH and SHAATIBIYYAH require a short
 // * placement quiz on the preceding matn before the student may register lines
 // * from them.
 //
-// * Ladder: Tuhfatul Atfal → Muqaddimah Al-Jazariyyah → Shaṭibiyyah
+// * Ladder: Tuhfatul Atfal → Muqaddimah Al Jazariyyah → Shaṭibiyyah
 
 export const TAJWEED_TRACKS = ['TUHFATUL_ATFAL', 'JAZARIYYAH', 'SHAATIBIYYAH'] as const
 
@@ -26,7 +26,7 @@ export const MATN_INFO: Record<TajweedTrack, MatnInfo> = {
 		prerequisite: null
 	},
 	JAZARIYYAH: {
-		label: 'Muqaddimah Al-Jazariyyah',
+		label: 'Muqaddimah Al Jazariyyah',
 		arabic: 'المقدمة الجزرية',
 		lines: 107,
 		prerequisite: 'TUHFATUL_ATFAL'
@@ -89,12 +89,7 @@ export const QUIZ_BANK: Record<'TUHFATUL_ATFAL' | 'JAZARIYYAH', QuizQuestion[]> 
 		{
 			id: 'ta-author',
 			question: 'Who authored Tuhfatul Atfal?',
-			options: [
-				'Sulaymān ibn Ḥusayn al-Jamzūrī',
-				'Ibn al-Jazarī',
-				'Al-Shāṭibī',
-				'Ibn Kathīr'
-			],
+			options: ['Sulaymān ibn Ḥusayn al-Jamzūrī', 'Ibn al-Jazarī', 'Al-Shāṭibī', 'Ibn Kathīr'],
 			answer: 0
 		},
 		{
@@ -131,13 +126,8 @@ export const QUIZ_BANK: Record<'TUHFATUL_ATFAL' | 'JAZARIYYAH', QuizQuestion[]> 
 	JAZARIYYAH: [
 		{
 			id: 'ja-author',
-			question: 'Who authored Muqaddimah Al-Jazariyyah?',
-			options: [
-				'Muḥammad ibn al-Jazarī',
-				'Sulaymān al-Jamzūrī',
-				'Al-Shāṭibī',
-				'Ibn Kathīr'
-			],
+			question: 'Who authored Muqaddimah Al Jazariyyah?',
+			options: ['Muḥammad ibn al-Jazarī', 'Sulaymān al-Jamzūrī', 'Al-Shāṭibī', 'Ibn Kathīr'],
 			answer: 0
 		},
 		{
@@ -160,7 +150,7 @@ export const QUIZ_BANK: Record<'TUHFATUL_ATFAL' | 'JAZARIYYAH', QuizQuestion[]> 
 		},
 		{
 			id: 'ja-opening',
-			question: 'The opening line of Al-Jazariyyah begins with…',
+			question: 'The opening line of Al Jazariyyah begins with…',
 			options: [
 				'Yaqūlu rājī raḥmata l-ghafūr',
 				'Al-ḥamdu lillāhi rabbi l-ʿālamīn',
@@ -171,19 +161,26 @@ export const QUIZ_BANK: Record<'TUHFATUL_ATFAL' | 'JAZARIYYAH', QuizQuestion[]> 
 		},
 		{
 			id: 'ja-subject',
-			question: 'Muqaddimah Al-Jazariyyah is a poem (naẓm) principally about…',
+			question: 'Muqaddimah Al Jazariyyah is a poem (naẓm) principally about…',
 			options: ['Tafsīr', 'Tajwīd', 'Ḥadīth', 'Fiqh'],
 			answer: 1
 		}
 	]
 }
 
-/** Picks `count` random questions about the prerequisite matn. */
+/**
+ * Picks `count` random questions about the prerequisite matn.
+ * `exclude` drops questions from the previous attempt so a retry never
+ * repeats the same set.
+ */
 export function sampleQuiz(
 	prerequisite: 'TUHFATUL_ATFAL' | 'JAZARIYYAH',
-	count: number = QUIZ_LENGTH
+	count: number = QUIZ_LENGTH,
+	exclude: string[] = []
 ): QuizQuestion[] {
-	const pool = [...QUIZ_BANK[prerequisite]]
+	const excluded = new Set(exclude)
+	let pool = QUIZ_BANK[prerequisite].filter(question => !excluded.has(question.id))
+	if (pool.length < count) pool = [...QUIZ_BANK[prerequisite]]
 	for (let i = pool.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1))
 		;[pool[i], pool[j]] = [pool[j], pool[i]]

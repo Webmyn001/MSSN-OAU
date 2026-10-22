@@ -97,8 +97,8 @@ export default function AlMamharahManagerPage() {
 	return (
 		<>
 			<Seo
-				title="Al-Mamharah — Programme Manager"
-				description="Manage Al-Mamharah applications, participants, daily progress and settings."
+				title="Al Mamharah | Programme Manager"
+				description="Manage Al Mamharah applications, participants, daily progress and settings."
 				path="/al-mamharah/manager/"
 			/>
 
@@ -116,7 +116,7 @@ export default function AlMamharahManagerPage() {
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<div>
 									<h1 className="flex flex-wrap items-baseline gap-2 font-secondary text-2xl font-bold text-primary-800 sm:text-3xl">
-										Al-Mamharah Manager
+										Al Mamharah Manager
 										<Arabic className="text-primary-600">إدارة البرنامج</Arabic>
 									</h1>
 									<p className="mt-1 text-sm text-gray-600">

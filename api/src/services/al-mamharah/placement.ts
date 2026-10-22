@@ -168,14 +168,22 @@ function placementTarget(participant: AlMamharahParticipant): PlacementTarget {
 	return { prerequisite: prerequisite as 'TUHFATUL_ATFAL' | 'JAZARIYYAH', track }
 }
 
-/** Serves a random placement quiz on the matn that precedes the chosen track. */
-export function buildPlacementQuiz(participant: AlMamharahParticipant): PlacementQuiz {
+/**
+ * Serves a random placement quiz on the matn that precedes the chosen track.
+ * Previously served question ids can be excluded so a retry gets a fresh set.
+ */
+export function buildPlacementQuiz(
+	participant: AlMamharahParticipant,
+	exclude: string[] = []
+): PlacementQuiz {
 	const { prerequisite, track } = placementTarget(participant)
-	const questions = sampleQuiz(prerequisite).map(({ id, question, options }) => ({
-		id,
-		question,
-		options
-	}))
+	const questions = sampleQuiz(prerequisite, QUIZ_LENGTH, exclude).map(
+		({ id, question, options }) => ({
+			id,
+			question,
+			options
+		})
+	)
 	return {
 		track,
 		prerequisite: { track: prerequisite, label: MATN_INFO[prerequisite].label },

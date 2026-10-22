@@ -124,7 +124,7 @@ export function ApplicationForm({
 			className="flex flex-col rounded-xl border border-gray-200 bg-white/90 p-4 shadow-md backdrop-blur-sm sm:p-6 lg:p-8"
 		>
 			<h2 className="mb-2 font-secondary text-xl font-semibold text-primary-700">
-				Apply to Al-Mamharah
+				Apply to Al Mamharah
 			</h2>
 			<p className="mb-6 text-sm text-gray-600">
 				Submit your details and the Programme Manager will review your application.
@@ -286,7 +286,7 @@ export function ApplicationForm({
 							</option>
 							{START_OPTIONS.map((option) => (
 								<option key={option.number} value={option.value}>
-									{option.number}. {option.value} (pg {option.page})
+										{option.number}. {option.value} (page {option.page})
 								</option>
 							))}
 						</select>
@@ -333,16 +333,16 @@ export function ApplicationForm({
 							value={formData.tajweedTrack}
 							onChange={(e) => update("tajweedTrack", e.target.value)}
 						>
-							<option value="">None — muroja&apos;ah only</option>
+							<option value="">None, muroja&apos;ah only</option>
 							{TAJWEED_TRACK_OPTIONS.map((option) => (
 								<option key={option.value} value={option.value}>
-									{option.label} · {option.lines} lines
+									{option.label}, {option.lines} lines
 								</option>
 							))}
 						</select>
 						<p className="mt-1 text-xs text-gray-500">
 							Optional. You will record one line per day from your matn alongside the
-							muroja&apos;ah. Choosing Al-Jazariyyah or Shaṭibiyyah requires a short placement
+							muroja&apos;ah. Choosing Al Jazariyyah or Shaṭibiyyah requires a short placement
 							check on the preceding matn after approval.
 						</p>
 					</div>

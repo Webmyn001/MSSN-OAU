@@ -350,7 +350,7 @@ export function EnterProgramme() {
 		if (!devCode) return null;
 		return (
 			<div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
-				Development mode — your code is{" "}
+				Development mode. Your code is{" "}
 				<span className="font-mono font-semibold">{devCode}</span>. This hint is never shown in
 				production.
 			</div>
@@ -401,7 +401,7 @@ export function EnterProgramme() {
 						className={inputClass}
 						value={confirmPassword}
 						onChange={(e) => setConfirmPassword(e.target.value)}
-						placeholder="Re-enter your password"
+						placeholder="Enter your password again"
 					/>
 				</div>
 			</>

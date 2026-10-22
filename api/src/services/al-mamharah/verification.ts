@@ -59,7 +59,7 @@ export async function issueVerificationCode(
 		expiresAt: new Date(Date.now() + CODE_EXPIRY_MS)
 	})
 
-	logger.info({ participantId, purpose }, 'Al-Mamharah verification code issued')
+	logger.info({ participantId, purpose }, 'Al Mamharah verification code issued')
 	return code
 }
 
@@ -128,7 +128,7 @@ export async function createParticipantSession(
 	const token = createId()
 	const expiresAt = new Date(Date.now() + PARTICIPANT_SESSION_MS)
 	await db.insert(alMamharahParticipantSessions).values({ participantId, token, expiresAt })
-	logger.info({ participantId }, 'Al-Mamharah participant session created')
+	logger.info({ participantId }, 'Al Mamharah participant session created')
 	return { token, expiresAt }
 }
 
@@ -162,7 +162,7 @@ export async function validateParticipantSession(
 
 		return row
 	} catch (error) {
-		logger.error({ error }, 'Failed to validate Al-Mamharah participant session')
+		logger.error({ error }, 'Failed to validate Al Mamharah participant session')
 		return null
 	}
 }
@@ -187,10 +187,10 @@ export function verificationEmailHtml(options: {
 	code: string
 	expiresMinutes: number
 }): { subject: string; html: string; text: string } {
-	const subject = 'Al-Mamharah — Your verification code'
+	const subject = 'Al Mamharah: your verification code'
 	const content = `
 		<p style="margin:0 0 12px;">Assalāmu ʿalaykum ${options.fullName},</p>
-		<p style="margin:0 0 16px;">Use the code below to enter the Al-Mamharah programme dashboard. It expires in ${options.expiresMinutes} minutes.</p>
+		<p style="margin:0 0 16px;">Use the code below to enter the Al Mamharah programme dashboard. It expires in ${options.expiresMinutes} minutes.</p>
 		<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 16px;">
 			<tr>
 				<td style="background-color:#f0f7f2; border:1px solid #e3ece6; border-radius:10px; padding:14px 28px;">
@@ -202,7 +202,7 @@ export function verificationEmailHtml(options: {
 		<p style="margin:0; color:#6b7280; font-size:12px;">If you need help, contact the Programme Manager: 09039052468, 07035199803, 07069638881.</p>
 	`
 	const html = brandEmail(subject, content)
-	const text = `Assalamu alaykum ${options.fullName},\n\nYour Al-Mamharah verification code is ${options.code}. It expires in ${options.expiresMinutes} minutes.\n\nIf you did not request this code, ignore this email.`
+	const text = `Assalamu alaykum ${options.fullName},\n\nYour Al Mamharah verification code is ${options.code}. It expires in ${options.expiresMinutes} minutes.\n\nIf you did not request this code, ignore this email.`
 	return { subject, html, text }
 }
 

@@ -81,7 +81,7 @@ export function dailyTargetFromMasar(masar: AlMamharahMasar): DailyTarget {
 }
 
 /**
- * Builds the participant's positional daily target, e.g. "Al-Baqarah · pg 2–4",
+ * Builds the participant's positional daily target, e.g. "Surah Al Baqarah, pages 2 to 4",
  * by advancing from their chosen start page by the masār's daily page count.
  *
  * `startDirection` decides the way the track runs:
@@ -122,7 +122,7 @@ export function positionalDailyTarget(
 		surah: surahAtPage(fromPage).name,
 		fromPage,
 		toPage,
-		label: `${base.label} · ${pageRangeLabel(fromPage, toPage)}`
+		label: `${base.label}. ${pageRangeLabel(fromPage, toPage)}`
 	}
 }
 
@@ -196,7 +196,7 @@ export async function recordCompletion(
 		const info = MATN_INFO[track]
 		const stats = await tajweedLineStats(participant.id)
 		if (stats.lastLine >= info.lines) {
-			throw new ValidationError(`You have completed ${info.label} — barakallāhu fīk.`)
+			throw new ValidationError(`You have completed ${info.label}. Barakallāhu fīk.`)
 		}
 		const nextLine = stats.lastLine + 1
 		const requested = input.lineNumber ?? nextLine

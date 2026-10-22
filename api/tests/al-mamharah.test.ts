@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from 'bun:test'
 import app from '../src/app'
 import { addDays, todayInTimeZone } from '../src/services/al-mamharah/dates'
 
-// * Integration tests for the Al-Mamharah programme API.
+// * Integration tests for the Al Mamharah programme API.
 // * These run against a real PostgreSQL database created by
 // * `bun scripts/test-cluster.ts` (see package.json `test:al-mamharah`).
 

@@ -28,7 +28,7 @@ import { getSettings } from '../services/al-mamharah/settings'
 import { todayInTimeZone } from '../services/al-mamharah/dates'
 import { clientKey, rateLimit } from '../services/al-mamharah/rate-limit'
 
-// * Public Al-Mamharah endpoints: application submission, password-based
+// * Public Al Mamharah endpoints: application submission, password-based
 // * student login (OTP only on the first login to set a password) and the
 // * forgotten-password reset.
 
@@ -59,7 +59,7 @@ publicAlMamharahRoute.get('/info', async c => {
 			acceptingApplications: settings.acceptingApplications
 		})
 	} catch (error) {
-		logger.error({ error }, 'Failed to read Al-Mamharah programme info')
+		logger.error({ error }, 'Failed to read Al Mamharah programme info')
 		return errorResponse(c, 'Unable to load programme information', 'READ_ERROR', 500)
 	}
 })
@@ -70,7 +70,7 @@ publicAlMamharahRoute.post('/', zValidator('json', submitApplicationSchema), asy
 	if (!settings.acceptingApplications) {
 		return errorResponse(
 			c,
-			'Applications for this phase of Al-Mamharah are currently closed. Please check back later or contact the Programme Manager.',
+			'Applications for this phase of Al Mamharah are currently closed. Please check back later or contact the Programme Manager.',
 			'APPLICATIONS_CLOSED',
 			403
 		)
@@ -155,7 +155,7 @@ publicAlMamharahRoute.post('/enter', zValidator('json', enterProgrammeSchema), a
 	try {
 		code = await issueVerificationCode(participant.id, 'ENTER_PROGRAMME')
 	} catch (error) {
-		logger.error({ error }, 'Failed to issue Al-Mamharah verification code')
+		logger.error({ error }, 'Failed to issue Al Mamharah verification code')
 		return errorResponse(
 			c,
 			'We could not generate a verification code right now. Please try again shortly.',
@@ -168,7 +168,7 @@ publicAlMamharahRoute.post('/enter', zValidator('json', enterProgrammeSchema), a
 		await sendVerificationEmail(resolution.application.email, participant.displayName, code)
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production') {
-			logger.error({ error }, 'Failed to send Al-Mamharah verification email')
+			logger.error({ error }, 'Failed to send Al Mamharah verification email')
 			return errorResponse(
 				c,
 				'We could not send the verification email right now. Please try again in a moment.',
@@ -177,7 +177,7 @@ publicAlMamharahRoute.post('/enter', zValidator('json', enterProgrammeSchema), a
 			)
 		}
 		// * Outside production there is no real mailbox; fall back to the dev code.
-		logger.warn({ error }, 'Al-Mamharah verification email failed (non-production)')
+		logger.warn({ error }, 'Al Mamharah verification email failed (non-production)')
 	}
 
 	return successResponse(c, {
@@ -351,7 +351,7 @@ publicAlMamharahRoute.post(
 		try {
 			code = await issueVerificationCode(resolution.participant.id, 'RESET_PASSWORD')
 		} catch (error) {
-			logger.error({ error }, 'Failed to issue Al-Mamharah password-reset code')
+			logger.error({ error }, 'Failed to issue Al Mamharah password-reset code')
 			return generic
 		}
 
@@ -362,7 +362,7 @@ publicAlMamharahRoute.post(
 				code
 			)
 		} catch (error) {
-			logger.error({ error }, 'Failed to send Al-Mamharah password-reset email')
+			logger.error({ error }, 'Failed to send Al Mamharah password-reset email')
 			return generic
 		}
 

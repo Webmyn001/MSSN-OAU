@@ -141,7 +141,12 @@ alMamharahParticipantRoute.get('/tajweed', async c => {
 /** GET /tajweed/quiz — placement quiz on the preceding matn. */
 alMamharahParticipantRoute.get('/tajweed/quiz', async c => {
 	const participant = requireParticipant(c)
-	const quiz = buildPlacementQuiz(participant)
+	const exclude = (c.req.query('exclude') ?? '')
+		.split(',')
+		.map(id => id.trim())
+		.filter(Boolean)
+		.slice(0, 10)
+	const quiz = buildPlacementQuiz(participant, exclude)
 	return successResponse(c, quiz)
 })
 

@@ -74,7 +74,7 @@ const MENU_GROUPS = [
 		links: [
 			{
 				href: "/al-mamharah",
-				label: "Al-Mamharah",
+				label: "Al Mamharah",
 				icon: (
 					<svg
 						xmlns="http://www.w3.org/2000/svg"

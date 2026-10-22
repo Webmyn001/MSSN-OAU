@@ -60,7 +60,7 @@ export function OverviewPanel({ token, onExpired }: { token: string; onExpired: 
 				<div className="flex items-center gap-2 text-sm text-primary-700">
 					<CalendarDays className="size-4" />
 					<span>
-						Programme window: {formatISODate(data.programme.start)} – {formatISODate(data.programme.end)}
+						Programme window: {formatISODate(data.programme.start)} to {formatISODate(data.programme.end)}
 					</span>
 				</div>
 			</div>

@@ -253,7 +253,7 @@ export function SettingsPanel({
 			</div>
 
 			<div>
-				<h3 className="font-secondary text-base font-semibold text-gray-800">Auto-suspension</h3>
+				<h3 className="font-secondary text-base font-semibold text-gray-800">Automatic suspension</h3>
 				<p className="mt-1 text-xs text-gray-500">
 					Participants who miss this many days in a calendar month are suspended automatically.
 				</p>

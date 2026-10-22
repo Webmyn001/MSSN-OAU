@@ -81,7 +81,7 @@ export function ManagersPanel({
 		try {
 			const result = await resendManagerInvite(manager.id, token);
 			setLastLink(result.data?.activationLink ?? null);
-			toast.success("Invitation re-sent.");
+			toast.success("Invitation sent again.");
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Could not resend the invitation.");
 		} finally {
@@ -175,7 +175,7 @@ export function ManagersPanel({
 							</Button>
 						</div>
 						<p className="mt-1 text-[11px] text-amber-700">
-							Never shown in production — it is emailed instead.
+							Never shown in production. It is emailed instead.
 						</p>
 					</div>
 				) : null}
