@@ -57,10 +57,10 @@ export function minISO(a: ISODate, b: ISODate): ISODate {
 }
 
 /**
- * Today's date in the given IANA timezone, as YYYY-MM-DD.
- * Uses the server clock — clients cannot influence this value.
+ * Formats a timestamp as YYYY-MM-DD in the given IANA timezone.
+ * Falls back to the server's local timezone if the value is invalid.
  */
-export function todayInTimeZone(timeZone: string): ISODate {
+export function dateInTimeZone(date: Date, timeZone: string): ISODate {
 	try {
 		// * en-CA formats as YYYY-MM-DD
 		return new Intl.DateTimeFormat('en-CA', {
@@ -68,14 +68,22 @@ export function todayInTimeZone(timeZone: string): ISODate {
 			year: 'numeric',
 			month: '2-digit',
 			day: '2-digit'
-		}).format(new Date())
+		}).format(date)
 	} catch {
 		return new Intl.DateTimeFormat('en-CA', {
 			year: 'numeric',
 			month: '2-digit',
 			day: '2-digit'
-		}).format(new Date())
+		}).format(date)
 	}
+}
+
+/**
+ * Today's date in the given IANA timezone, as YYYY-MM-DD.
+ * Uses the server clock — clients cannot influence this value.
+ */
+export function todayInTimeZone(timeZone: string): ISODate {
+	return dateInTimeZone(new Date(), timeZone)
 }
 
 /** Returns true when the timezone string is a valid IANA timezone. */

@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
 	addDays,
 	computeStreaks,
+	dateInTimeZone,
 	diffDays,
 	isValidISODate,
 	rankEntries,
@@ -46,6 +47,11 @@ describe('date helpers', () => {
 
 	test('resolves today in a timezone', () => {
 		expect(todayInTimeZone('Africa/Lagos')).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+	})
+
+	test('maps a registration timestamp to the programme calendar day', () => {
+		// * 23:30 UTC is already the next day in Lagos (UTC+1).
+		expect(dateInTimeZone(new Date('2026-10-17T23:30:00Z'), 'Africa/Lagos')).toBe('2026-10-18')
 	})
 })
 

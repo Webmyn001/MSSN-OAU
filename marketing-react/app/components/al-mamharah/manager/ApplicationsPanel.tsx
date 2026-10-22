@@ -227,7 +227,7 @@ export function ApplicationsPanel({ token, onExpired }: { token: string; onExpir
 													className="block text-sm font-medium text-gray-700"
 													htmlFor={`almh-start-${item.id}`}
 												>
-													Start date (optional, defaults to the programme start)
+													Start date (optional, defaults to the registration date)
 												</label>
 												<input
 													id={`almh-start-${item.id}`}

@@ -10,7 +10,7 @@ import { ConflictError, NotFoundError, ValidationError } from '../../lib/errors'
 import { isUniqueViolation } from '../../lib/pg-error'
 import { recordAudit } from './audit'
 import { getSettings } from './settings'
-import { isValidISODate } from './dates'
+import { dateInTimeZone, isValidISODate, maxISO } from './dates'
 import { logger } from '../../lib/logger'
 
 // * Application review and approval (Programme Manager actions).
@@ -155,19 +155,20 @@ export interface ApproveResult {
 
 /**
  * Approves a pending application and creates the participant record.
- * The participant's first eligible day defaults to the programme start date.
+ * The participant's first eligible day defaults to the day they registered
+ * (never earlier than the programme start), so a new sign-up never begins
+ * with days counted as missed.
  */
 export async function approveApplication(
 	applicationId: string,
 	options: { reviewedBy: string; startDate?: string }
 ): Promise<ApproveResult> {
 	const settings = await getSettings()
-	let startDate = options.startDate ?? settings.start
-	if (!isValidISODate(startDate)) {
+	const requestedStart = options.startDate
+	if (requestedStart !== undefined && !isValidISODate(requestedStart)) {
 		throw new ValidationError('Invalid start date')
 	}
-	if (startDate < settings.start) startDate = settings.start
-	if (startDate > settings.end) {
+	if (requestedStart !== undefined && requestedStart > settings.end) {
 		throw new ValidationError('Start date cannot be after the programme end date')
 	}
 
@@ -182,6 +183,13 @@ export async function approveApplication(
 			throw new ConflictError(
 				`Only pending applications can be approved (current: ${application.status})`
 			)
+		}
+
+		const registeredOn = dateInTimeZone(application.createdAt, settings.timezone)
+		let startDate = requestedStart ?? maxISO(registeredOn, settings.start)
+		if (startDate < settings.start) startDate = settings.start
+		if (startDate > settings.end) {
+			throw new ValidationError('Start date cannot be after the programme end date')
 		}
 
 		const [updated] = await tx
@@ -212,7 +220,7 @@ export async function approveApplication(
 			})
 			.returning()
 
-		return { application: updated, participantId: participant.id }
+		return { application: updated, participantId: participant.id, startDate }
 	})
 
 	await recordAudit({
@@ -221,7 +229,7 @@ export async function approveApplication(
 		action: 'APPLICATION_APPROVED',
 		entity: 'application',
 		entityId: applicationId,
-		details: { participantId: result.participantId, startDate }
+		details: { participantId: result.participantId, startDate: result.startDate }
 	})
 
 	return result
