@@ -1,4 +1,4 @@
-import { and, count, eq, sql } from 'drizzle-orm'
+import { and, count, eq, inArray, sql } from 'drizzle-orm'
 import { db } from '../../lib/db'
 import {
 	alMamharahCompletions,
@@ -13,14 +13,13 @@ import { todayInTimeZone, type ISODate } from './dates'
 import {
 	MATN_INFO,
 	QUIZ_LENGTH,
-	gradeQuiz,
 	normalizeTajweedTrack,
 	prerequisiteFor,
-	sampleQuiz,
 	tajweedTrackRank,
 	type QuizAnswer,
 	type TajweedTrack
 } from './tajweed'
+import { getQuizBank, gradePlacementAnswers } from './questions'
 
 // * Optional tajweed track: status, placement quiz and daily line register.
 
@@ -69,6 +68,60 @@ export async function tajweedLineStats(
 		completedLines: Number(aggregate?.completedLines ?? 0),
 		todayLine
 	}
+}
+
+/** Line-register statistics for many participants, keyed by participant id. */
+export async function tajweedLineStatsByParticipant(
+	participantIds: string[],
+	today?: ISODate
+): Promise<Map<string, TajweedLineStats>> {
+	const result = new Map<string, TajweedLineStats>()
+	if (participantIds.length === 0) return result
+
+	const aggregateRows = await db
+		.select({
+			participantId: alMamharahCompletions.participantId,
+			lastLine: sql<number | null>`max(${alMamharahCompletions.lineNumber})`,
+			completedLines: count()
+		})
+		.from(alMamharahCompletions)
+		.where(
+			and(
+				inArray(alMamharahCompletions.participantId, participantIds),
+				eq(alMamharahCompletions.taskType, 'TAJWEED_QIRAAT')
+			)
+		)
+		.groupBy(alMamharahCompletions.participantId)
+
+	for (const row of aggregateRows) {
+		result.set(row.participantId, {
+			lastLine: Number(row.lastLine ?? 0),
+			completedLines: Number(row.completedLines),
+			todayLine: null
+		})
+	}
+
+	if (today) {
+		const todayRows = await db
+			.select({
+				participantId: alMamharahCompletions.participantId,
+				lineNumber: alMamharahCompletions.lineNumber
+			})
+			.from(alMamharahCompletions)
+			.where(
+				and(
+					inArray(alMamharahCompletions.participantId, participantIds),
+					eq(alMamharahCompletions.taskType, 'TAJWEED_QIRAAT'),
+					eq(alMamharahCompletions.programmeDate, today)
+				)
+			)
+		for (const row of todayRows) {
+			const stats = result.get(row.participantId)
+			if (stats) stats.todayLine = row.lineNumber ?? null
+		}
+	}
+
+	return result
 }
 
 export interface TajweedStatus {
@@ -172,18 +225,17 @@ function placementTarget(participant: AlMamharahParticipant): PlacementTarget {
  * Serves a random placement quiz on the matn that precedes the chosen track.
  * Previously served question ids can be excluded so a retry gets a fresh set.
  */
-export function buildPlacementQuiz(
+export async function buildPlacementQuiz(
 	participant: AlMamharahParticipant,
 	exclude: string[] = []
-): PlacementQuiz {
+): Promise<PlacementQuiz> {
 	const { prerequisite, track } = placementTarget(participant)
-	const questions = sampleQuiz(prerequisite, QUIZ_LENGTH, exclude).map(
-		({ id, question, options }) => ({
-			id,
-			question,
-			options
-		})
-	)
+	const bank = await getQuizBank(prerequisite, exclude)
+	const questions = bank.map(({ id, question, options }) => ({
+		id,
+		question,
+		options
+	}))
 	return {
 		track,
 		prerequisite: { track: prerequisite, label: MATN_INFO[prerequisite].label },
@@ -210,7 +262,7 @@ export async function submitPlacementQuiz(
 		return { passed: true, correct: QUIZ_LENGTH, total: QUIZ_LENGTH, recommendation: null }
 	}
 
-	const grade = gradeQuiz(prerequisite, answers)
+	const grade = await gradePlacementAnswers(prerequisite, answers)
 
 	if (!grade.passed) {
 		await recordAudit({

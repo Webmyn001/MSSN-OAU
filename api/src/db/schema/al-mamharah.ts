@@ -257,6 +257,28 @@ export const alMamharahManagerTokens = pgTable(
 	})
 )
 
+// * Placement quiz question bank, editable by managers.
+export const alMamharahPlacementQuestions = pgTable(
+	'al_mamharah_placement_questions',
+	{
+		id: varchar('id', { length: 64 }).primaryKey(),
+		// * Matn the question belongs to: TUHFATUL_ATFAL | JAZARIYYAH
+		track: varchar('track', { length: 30 }).notNull(),
+		question: text('question').notNull(),
+		options: jsonb('options').$type<string[]>().notNull(),
+		// * Zero-based index into `options`.
+		answer: integer('answer').notNull(),
+		active: boolean('active').notNull().default(true),
+		updatedBy: varchar('updated_by', { length: 255 }),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	table => ({
+		trackIdx: index('almh_placement_questions_track_idx').on(table.track),
+		activeIdx: index('almh_placement_questions_active_idx').on(table.active)
+	})
+)
+
 // * Audit trail for important administrative and access events
 export const alMamharahAuditLog = pgTable(
 	'al_mamharah_audit_log',
@@ -299,3 +321,5 @@ export type AlMamharahManager = typeof alMamharahManagers.$inferSelect
 export type NewAlMamharahManager = typeof alMamharahManagers.$inferInsert
 export type AlMamharahManagerToken = typeof alMamharahManagerTokens.$inferSelect
 export type AlMamharahAuditEntry = typeof alMamharahAuditLog.$inferSelect
+export type AlMamharahPlacementQuestion = typeof alMamharahPlacementQuestions.$inferSelect
+export type NewAlMamharahPlacementQuestion = typeof alMamharahPlacementQuestions.$inferInsert

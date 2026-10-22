@@ -150,6 +150,8 @@ export interface ParticipantWithStats {
 	createdAt: Date
 	// * Optional tajweed track (null = muroja'ah only)
 	tajweedTrack: string | null
+	/** Whether the placement quiz for the track has been passed. */
+	tajweedPlacementPassed: boolean
 	application: ParticipantApplicationInfo
 	stats: StreakStats
 }
@@ -168,6 +170,7 @@ function mapWithStats(
 		status: participant.status,
 		createdAt: participant.createdAt,
 		tajweedTrack: participant.tajweedTrack,
+		tajweedPlacementPassed: Boolean(participant.tajweedPlacementPassedAt),
 		application: {
 			matricNumber: application?.matricNumber ?? '',
 			faculty: application?.faculty ?? '',

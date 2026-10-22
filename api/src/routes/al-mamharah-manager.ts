@@ -9,6 +9,7 @@ import {
 	activateManagerSchema,
 	approveApplicationSchema,
 	auditQuerySchema,
+	createPlacementQuestionSchema,
 	dailyProgressQuerySchema,
 	deleteCompletionSchema,
 	exportQuerySchema,
@@ -16,12 +17,14 @@ import {
 	leaderboardQuerySchema,
 	listApplicationsQuerySchema,
 	listParticipantsQuerySchema,
+	listPlacementQuestionsQuerySchema,
 	managerCompletionSchema,
 	managerLoginSchema,
 	programmeSettingsSchema,
 	rejectApplicationSchema,
 	resetProgrammeSchema,
 	setParticipantTajweedSchema,
+	updatePlacementQuestionSchema,
 	updateParticipantStatusSchema
 } from '../schemas/al-mamharah'
 import {
@@ -46,7 +49,20 @@ import { enforceMissedDaySuspension } from '../services/al-mamharah/participant-
 import { listAudit, recordAudit } from '../services/al-mamharah/audit'
 import { getSettings, saveSettings } from '../services/al-mamharah/settings'
 import { resetProgramme } from '../services/al-mamharah/reset'
-import { setTajweedTrackByManager } from '../services/al-mamharah/placement'
+import {
+	setTajweedTrackByManager,
+	tajweedLineStatsByParticipant
+} from '../services/al-mamharah/placement'
+import {
+	createPlacementQuestion,
+	listPlacementQuestions,
+	updatePlacementQuestion
+} from '../services/al-mamharah/questions'
+import {
+	normalizeTajweedTrack,
+	prerequisiteFor,
+	tajweedTrackLabel
+} from '../services/al-mamharah/tajweed'
 import { isValidISODate, todayInTimeZone } from '../services/al-mamharah/dates'
 import {
 	activateManager,
@@ -540,6 +556,62 @@ alMamharahManagerRoute.get('/audit', zValidator('query', auditQuerySchema), asyn
 	})
 })
 
+/** GET /questions — placement quiz question bank for manager review. */
+alMamharahManagerRoute.get(
+	'/questions',
+	zValidator('query', listPlacementQuestionsQuerySchema),
+	async c => {
+		requireManager(c)
+		const { track } = c.req.valid('query')
+		const questions = await listPlacementQuestions(track)
+		return successResponse(c, questions)
+	}
+)
+
+/** POST /questions — add a placement question. */
+alMamharahManagerRoute.post(
+	'/questions',
+	zValidator('json', createPlacementQuestionSchema),
+	async c => {
+		const manager = requireManager(c)
+		const input = c.req.valid('json')
+		const question = await createPlacementQuestion(input.track, input, manager.email)
+		await recordAudit({
+			actorType: 'MANAGER',
+			actor: manager.email,
+			action: 'PLACEMENT_QUESTION_CREATED',
+			entity: 'placement_question',
+			entityId: question.id,
+			details: { track: question.track, question: question.question }
+		})
+		return successResponse(c, question, undefined, 201)
+	}
+)
+
+/** PUT /questions/:id — edit or (de)activate a placement question. */
+alMamharahManagerRoute.put(
+	'/questions/:id',
+	zValidator('json', updatePlacementQuestionSchema),
+	async c => {
+		const manager = requireManager(c)
+		const input = c.req.valid('json')
+		const question = await updatePlacementQuestion(c.req.param('id'), input, manager.email)
+		await recordAudit({
+			actorType: 'MANAGER',
+			actor: manager.email,
+			action: 'PLACEMENT_QUESTION_UPDATED',
+			entity: 'placement_question',
+			entityId: question.id,
+			details: {
+				track: question.track,
+				question: question.question,
+				active: question.active
+			}
+		})
+		return successResponse(c, question)
+	}
+)
+
 /** GET /export/applications.csv */
 alMamharahManagerRoute.get(
 	'/export/applications.csv',
@@ -555,6 +627,7 @@ alMamharahManagerRoute.get(
 			'Faculty',
 			'Department',
 			'Masar',
+			'Tajweed Track',
 			'Status',
 			'Reviewed By',
 			'Reviewed At',
@@ -569,6 +642,7 @@ alMamharahManagerRoute.get(
 				row.faculty,
 				row.department,
 				row.masar,
+				tajweedTrackLabel(row.tajweedTrack) ?? '',
 				row.status,
 				row.reviewedBy ?? '',
 				row.reviewedAt ? row.reviewedAt.toISOString() : '',
@@ -586,6 +660,10 @@ alMamharahManagerRoute.get('/export/participants.csv', async c => {
 	const settings = await getSettings()
 	const today = todayInTimeZone(settings.timezone)
 	const result = await listParticipants({ page: 1, limit: 200 })
+	const tajweedByParticipant = await tajweedLineStatsByParticipant(
+		result.items.map(item => item.id),
+		today
+	)
 	const header = [
 		'Full Name',
 		'Email',
@@ -593,6 +671,11 @@ alMamharahManagerRoute.get('/export/participants.csv', async c => {
 		'Faculty',
 		'Department',
 		'Masar',
+		'Tajweed Track',
+		'Tajweed Placement',
+		'Tajweed Lines Completed',
+		'Tajweed Last Line',
+		'Tajweed Today Line',
 		'Status',
 		'Start Date',
 		'Current Streak',
@@ -600,14 +683,28 @@ alMamharahManagerRoute.get('/export/participants.csv', async c => {
 		'Total Days',
 		'Today Completed'
 	]
-	const body = result.items.map(item =>
-		[
+	const body = result.items.map(item => {
+		const track = normalizeTajweedTrack(item.tajweedTrack)
+		const placement = !track
+			? ''
+			: prerequisiteFor(track)
+				? item.tajweedPlacementPassed
+					? 'passed'
+					: 'pending'
+				: 'not required'
+		const tajweed = tajweedByParticipant.get(item.id)
+		return [
 			item.displayName,
 			item.email,
 			item.application.matricNumber,
 			item.application.faculty,
 			item.application.department,
 			item.masar,
+			tajweedTrackLabel(item.tajweedTrack) ?? '',
+			placement,
+			tajweed?.completedLines ?? 0,
+			tajweed?.lastLine ?? '',
+			tajweed?.todayLine ?? '',
 			item.status,
 			item.startDate,
 			item.stats.current,
@@ -617,7 +714,7 @@ alMamharahManagerRoute.get('/export/participants.csv', async c => {
 		]
 			.map(csvCell)
 			.join(',')
-	)
+	})
 	return csvResponse(
 		c,
 		`al-mamharah-participants-${today}.csv`,

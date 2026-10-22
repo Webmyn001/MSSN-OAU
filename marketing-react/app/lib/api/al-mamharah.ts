@@ -447,6 +447,58 @@ export function getAudit(query: Query = {}, token: string | undefined = getManag
 	return request(`/al-mamharah/manager/audit?${toQueryString(query)}`, { token });
 }
 
+export type PlacementQuestionTrack = "TUHFATUL_ATFAL" | "JAZARIYYAH";
+
+export interface PlacementQuestion {
+	id: string;
+	track: PlacementQuestionTrack;
+	question: string;
+	options: string[];
+	answer: number;
+	active: boolean;
+	updatedBy: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface PlacementQuestionInput {
+	question: string;
+	options: string[];
+	answer: number;
+	active: boolean;
+}
+
+export function listPlacementQuestions(
+	track?: PlacementQuestionTrack,
+	token: string | undefined = getManagerToken(),
+) {
+	const query = track ? `?${toQueryString({ track })}` : "";
+	return request<PlacementQuestion[]>(`/al-mamharah/manager/questions${query}`, { token });
+}
+
+export function createPlacementQuestion(
+	payload: PlacementQuestionInput & { track: PlacementQuestionTrack },
+	token: string | undefined = getManagerToken(),
+) {
+	return request<PlacementQuestion>("/al-mamharah/manager/questions", {
+		method: "POST",
+		body: payload,
+		token,
+	});
+}
+
+export function updatePlacementQuestion(
+	id: string,
+	payload: PlacementQuestionInput,
+	token: string | undefined = getManagerToken(),
+) {
+	return request<PlacementQuestion>(`/al-mamharah/manager/questions/${id}`, {
+		method: "PUT",
+		body: payload,
+		token,
+	});
+}
+
 /**
  * CSV endpoints are downloads, so they need an authenticated fetch rather than
  * a plain anchor. Returns the raw Response for the caller to stream to disk.

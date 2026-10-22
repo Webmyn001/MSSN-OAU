@@ -130,6 +130,43 @@ export const placementQuizAnswersSchema = z.object({
 		.max(10)
 })
 
+// * Manager-editable placement question bank.
+export const placementQuestionTrackSchema = z.enum(['TUHFATUL_ATFAL', 'JAZARIYYAH'])
+
+const placementQuestionFields = {
+	question: z.string().trim().min(5, 'Enter the question').max(1000),
+	options: z
+		.array(z.string().trim().min(1, 'Options cannot be empty').max(300))
+		.min(2, 'Provide at least two options')
+		.max(6, 'Provide at most six options'),
+	answer: z.number().int().min(0).max(5),
+	active: z.boolean().optional()
+}
+
+const answerMustMatchOption = (value: { options: string[]; answer: number }) =>
+	value.answer < value.options.length
+
+export const listPlacementQuestionsQuerySchema = z.object({
+	track: placementQuestionTrackSchema.optional()
+})
+
+export const createPlacementQuestionSchema = z
+	.object({
+		track: placementQuestionTrackSchema,
+		...placementQuestionFields
+	})
+	.refine(answerMustMatchOption, {
+		message: 'Choose which option is correct',
+		path: ['answer']
+	})
+
+export const updatePlacementQuestionSchema = z
+	.object(placementQuestionFields)
+	.refine(answerMustMatchOption, {
+		message: 'Choose which option is correct',
+		path: ['answer']
+	})
+
 export const chooseTajweedTrackSchema = z.object({
 	track: alMamharahTajweedTrackSchema.nullable()
 })

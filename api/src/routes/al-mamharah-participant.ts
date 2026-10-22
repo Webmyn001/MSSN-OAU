@@ -146,7 +146,7 @@ alMamharahParticipantRoute.get('/tajweed/quiz', async c => {
 		.map(id => id.trim())
 		.filter(Boolean)
 		.slice(0, 10)
-	const quiz = buildPlacementQuiz(participant, exclude)
+	const quiz = await buildPlacementQuiz(participant, exclude)
 	return successResponse(c, quiz)
 })
 

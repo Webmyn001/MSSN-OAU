@@ -6,6 +6,7 @@ import { ManagerLogin } from "~/components/al-mamharah/manager/ManagerLogin";
 import { OverviewPanel } from "~/components/al-mamharah/manager/OverviewPanel";
 import { ApplicationsPanel } from "~/components/al-mamharah/manager/ApplicationsPanel";
 import { ParticipantsPanel } from "~/components/al-mamharah/manager/ParticipantsPanel";
+import { QuestionsPanel } from "~/components/al-mamharah/manager/QuestionsPanel";
 import { DailyPanel } from "~/components/al-mamharah/manager/DailyPanel";
 import { LeaderboardPanel } from "~/components/al-mamharah/manager/LeaderboardPanel";
 import { ManagersPanel } from "~/components/al-mamharah/manager/ManagersPanel";
@@ -27,6 +28,7 @@ const tabs = [
 	{ value: "overview", label: "Overview" },
 	{ value: "applications", label: "Applications" },
 	{ value: "participants", label: "Participants" },
+	{ value: "questions", label: "Questions" },
 	{ value: "daily", label: "Daily progress" },
 	{ value: "leaderboard", label: "Leaderboard" },
 	{ value: "managers", label: "Managers" },
@@ -147,6 +149,9 @@ export default function AlMamharahManagerPage() {
 									</TabsContent>
 									<TabsContent value="participants" className="mt-6">
 										<ParticipantsPanel token={token} onExpired={onExpired} />
+									</TabsContent>
+									<TabsContent value="questions" className="mt-6">
+										<QuestionsPanel token={token} onExpired={onExpired} />
 									</TabsContent>
 									<TabsContent value="daily" className="mt-6">
 										<DailyPanel token={token} onExpired={onExpired} />

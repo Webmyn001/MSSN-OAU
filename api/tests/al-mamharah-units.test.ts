@@ -429,6 +429,18 @@ describe('tajweed tracks', () => {
 		}
 	})
 
+	test('both banks hold at least thirty valid, unique questions', () => {
+		for (const track of ['TUHFATUL_ATFAL', 'JAZARIYYAH'] as const) {
+			const bank = QUIZ_BANK[track]
+			expect(bank.length).toBeGreaterThanOrEqual(30)
+			expect(new Set(bank.map(q => q.id)).size).toBe(bank.length)
+			for (const question of bank) {
+				expect(question.answer).toBeGreaterThanOrEqual(0)
+				expect(question.answer).toBeLessThan(question.options.length)
+			}
+		}
+	})
+
 	test('a retry never repeats the questions already answered', () => {
 		const first = sampleQuiz('TUHFATUL_ATFAL')
 		const next = sampleQuiz(
