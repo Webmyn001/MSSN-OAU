@@ -161,6 +161,14 @@ export const programmeSettingsSchema = z.object({
 	maxMissedDaysPerMonth: z.number().int().min(1).max(31).optional()
 })
 
+// * Destructive: requires typing RESET so it cannot be triggered by accident.
+export const resetProgrammeSchema = z.object({
+	confirmation: z
+		.string()
+		.trim()
+		.refine(value => value === 'RESET', { message: 'Type RESET to confirm the reset' })
+})
+
 export const listApplicationsQuerySchema = z.object({
 	page: z.coerce.number().int().positive().default(1),
 	limit: z.coerce.number().int().positive().max(100).default(20),

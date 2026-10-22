@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { Loader2, AlertCircle, Save, CheckCircle2 } from "lucide-react";
+import { Loader2, AlertCircle, Save, CheckCircle2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
-import { getSettings, updateSettings, AlMamharahError } from "~/lib/api/al-mamharah";
+import {
+	getSettings,
+	updateSettings,
+	resetProgramme,
+	AlMamharahError,
+} from "~/lib/api/al-mamharah";
 import { TASK_LABELS } from "~/lib/data/al-mamharah";
 
 const TASKS: Array<"MUROJAAH" | "TAJWEED_QIRAAT"> = ["MUROJAAH", "TAJWEED_QIRAAT"];
@@ -37,6 +42,9 @@ export function SettingsPanel({
 	const [streakTasks, setStreakTasks] = useState<string[]>([]);
 	const [acceptingApplications, setAcceptingApplications] = useState(true);
 	const [maxMissedDaysPerMonth, setMaxMissedDaysPerMonth] = useState(4);
+	const [resetOpen, setResetOpen] = useState(false);
+	const [resetWord, setResetWord] = useState("");
+	const [resetting, setResetting] = useState(false);
 
 	async function load() {
 		setLoading(true);
@@ -92,12 +100,37 @@ export function SettingsPanel({
 		}
 	}
 
+	async function reset() {
+		if (resetWord.trim() !== "RESET") {
+			toast.error("Type RESET to confirm.");
+			return;
+		}
+		setResetting(true);
+		try {
+			const result = await resetProgramme(token);
+			const cleared = result.data?.completionsDeleted ?? 0;
+			toast.success(
+				`Programme reset. ${cleared} record${cleared === 1 ? "" : "s"} cleared.`,
+			);
+			setResetOpen(false);
+			setResetWord("");
+			onSaved?.(result.data?.settings);
+			await load();
+		} catch (err) {
+			if (err instanceof AlMamharahError && (err.status === 401 || err.status === 403)) {
+				onExpired();
+				return;
+			}
+			toast.error(err instanceof Error ? err.message : "Could not reset the programme.");
+		} finally {
+			setResetting(false);
+		}
+	}
+
 	useEffect(() => {
 		load();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	if (loading) {
+	}, []);	if (loading) {
 		return (
 			<div className="flex justify-center py-16">
 				<Loader2 className="size-8 animate-spin text-primary-600" />
@@ -250,6 +283,65 @@ export function SettingsPanel({
 						<CheckCircle2 className="size-4" /> Saved
 					</span>
 				) : null}
+			</div>
+
+			<div className="rounded-xl border border-red-200 bg-red-50/60 p-4">
+				<h3 className="font-secondary text-base font-semibold text-red-800">
+					Reset programme
+				</h3>
+				<p className="mt-1 text-xs text-red-700">
+					Deletes every recorded reading, streak and login session, returns all participants to
+					zero and restarts the programme from today (31 days, applications open). Student
+					accounts, passwords and applications are kept. This cannot be undone.
+				</p>
+				{resetOpen ? (
+					<div className="mt-3 space-y-2">
+						<label
+							className="block text-xs font-medium text-red-800"
+							htmlFor="reset-confirm"
+						>
+							Type <span className="font-mono font-semibold">RESET</span> to confirm
+						</label>
+						<input
+							id="reset-confirm"
+							type="text"
+							autoComplete="off"
+							className="w-full max-w-xs rounded-lg border border-red-200 bg-white px-3 py-2 text-sm focus:border-red-500 focus:ring-red-500"
+							value={resetWord}
+							onChange={(e) => setResetWord(e.target.value)}
+							placeholder="RESET"
+						/>
+						<div className="flex gap-2">
+							<Button
+								variant="destructive"
+								onClick={reset}
+								disabled={resetting || resetWord.trim() !== "RESET"}
+							>
+								{resetting ? (
+									<Loader2 className="size-4 animate-spin" />
+								) : (
+									<RotateCcw className="size-4" />
+								)}
+								Reset everything
+							</Button>
+							<Button
+								variant="outline"
+								onClick={() => {
+									setResetOpen(false);
+									setResetWord("");
+								}}
+								disabled={resetting}
+							>
+								Cancel
+							</Button>
+						</div>
+					</div>
+				) : (
+					<Button variant="destructive" className="mt-3" onClick={() => setResetOpen(true)}>
+						<RotateCcw className="size-4" />
+						Reset programme
+					</Button>
+				)}
 			</div>
 		</div>
 	);

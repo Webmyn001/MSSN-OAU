@@ -19,6 +19,7 @@ import {
 	managerLoginSchema,
 	programmeSettingsSchema,
 	rejectApplicationSchema,
+	resetProgrammeSchema,
 	updateParticipantStatusSchema
 } from '../schemas/al-mamharah'
 import {
@@ -41,6 +42,7 @@ import { deleteCompletion, recordCompletion } from '../services/al-mamharah/prog
 import { enforceMissedDaySuspension } from '../services/al-mamharah/participant-auth'
 import { listAudit, recordAudit } from '../services/al-mamharah/audit'
 import { getSettings, saveSettings } from '../services/al-mamharah/settings'
+import { resetProgramme } from '../services/al-mamharah/reset'
 import { isValidISODate, todayInTimeZone } from '../services/al-mamharah/dates'
 import {
 	activateManager,
@@ -454,6 +456,34 @@ alMamharahManagerRoute.put('/settings', zValidator('json', programmeSettingsSche
 	})
 	return successResponse(c, saved)
 })
+
+/**
+ * POST /reset - destructive: wipes every recorded reading, logs all students
+ * out and restarts the programme from today (primary manager only).
+ */
+alMamharahManagerRoute.post(
+	'/reset',
+	zValidator('json', resetProgrammeSchema),
+	async c => {
+		const primary = requirePrimaryManager(c)
+		const result = await resetProgramme()
+		await recordAudit({
+			actorType: 'MANAGER',
+			actor: primary.email,
+			action: 'PROGRAMME_RESET',
+			entity: 'programme',
+			details: {
+				completionsDeleted: result.completionsDeleted,
+				sessionsDeleted: result.sessionsDeleted,
+				codesDeleted: result.codesDeleted,
+				participantsReset: result.participantsReset,
+				start: result.start,
+				end: result.end
+			}
+		})
+		return successResponse(c, result)
+	}
+)
 
 /** GET /audit — paginated audit trail. */
 alMamharahManagerRoute.get('/audit', zValidator('query', auditQuerySchema), async c => {

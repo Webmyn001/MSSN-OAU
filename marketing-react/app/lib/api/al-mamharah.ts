@@ -373,6 +373,14 @@ export function updateSettings(
 	return request("/al-mamharah/manager/settings", { method: "PUT", body: payload, token });
 }
 
+export function resetProgramme(token: string | undefined = getManagerToken()) {
+	return request("/al-mamharah/manager/reset", {
+		method: "POST",
+		body: { confirmation: "RESET" },
+		token,
+	});
+}
+
 export function getAudit(query: Query = {}, token: string | undefined = getManagerToken()) {
 	return request(`/al-mamharah/manager/audit?${toQueryString(query)}`, { token });
 }
