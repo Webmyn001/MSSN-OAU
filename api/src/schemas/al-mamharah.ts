@@ -59,14 +59,18 @@ export const submitApplicationSchema = z.object({
 	startSurah: z.string().trim().min(1).max(100).optional(),
 	startPage: z.number().int().min(1).max(604).optional(),
 	startDirection: alMamharahStartDirectionSchema.optional(),
-	// * Optional tajweed track (may be omitted / "none").
-	tajweedTrack: alMamharahTajweedTrackSchema.optional(),
+	// * Tajweed track is compulsory for every applicant.
+	tajweedTrack: alMamharahTajweedTrackSchema,
 	confirmedMemorisation: requiredConfirmation(
 		'Please confirm that you have memorised at least 15 ajzāʼ of the Qurʼān'
 	),
 	confirmedTajweed: requiredConfirmation('Please confirm that you have studied tajwīd'),
 	agreedGuidelines: requiredConfirmation('Please agree to the programme guidelines')
 })
+
+// * Managers can correct any application on the applicant's behalf. The shape
+// * matches the public form so the same fields are validated end to end.
+export const updateApplicationSchema = submitApplicationSchema
 
 export const enterProgrammeSchema = z.object({
 	fullName: z.string().trim().min(2, 'Enter your full name').max(255)

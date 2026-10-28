@@ -211,22 +211,23 @@ export interface RankedEntry {
 }
 
 /**
- * Assigns ranks: primarily by current streak, then longest streak, then total
- * completed days. Equal statistics receive equal (competition-style) ranks;
- * remaining ties are broken alphabetically for stable ordering only.
+ * Assigns ranks: primarily by total marks recorded since the participant's
+ * start date, then current streak, then longest streak. Equal statistics
+ * receive equal (competition-style) ranks; remaining ties are broken
+ * alphabetically for stable ordering only.
  */
 export function rankEntries<T extends RankedEntry>(entries: T[]): (T & { rank: number })[] {
 	const sorted = [...entries].sort((a, b) => {
+		if (b.total !== a.total) return b.total - a.total
 		if (b.current !== a.current) return b.current - a.current
 		if (b.longest !== a.longest) return b.longest - a.longest
-		if (b.total !== a.total) return b.total - a.total
 		return a.displayName.localeCompare(b.displayName)
 	})
 
 	let rank = 0
 	let prevKey = ''
 	return sorted.map((entry, i) => {
-		const key = `${entry.current}:${entry.longest}:${entry.total}`
+		const key = `${entry.total}:${entry.current}:${entry.longest}`
 		if (key !== prevKey) {
 			rank = i + 1
 			prevKey = key

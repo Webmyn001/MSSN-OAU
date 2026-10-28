@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Button } from "~/components/ui/button";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { submitApplication } from "~/lib/api/al-mamharah";
+import { submitApplication, updateApplication } from "~/lib/api/al-mamharah";
 import {
 	MASAR_OPTIONS,
 	START_OPTIONS,
@@ -16,7 +16,7 @@ const inputClass =
 	"py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm";
 const labelClass = "block mb-2 text-sm text-gray-700 font-medium font-primary";
 
-interface FormData {
+export interface ApplicationFormValues {
 	fullName: string;
 	email: string;
 	phone: string;
@@ -32,7 +32,7 @@ interface FormData {
 	agreedGuidelines: boolean;
 }
 
-const initialForm: FormData = {
+const initialForm: ApplicationFormValues = {
 	fullName: "",
 	email: "",
 	phone: "",
@@ -50,15 +50,29 @@ const initialForm: FormData = {
 
 export function ApplicationForm({
 	onSubmitted,
+	mode = "create",
+	initialValues,
+	applicationId,
+	token,
+	onCancel,
 }: {
 	onSubmitted?: (payload: any) => void;
+	/** "edit" reuses the same form so a manager can correct an application. */
+	mode?: "create" | "edit";
+	initialValues?: Partial<ApplicationFormValues>;
+	applicationId?: string;
+	token?: string;
+	onCancel?: () => void;
 }) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submissionMessage, setSubmissionMessage] = useState<string | null>(null);
 	const [formError, setFormError] = useState<string | null>(null);
-	const [formData, setFormData] = useState<FormData>(initialForm);
+	const [formData, setFormData] = useState<ApplicationFormValues>(() => ({
+		...initialForm,
+		...initialValues,
+	}));
 
-	function update<K extends keyof FormData>(key: K, value: FormData[K]) {
+	function update<K extends keyof ApplicationFormValues>(key: K, value: ApplicationFormValues[K]) {
 		setFormData((prev) => ({ ...prev, [key]: value }));
 	}
 
@@ -78,6 +92,10 @@ export function ApplicationForm({
 			setFormError("Please choose your revision direction.");
 			return;
 		}
+		if (!formData.tajweedTrack) {
+			setFormError("Please choose a tajweed track.");
+			return;
+		}
 		if (
 			!formData.confirmedMemorisation ||
 			!formData.confirmedTajweed ||
@@ -89,7 +107,7 @@ export function ApplicationForm({
 
 		setIsSubmitting(true);
 		try {
-			const result = await submitApplication({
+			const payload = {
 				fullName: formData.fullName.trim(),
 				email: formData.email.trim(),
 				phone: formData.phone.trim() || undefined,
@@ -100,11 +118,21 @@ export function ApplicationForm({
 				startSurah: formData.startSurah,
 				startPage: startPageForSurah(formData.startSurah),
 				startDirection: formData.startDirection,
-				tajweedTrack: formData.tajweedTrack || undefined,
+				tajweedTrack: formData.tajweedTrack,
 				confirmedMemorisation: formData.confirmedMemorisation,
 				confirmedTajweed: formData.confirmedTajweed,
 				agreedGuidelines: formData.agreedGuidelines,
-			});
+			};
+
+			if (mode === "edit") {
+				if (!applicationId) throw new Error("No application selected for editing.");
+				const result = await updateApplication(applicationId, payload, token);
+				toast.success("Application updated.");
+				onSubmitted?.(result.data);
+				return;
+			}
+
+			const result = await submitApplication(payload);
 			setSubmissionMessage(result.data?.message ?? "Your application has been received.");
 			toast.success("Application submitted successfully.");
 			onSubmitted?.(result.data);
@@ -124,10 +152,12 @@ export function ApplicationForm({
 			className="flex flex-col rounded-xl border border-gray-200 bg-white/90 p-4 shadow-md backdrop-blur-sm sm:p-6 lg:p-8"
 		>
 			<h2 className="mb-2 font-secondary text-xl font-semibold text-primary-700">
-				Apply to Al Mamharah
+				{mode === "edit" ? "Edit Application" : "Apply to Al Mamharah"}
 			</h2>
 			<p className="mb-6 text-sm text-gray-600">
-				Submit your details and the Programme Manager will review your application.
+				{mode === "edit"
+					? "Correct the applicant's answers below and save them on their behalf."
+					: "Submit your details and the Programme Manager will review your application."}
 			</p>
 
 			{submissionMessage ? (
@@ -324,16 +354,19 @@ export function ApplicationForm({
 
 					<div>
 						<label className={labelClass} htmlFor="almh-tajweedTrack">
-							Tajweed track <span className="font-normal text-gray-400">(optional)</span>
+							Tajweed track <span className="text-red-500">*</span>
 						</label>
 						<select
 							id="almh-tajweedTrack"
 							name="tajweedTrack"
+							required
 							className="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-primary-600 focus:ring-primary-600 disabled:opacity-50 shadow-sm appearance-none bg-white"
 							value={formData.tajweedTrack}
 							onChange={(e) => update("tajweedTrack", e.target.value)}
 						>
-							<option value="">None, muroja&apos;ah only</option>
+							<option value="" disabled>
+								Select your tajweed track
+							</option>
 							{TAJWEED_TRACK_OPTIONS.map((option) => (
 								<option key={option.value} value={option.value}>
 									{option.label}, {option.lines} lines
@@ -341,7 +374,7 @@ export function ApplicationForm({
 							))}
 						</select>
 						<p className="mt-1 text-xs text-gray-500">
-							Optional. You will record one line per day from your matn alongside the
+							Required. You will record one line per day from your matn alongside the
 							muroja&apos;ah. Choosing Al Jazariyyah or Shaṭibiyyah requires a short placement
 							check on the preceding matn after approval.
 						</p>
@@ -386,13 +419,26 @@ export function ApplicationForm({
 						</div>
 					) : null}
 
-					<div className="mt-2">
+					<div className="mt-2 flex flex-col gap-2 sm:flex-row">
+						{mode === "edit" && onCancel ? (
+							<Button
+								type="button"
+								variant="outline"
+								className="w-full sm:w-auto"
+								onClick={onCancel}
+								disabled={isSubmitting}
+							>
+								Cancel
+							</Button>
+						) : null}
 						<Button type="submit" className="w-full" disabled={isSubmitting}>
 							{isSubmitting ? (
 								<>
 									<Loader2 className="mr-2 size-4 animate-spin" />
-									<span>Submitting...</span>
+									<span>{mode === "edit" ? "Saving..." : "Submitting..."}</span>
 								</>
+							) : mode === "edit" ? (
+								"Save changes"
 							) : (
 								"Submit Application"
 							)}

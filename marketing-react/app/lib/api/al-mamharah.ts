@@ -320,6 +320,18 @@ export function rejectApplication(
 	});
 }
 
+export function updateApplication(
+	id: string,
+	payload: Record<string, unknown>,
+	token: string | undefined = getManagerToken(),
+) {
+	return request(`/al-mamharah/manager/applications/${id}`, {
+		method: "PUT",
+		body: payload,
+		token,
+	});
+}
+
 export function listParticipants(query: Query = {}, token: string | undefined = getManagerToken()) {
 	return request(`/al-mamharah/manager/participants?${toQueryString(query)}`, { token });
 }

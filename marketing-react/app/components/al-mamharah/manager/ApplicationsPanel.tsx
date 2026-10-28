@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { Loader2, AlertCircle, Check, X, ChevronLeft, ChevronRight, Search, Download } from "lucide-react";
+import { Loader2, AlertCircle, Check, X, ChevronLeft, ChevronRight, Search, Download, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import {
 	listApplications,
@@ -17,11 +17,34 @@ import {
 	applicationStatusArabic,
 } from "~/lib/data/al-mamharah";
 import { Arabic } from "~/components/al-mamharah/Arabic";
+import {
+	ApplicationForm,
+	type ApplicationFormValues,
+} from "~/components/al-mamharah/ApplicationForm";
 
 const selectClass =
 	"rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-600 focus:ring-primary-600";
 const inputClass =
 	"w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:border-primary-600 focus:ring-primary-600";
+
+/** Prefills the shared application form with the applicant's saved answers. */
+function toFormValues(item: any): Partial<ApplicationFormValues> {
+	return {
+		fullName: item.fullName ?? "",
+		email: item.email ?? "",
+		phone: item.phone ?? "",
+		matricNumber: item.matricNumber ?? "",
+		faculty: item.faculty ?? "",
+		department: item.department ?? "",
+		masar: item.masar ?? "",
+		startSurah: item.startSurah ?? "",
+		startDirection: item.startDirection ?? "",
+		tajweedTrack: item.tajweedTrack ?? "",
+		confirmedMemorisation: Boolean(item.confirmedMemorisation),
+		confirmedTajweed: Boolean(item.confirmedTajweed),
+		agreedGuidelines: Boolean(item.agreedGuidelines),
+	};
+}
 
 export function ApplicationsPanel({ token, onExpired }: { token: string; onExpired: () => void }) {
 	const [loading, setLoading] = useState(true);
@@ -35,6 +58,7 @@ export function ApplicationsPanel({ token, onExpired }: { token: string; onExpir
 	const [actionStart, setActionStart] = useState("");
 	const [actionNotes, setActionNotes] = useState("");
 	const [acting, setActing] = useState(false);
+	const [editingId, setEditingId] = useState<string | null>(null);
 
 	async function load() {
 		setLoading(true);
@@ -159,113 +183,141 @@ export function ApplicationsPanel({ token, onExpired }: { token: string; onExpir
 								key={item.id}
 								className="rounded-xl border border-primary-100 bg-white/90 p-4 shadow-sm"
 							>
-								<div className="flex flex-wrap items-start justify-between gap-3">
-									<div className="min-w-0">
-										<div className="flex flex-wrap items-center gap-2">
-											<h3 className="font-secondary text-base font-semibold text-gray-800">
-												{item.fullName}
-											</h3>
-											<span
-												className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-													item.status === "PENDING"
-														? "bg-amber-100 text-amber-700"
-														: item.status === "APPROVED"
-															? "bg-emerald-100 text-emerald-700"
-															: "bg-rose-100 text-rose-700"
-												}`}
-											>
-												{applicationStatusLabel(item.status)}
-												<Arabic className="ms-1 tracking-normal">
-													{applicationStatusArabic(item.status)}
-												</Arabic>
-											</span>
+								{editingId === item.id ? (
+									<ApplicationForm
+										mode="edit"
+										applicationId={item.id}
+										token={token}
+										initialValues={toFormValues(item)}
+										onSubmitted={() => {
+											setEditingId(null);
+											load();
+										}}
+										onCancel={() => setEditingId(null)}
+									/>
+								) : (
+									<>
+										<div className="flex flex-wrap items-start justify-between gap-3">
+											<div className="min-w-0">
+												<div className="flex flex-wrap items-center gap-2">
+													<h3 className="font-secondary text-base font-semibold text-gray-800">
+														{item.fullName}
+													</h3>
+													<span
+														className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+															item.status === "PENDING"
+																? "bg-amber-100 text-amber-700"
+																: item.status === "APPROVED"
+																	? "bg-emerald-100 text-emerald-700"
+																	: "bg-rose-100 text-rose-700"
+														}`}
+													>
+														{applicationStatusLabel(item.status)}
+														<Arabic className="ms-1 tracking-normal">
+															{applicationStatusArabic(item.status)}
+														</Arabic>
+													</span>
+												</div>
+												<p className="mt-1 text-sm text-gray-600">
+													{item.email} {item.phone ? `· ${item.phone}` : ""}
+												</p>
+												<p className="text-sm text-gray-600">
+													{item.matricNumber} · {item.department}, {item.faculty}
+												</p>
+												<p className="mt-1 text-xs text-primary-600">
+													{masarLabel(item.masar)}
+													{item.tajweedTrack
+														? ` · Tajweed: ${tajweedTrackLabel(item.tajweedTrack)}`
+														: ""}
+												</p>
+												<p className="mt-1 text-xs text-gray-400">
+													Submitted {formatDateTime(item.createdAt)}
+													{item.reviewedBy
+														? `· Reviewed by ${item.reviewedBy} (${formatDateTime(item.reviewedAt)})`
+														: ""}
+												</p>
+												{item.reviewNotes ? (
+													<p className="mt-1 text-xs text-gray-500">Note: {item.reviewNotes}</p>
+												) : null}
+											</div>
+
+											<div className="flex shrink-0 flex-wrap gap-2">
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() => {
+														setAction(null);
+														setEditingId(item.id);
+													}}
+												>
+													<Pencil className="size-4" /> Edit
+												</Button>
+												{item.status === "PENDING" ? (
+													<>
+														<Button size="sm" onClick={() => openAction(item.id, "approve")}>
+															<Check className="size-4" /> Approve
+														</Button>
+														<Button
+															variant="outline"
+															size="sm"
+															onClick={() => openAction(item.id, "reject")}
+														>
+															<X className="size-4" /> Reject
+														</Button>
+													</>
+												) : null}
+											</div>
 										</div>
-										<p className="mt-1 text-sm text-gray-600">
-											{item.email} {item.phone ? `· ${item.phone}` : ""}
-										</p>
-										<p className="text-sm text-gray-600">
-											{item.matricNumber} · {item.department}, {item.faculty}
-										</p>
-										<p className="mt-1 text-xs text-primary-600">
-											{masarLabel(item.masar)}
-											{item.tajweedTrack
-												? ` · Tajweed: ${tajweedTrackLabel(item.tajweedTrack)}`
-												: ""}
-										</p>
-										<p className="mt-1 text-xs text-gray-400">
-											Submitted {formatDateTime(item.createdAt)}
-											{item.reviewedBy
-												? `· Reviewed by ${item.reviewedBy} (${formatDateTime(item.reviewedAt)})`
-												: ""}
-										</p>
-										{item.reviewNotes ? (
-											<p className="mt-1 text-xs text-gray-500">Note: {item.reviewNotes}</p>
+
+										{action && action.id === item.id ? (
+											<div className="mt-4 rounded-lg border border-primary-100 bg-primary-50/40 p-4">
+												{action.type === "approve" ? (
+													<>
+														<label
+															className="block text-sm font-medium text-gray-700"
+															htmlFor={`almh-start-${item.id}`}
+														>
+															Start date (optional, defaults to the registration date)
+														</label>
+														<input
+															id={`almh-start-${item.id}`}
+															type="date"
+															className="mt-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-600 focus:ring-primary-600"
+															value={actionStart}
+															onChange={(e) => setActionStart(e.target.value)}
+														/>
+													</>
+												) : (
+													<>
+														<label
+															className="block text-sm font-medium text-gray-700"
+															htmlFor={`almh-notes-${item.id}`}
+														>
+															Reason / notes (optional)
+														</label>
+														<textarea
+															id={`almh-notes-${item.id}`}
+															rows={2}
+															className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-600 focus:ring-primary-600"
+															value={actionNotes}
+															onChange={(e) => setActionNotes(e.target.value)}
+															placeholder="Shared with the applicant in follow-up."
+														/>
+													</>
+												)}
+												<div className="mt-3 flex gap-2">
+													<Button size="sm" onClick={confirmAction} disabled={acting}>
+														{acting ? <Loader2 className="size-4 animate-spin" /> : null}
+														Confirm {action.type === "approve" ? "approval" : "rejection"}
+													</Button>
+													<Button variant="ghost" size="sm" onClick={() => setAction(null)}>
+														Cancel
+													</Button>
+												</div>
+											</div>
 										) : null}
-									</div>
-
-									{item.status === "PENDING" ? (
-										<div className="flex shrink-0 gap-2">
-											<Button size="sm" onClick={() => openAction(item.id, "approve")}>
-												<Check className="size-4" /> Approve
-											</Button>
-											<Button
-												variant="outline"
-												size="sm"
-												onClick={() => openAction(item.id, "reject")}
-											>
-												<X className="size-4" /> Reject
-											</Button>
-										</div>
-									) : null}
-								</div>
-
-								{action && action.id === item.id ? (
-									<div className="mt-4 rounded-lg border border-primary-100 bg-primary-50/40 p-4">
-										{action.type === "approve" ? (
-											<>
-												<label
-													className="block text-sm font-medium text-gray-700"
-													htmlFor={`almh-start-${item.id}`}
-												>
-													Start date (optional, defaults to the registration date)
-												</label>
-												<input
-													id={`almh-start-${item.id}`}
-													type="date"
-													className="mt-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-600 focus:ring-primary-600"
-													value={actionStart}
-													onChange={(e) => setActionStart(e.target.value)}
-												/>
-											</>
-										) : (
-											<>
-												<label
-													className="block text-sm font-medium text-gray-700"
-													htmlFor={`almh-notes-${item.id}`}
-												>
-													Reason / notes (optional)
-												</label>
-												<textarea
-													id={`almh-notes-${item.id}`}
-													rows={2}
-													className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-600 focus:ring-primary-600"
-													value={actionNotes}
-													onChange={(e) => setActionNotes(e.target.value)}
-													placeholder="Shared with the applicant in follow-up."
-												/>
-											</>
-										)}
-										<div className="mt-3 flex gap-2">
-											<Button size="sm" onClick={confirmAction} disabled={acting}>
-												{acting ? <Loader2 className="size-4 animate-spin" /> : null}
-												Confirm {action.type === "approve" ? "approval" : "rejection"}
-											</Button>
-											<Button variant="ghost" size="sm" onClick={() => setAction(null)}>
-												Cancel
-											</Button>
-										</div>
-									</div>
-								) : null}
+									</>
+								)}
 							</li>
 						))}
 					</ul>

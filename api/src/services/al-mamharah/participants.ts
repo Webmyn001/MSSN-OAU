@@ -472,13 +472,14 @@ const SCOPE_TASK: Record<LeaderboardScope, AlMamharahTaskType | undefined> = {
 }
 
 /**
- * Leaderboard for authenticated participants: ranked by current streak, then
- * longest streak, then total completed days. Only display names and streak
- * statistics are exposed — no emails, phones or matriculation numbers.
+ * Leaderboard for authenticated participants: ranked by total marks recorded
+ * since each participant's start date, then current streak, then longest
+ * streak. Only display names and streak statistics are exposed — no emails,
+ * phones or matriculation numbers.
  *
  * Scopes: OVERALL counts every recorded day, QURAN ranks the muroja'ah alone
  * and TAJWEED ranks only participants with a tajweed track by their line
- * register.
+ * register (each line is one mark).
  */
 export async function getLeaderboard(
 	selfParticipantId: string | null,

@@ -77,7 +77,8 @@ export const alMamharahApplications = pgTable(
 		startPage: integer('start_page'),
 		// * Revision track: BAQARAH_UPWARD | KAHF_UPWARD | KAHF_DOWNWARD | NAS_DOWNWARD
 		startDirection: varchar('start_direction', { length: 30 }),
-		// * Optional tajweed track: TUHFATUL_ATFAL | JAZARIYYAH | SHAATIBIYYAH
+		// * Tajweed track (TUHFATUL_ATFAL | JAZARIYYAH | SHAATIBIYYAH).
+		// * Compulsory for new applications; legacy rows may still be null.
 		tajweedTrack: varchar('tajweed_track', { length: 30 }),
 		confirmedMemorisation: boolean('confirmed_memorisation').notNull().default(false),
 		confirmedTajweed: boolean('confirmed_tajweed').notNull().default(false),
@@ -117,7 +118,8 @@ export const alMamharahParticipants = pgTable(
 		startPage: integer('start_page'),
 		// * Revision track (see alMamharahApplications.startDirection)
 		startDirection: varchar('start_direction', { length: 30 }),
-		// * Optional tajweed track (see alMamharahApplications.tajweedTrack).
+		// * Tajweed track (see alMamharahApplications.tajweedTrack). Required for
+		// * new applicants; managers may leave legacy participants without one.
 		// * JAZARIYYAH and SHAATIBIYYAH require passing a placement quiz on the
 		// * preceding matn first; the timestamp records that pass.
 		tajweedTrack: varchar('tajweed_track', { length: 30 }),

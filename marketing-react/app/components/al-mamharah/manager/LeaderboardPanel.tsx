@@ -86,8 +86,8 @@ export function LeaderboardPanel({ token, onExpired }: { token: string; onExpire
 				entries={data.entries ?? []}
 				caption={
 					scope === "TAJWEED"
-						? "Ranked by tajweed line streak, then longest streak, then total lines."
-						: "Ranked by current streak, then longest streak, then total days."
+						? "Ranked by total tajweed lines recorded since each participant's start date, then current streak."
+						: "Ranked by total marks since each participant's start date, then current streak."
 				}
 				emptyText={
 					scope === "TAJWEED"

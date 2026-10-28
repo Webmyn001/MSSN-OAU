@@ -26,8 +26,8 @@ export interface ApplicationInput {
 	startSurah?: string
 	startPage?: number
 	startDirection?: string
-	// * Optional tajweed track (TUHFATUL_ATFAL | JAZARIYYAH | SHAATIBIYYAH)
-	tajweedTrack?: string
+	// * Tajweed track (TUHFATUL_ATFAL | JAZARIYYAH | SHAATIBIYYAH) — compulsory.
+	tajweedTrack: string
 	confirmedMemorisation: boolean
 	confirmedTajweed: boolean
 	agreedGuidelines: boolean
@@ -40,6 +40,10 @@ export function normalizePersonName(value: string): string {
 
 /** Submits a new application. Throws ConflictError on duplicate email/matric. */
 export async function submitApplication(input: ApplicationInput): Promise<AlMamharahApplication> {
+	if (!input.tajweedTrack?.trim()) {
+		throw new ValidationError('Please choose a tajweed track')
+	}
+
 	const values = {
 		fullName: normalizePersonName(input.fullName),
 		email: input.email.trim().toLowerCase(),
@@ -146,6 +150,110 @@ export async function getApplication(id: string): Promise<AlMamharahApplication>
 		.limit(1)
 	if (!application) throw new NotFoundError('Application not found')
 	return application
+}
+
+/**
+ * Corrects an application on the applicant's behalf (manager only).
+ *
+ * Applications are often submitted with typos or the wrong track, so the
+ * manager can reopen the original form and save the corrected answers. When the
+ * application has already been approved the linked participant is kept in sync
+ * (name, email, masār and start position). Changing the tajweed track clears the
+ * old placement pass because the new matn needs its own placement check.
+ */
+export async function updateApplication(
+	applicationId: string,
+	input: ApplicationInput,
+	options: { updatedBy: string }
+): Promise<AlMamharahApplication> {
+	if (!input.tajweedTrack?.trim()) {
+		throw new ValidationError('Please choose a tajweed track')
+	}
+
+	const values = {
+		fullName: normalizePersonName(input.fullName),
+		email: input.email.trim().toLowerCase(),
+		phone: input.phone?.trim() || null,
+		matricNumber: input.matricNumber.trim().toUpperCase(),
+		faculty: input.faculty.trim(),
+		department: input.department.trim(),
+		masar: input.masar,
+		startSurah: input.startSurah?.trim() || null,
+		startPage: input.startPage ?? null,
+		startDirection: input.startDirection?.trim() || null,
+		tajweedTrack: input.tajweedTrack.trim(),
+		confirmedMemorisation: true,
+		confirmedTajweed: true,
+		agreedGuidelines: true
+	}
+
+	try {
+		const result = await db.transaction(async tx => {
+			const [existing] = await tx
+				.select()
+				.from(alMamharahApplications)
+				.where(eq(alMamharahApplications.id, applicationId))
+				.for('update')
+			if (!existing) throw new NotFoundError('Application not found')
+
+			const [updated] = await tx
+				.update(alMamharahApplications)
+				.set({ ...values, updatedAt: new Date() })
+				.where(eq(alMamharahApplications.id, applicationId))
+				.returning()
+
+			const [participant] = await tx
+				.select()
+				.from(alMamharahParticipants)
+				.where(eq(alMamharahParticipants.applicationId, applicationId))
+				.limit(1)
+
+			if (participant) {
+				const trackChanged = (participant.tajweedTrack ?? null) !== values.tajweedTrack
+				await tx
+					.update(alMamharahParticipants)
+					.set({
+						displayName: values.fullName,
+						email: values.email,
+						masar: values.masar,
+						startSurah: values.startSurah,
+						startPage: values.startPage,
+						startDirection: values.startDirection,
+						tajweedTrack: values.tajweedTrack,
+						...(trackChanged ? { tajweedPlacementPassedAt: null } : {}),
+						updatedAt: new Date()
+					})
+					.where(eq(alMamharahParticipants.id, participant.id))
+			}
+
+			return { updated, existing, participantSynced: Boolean(participant) }
+		})
+
+		const changedFields = Object.keys(values).filter(
+			key => (result.existing as Record<string, unknown>)[key] !== values[key as keyof typeof values]
+		)
+
+		await recordAudit({
+			actorType: 'MANAGER',
+			actor: options.updatedBy,
+			action: 'APPLICATION_UPDATED',
+			entity: 'application',
+			entityId: applicationId,
+			details: {
+				changedFields,
+				participantSynced: result.participantSynced
+			}
+		})
+
+		return result.updated
+	} catch (error) {
+		if (isUniqueViolation(error)) {
+			throw new ConflictError(
+				'Another application already uses this email address or matriculation number.'
+			)
+		}
+		throw error
+	}
 }
 
 export interface ApproveResult {

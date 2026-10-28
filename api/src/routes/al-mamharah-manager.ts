@@ -24,6 +24,7 @@ import {
 	rejectApplicationSchema,
 	resetProgrammeSchema,
 	setParticipantTajweedSchema,
+	updateApplicationSchema,
 	updatePlacementQuestionSchema,
 	updateParticipantStatusSchema
 } from '../schemas/al-mamharah'
@@ -32,7 +33,8 @@ import {
 	approveApplication,
 	listApplications,
 	listApplicationsForExport,
-	rejectApplication
+	rejectApplication,
+	updateApplication
 } from '../services/al-mamharah/applications'
 import {
 	getDailyProgress,
@@ -240,6 +242,23 @@ alMamharahManagerRoute.post(
 			application: result.application,
 			participantId: result.participantId,
 			message: 'Application approved. The participant can now enter the programme.'
+		})
+	}
+)
+
+/** PUT /applications/:id — correct an application on the applicant's behalf. */
+alMamharahManagerRoute.put(
+	'/applications/:id',
+	zValidator('json', updateApplicationSchema),
+	async c => {
+		const manager = requireManager(c)
+		const application = await updateApplication(c.req.param('id'), c.req.valid('json'), {
+			updatedBy: manager.email
+		})
+		return successResponse(c, {
+			application,
+			message:
+				'Application updated. Any approved participant record was updated with the same details.'
 		})
 	}
 )

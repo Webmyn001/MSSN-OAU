@@ -135,7 +135,7 @@ describe('computeStreaks', () => {
 })
 
 describe('rankEntries', () => {
-	test('ranks by current, then longest, then total, with ties sharing a rank', () => {
+	test('ranks by total marks, then current, then longest, with ties sharing a rank', () => {
 		const ranked = rankEntries([
 			{ displayName: 'Bilal', current: 3, longest: 5, total: 10 },
 			{ displayName: 'Aisha', current: 5, longest: 5, total: 12 },
@@ -145,7 +145,8 @@ describe('rankEntries', () => {
 		expect(ranked.map(entry => entry.rank)).toEqual([1, 1, 3, 4])
 		expect(ranked[0].displayName).toBe('Aisha')
 		expect(ranked[1].displayName).toBe('Zaid')
-		expect(ranked[2].displayName).toBe('Umar')
+		expect(ranked[2].displayName).toBe('Bilal')
+		expect(ranked[3].displayName).toBe('Umar')
 	})
 })
 
