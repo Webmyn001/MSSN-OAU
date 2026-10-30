@@ -335,21 +335,23 @@ export default function AlMamharahDashboardPage() {
 								/>
 								<StatCard
 									label="Total marks"
-									value={report.stats.total}
-									hint="since you started"
+									value={report.stats.marks}
+									hint="½ per task, 1 for both"
 									tone="primary"
 								/>
 								<StatCard
 									label="Completion"
 									value={`${Math.round(report.stats.completionRate ?? 0)}%`}
-									hint={`${report.stats.missedDays} missed`}
+									hint={`${report.stats.missedDays} days missed`}
 									tone="slate"
 								/>
 							</div>
 							<p className="mt-3 text-xs text-gray-500">
-								A streak counts consecutive programme days you record a mark. Missing a day
-								resets the current streak, but your best streak and total marks are kept.
-								Rankings use total marks from your start date.
+								Each day is worth one mark: half for your muroja&apos;ah and half for your
+								tajweed line, so recording both earns the full mark. Completion shows the
+								marks you have earned so far. A streak counts consecutive programme days you
+								record a mark; missing a day resets the current streak, but your best streak
+								and total marks are kept. Rankings use total marks from your start date.
 							</p>
 
 							<div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-5">
@@ -597,7 +599,7 @@ export default function AlMamharahDashboardPage() {
 											caption={
 												scope === "TAJWEED"
 													? "Ranked by total tajweed lines recorded since each participant's start date, then current streak."
-													: "Ranked by total marks since each participant's start date, then current streak."
+													: "Ranked by total marks since each participant's start date (½ per task, 1 for both), then current streak."
 											}
 											emptyText={
 												scope === "TAJWEED"

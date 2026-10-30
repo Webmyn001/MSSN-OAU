@@ -49,19 +49,27 @@ function rankStyles(rank: number): string {
 	return "bg-primary-50 text-primary-700 border-primary-100";
 }
 
+/** Row background: podium colours come first so a top-three "you" keeps them. */
 function rowStyles(rank: number, isSelf: boolean): string {
-	if (isSelf) return "bg-primary-50/70";
-	if (rank === 1) return "bg-amber-50/50";
-	if (rank === 2) return "bg-slate-50";
-	if (rank === 3) return "bg-orange-50/40";
-	return "hover:bg-gray-50";
+	if (rank === 1) return isSelf ? "bg-amber-100/80" : "bg-amber-50/50";
+	if (rank === 2) return isSelf ? "bg-slate-100" : "bg-slate-50";
+	if (rank === 3) return isSelf ? "bg-orange-100/70" : "bg-orange-50/40";
+	return isSelf ? "bg-primary-50/70" : "hover:bg-gray-50";
+}
+
+/** The "You" chip follows the podium colour when the participant is top three. */
+function youStyles(rank: number): string {
+	if (rank === 1) return "bg-amber-400/90 text-amber-950 ring-1 ring-amber-600";
+	if (rank === 2) return "bg-slate-300 text-slate-900 ring-1 ring-slate-500";
+	if (rank === 3) return "bg-orange-400/90 text-orange-950 ring-1 ring-orange-600";
+	return "bg-primary-100 text-primary-700";
 }
 
 export function Leaderboard({
 	entries = [],
 	selfId = null,
 	emptyText = "No participants are ranked yet.",
-	caption = "Ranked by total marks since each participant's start date, then current streak.",
+	caption = "Ranked by total marks since each participant's start date (½ per task, 1 for both), then current streak.",
 }: LeaderboardProps) {
 	if (entries.length === 0) {
 		return <p className="py-8 text-center text-sm text-gray-500">{emptyText}</p>;
@@ -102,7 +110,11 @@ export function Leaderboard({
 											</span>
 											<span className="font-medium text-gray-800">{entry.displayName}</span>
 											{isSelf ? (
-												<span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-700">
+												<span
+													className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${youStyles(
+														entry.rank,
+													)}`}
+												>
 													You
 												</span>
 											) : null}

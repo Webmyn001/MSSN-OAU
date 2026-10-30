@@ -397,7 +397,10 @@ export function ParticipantsPanel({ token, onExpired }: { token: string; onExpir
 												Longest: <b className="text-gray-700">{p.stats.longest}</b>
 											</span>
 											<span>
-												Total: <b className="text-gray-700">{p.stats.total}</b>
+												Marks: <b className="text-gray-700">{p.stats.marks}</b>
+											</span>
+											<span>
+												Days: <b className="text-gray-700">{p.stats.total}</b>
 											</span>
 											<span>
 												Missed: <b className="text-gray-700">{p.stats.missedDays}</b>

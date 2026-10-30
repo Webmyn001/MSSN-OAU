@@ -104,11 +104,14 @@ export interface StreakStats {
 	longest: number
 	// * Total completed eligible days
 	total: number
+	// * Weighted marks earned since the start date. Each recorded task is worth
+	// * half of the day, so muroja'ah only or tajweed only = 0.5 and both = 1.
+	marks: number
 	// * Eligible days so far (from start through min(today, end))
 	eligibleDays: number
 	// * Eligible days without a completion
 	missedDays: number
-	// * total / eligibleDays (0 before the programme starts)
+	// * marks / eligibleDays (0 before the programme starts)
 	completionRate: number
 	// * Whether today (in programme time) already has a completion
 	todayCompleted: boolean
@@ -126,12 +129,17 @@ export interface StreakStats {
  * - The current streak may start yesterday when today is still outstanding.
  * - The longest streak is preserved when the current streak resets.
  * - No grace periods, freezes, bonuses or penalties are applied.
+ *
+ * `marksByDate` optionally supplies the mark earned on each day (0.5 per task,
+ * 1 for both). When omitted every completed day is worth one mark, which keeps
+ * the streak-only callers and tests unchanged.
  */
 export function computeStreaks(
 	completedDates: Iterable<ISODate>,
 	start: ISODate,
 	end: ISODate,
-	today: ISODate
+	today: ISODate,
+	marksByDate?: Map<ISODate, number>
 ): StreakStats {
 	const completed = new Set<ISODate>()
 	for (const d of completedDates) {
@@ -146,6 +154,7 @@ export function computeStreaks(
 			current: 0,
 			longest: 0,
 			total: 0,
+			marks: 0,
 			eligibleDays: 0,
 			missedDays: 0,
 			completionRate: 0,
@@ -155,6 +164,7 @@ export function computeStreaks(
 	}
 
 	let total = 0
+	let marks = 0
 	let longest = 0
 	let run = 0
 	let cursor: ISODate = start
@@ -163,6 +173,7 @@ export function computeStreaks(
 	for (let i = 0; i <= totalDays; i++) {
 		if (completed.has(cursor)) {
 			total++
+			marks += marksByDate?.get(cursor) ?? 1
 			run++
 			if (run > longest) longest = run
 		} else {
@@ -195,9 +206,10 @@ export function computeStreaks(
 		current,
 		longest,
 		total,
+		marks,
 		eligibleDays,
 		missedDays: eligibleDays - total,
-		completionRate: eligibleDays > 0 ? Math.round((total / eligibleDays) * 1000) / 10 : 0,
+		completionRate: eligibleDays > 0 ? Math.round((marks / eligibleDays) * 1000) / 10 : 0,
 		todayCompleted,
 		todayEligible
 	}
@@ -212,8 +224,9 @@ export interface RankedEntry {
 
 /**
  * Assigns ranks: primarily by total marks recorded since the participant's
- * start date, then current streak, then longest streak. Equal statistics
- * receive equal (competition-style) ranks; remaining ties are broken
+ * start date, then current streak, then longest streak. Equal statistics share
+ * the same position and the next distinct position is the following ordinal
+ * (dense ranking: 1st, 1st, 1st, 2nd, 3rd…). Remaining ties are broken
  * alphabetically for stable ordering only.
  */
 export function rankEntries<T extends RankedEntry>(entries: T[]): (T & { rank: number })[] {
@@ -226,10 +239,10 @@ export function rankEntries<T extends RankedEntry>(entries: T[]): (T & { rank: n
 
 	let rank = 0
 	let prevKey = ''
-	return sorted.map((entry, i) => {
+	return sorted.map(entry => {
 		const key = `${entry.total}:${entry.current}:${entry.longest}`
 		if (key !== prevKey) {
-			rank = i + 1
+			rank++
 			prevKey = key
 		}
 		return { ...entry, rank }

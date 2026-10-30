@@ -10,7 +10,13 @@ import {
 import { NotFoundError, ValidationError } from '../../lib/errors'
 import { recordAudit } from './audit'
 import { diffDays, isValidISODate, todayInTimeZone, type ISODate, type StreakStats } from './dates'
-import { computeParticipantStats, participantWindowStart, toISODateValue } from './participants'
+import {
+	computeParticipantStats,
+	marksByDateFromRecords,
+	participantWindowStart,
+	toISODateValue,
+	type CompletionRecord
+} from './participants'
 import { clampPage, pageRangeLabel, surahAtPage } from './mushaf'
 import { getSettings, type AlMamharahSettings } from './settings'
 import {
@@ -246,22 +252,34 @@ export async function recordCompletion(
 		completion = existing
 	}
 
-	const dates = await getCompletionDates(participant.id)
+	const records = await getCompletionRecords(participant.id)
 	return {
 		completion,
 		alreadyRecorded,
 		date,
-		stats: computeParticipantStats(dates, participant, settings, today)
+		stats: computeParticipantStats(
+			records.map(record => record.date),
+			participant,
+			settings,
+			today,
+			marksByDateFromRecords(records)
+		)
 	}
 }
 
-/** All completion dates for a participant. */
-export async function getCompletionDates(participantId: string): Promise<ISODate[]> {
+/** All completion records (date + task) for a participant. */
+export async function getCompletionRecords(participantId: string): Promise<CompletionRecord[]> {
 	const rows = await db
-		.select({ programmeDate: alMamharahCompletions.programmeDate })
+		.select({
+			programmeDate: alMamharahCompletions.programmeDate,
+			taskType: alMamharahCompletions.taskType
+		})
 		.from(alMamharahCompletions)
 		.where(eq(alMamharahCompletions.participantId, participantId))
-	return rows.map(r => toISODateValue(r.programmeDate))
+	return rows.map(row => ({
+		date: toISODateValue(row.programmeDate),
+		taskType: row.taskType
+	}))
 }
 
 export interface CompletionEntry {
@@ -343,8 +361,14 @@ export async function getParticipantReport(
 ): Promise<ParticipantReport> {
 	const settings: AlMamharahSettings = await getSettings()
 	const today = todayInTimeZone(settings.timezone)
-	const dates = await getCompletionDates(participant.id)
-	const stats = computeParticipantStats(dates, participant, settings, today)
+	const records = await getCompletionRecords(participant.id)
+	const stats = computeParticipantStats(
+		records.map(record => record.date),
+		participant,
+		settings,
+		today,
+		marksByDateFromRecords(records)
+	)
 	const completions = await listCompletions(participant.id, {
 		limit: options.completionLimit ?? 60
 	})

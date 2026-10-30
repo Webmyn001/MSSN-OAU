@@ -132,6 +132,26 @@ describe('computeStreaks', () => {
 		expect(stats.current).toBe(0)
 		expect(stats.longest).toBe(3)
 	})
+
+	test('weights each recorded task as half of the day mark', () => {
+		const today = '2026-10-20'
+		const marksByDate = new Map([
+			['2026-10-18', 1],
+			['2026-10-19', 0.5],
+			['2026-10-20', 0.5]
+		])
+		const stats = computeStreaks(
+			['2026-10-18', '2026-10-19', '2026-10-20'],
+			start,
+			end,
+			today,
+			marksByDate
+		)
+		expect(stats.total).toBe(3)
+		expect(stats.marks).toBe(2)
+		expect(stats.completionRate).toBe(66.7)
+		expect(stats.current).toBe(3)
+	})
 })
 
 describe('rankEntries', () => {
@@ -142,11 +162,22 @@ describe('rankEntries', () => {
 			{ displayName: 'Umar', current: 3, longest: 6, total: 9 },
 			{ displayName: 'Zaid', current: 5, longest: 5, total: 12 }
 		])
-		expect(ranked.map(entry => entry.rank)).toEqual([1, 1, 3, 4])
+		expect(ranked.map(entry => entry.rank)).toEqual([1, 1, 2, 3])
 		expect(ranked[0].displayName).toBe('Aisha')
 		expect(ranked[1].displayName).toBe('Zaid')
 		expect(ranked[2].displayName).toBe('Bilal')
 		expect(ranked[3].displayName).toBe('Umar')
+	})
+
+	test('continues with the next ordinal after a shared first place', () => {
+		const ranked = rankEntries([
+			{ displayName: 'Aisha', current: 5, longest: 5, total: 12 },
+			{ displayName: 'Bilal', current: 5, longest: 5, total: 12 },
+			{ displayName: 'Umar', current: 5, longest: 5, total: 12 },
+			{ displayName: 'Zaid', current: 3, longest: 3, total: 8 },
+			{ displayName: 'Maryam', current: 2, longest: 2, total: 6 }
+		])
+		expect(ranked.map(entry => entry.rank)).toEqual([1, 1, 1, 2, 3])
 	})
 })
 

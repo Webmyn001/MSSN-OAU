@@ -78,14 +78,21 @@ export function toISODateValue(value: string | Date): ISODate {
 	return String(value).slice(0, 10)
 }
 
+/** A single recorded task on a programme day. */
+export interface CompletionRecord {
+	date: ISODate
+	taskType: AlMamharahTaskType
+}
+
 /**
- * Loads completion dates grouped by participant id (optionally restricted to
- * a set of participant ids) so statistics can be computed without N+1 queries.
+ * Loads completion records (date + task) grouped by participant id (optionally
+ * restricted to a set of participant ids) so statistics can be computed without
+ * N+1 queries.
  */
-export async function completionDatesByParticipant(
+export async function completionRecordsByParticipant(
 	participantIds?: string[],
 	taskType?: AlMamharahTaskType
-): Promise<Map<string, ISODate[]>> {
+): Promise<Map<string, CompletionRecord[]>> {
 	// * Guard: an empty id list would generate `IN ('')`, which Postgres rejects
 	// * as invalid uuid syntax (22P02) → 500. Return an empty map instead.
 	if (participantIds && participantIds.length === 0) return new Map()
@@ -103,13 +110,46 @@ export async function completionDatesByParticipant(
 		.from(alMamharahCompletions)
 		.where(conditions.length > 0 ? and(...conditions) : undefined)
 
-	const grouped = new Map<string, ISODate[]>()
+	const grouped = new Map<string, CompletionRecord[]>()
 	for (const row of rows) {
 		const list = grouped.get(row.participantId) ?? []
-		list.push(toISODateValue(row.programmeDate))
+		list.push({ date: toISODateValue(row.programmeDate), taskType: row.taskType })
 		grouped.set(row.participantId, list)
 	}
 	return grouped
+}
+
+/**
+ * Loads completion dates grouped by participant id (optionally restricted to
+ * a set of participant ids). Dates may repeat when a participant recorded more
+ * than one task on the same day; callers that need task detail should use
+ * {@link completionRecordsByParticipant}.
+ */
+export async function completionDatesByParticipant(
+	participantIds?: string[],
+	taskType?: AlMamharahTaskType
+): Promise<Map<string, ISODate[]>> {
+	const records = await completionRecordsByParticipant(participantIds, taskType)
+	const grouped = new Map<string, ISODate[]>()
+	for (const [participantId, list] of records) {
+		grouped.set(
+			participantId,
+			list.map(record => record.date)
+		)
+	}
+	return grouped
+}
+
+/**
+ * Each recorded task is worth half of the day's mark, so recording only the
+ * muroja'ah or only the tajweed line earns 0.5 and recording both earns 1.
+ */
+export function marksByDateFromRecords(records: CompletionRecord[]): Map<ISODate, number> {
+	const marks = new Map<ISODate, number>()
+	for (const record of records) {
+		marks.set(record.date, (marks.get(record.date) ?? 0) + 0.5)
+	}
+	return marks
 }
 
 /** First eligible day for a participant: later of programme start and their start date. */
@@ -125,10 +165,11 @@ export function computeParticipantStats(
 	completedDates: ISODate[],
 	participant: AlMamharahParticipant,
 	settings: AlMamharahSettings,
-	today: ISODate
+	today: ISODate,
+	marksByDate?: Map<ISODate, number>
 ): StreakStats {
 	const start = participantWindowStart(toISODateValue(participant.startDate), settings)
-	return computeStreaks(completedDates, start, settings.end, today)
+	return computeStreaks(completedDates, start, settings.end, today, marksByDate)
 }
 
 export interface ParticipantApplicationInfo {
@@ -246,14 +287,21 @@ export async function listParticipants(
 	])
 
 	const ids = rows.map(r => r.participant.id)
-	const dates = await completionDatesByParticipant(ids)
-	const items = rows.map(row =>
-		mapWithStats(
+	const records = await completionRecordsByParticipant(ids)
+	const items = rows.map(row => {
+		const list = records.get(row.participant.id) ?? []
+		return mapWithStats(
 			row.participant,
 			row.application,
-			computeParticipantStats(dates.get(row.participant.id) ?? [], row.participant, settings, today)
+			computeParticipantStats(
+				list.map(record => record.date),
+				row.participant,
+				settings,
+				today,
+				marksByDateFromRecords(list)
+			)
 		)
-	)
+	})
 
 	return { items, total: totalRows[0]?.total ?? 0, page: filters.page, limit: filters.limit }
 }
@@ -477,9 +525,11 @@ const SCOPE_TASK: Record<LeaderboardScope, AlMamharahTaskType | undefined> = {
  * streak. Only display names and streak statistics are exposed — no emails,
  * phones or matriculation numbers.
  *
- * Scopes: OVERALL counts every recorded day, QURAN ranks the muroja'ah alone
- * and TAJWEED ranks only participants with a tajweed track by their line
- * register (each line is one mark).
+ * Scopes: OVERALL awards half a mark for each recorded task, so marking only
+ * the muroja'ah or only the tajweed line earns 0.5 and marking both earns 1.
+ * QURAN ranks the muroja'ah by recorded days and TAJWEED ranks only
+ * participants with a tajweed track by their line register (each line is one
+ * mark).
  */
 export async function getLeaderboard(
 	selfParticipantId: string | null,
@@ -501,20 +551,31 @@ export async function getLeaderboard(
 				: eq(alMamharahParticipants.status, 'ACTIVE')
 		)
 
-	const dates = await completionDatesByParticipant(
+	const records = await completionRecordsByParticipant(
 		participants.map(p => p.id),
 		SCOPE_TASK[scope]
 	)
 
 	const ranked = rankEntries(
 		participants.map(p => {
-			const stats = computeParticipantStats(dates.get(p.id) ?? [], p, settings, today)
+			const list = records.get(p.id) ?? []
+			const dates = list.map(record => record.date)
+			// * The overall board splits each day between the two tasks; the
+			// * scope boards already count a single activity, so each entry there
+			// * is worth one full mark.
+			const stats = computeParticipantStats(
+				dates,
+				p,
+				settings,
+				today,
+				scope === 'OVERALL' ? marksByDateFromRecords(list) : undefined
+			)
 			return {
 				participantId: p.id,
 				displayName: p.displayName,
 				current: stats.current,
 				longest: stats.longest,
-				total: stats.total,
+				total: scope === 'OVERALL' ? stats.marks : stats.total,
 				todayCompleted: stats.todayCompleted,
 				tajweedTrack: p.tajweedTrack
 			}

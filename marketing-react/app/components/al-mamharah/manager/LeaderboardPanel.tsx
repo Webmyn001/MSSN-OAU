@@ -87,7 +87,7 @@ export function LeaderboardPanel({ token, onExpired }: { token: string; onExpire
 				caption={
 					scope === "TAJWEED"
 						? "Ranked by total tajweed lines recorded since each participant's start date, then current streak."
-						: "Ranked by total marks since each participant's start date, then current streak."
+						: "Ranked by total marks since each participant's start date (½ per task, 1 for both), then current streak."
 				}
 				emptyText={
 					scope === "TAJWEED"
