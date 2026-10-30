@@ -28,6 +28,7 @@ import {
 	type QuizAnswer
 } from '../src/services/al-mamharah/tajweed'
 import { needsPlacementQuiz } from '../src/services/al-mamharah/placement'
+import { suspendedAccountNotice } from '../src/services/al-mamharah/participant-auth'
 
 // * Pure-function tests — no database required.
 
@@ -178,6 +179,23 @@ describe('rankEntries', () => {
 			{ displayName: 'Maryam', current: 2, longest: 2, total: 6 }
 		])
 		expect(ranked.map(entry => entry.rank)).toEqual([1, 1, 1, 2, 3])
+	})
+})
+
+describe('suspendedAccountNotice', () => {
+	test('names the missed-day threshold and asks the student to contact the admin', () => {
+		const notice = suspendedAccountNotice('MISSED_DAYS', 4)
+		expect(notice.code).toBe('ACCOUNT_SUSPENDED')
+		expect(notice.message).toContain('missed 4 days')
+		expect(notice.message).toContain('contact the admin for support')
+		expect(notice.messageAr).toContain('4')
+	})
+
+	test('uses generic suspension wording for a manual suspension', () => {
+		const notice = suspendedAccountNotice('MANUAL', 4)
+		expect(notice.code).toBe('ACCOUNT_SUSPENDED')
+		expect(notice.message).not.toContain('missed')
+		expect(notice.message).toContain('contact the admin for support')
 	})
 })
 

@@ -10,6 +10,10 @@ const TZ = 'Africa/Lagos'
 const today = todayInTimeZone(TZ)
 const startDate = addDays(today, -5)
 const endDate = addDays(today, 10)
+// * The approved participant starts two days ago so the fixture is eligible for
+// * a manager backfill while staying below the 4-missed-day auto-suspension
+// * threshold at first login.
+const participantStartDate = addDays(today, -2)
 
 const PRIMARY_EMAIL = 'primary.manager@example.com'
 const PRIMARY_PASSWORD = 'primary-password-123'
@@ -116,6 +120,7 @@ describe('applications', () => {
 				faculty: 'Arts',
 				department: 'Arabic',
 				masar: 'FOUR_PAGES',
+				tajweedTrack: 'TUHFATUL_ATFAL',
 				confirmedMemorisation: true,
 				confirmedTajweed: true,
 				agreedGuidelines: true
@@ -135,6 +140,7 @@ describe('applications', () => {
 				faculty: 'Arts',
 				department: 'Arabic',
 				masar: 'ONE_JUZ',
+				tajweedTrack: 'TUHFATUL_ATFAL',
 				confirmedMemorisation: true,
 				confirmedTajweed: true,
 				agreedGuidelines: true
@@ -153,6 +159,7 @@ describe('applications', () => {
 				faculty: 'Arts',
 				department: 'Arabic',
 				masar: 'ONE_JUZ',
+				tajweedTrack: 'TUHFATUL_ATFAL',
 				confirmedMemorisation: true,
 				confirmedTajweed: true,
 				agreedGuidelines: true
@@ -171,6 +178,7 @@ describe('applications', () => {
 				faculty: 'Education',
 				department: 'Islamic Studies',
 				masar: 'FIVE_JUZ',
+				tajweedTrack: 'TUHFATUL_ATFAL',
 				confirmedMemorisation: true,
 				confirmedTajweed: true,
 				agreedGuidelines: true
@@ -272,7 +280,11 @@ describe('manager programme management', () => {
 	test('approves a pending application and creates a participant', async () => {
 		const result = await api(
 			`/al-mamharah/manager/applications/${state.approvedApplicationId}/approve`,
-			{ method: 'POST', token: managerToken, body: JSON.stringify({ startDate }) }
+			{
+				method: 'POST',
+				token: managerToken,
+				body: JSON.stringify({ startDate: participantStartDate })
+			}
 		)
 		expect(result.status).toBe(200)
 		const payload = data<{ participantId: string }>(result)
@@ -328,7 +340,11 @@ describe('participant dashboard', () => {
 
 		const verified = await api('/public/al-mamharah/enter/verify', {
 			method: 'POST',
-			body: JSON.stringify({ fullName: APPROVED_APPLICANT, code: payload.devCode })
+			body: JSON.stringify({
+				fullName: APPROVED_APPLICANT,
+				code: payload.devCode,
+				password: 'participant-password-123'
+			})
 		})
 		expect(verified.status).toBe(200)
 		const session = data<{ token: string; participant: { id: string } }>(verified)
@@ -367,13 +383,13 @@ describe('participant dashboard', () => {
 		expect(data<{ alreadyRecorded: boolean }>(second).alreadyRecorded).toBe(true)
 	})
 
-	test('rejects tasks that are not part of the programme', async () => {
+	test('records the tajweed line when the participant has a tajweed track', async () => {
 		const result = await api('/al-mamharah/participant/complete', {
 			method: 'POST',
 			token: state.participantToken,
 			body: JSON.stringify({ taskType: 'TAJWEED_QIRAAT' })
 		})
-		expect(result.status).toBe(400)
+		expect(result.status).toBe(201)
 	})
 
 	test('updates the streak after recording today', async () => {
@@ -473,6 +489,14 @@ describe('manager monitoring', () => {
 		})
 		expect(suspended.status).toBe(200)
 
+		const suspendedLogin = await api('/public/al-mamharah/login', {
+			method: 'POST',
+			body: JSON.stringify({ fullName: APPROVED_APPLICANT, password: 'any-password' })
+		})
+		expect(suspendedLogin.status).toBe(403)
+		expect(suspendedLogin.body.code).toBe('ACCOUNT_SUSPENDED')
+		expect(suspendedLogin.body.error).toContain('contact the admin for support')
+
 		const blocked = await api('/al-mamharah/participant', { token: state.participantToken })
 		expect(blocked.status).toBe(401)
 
@@ -496,6 +520,45 @@ describe('manager monitoring', () => {
 		const csv = await response.text()
 		expect(csv).toContain('Full Name')
 		expect(csv).toContain(APPROVED_APPLICANT)
+	})
+
+	test('shows the missed-day reason when an auto-suspended participant signs in', async () => {
+		const application = await api('/public/al-mamharah', {
+			method: 'POST',
+			body: JSON.stringify({
+				fullName: 'Sadiq Test Missed Days',
+				email: 'sadiq.missed@example.com',
+				matricNumber: 'RUN/1000/004',
+				faculty: 'Arts',
+				department: 'Arabic',
+				masar: 'ONE_JUZ',
+				tajweedTrack: 'TUHFATUL_ATFAL',
+				confirmedMemorisation: true,
+				confirmedTajweed: true,
+				agreedGuidelines: true
+			})
+		})
+		expect(application.status).toBe(201)
+		const applicationId = data<{ id: string }>(application).id
+
+		// * Start ten days ago so more than four eligible days are already missed.
+		const approved = await api(`/al-mamharah/manager/applications/${applicationId}/approve`, {
+			method: 'POST',
+			token: managerToken,
+			body: JSON.stringify({ startDate: addDays(today, -10) })
+		})
+		expect(approved.status).toBe(200)
+
+		const entered = await api('/public/al-mamharah/enter', {
+			method: 'POST',
+			body: JSON.stringify({ fullName: 'Sadiq Test Missed Days' })
+		})
+		expect(entered.status).toBe(200)
+		const notice = data<{ status: string; reason: string; message: string }>(entered)
+		expect(notice.status).toBe('suspended')
+		expect(notice.reason).toBe('MISSED_DAYS')
+		expect(notice.message).toContain('missed 4 days')
+		expect(notice.message).toContain('contact the admin for support')
 	})
 
 	test('records audit entries for approvals and suspensions', async () => {

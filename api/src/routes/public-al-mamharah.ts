@@ -14,7 +14,9 @@ import { submitApplication } from '../services/al-mamharah/applications'
 import { resolveParticipantByName } from '../services/al-mamharah/participants'
 import {
 	enforceForParticipant,
+	getParticipantSuspension,
 	setParticipantPassword,
+	suspendedAccountNotice,
 	verifyParticipantPassword
 } from '../services/al-mamharah/participant-auth'
 import {
@@ -42,6 +44,27 @@ const NOT_VERIFIED_MESSAGE_AR =
 	'لم يتم التحقق من مشاركتك بعد. يُرجى التواصل مع مدير البرنامج للمساعدة.'
 
 const CODE_EXPIRY_MINUTES = 30
+
+/**
+ * Builds the specific notice for a suspended participant. Auto-suspensions
+ * carry the missed-day threshold in the audit trail; manual suspensions use the
+ * generic "contact the admin" wording.
+ */
+async function suspensionDetails(participant: Parameters<typeof getParticipantSuspension>[0]) {
+	const suspension = await getParticipantSuspension(participant)
+	const settings = await getSettings()
+	if (!suspension.suspended) {
+		return {
+			...suspension,
+			...suspendedAccountNotice('MANUAL', settings.maxMissedDaysPerMonth)
+		}
+	}
+	const threshold = suspension.threshold ?? settings.maxMissedDaysPerMonth
+	return {
+		...suspension,
+		...suspendedAccountNotice(suspension.reason ?? 'MANUAL', threshold)
+	}
+}
 
 /** GET /public/al-mamharah/info — programme window and current phase. */
 publicAlMamharahRoute.get('/info', async c => {
@@ -135,10 +158,12 @@ publicAlMamharahRoute.post('/enter', zValidator('json', enterProgrammeSchema), a
 	// * Auto-suspend check before granting anything (self-check on sign-in).
 	const participant = await enforceForParticipant(resolution.participant)
 	if (participant.status !== 'ACTIVE') {
+		const suspension = await suspensionDetails(participant)
 		return successResponse(c, {
-			status: 'not_verified',
-			message: NOT_VERIFIED_MESSAGE,
-			messageAr: NOT_VERIFIED_MESSAGE_AR
+			status: 'suspended',
+			reason: suspension.reason,
+			message: suspension.message,
+			messageAr: suspension.messageAr
 		})
 	}
 
@@ -190,78 +215,73 @@ publicAlMamharahRoute.post('/enter', zValidator('json', enterProgrammeSchema), a
 })
 
 /** POST /public/al-mamharah/enter/verify — first login: name + code + new password → session. */
-publicAlMamharahRoute.post(
-	'/enter/verify',
-	zValidator('json', verifyEnterCodeSchema),
-	async c => {
-		if (!rateLimit(clientKey(c.req, 'almh-verify'), 10, 10 * 60 * 1000)) {
+publicAlMamharahRoute.post('/enter/verify', zValidator('json', verifyEnterCodeSchema), async c => {
+	if (!rateLimit(clientKey(c.req, 'almh-verify'), 10, 10 * 60 * 1000)) {
+		return errorResponse(
+			c,
+			'Too many attempts. Please wait a few minutes and try again.',
+			'RATE_LIMITED',
+			400
+		)
+	}
+
+	const { fullName, code, password } = c.req.valid('json')
+	const resolution = await resolveParticipantByName(fullName)
+
+	const invalid = () =>
+		errorResponse(
+			c,
+			'Invalid name or code. Please check your details and try again.',
+			'INVALID_CREDENTIALS',
+			401
+		)
+
+	if (resolution.kind !== 'approved') return invalid()
+	const participant = await enforceForParticipant(resolution.participant)
+	if (participant.status !== 'ACTIVE') {
+		const suspension = await suspensionDetails(participant)
+		return errorResponse(c, suspension.message, suspension.code, 403, {
+			reason: suspension.reason,
+			messageAr: suspension.messageAr
+		})
+	}
+
+	const valid = await verifyParticipantCode(participant.id, code, 'ENTER_PROGRAMME')
+	if (!valid) {
+		return errorResponse(
+			c,
+			'That code is invalid or has expired. Please request a new code.',
+			'INVALID_CODE',
+			401
+		)
+	}
+
+	// * First login sets the password the student will use from now on.
+	if (!participant.passwordHash) {
+		if (!password) {
 			return errorResponse(
 				c,
-				'Too many attempts. Please wait a few minutes and try again.',
-				'RATE_LIMITED',
+				'Choose a password (at least 8 characters) to secure your account.',
+				'PASSWORD_REQUIRED',
 				400
 			)
 		}
-
-		const { fullName, code, password } = c.req.valid('json')
-		const resolution = await resolveParticipantByName(fullName)
-
-		const invalid = () =>
-			errorResponse(
-				c,
-				'Invalid name or code. Please check your details and try again.',
-				'INVALID_CREDENTIALS',
-				401
-			)
-
-		if (resolution.kind !== 'approved') return invalid()
-		const participant = await enforceForParticipant(resolution.participant)
-		if (participant.status !== 'ACTIVE') {
-			return errorResponse(
-				c,
-				'Your access is currently inactive. Please contact the Programme Manager for assistance.',
-				'PARTICIPANT_INACTIVE',
-				403
-			)
-		}
-
-		const valid = await verifyParticipantCode(participant.id, code, 'ENTER_PROGRAMME')
-		if (!valid) {
-			return errorResponse(
-				c,
-				'That code is invalid or has expired. Please request a new code.',
-				'INVALID_CODE',
-				401
-			)
-		}
-
-		// * First login sets the password the student will use from now on.
-		if (!participant.passwordHash) {
-			if (!password) {
-				return errorResponse(
-					c,
-					'Choose a password (at least 8 characters) to secure your account.',
-					'PASSWORD_REQUIRED',
-					400
-				)
-			}
-			await setParticipantPassword(participant.id, password)
-		}
-
-		const session = await createParticipantSession(participant.id)
-		await auditAccessGranted(participant.id, participant.displayName)
-
-		return successResponse(c, {
-			token: session.token,
-			expiresAt: session.expiresAt,
-			participant: {
-				id: participant.id,
-				displayName: participant.displayName,
-				masar: participant.masar
-			}
-		})
+		await setParticipantPassword(participant.id, password)
 	}
-)
+
+	const session = await createParticipantSession(participant.id)
+	await auditAccessGranted(participant.id, participant.displayName)
+
+	return successResponse(c, {
+		token: session.token,
+		expiresAt: session.expiresAt,
+		participant: {
+			id: participant.id,
+			displayName: participant.displayName,
+			masar: participant.masar
+		}
+	})
+})
 
 /** POST /public/al-mamharah/login — returning student: name + password → session. */
 publicAlMamharahRoute.post('/login', zValidator('json', participantLoginSchema), async c => {
@@ -283,12 +303,11 @@ publicAlMamharahRoute.post('/login', zValidator('json', participantLoginSchema),
 	if (resolution.kind !== 'approved') return invalid()
 	const participant = await enforceForParticipant(resolution.participant)
 	if (participant.status !== 'ACTIVE') {
-		return errorResponse(
-			c,
-			'Your access is currently inactive. Please contact the Programme Manager for assistance.',
-			'PARTICIPANT_INACTIVE',
-			403
-		)
+		const suspension = await suspensionDetails(participant)
+		return errorResponse(c, suspension.message, suspension.code, 403, {
+			reason: suspension.reason,
+			messageAr: suspension.messageAr
+		})
 	}
 
 	// * No password set yet — send them through the first-login code flow.
@@ -376,64 +395,59 @@ publicAlMamharahRoute.post(
 )
 
 /** POST /public/al-mamharah/reset-password — name + code + new password → session. */
-publicAlMamharahRoute.post(
-	'/reset-password',
-	zValidator('json', resetPasswordSchema),
-	async c => {
-		if (!rateLimit(clientKey(c.req, 'almh-reset'), 10, 10 * 60 * 1000)) {
-			return errorResponse(
-				c,
-				'Too many attempts. Please wait a few minutes and try again.',
-				'RATE_LIMITED',
-				400
-			)
-		}
+publicAlMamharahRoute.post('/reset-password', zValidator('json', resetPasswordSchema), async c => {
+	if (!rateLimit(clientKey(c.req, 'almh-reset'), 10, 10 * 60 * 1000)) {
+		return errorResponse(
+			c,
+			'Too many attempts. Please wait a few minutes and try again.',
+			'RATE_LIMITED',
+			400
+		)
+	}
 
-		const { fullName, code, password } = c.req.valid('json')
-		const resolution = await resolveParticipantByName(fullName)
+	const { fullName, code, password } = c.req.valid('json')
+	const resolution = await resolveParticipantByName(fullName)
 
-		const invalid = () =>
-			errorResponse(
-				c,
-				'Invalid name or code. Please check your details and try again.',
-				'INVALID_CREDENTIALS',
-				401
-			)
+	const invalid = () =>
+		errorResponse(
+			c,
+			'Invalid name or code. Please check your details and try again.',
+			'INVALID_CREDENTIALS',
+			401
+		)
 
-		if (resolution.kind !== 'approved') return invalid()
-		if (resolution.participant.status !== 'ACTIVE') {
-			return errorResponse(
-				c,
-				'Your access is currently inactive. Please contact the Programme Manager for assistance.',
-				'PARTICIPANT_INACTIVE',
-				403
-			)
-		}
-
-		const valid = await verifyParticipantCode(resolution.participant.id, code, 'RESET_PASSWORD')
-		if (!valid) {
-			return errorResponse(
-				c,
-				'That code is invalid or has expired. Please request a new code.',
-				'INVALID_CODE',
-				401
-			)
-		}
-
-		await setParticipantPassword(resolution.participant.id, password)
-		const session = await createParticipantSession(resolution.participant.id)
-		await auditAccessGranted(resolution.participant.id, resolution.participant.displayName)
-
-		return successResponse(c, {
-			token: session.token,
-			expiresAt: session.expiresAt,
-			participant: {
-				id: resolution.participant.id,
-				displayName: resolution.participant.displayName,
-				masar: resolution.participant.masar
-			}
+	if (resolution.kind !== 'approved') return invalid()
+	if (resolution.participant.status !== 'ACTIVE') {
+		const suspension = await suspensionDetails(resolution.participant)
+		return errorResponse(c, suspension.message, suspension.code, 403, {
+			reason: suspension.reason,
+			messageAr: suspension.messageAr
 		})
 	}
-)
+
+	const valid = await verifyParticipantCode(resolution.participant.id, code, 'RESET_PASSWORD')
+	if (!valid) {
+		return errorResponse(
+			c,
+			'That code is invalid or has expired. Please request a new code.',
+			'INVALID_CODE',
+			401
+		)
+	}
+
+	await setParticipantPassword(resolution.participant.id, password)
+	const session = await createParticipantSession(resolution.participant.id)
+	await auditAccessGranted(resolution.participant.id, resolution.participant.displayName)
+
+	return successResponse(c, {
+		token: session.token,
+		expiresAt: session.expiresAt,
+		participant: {
+			id: resolution.participant.id,
+			displayName: resolution.participant.displayName,
+			masar: resolution.participant.masar
+		}
+	})
+})
 
 export default publicAlMamharahRoute

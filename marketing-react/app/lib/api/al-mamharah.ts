@@ -12,17 +12,23 @@ export interface AlMamharahErrorShape {
 	message: string;
 	code?: string;
 	status: number;
+	details?: unknown;
 }
 
 export class AlMamharahError extends Error implements AlMamharahErrorShape {
 	name = "AlMamharahError";
 	code?: string;
 	status: number;
+	details?: unknown;
 
-	constructor(message: string, options: { code?: string; status?: number } = {}) {
+	constructor(
+		message: string,
+		options: { code?: string; status?: number; details?: unknown } = {},
+	) {
 		super(message);
 		this.code = options.code;
 		this.status = options.status ?? 0;
+		this.details = options.details;
 	}
 }
 
@@ -103,6 +109,7 @@ async function request<T = any>(path: string, options: RequestOptions = {}): Pro
 		throw new AlMamharahError(payload?.error || "Something went wrong. Please try again.", {
 			code: payload?.code,
 			status: response.status,
+			details: payload?.details,
 		});
 	}
 

@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { db } from '../../lib/db'
 import {
+	alMamharahAuditLog,
 	alMamharahCompletions,
 	alMamharahParticipants,
 	type AlMamharahParticipant
@@ -93,7 +94,11 @@ export async function monthMissedDays(
 			)
 		)
 	const completedDays = new Set(rows.map(row => toISODateValue(row.programmeDate)))
-	return { elapsed, completed: completedDays.size, missed: Math.max(0, elapsed - completedDays.size) }
+	return {
+		elapsed,
+		completed: completedDays.size,
+		missed: Math.max(0, elapsed - completedDays.size)
+	}
 }
 
 /**
@@ -172,4 +177,80 @@ export async function enforceMissedDaySuspension(
 		)
 	}
 	return { checked: active.length, suspended }
+}
+
+// * --- Suspension notices ----------------------------------------------------
+
+export type SuspensionReason = 'MISSED_DAYS' | 'MANUAL'
+
+export interface ParticipantSuspension {
+	suspended: boolean
+	reason: SuspensionReason | null
+	missedDays: number | null
+	threshold: number | null
+}
+
+/**
+ * Explains why a suspended participant is blocked.
+ *
+ * The most recent `PARTICIPANT_SUSPENDED` audit entry records whether the
+ * system auto-suspended the account for missed days (`reason: MISSED_DAYS`) or
+ * a manager suspended it manually. Accounts suspended before the audit entry
+ * existed fall back to the manual wording.
+ */
+export async function getParticipantSuspension(
+	participant: Pick<AlMamharahParticipant, 'id' | 'status'>
+): Promise<ParticipantSuspension> {
+	if (participant.status !== 'SUSPENDED') {
+		return { suspended: false, reason: null, missedDays: null, threshold: null }
+	}
+
+	let details: Record<string, unknown> = {}
+	try {
+		const [entry] = await db
+			.select({ details: alMamharahAuditLog.details })
+			.from(alMamharahAuditLog)
+			.where(
+				and(
+					eq(alMamharahAuditLog.entityId, participant.id),
+					eq(alMamharahAuditLog.action, 'PARTICIPANT_SUSPENDED')
+				)
+			)
+			.orderBy(desc(alMamharahAuditLog.createdAt))
+			.limit(1)
+		details = entry?.details ?? {}
+	} catch (error) {
+		logger.error({ error, participantId: participant.id }, 'Failed reading suspension reason')
+	}
+
+	const auto = details.reason === 'MISSED_DAYS'
+	return {
+		suspended: true,
+		reason: auto ? 'MISSED_DAYS' : 'MANUAL',
+		missedDays: typeof details.missedDays === 'number' ? details.missedDays : null,
+		threshold: typeof details.threshold === 'number' ? details.threshold : null
+	}
+}
+
+/**
+ * Login notice shown when a suspended participant tries to sign in. Missed-day
+ * suspensions name the threshold so the student understands why the account
+ * was blocked; every notice tells them to contact the admin for support.
+ */
+export function suspendedAccountNotice(
+	reason: SuspensionReason,
+	threshold: number
+): { code: 'ACCOUNT_SUSPENDED'; message: string; messageAr: string } {
+	if (reason === 'MISSED_DAYS') {
+		return {
+			code: 'ACCOUNT_SUSPENDED',
+			message: `Your account has been suspended because you missed ${threshold} days of recording in a month. Please contact the admin for support.`,
+			messageAr: `تم تعليق حسابك لأنك فاتتك ${threshold} أيام من التسجيل في شهر واحد. يُرجى التواصل مع الإدارة للحصول على الدعم.`
+		}
+	}
+	return {
+		code: 'ACCOUNT_SUSPENDED',
+		message: 'Your account has been suspended. Please contact the admin for support.',
+		messageAr: 'تم تعليق حسابك. يُرجى التواصل مع الإدارة للحصول على الدعم.'
+	}
 }

@@ -60,7 +60,7 @@ export const PROGRAMME_CONTACTS: ProgrammeContact[] = [
 export const PROGRAMME_GUIDELINES: string[] = [
 	"Record your daily muroja'ah on the dashboard before the day ends. A day only counts once it is recorded, and your streak counts consecutive recorded days.",
 	"Your masār sets your daily muroja'ah target. Choose the pace you can sustain for the whole programme window.",
-	"Tajweed is optional. You may study one of the three mutūn (Tuhfatul Atfal, Muqaddimah Al Jazariyyah or Shaṭibiyyah) and record one line per day alongside your muroja'ah. A missed tajweed line alone never suspends you.",
+	"Tajweed is compulsory. Choose one of the three mutūn (Tuhfatul Atfal, Muqaddimah Al Jazariyyah or Shaṭibiyyah) and record one line per day alongside your muroja'ah. A missed tajweed line alone never suspends you.",
 	"Choosing Al Jazariyyah or Shaṭibiyyah requires passing a short placement check of two questions (MCQ) on the preceding matn after approval. You may retake it as many times as needed. If you do not pass, we recommend moving down to the lower matn.",
 	"Missing 4 programme days in a calendar month leads to automatic suspension. Only a recorded muroja'ah counts as attendance, so a tajweed line alone does not keep the day.",
 	"Entries are recorded by you but monitored by the Programme Manager and instructors. Please be honest.",
