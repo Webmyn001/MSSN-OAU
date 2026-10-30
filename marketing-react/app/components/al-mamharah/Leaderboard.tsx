@@ -82,9 +82,24 @@ export function Leaderboard({
 					<thead>
 						<tr className="border-b border-primary-100 text-left text-xs uppercase tracking-wide text-gray-500">
 							<th className="px-3 py-2 font-medium">Participant</th>
-							<th className="px-3 py-2 text-center font-medium">Current</th>
-							<th className="px-3 py-2 text-center font-medium">Best</th>
-							<th className="px-3 py-2 text-center font-medium">Marks</th>
+							<th
+								className="px-3 py-2 text-center font-medium"
+								title="Consecutive programme days with a recorded mark"
+							>
+								Current streak
+							</th>
+							<th
+								className="px-3 py-2 text-center font-medium"
+								title="Longest run of consecutive days with a recorded mark"
+							>
+								Best streak
+							</th>
+							<th
+								className="px-3 py-2 text-center font-medium"
+								title="Total marks since the start date: ½ for one task, 1 for both"
+							>
+								Marks
+							</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -141,6 +156,26 @@ export function Leaderboard({
 					</tbody>
 				</table>
 			</div>
+			<dl className="mt-3 grid gap-1 text-xs text-gray-500 sm:grid-cols-3">
+				<div>
+					<dt className="inline font-semibold text-gray-700">Current streak:</dt>{" "}
+					<dd className="inline">
+						consecutive programme days you have recorded a mark up to today (or yesterday while
+						today is still open).
+					</dd>
+				</div>
+				<div>
+					<dt className="inline font-semibold text-gray-700">Best streak:</dt>{" "}
+					<dd className="inline">your longest run of consecutive marked days so far.</dd>
+				</div>
+				<div>
+					<dt className="inline font-semibold text-gray-700">Marks:</dt>{" "}
+					<dd className="inline">
+						total earned since your start date — ½ for one task and 1 for both muroja&apos;ah
+						and tajweed.
+					</dd>
+				</div>
+			</dl>
 			<p className="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
 				<Trophy className="size-3.5 text-amber-500" />
 				{caption}
