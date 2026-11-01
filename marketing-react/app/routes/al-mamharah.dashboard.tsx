@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { Seo } from "~/components/seo";
 import { Button } from "~/components/ui/button";
 import { StatCard } from "~/components/al-mamharah/StatCard";
-import { Leaderboard } from "~/components/al-mamharah/Leaderboard";
+import { Leaderboard, leaderboardCaption } from "~/components/al-mamharah/Leaderboard";
 import { TajweedPlacement } from "~/components/al-mamharah/TajweedPlacement";
 import {
 	Loader2,
@@ -596,11 +596,7 @@ export default function AlMamharahDashboardPage() {
 										<Leaderboard
 											entries={leaderboard?.entries ?? []}
 											selfId={report.participant.id}
-											caption={
-												scope === "TAJWEED"
-													? "Ranked by total tajweed lines recorded since each participant's start date, then current streak."
-													: "Ranked by total marks since each participant's start date (½ per task, 1 for both), then current streak."
-											}
+											caption={leaderboardCaption(scope)}
 											emptyText={
 												scope === "TAJWEED"
 													? "No tajweed lines recorded yet."
@@ -614,7 +610,11 @@ export default function AlMamharahDashboardPage() {
 												<p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-gray-500">
 													<Flame className="size-3.5 text-orange-500" /> Your position
 												</p>
-												<Leaderboard entries={[leaderboard.self]} selfId={report.participant.id} />
+												<Leaderboard
+													entries={[leaderboard.self]}
+													selfId={report.participant.id}
+													showLegend={false}
+												/>
 											</div>
 										) : null}
 									</div>

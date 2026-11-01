@@ -12,11 +12,26 @@ export interface LeaderboardEntry {
 	tajweedTrack?: string | null;
 }
 
+type LeaderboardScope = "OVERALL" | "QURAN" | "TAJWEED";
+
 interface LeaderboardProps {
 	entries?: LeaderboardEntry[];
 	selfId?: string | null;
 	emptyText?: string;
 	caption?: string;
+	/** Set false for the single "your position" row so the legend does not repeat. */
+	showLegend?: boolean;
+}
+
+/** Short, scope-specific description of what the board ranks. */
+export function leaderboardCaption(scope: LeaderboardScope): string {
+	if (scope === "TAJWEED") {
+		return "Ranked by tajweed lines recorded since each start date, then current streak.";
+	}
+	if (scope === "QURAN") {
+		return "Ranked by muroja'ah days recorded since each start date, then current streak.";
+	}
+	return "Ranked by marks since each start date (½ per task, 1 for both), then current streak.";
 }
 
 /** 1 -> "1st", 2 -> "2nd", 3 -> "3rd", 11 -> "11th", 22 -> "22nd". */
@@ -69,7 +84,8 @@ export function Leaderboard({
 	entries = [],
 	selfId = null,
 	emptyText = "No participants are ranked yet.",
-	caption = "Ranked by total marks since each participant's start date (½ per task, 1 for both), then current streak.",
+	caption = leaderboardCaption("OVERALL"),
+	showLegend = true,
 }: LeaderboardProps) {
 	if (entries.length === 0) {
 		return <p className="py-8 text-center text-sm text-gray-500">{emptyText}</p>;
@@ -77,6 +93,37 @@ export function Leaderboard({
 
 	return (
 		<>
+			{showLegend ? (
+				<div className="mb-4 rounded-lg border border-primary-100 bg-primary-50/40 p-3 text-xs text-gray-600">
+					<dl className="grid gap-1.5 sm:grid-cols-3">
+						<div>
+							<dt className="inline font-semibold text-gray-800">Current streak:</dt>{" "}
+							<dd className="inline">
+								consecutive programme days with a mark, up to today (or yesterday while today
+								is still open). A missed day resets it to zero.
+							</dd>
+						</div>
+						<div>
+							<dt className="inline font-semibold text-gray-800">Best streak:</dt>{" "}
+							<dd className="inline">
+								your longest run of consecutive marked days so far. It stays even after your
+								current streak resets.
+							</dd>
+						</div>
+						<div>
+							<dt className="inline font-semibold text-gray-800">Marks:</dt>{" "}
+							<dd className="inline">
+								total earned since your start date — ½ for one task, 1 for both muroja&apos;ah
+								and tajweed.
+							</dd>
+						</div>
+					</dl>
+					<p className="mt-2 flex items-start gap-1.5 border-t border-primary-100/70 pt-2 text-gray-500">
+						<Trophy className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
+						{caption}
+					</p>
+				</div>
+			) : null}
 			<div className="overflow-x-auto">
 				<table className="w-full border-collapse text-sm">
 					<thead>
@@ -156,30 +203,6 @@ export function Leaderboard({
 					</tbody>
 				</table>
 			</div>
-			<dl className="mt-3 grid gap-1 text-xs text-gray-500 sm:grid-cols-3">
-				<div>
-					<dt className="inline font-semibold text-gray-700">Current streak:</dt>{" "}
-					<dd className="inline">
-						consecutive programme days you have recorded a mark up to today (or yesterday while
-						today is still open).
-					</dd>
-				</div>
-				<div>
-					<dt className="inline font-semibold text-gray-700">Best streak:</dt>{" "}
-					<dd className="inline">your longest run of consecutive marked days so far.</dd>
-				</div>
-				<div>
-					<dt className="inline font-semibold text-gray-700">Marks:</dt>{" "}
-					<dd className="inline">
-						total earned since your start date — ½ for one task and 1 for both muroja&apos;ah
-						and tajweed.
-					</dd>
-				</div>
-			</dl>
-			<p className="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
-				<Trophy className="size-3.5 text-amber-500" />
-				{caption}
-			</p>
 		</>
 	);
 }

@@ -51,10 +51,6 @@ export function EnterProgramme() {
 		message: string;
 		messageAr: string;
 	} | null>(null);
-	const [suspension, setSuspension] = useState<{
-		message: string;
-		messageAr: string;
-	} | null>(null);
 	const [devCode, setDevCode] = useState<string | null>(null);
 	const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
@@ -63,10 +59,21 @@ export function EnterProgramme() {
 		toast.error(message);
 	}
 
+	/** Suspension notices stay visible longer because they explain a blocked account. */
+	function showSuspensionToast(message: string, messageAr?: string) {
+		toast.error(message, {
+			duration: 12000,
+			description: messageAr ? (
+				<span dir="rtl" lang="ar" className="font-secondary">
+					{messageAr}
+				</span>
+			) : undefined,
+		});
+	}
+
 	function resetLocal() {
 		setFormError(null);
 		setNotVerified(null);
-		setSuspension(null);
 		setDevCode(null);
 		setInfoMessage(null);
 		setCode("");
@@ -94,7 +101,6 @@ export function EnterProgramme() {
 	async function beginSetup() {
 		setFormError(null);
 		setNotVerified(null);
-		setSuspension(null);
 		if (fullName.trim().length < 2) {
 			startError("Please enter your full name exactly as submitted.");
 			return;
@@ -122,11 +128,10 @@ export function EnterProgramme() {
 				toast.info("This account already has a password.");
 			} else if (data.status === "suspended") {
 				setView("login");
-				setSuspension({
-					message: data.message ?? "This account has been suspended.",
-					messageAr: data.messageAr ?? "",
-				});
-				toast.error("This account has been suspended.");
+				showSuspensionToast(
+					data.message ?? "This account has been suspended.",
+					data.messageAr,
+				);
 			} else {
 				setView("login");
 				setNotVerified({
@@ -148,7 +153,6 @@ export function EnterProgramme() {
 		event.preventDefault();
 		setFormError(null);
 		setNotVerified(null);
-		setSuspension(null);
 		if (fullName.trim().length < 2) {
 			startError("Please enter your full name exactly as submitted.");
 			return;
@@ -170,10 +174,7 @@ export function EnterProgramme() {
 			if (error instanceof AlMamharahError && error.code === "ACCOUNT_SUSPENDED") {
 				setIsSubmitting(false);
 				const details = error.details as { messageAr?: string } | undefined;
-				setSuspension({
-					message: error.message,
-					messageAr: details?.messageAr ?? "",
-				});
+				showSuspensionToast(error.message, details?.messageAr);
 				return;
 			}
 			// * No password yet - email a setup code and move them to the setup step.
@@ -296,10 +297,10 @@ export function EnterProgramme() {
 				setView("login");
 			} else if (data.status === "suspended") {
 				setView("login");
-				setSuspension({
-					message: data.message ?? "This account has been suspended.",
-					messageAr: data.messageAr ?? "",
-				});
+				showSuspensionToast(
+					data.message ?? "This account has been suspended.",
+					data.messageAr,
+				);
 			} else {
 				setNotVerified({
 					message: data.message ?? "Your participation has not yet been verified.",
@@ -369,26 +370,6 @@ export function EnterProgramme() {
 						{notVerified.messageAr ? (
 							<p className="text-right font-secondary" dir="rtl" lang="ar">
 								{notVerified.messageAr}
-							</p>
-						) : null}
-					</div>
-				</div>
-			</div>
-		);
-	}
-
-	function suspensionBox() {
-		if (!suspension) return null;
-		return (
-			<div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-				<div className="flex items-start gap-2">
-					<AlertCircle className="mt-0.5 size-4 shrink-0" />
-					<div className="space-y-1">
-						<p className="font-semibold">Account suspended</p>
-						<p>{suspension.message}</p>
-						{suspension.messageAr ? (
-							<p className="text-right font-secondary" dir="rtl" lang="ar">
-								{suspension.messageAr}
 							</p>
 						) : null}
 					</div>
@@ -587,7 +568,6 @@ export function EnterProgramme() {
 						</div>
 					</div>
 					{notVerifiedBox()}
-					{suspensionBox()}
 					{errorBox()}
 					{submitButton("Sign in", "Signing in...", <Lock className="mr-2 size-4" />)}
 					<div className="flex flex-col items-center gap-2 border-t border-gray-100 pt-3">

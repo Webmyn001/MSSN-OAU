@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Leaderboard } from "~/components/al-mamharah/Leaderboard";
+import { Leaderboard, leaderboardCaption } from "~/components/al-mamharah/Leaderboard";
 import { Loader2, AlertCircle } from "lucide-react";
 import { getManagerLeaderboard, AlMamharahError } from "~/lib/api/al-mamharah";
 
@@ -84,11 +84,7 @@ export function LeaderboardPanel({ token, onExpired }: { token: string; onExpire
 			</div>
 			<Leaderboard
 				entries={data.entries ?? []}
-				caption={
-					scope === "TAJWEED"
-						? "Ranked by total tajweed lines recorded since each participant's start date, then current streak."
-						: "Ranked by total marks since each participant's start date (½ per task, 1 for both), then current streak."
-				}
+				caption={leaderboardCaption(scope)}
 				emptyText={
 					scope === "TAJWEED"
 						? "No tajweed lines recorded yet."
