@@ -434,7 +434,9 @@ export async function deleteParticipant(
 		await tx
 			.delete(alMamharahParticipantSessions)
 			.where(eq(alMamharahParticipantSessions.participantId, participantId))
-		await tx.delete(alMamharahCompletions).where(eq(alMamharahCompletions.participantId, participantId))
+		await tx
+			.delete(alMamharahCompletions)
+			.where(eq(alMamharahCompletions.participantId, participantId))
 		await tx.delete(alMamharahParticipants).where(eq(alMamharahParticipants.id, participantId))
 		await tx
 			.delete(alMamharahApplications)
@@ -521,9 +523,9 @@ const SCOPE_TASK: Record<LeaderboardScope, AlMamharahTaskType | undefined> = {
 
 /**
  * Leaderboard for authenticated participants: ranked by total marks recorded
- * since each participant's start date, then current streak, then longest
- * streak. Only display names and streak statistics are exposed — no emails,
- * phones or matriculation numbers.
+ * since each participant's start date, then current streak. Only display names
+ * and streak statistics are exposed — no emails, phones or matriculation
+ * numbers.
  *
  * Scopes: OVERALL awards half a mark for each recorded task, so marking only
  * the muroja'ah or only the tajweed line earns 0.5 and marking both earns 1.

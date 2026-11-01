@@ -10,7 +10,7 @@ import {
 import { logger } from '../../lib/logger'
 import { recordAudit } from './audit'
 import { getSettings, type AlMamharahSettings } from './settings'
-import { todayInTimeZone, type ISODate } from './dates'
+import { addDays, dateInTimeZone, maxISO, todayInTimeZone, type ISODate } from './dates'
 import { toISODateValue } from './participants'
 
 // * Password-based access for Al-Mamharah participants.
@@ -50,9 +50,35 @@ export async function setParticipantPassword(
 // * --- Auto-suspension for missed days --------------------------------------
 
 /**
+ * Returns the programme date on which a manager last reactivated the
+ * participant, or null when the account has never been reactivated.
+ */
+async function lastReactivationDate(
+	participantId: string,
+	timeZone: string
+): Promise<ISODate | null> {
+	const [entry] = await db
+		.select({ createdAt: alMamharahAuditLog.createdAt })
+		.from(alMamharahAuditLog)
+		.where(
+			and(
+				eq(alMamharahAuditLog.entityId, participantId),
+				eq(alMamharahAuditLog.action, 'PARTICIPANT_ACTIVATED')
+			)
+		)
+		.orderBy(desc(alMamharahAuditLog.createdAt))
+		.limit(1)
+	return entry ? dateInTimeZone(entry.createdAt, timeZone) : null
+}
+
+/**
  * Counts eligible programme days elapsed so far this calendar month for a
  * participant, and how many of those days they completed. A day is "eligible"
  * once the participant's window has started and it is not after today.
+ *
+ * A manager reactivation restarts the count: days missed before the account was
+ * restored never count again, so a reactivated participant begins at zero and
+ * is not immediately auto-suspended by the old misses.
  */
 export async function monthMissedDays(
 	participant: AlMamharahParticipant,
@@ -69,12 +95,16 @@ export async function monthMissedDays(
 		toISODateValue(participant.startDate) > settings.start
 			? toISODateValue(participant.startDate)
 			: settings.start
+	const reactivatedOn = await lastReactivationDate(participant.id, settings.timezone)
+	const countingStart = reactivatedOn
+		? maxISO(maxISO(monthStart, windowStart), addDays(reactivatedOn, 1))
+		: maxISO(monthStart, windowStart)
 
 	let elapsed = 0
 	for (let day = 1; day <= daysInMonth; day++) {
 		const date: ISODate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 		if (date < monthStart || date > today) continue
-		if (date < windowStart) continue
+		if (date < countingStart) continue
 		elapsed++
 	}
 
@@ -89,7 +119,7 @@ export async function monthMissedDays(
 				// * Only the core muroja'ah keeps a day "present": the optional
 				// * tajweed line must not rescue a missed muroja'ah day.
 				eq(alMamharahCompletions.taskType, 'MUROJAAH'),
-				sql`${alMamharahCompletions.programmeDate} >= ${monthStart}`,
+				sql`${alMamharahCompletions.programmeDate} >= ${countingStart}`,
 				sql`${alMamharahCompletions.programmeDate} <= ${today}`
 			)
 		)

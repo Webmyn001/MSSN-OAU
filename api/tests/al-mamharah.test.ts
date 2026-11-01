@@ -1,6 +1,14 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
+import { eq } from 'drizzle-orm'
 import app from '../src/app'
 import { addDays, todayInTimeZone } from '../src/services/al-mamharah/dates'
+import { db } from '../src/lib/db'
+import { alMamharahParticipants } from '../src/db/schema'
+import {
+	enforceForParticipant,
+	monthMissedDays
+} from '../src/services/al-mamharah/participant-auth'
+import { getSettings } from '../src/services/al-mamharah/settings'
 
 // * Integration tests for the Al Mamharah programme API.
 // * These run against a real PostgreSQL database created by
@@ -541,7 +549,6 @@ describe('manager monitoring', () => {
 		expect(application.status).toBe(201)
 		const applicationId = data<{ id: string }>(application).id
 
-		// * Start ten days ago so more than four eligible days are already missed.
 		const approved = await api(`/al-mamharah/manager/applications/${applicationId}/approve`, {
 			method: 'POST',
 			token: managerToken,
@@ -549,8 +556,29 @@ describe('manager monitoring', () => {
 		})
 		expect(approved.status).toBe(200)
 
+		// * Pin the fixture to a known month and enforce with a fixed date so this
+		// * test does not depend on the day the suite happens to run.
+		const [participant] = await db
+			.select()
+			.from(alMamharahParticipants)
+			.where(eq(alMamharahParticipants.applicationId, applicationId))
+		expect(participant).toBeTruthy()
+		const [pinned] = await db
+			.update(alMamharahParticipants)
+			.set({ startDate: '2026-10-20' })
+			.where(eq(alMamharahParticipants.id, participant.id))
+			.returning()
+		const fixedSettings = {
+			...(await getSettings()),
+			start: '2026-10-01',
+			end: '2026-11-30'
+		}
+		const suspended = await enforceForParticipant(pinned, fixedSettings, '2026-10-31')
+		expect(suspended.status).toBe('SUSPENDED')
+
 		const entered = await api('/public/al-mamharah/enter', {
 			method: 'POST',
+			ip: '127.0.0.2',
 			body: JSON.stringify({ fullName: 'Sadiq Test Missed Days' })
 		})
 		expect(entered.status).toBe(200)
@@ -559,6 +587,47 @@ describe('manager monitoring', () => {
 		expect(notice.reason).toBe('MISSED_DAYS')
 		expect(notice.message).toContain('missed 4 days')
 		expect(notice.message).toContain('contact the admin for support')
+	})
+
+	test('restarts missed-day counting after a manager reactivates an account', async () => {
+		const list = await api(
+			`/al-mamharah/manager/participants?search=${encodeURIComponent('Sadiq Test Missed Days')}`,
+			{ token: managerToken }
+		)
+		expect(list.status).toBe(200)
+		const participant = (list.body.data as { id: string; displayName: string }[]).find(
+			item => item.displayName === 'Sadiq Test Missed Days'
+		)
+		expect(participant).toBeTruthy()
+
+		const reactivated = await api(`/al-mamharah/manager/participants/${participant?.id}/status`, {
+			method: 'POST',
+			token: managerToken,
+			body: JSON.stringify({ status: 'ACTIVE', notes: 'Reset after review' })
+		})
+		expect(reactivated.status).toBe(200)
+		const [activeParticipant] = await db
+			.select()
+			.from(alMamharahParticipants)
+			.where(eq(alMamharahParticipants.id, participant?.id ?? ''))
+		const missedDays = await monthMissedDays(
+			activeParticipant,
+			await getSettings(),
+			todayInTimeZone(TZ)
+		)
+		// * Counting restarts from the reactivation, so the misses from before the
+		// * manager restored the account can never trigger an immediate suspension.
+		expect(missedDays.missed).toBeLessThan(4)
+
+		// * The misses from before the reactivation must not count again: the
+		// * next attempt starts from zero and asks for a setup code instead of
+		// * reporting a suspended account.
+		const entered = await api('/public/al-mamharah/enter', {
+			method: 'POST',
+			body: JSON.stringify({ fullName: 'Sadiq Test Missed Days' })
+		})
+		expect(entered.status).toBe(200)
+		expect(data<{ status: string }>(entered).status).not.toBe('suspended')
 	})
 
 	test('records audit entries for approvals and suspensions', async () => {

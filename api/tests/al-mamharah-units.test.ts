@@ -156,7 +156,7 @@ describe('computeStreaks', () => {
 })
 
 describe('rankEntries', () => {
-	test('ranks by total marks, then current, then longest, with ties sharing a rank', () => {
+	test('ranks by total marks then current streak, with ties sharing a rank', () => {
 		const ranked = rankEntries([
 			{ displayName: 'Bilal', current: 3, longest: 5, total: 10 },
 			{ displayName: 'Aisha', current: 5, longest: 5, total: 12 },
@@ -168,6 +168,14 @@ describe('rankEntries', () => {
 		expect(ranked[1].displayName).toBe('Zaid')
 		expect(ranked[2].displayName).toBe('Bilal')
 		expect(ranked[3].displayName).toBe('Umar')
+	})
+
+	test('does not use best streak to break ranking ties', () => {
+		const ranked = rankEntries([
+			{ displayName: 'Bilal', current: 3, longest: 5, total: 10 },
+			{ displayName: 'Umar', current: 3, longest: 6, total: 10 }
+		])
+		expect(ranked.map(entry => entry.rank)).toEqual([1, 1])
 	})
 
 	test('continues with the next ordinal after a shared first place', () => {
