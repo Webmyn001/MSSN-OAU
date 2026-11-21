@@ -1,0 +1,32 @@
+# * Frontend-only Render Blueprint — MSSN OAU Admin Dashboard
+# * Use this file when you only want to deploy dashboard-react.
+# * In Render: New -> Blueprint -> select the repo -> set "Blueprint file path"
+# * to dashboard-render.yaml -> Apply. No API secrets are required.
+# *
+# * The API has its own blueprint in render.yaml (mssn-api) which owns all the
+# * Cloudinary / SMTP / Paystack / database variables.
+
+services:
+  - type: web
+    name: mssn-dashboard
+    runtime: static
+    rootDir: dashboard-react
+    plan: free
+    region: frankfurt
+    # npm ci can fail cross-platform (the Windows-generated lockfile can lack the
+    # linux-x64 optional binaries), so use npm install; --include=dev is required
+    # because Render sets NODE_ENV=production which would omit the Vite tooling.
+    buildCommand: npm install --no-audit --no-fund --include=dev && npm run build
+    staticPublishPath: ./build/client
+    # SPA fallback: serve index.html for client-side routes.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Baked into the JS bundle at build time — change it here and rebuild if
+      # your API lives at a different URL.
+      - key: VITE_API_BASE_URL
+        value: https://mssn-api.onrender.com
