@@ -29,11 +29,21 @@ const categories = [
 	"Programme",
 	"Event Report",
 	"Announcement",
-	"Academic",
 	"Academic Committee",
 	"Islamic Affairs Board",
 	"Welfare",
 ];
+
+// Older posts still use "Academic"; treat them as "Academic Committee" so they
+// remain filterable and are migrated when edited and saved.
+const LEGACY_CATEGORIES: Record<string, string> = {
+	Academic: "Academic Committee",
+};
+
+function normalizeCategory(category?: string): string {
+	if (!category) return "General";
+	return LEGACY_CATEGORIES[category] ?? category;
+}
 
 export default function LatestNewsAdmin() {
 	const [data, setData] = useState<LatestNewsData>({ items: [] });
@@ -135,7 +145,7 @@ export default function LatestNewsAdmin() {
 	function displayedItems(): LatestNews[] {
 		let list = data.items;
 		if (filterCategory !== "all") {
-			list = list.filter((i) => i.category === filterCategory);
+			list = list.filter((i) => normalizeCategory(i.category) === filterCategory);
 		}
 		if (searchQuery.trim()) {
 			const q = searchQuery.toLowerCase();
@@ -165,7 +175,7 @@ export default function LatestNewsAdmin() {
 			setFormImage2(item.image2 || "");
 			setFormDate(item.date);
 			setFormAuthor(item.author || "");
-			setFormCategory(item.category || "General");
+			setFormCategory(normalizeCategory(item.category));
 		} else {
 			setEditingId(null);
 			setFormTitle("");
@@ -340,7 +350,7 @@ export default function LatestNewsAdmin() {
 											<h4 className="text-sm font-bold text-green-950 line-clamp-1">{item.title}</h4>
 											{item.category ? (
 												<span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-800 shrink-0">
-													{item.category}
+													{normalizeCategory(item.category)}
 												</span>
 											) : null}
 										</div>
@@ -657,7 +667,7 @@ export default function LatestNewsAdmin() {
 						<div className="space-y-3">
 							{activeItem.category ? (
 								<span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-800">
-									{activeItem.category}
+									{normalizeCategory(activeItem.category)}
 								</span>
 							) : null}
 							<div className="bg-green-50/50 p-4 rounded-xl border border-green-100">
