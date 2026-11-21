@@ -11,7 +11,6 @@ services:
     name: mssn-dashboard
     runtime: static
     rootDir: dashboard-react
-    plan: free
     # npm ci can fail cross-platform (the Windows-generated lockfile can lack the
     # linux-x64 optional binaries), so use npm install; --include=dev is required
     # because Render sets NODE_ENV=production which would omit the Vite tooling.
