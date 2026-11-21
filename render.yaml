@@ -39,9 +39,10 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-      # Secrets/values to fill in during Blueprint creation (prompted in dashboard)
+      # Public frontend URL — used for CORS, password-reset links and manager
+      # activation links. No trailing slash (link builders append paths).
       - key: APP_URL
-        sync: false
+        value: https://www.mssnoau.org
       - key: PAYSTACK_SECRET_KEY
         sync: false
       - key: PAYSTACK_PUBLIC_KEY
@@ -75,6 +76,20 @@ services:
         sync: false
       - key: CLOUDINARY_UPLOAD_PRESET
         sync: false
+
+      # Al Mamharah — bootstraps the primary Programme Manager on the first
+      # login attempt, but only while no PRIMARY manager row exists yet.
+      # Password must be at least 8 characters.
+      - key: AL_MAMHARAH_MANAGER_EMAIL
+        sync: false
+      - key: AL_MAMHARAH_MANAGER_PASSWORD
+        sync: false
+      # Dedicated secret for manager JWTs (falls back to JWT_SECRET when unset).
+      - key: AL_MAMHARAH_MANAGER_JWT_SECRET
+        generateValue: true
+      # Public site URL used to build manager activation links.
+      - key: AL_MAMHARAH_SITE_URL
+        value: https://www.mssnoau.org
 
   # * MSSN OAU Admin Dashboard (React Router v7 SPA — Render static site)
   # * VITE_API_BASE_URL is baked into the JS bundle at build time, so any change

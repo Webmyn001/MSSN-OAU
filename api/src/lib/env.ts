@@ -69,7 +69,7 @@ const envSchema = z.object({
 	AL_MAMHARAH_MANAGER_EMAIL: z.string().email().optional(),
 	AL_MAMHARAH_MANAGER_PASSWORD: z.string().min(8).optional(),
 	AL_MAMHARAH_MANAGER_JWT_SECRET: z.string().min(16).optional(),
-	AL_MAMHARAH_SITE_URL: z.string().url().optional().default('https://mssn-oau.vercel.app')
+	AL_MAMHARAH_SITE_URL: z.string().url().optional().default('https://www.mssnoau.org')
 })
 
 // * Infer the type from the schema
