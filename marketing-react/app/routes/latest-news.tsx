@@ -32,7 +32,7 @@ export default function LatestNewsPage() {
 			<Seo
 				title="Latest Updates"
 				description="Articles, announcements, and updates from MSSN OAU and its committees."
-				path="/latest-news"
+				path="/latest-updates"
 			/>
 
 			<PageHeader subtitle="Read articles, announcements, and updates from MSSN OAU committees and the wider community.">
@@ -49,7 +49,7 @@ export default function LatestNewsPage() {
 							{items.map((item) => (
 								<Link
 									key={item.id}
-									to={`/latest-news/${postSlug(item)}`}
+									to={`/latest-updates/${postSlug(item)}`}
 									className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col animate-fade-in"
 								>
 									{item.image ? (

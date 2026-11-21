@@ -1,10 +1,11 @@
-import { Link, useParams } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { Calendar, User, Tag, ArrowLeft } from "lucide-react";
 import { formatNewsDate } from "./latest-news";
 import { findPostBySlug, postSlug } from "~/lib/utils/posts";
-import { useSiteData } from "~/lib/hooks/useSiteData";
+import { loadSiteData } from "~/lib/api/site-data";
+import type { Route } from "./+types/latest-news.$slug";
 
 interface NewsItem {
 	id: string;
@@ -18,10 +19,15 @@ interface NewsItem {
 	date?: string;
 }
 
+// * Loaded on the server so social-media crawlers receive the post's title,
+// * description and main image in the initial HTML (before React hydrates).
+export async function loader({ params }: Route.LoaderArgs): Promise<{ item: NewsItem | null }> {
+	const data = await loadSiteData(fetch, ["latestNews"]);
+	return { item: findPostBySlug(data.latestNews as NewsItem[], params.slug) };
+}
+
 export default function LatestNewsDetailPage() {
-	const { slug } = useParams<{ slug: string }>();
-	const [items] = useSiteData<NewsItem[]>("latestNews", []);
-	const item = findPostBySlug(items, slug);
+	const { item } = useLoaderData<typeof loader>();
 
 	if (!item) {
 		return (
@@ -42,9 +48,9 @@ export default function LatestNewsDetailPage() {
 			<Seo
 				title={item.title}
 				description={item.summary}
-				path={`/latest-news/${postSlug(item)}`}
-				type="Article"
-				images={item.image ? [{ url: item.image, width: 1200, height: 630, alt: item.title }] : []}
+				path={`/latest-updates/${postSlug(item)}`}
+				type="article"
+				images={item.image ? [{ url: item.image, alt: item.title }] : undefined}
 			/>
 
 			<PageHeader subtitle="Articles, announcements, and updates from MSSN OAU committees and the wider community.">
@@ -58,7 +64,7 @@ export default function LatestNewsDetailPage() {
 				<div className="max-w-3xl mx-auto px-5 sm:px-10 relative z-10">
 					<div className="animate-fade-in">
 						<Link
-							to="/#latest-news"
+							to="/#latest-updates"
 							className="inline-flex items-center gap-1.5 text-sm text-primary-700 hover:text-primary-800 font-medium mb-6 transition-colors"
 						>
 							<ArrowLeft className="w-4 h-4" /> Back to Home

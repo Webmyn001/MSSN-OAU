@@ -4,7 +4,7 @@
 
 // Site-wide constants
 export const SITE_NAME = "MSSNOAU";
-export const SITE_URL = "https://mssnoau.org";
+export const SITE_URL = "https://www.mssnoau.org";
 export const DEFAULT_DESCRIPTION =
 	"Muslim Students' Society of Nigeria at Obafemi Awolowo University (OAU) is a vibrant student organization dedicated to promoting Islamic values and fostering a sense of community among Muslim students on campus.";
 export const DEFAULT_OG_IMAGE = "https://mssnoau.sirv.com/mssn-logo.png";

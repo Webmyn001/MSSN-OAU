@@ -57,9 +57,11 @@ export function Seo({
 	const origin = SITE_URL;
 	const url = path ? `${origin}${path.startsWith("/") ? path : `/${path}`}` : origin;
 
-	const baseImages: OgImage[] = images ?? [
-		{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME },
-	];
+	// An empty array (e.g. a post without an image) must still fall back to the
+	// site image so social previews always have something to show.
+	const baseImages: OgImage[] = images?.length
+		? images
+		: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME }];
 
 	const finalImages = baseImages.map((img) => ({
 		...img,
@@ -113,6 +115,16 @@ export function Seo({
 			<meta name="twitter:card" content="summary_large_image" />
 			<meta name="twitter:site" content={TWITTER_HANDLE} />
 			<meta name="twitter:creator" content={TWITTER_HANDLE} />
+			<meta name="twitter:title" content={formattedTitle} />
+			<meta name="twitter:description" content={description} />
+			{finalImages[0] ? (
+				<>
+					<meta name="twitter:image" content={finalImages[0].url} />
+					{finalImages[0].alt ? (
+						<meta name="twitter:image:alt" content={finalImages[0].alt} />
+					) : null}
+				</>
+			) : null}
 
 			{schema ? (
 				<script

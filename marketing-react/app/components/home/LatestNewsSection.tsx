@@ -27,7 +27,7 @@ function formatDate(dateStr?: string) {
 
 export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 	return (
-		<section id="latest-news" className="py-16 sm:py-20 lg:py-24 relative overflow-hidden bg-gradient-to-b from-white via-green-50/30 to-white">
+		<section id="latest-updates" className="py-16 sm:py-20 lg:py-24 relative overflow-hidden bg-gradient-to-b from-white via-green-50/30 to-white">
 			<div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
 				<div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-3xl" />
 				<div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-green-700/5 rounded-full blur-3xl" />
@@ -53,7 +53,7 @@ export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 							{items.map((item) => (
 								<Link
 									key={item.id}
-									to={`/latest-news/${postSlug(item)}`}
+									to={`/latest-updates/${postSlug(item)}`}
 									className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col animate-fade-in"
 								>
 									{item.image ? (
@@ -104,7 +104,7 @@ export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 
 						<div className="text-center mt-10">
 							<Link
-								to="/latest-news"
+								to="/latest-updates"
 								className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-green-700 hover:bg-green-800 text-white text-sm font-bold shadow-md hover:shadow-lg transition-all"
 							>
 								View All Posts <ArrowRight className="w-4 h-4" />

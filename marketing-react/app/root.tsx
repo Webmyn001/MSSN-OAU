@@ -170,10 +170,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#003a1c" />
         <meta name="color-scheme" content="light dark" />
-        <meta
-          name="description"
-          content="Muslim Students Society of Nigeria, Obafemi Awolowo University Branch"
-        />
         <Meta />
         <Links />
       </head>

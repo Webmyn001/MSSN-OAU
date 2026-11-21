@@ -12,8 +12,10 @@ export default [
   route("alumni", "routes/alumni.tsx"),
   route("our-advisors", "routes/our-advisors.tsx"),
   route("our-excos", "routes/our-excos.tsx"),
-  route("latest-news", "routes/latest-news.tsx"),
-  route("latest-news/:slug", "routes/latest-news.$slug.tsx"),
+  route("latest-updates", "routes/latest-news.tsx"),
+  route("latest-updates/:slug", "routes/latest-news.$slug.tsx"),
+  // * Keep old shared/bookmarked URLs working.
+  route("latest-news/*", "routes/latest-news.redirect.tsx"),
   route("blog", "routes/blog.tsx"),
   route("blog/:slug", "routes/blog.$slug.tsx"),
   route("al-mamharah", "routes/al-mamharah.tsx"),
