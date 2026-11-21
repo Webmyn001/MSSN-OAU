@@ -259,7 +259,7 @@ export default function LatestNewsAdmin() {
 					<div>
 						<h2 className="text-2xl sm:text-3xl font-extrabold text-green-950 tracking-tight flex items-center gap-2">
 							<Newspaper className="w-7 h-7 text-green-700" />
-							Latest Posts
+							Latest Updates
 						</h2>
 						<p className="text-xs sm:text-sm text-gray-600 mt-1">
 							Create and manage posts and articles displayed on the marketing site.

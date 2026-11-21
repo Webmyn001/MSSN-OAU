@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Calendar, Newspaper, ArrowRight } from "lucide-react";
+import { postSlug } from "~/lib/utils/posts";
 
 export interface LatestNewsItem {
 	id: string | number;
@@ -26,7 +27,7 @@ function formatDate(dateStr?: string) {
 
 export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 	return (
-		<section className="py-16 sm:py-20 lg:py-24 relative overflow-hidden bg-gradient-to-b from-white via-green-50/30 to-white">
+		<section id="latest-news" className="py-16 sm:py-20 lg:py-24 relative overflow-hidden bg-gradient-to-b from-white via-green-50/30 to-white">
 			<div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
 				<div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-3xl" />
 				<div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-green-700/5 rounded-full blur-3xl" />
@@ -36,10 +37,10 @@ export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 				<div className="text-center mb-12 animate-fade-in">
 					<div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
 						<Newspaper className="w-4 h-4" />
-						Latest Updates
+						From Our Community
 					</div>
 					<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 font-secondary mb-4">
-						Latest <span className="text-green-700">Posts</span>
+						Latest <span className="text-green-700">Updates</span>
 					</h2>
 					<p className="text-gray-600 max-w-2xl mx-auto text-base sm:text-lg font-tertiary leading-relaxed">
 						Articles, announcements, and updates from MSSN OAU and its committees.
@@ -52,7 +53,7 @@ export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 							{items.map((item) => (
 								<Link
 									key={item.id}
-									to={`/latest-news/${item.id}`}
+									to={`/latest-news/${postSlug(item)}`}
 									className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col animate-fade-in"
 								>
 									{item.image ? (

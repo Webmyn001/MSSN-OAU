@@ -32,7 +32,7 @@ const navGroups: NavGroup[] = [
 		label: "Content",
 		icon: Newspaper,
 		items: [
-			{ label: "Latest Posts", href: "/latest-news", icon: Newspaper },
+			{ label: "Latest Updates", href: "/latest-news", icon: Newspaper },
 			{ label: "Blog Posts", href: "/blog", icon: Newspaper },
 			{ label: "Newsletter", href: "/newsletter", icon: Mail },
 			{ label: "Programmes", href: "/programmes", icon: BookOpen },

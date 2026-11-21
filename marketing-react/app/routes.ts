@@ -13,7 +13,7 @@ export default [
   route("our-advisors", "routes/our-advisors.tsx"),
   route("our-excos", "routes/our-excos.tsx"),
   route("latest-news", "routes/latest-news.tsx"),
-  route("latest-news/:id", "routes/latest-news.$id.tsx"),
+  route("latest-news/:slug", "routes/latest-news.$slug.tsx"),
   route("blog", "routes/blog.tsx"),
   route("blog/:slug", "routes/blog.$slug.tsx"),
   route("al-mamharah", "routes/al-mamharah.tsx"),

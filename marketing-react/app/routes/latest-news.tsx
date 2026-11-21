@@ -4,6 +4,7 @@ import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { Image } from "~/components/ui/image";
 import { useSiteData } from "~/lib/hooks/useSiteData";
+import { postSlug } from "~/lib/utils/posts";
 
 interface NewsItem {
 	id: string;
@@ -29,13 +30,13 @@ export default function LatestNewsPage() {
 	return (
 		<>
 			<Seo
-				title="Latest Posts"
+				title="Latest Updates"
 				description="Articles, announcements, and updates from MSSN OAU and its committees."
 				path="/latest-news"
 			/>
 
 			<PageHeader subtitle="Read articles, announcements, and updates from MSSN OAU committees and the wider community.">
-				Latest Posts
+				Latest Updates
 			</PageHeader>
 
 			<section className="py-12 sm:py-16 relative overflow-hidden">
@@ -48,7 +49,7 @@ export default function LatestNewsPage() {
 							{items.map((item) => (
 								<Link
 									key={item.id}
-									to={`/latest-news/${item.id}`}
+									to={`/latest-news/${postSlug(item)}`}
 									className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col animate-fade-in"
 								>
 									{item.image ? (

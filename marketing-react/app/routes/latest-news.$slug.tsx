@@ -3,6 +3,7 @@ import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { Calendar, User, Tag, ArrowLeft } from "lucide-react";
 import { formatNewsDate } from "./latest-news";
+import { findPostBySlug, postSlug } from "~/lib/utils/posts";
 import { useSiteData } from "~/lib/hooks/useSiteData";
 
 interface NewsItem {
@@ -18,9 +19,9 @@ interface NewsItem {
 }
 
 export default function LatestNewsDetailPage() {
-	const { id } = useParams();
+	const { slug } = useParams<{ slug: string }>();
 	const [items] = useSiteData<NewsItem[]>("latestNews", []);
-	const item = items.find((n) => n.id === id) || null;
+	const item = findPostBySlug(items, slug);
 
 	if (!item) {
 		return (
@@ -41,13 +42,13 @@ export default function LatestNewsDetailPage() {
 			<Seo
 				title={item.title}
 				description={item.summary}
-				path={`/latest-news/${id}`}
+				path={`/latest-news/${postSlug(item)}`}
 				type="Article"
 				images={item.image ? [{ url: item.image, width: 1200, height: 630, alt: item.title }] : []}
 			/>
 
 			<PageHeader subtitle="Articles, announcements, and updates from MSSN OAU committees and the wider community.">
-				Latest Posts
+				Latest Updates
 			</PageHeader>
 
 			<article className="py-12 sm:py-16 relative overflow-hidden">
@@ -74,7 +75,7 @@ export default function LatestNewsDetailPage() {
 							</span>
 							{item.author ? (
 								<span className="inline-flex items-center gap-1 text-xs text-gray-400">
-									<User className="w-3.5 h-3.5" /> {item.author}
+									<User className="w-3 h-3" /> {item.author}
 								</span>
 							) : null}
 						</div>
