@@ -24,7 +24,16 @@ interface ConfirmState {
 	action: () => Promise<void>;
 }
 
-const categories = ["General", "Programme", "Event Report", "Announcement", "Academic", "Welfare"];
+const categories = [
+	"General",
+	"Programme",
+	"Event Report",
+	"Announcement",
+	"Academic",
+	"Academic Committee",
+	"Islamic Affairs Board",
+	"Welfare",
+];
 
 export default function LatestNewsAdmin() {
 	const [data, setData] = useState<LatestNewsData>({ items: [] });
@@ -216,7 +225,7 @@ export default function LatestNewsAdmin() {
 		try {
 			setData(nextData);
 			await saveLatestNewsData(nextData);
-			toast("success", editingId ? "News updated" : "News published");
+			toast("success", editingId ? "Post updated" : "Post published");
 			closeForm();
 		} finally {
 			setFormLoading(false);
@@ -226,7 +235,7 @@ export default function LatestNewsAdmin() {
 	function deleteItem(id: string, title: string) {
 		setConfirmState({
 			open: true,
-			title: "Delete News?",
+			title: "Delete Post?",
 			message: `Delete "${title}"? This will be synced to the marketing site and cannot be undone.`,
 			action: async () => {
 				const nextData: LatestNewsData = { items: data.items.filter((i) => i.id !== id) };
@@ -250,10 +259,10 @@ export default function LatestNewsAdmin() {
 					<div>
 						<h2 className="text-2xl sm:text-3xl font-extrabold text-green-950 tracking-tight flex items-center gap-2">
 							<Newspaper className="w-7 h-7 text-green-700" />
-							Latest News
+							Latest Posts
 						</h2>
 						<p className="text-xs sm:text-sm text-gray-600 mt-1">
-							Create and manage news items displayed on the homepage.
+							Create and manage posts and articles displayed on the marketing site.
 						</p>
 					</div>
 					<div className="flex gap-2">
@@ -263,7 +272,7 @@ export default function LatestNewsAdmin() {
 							className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full text-xs font-semibold bg-green-700 text-white hover:bg-green-800 transition-all shadow-sm"
 						>
 							<Plus className="w-4 h-4" />
-							<span>Add News</span>
+							<span>Add Post</span>
 						</button>
 					</div>
 				</div>
@@ -308,7 +317,7 @@ export default function LatestNewsAdmin() {
 						<div className="w-12 h-12 rounded-full bg-green-50 text-green-700 flex items-center justify-center mx-auto">
 							<Newspaper className="w-6 h-6" />
 						</div>
-						<h3 className="text-base font-semibold text-green-950">No News Found</h3>
+						<h3 className="text-base font-semibold text-green-950">No Posts Found</h3>
 						<p className="text-xs text-gray-500">No items match your current filters.</p>
 					</div>
 				) : (
@@ -360,7 +369,7 @@ export default function LatestNewsAdmin() {
 					<div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border border-gray-100">
 						<div className="flex items-center justify-between pb-3 border-b border-gray-100">
 							<h3 className="text-base font-bold text-green-950">
-								{editingId ? "Edit News" : "Add Latest News"}
+								{editingId ? "Edit Post" : "Add New Post"}
 							</h3>
 							<button
 								type="button"
@@ -381,7 +390,7 @@ export default function LatestNewsAdmin() {
 									type="text"
 									value={formTitle}
 									onChange={(e) => setFormTitle(e.target.value)}
-									placeholder="News title"
+									placeholder="Post title"
 									className="w-full bg-green-50/50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-950 focus:outline-none focus:ring-2 focus:ring-green-600"
 								/>
 							</div>

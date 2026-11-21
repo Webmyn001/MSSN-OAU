@@ -27,7 +27,7 @@ export default function LatestNewsDetailPage() {
 			<>
 				<PageHeader>Not Found</PageHeader>
 				<div className="py-20 text-center">
-					<p className="text-gray-500 mb-4">This news item could not be found.</p>
+					<p className="text-gray-500 mb-4">This post could not be found.</p>
 					<Link to="/" className="text-green-700 hover:text-green-800 font-medium text-sm">
 						Return to Home
 					</Link>
@@ -46,8 +46,8 @@ export default function LatestNewsDetailPage() {
 				images={item.image ? [{ url: item.image, width: 1200, height: 630, alt: item.title }] : []}
 			/>
 
-			<PageHeader subtitle="Stay up to date with announcements, updates and stories from across the MSSN OAU community.">
-				Latest News
+			<PageHeader subtitle="Articles, announcements, and updates from MSSN OAU committees and the wider community.">
+				Latest Posts
 			</PageHeader>
 
 			<article className="py-12 sm:py-16 relative overflow-hidden">

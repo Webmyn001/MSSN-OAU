@@ -29,13 +29,13 @@ export default function LatestNewsPage() {
 	return (
 		<>
 			<Seo
-				title="Latest News"
-				description="Official announcements, event reports, and updates from MSSN OAU."
+				title="Latest Posts"
+				description="Articles, announcements, and updates from MSSN OAU and its committees."
 				path="/latest-news"
 			/>
 
-			<PageHeader subtitle="Stay up to date with announcements, updates and stories from across the MSSN OAU community.">
-				Latest News
+			<PageHeader subtitle="Read articles, announcements, and updates from MSSN OAU committees and the wider community.">
+				Latest Posts
 			</PageHeader>
 
 			<section className="py-12 sm:py-16 relative overflow-hidden">
@@ -100,7 +100,7 @@ export default function LatestNewsPage() {
 						</div>
 					) : (
 						<div className="text-center py-20">
-							<p className="text-gray-400 text-sm">No news items yet. Check back later.</p>
+							<p className="text-gray-400 text-sm">No posts yet. Check back later.</p>
 						</div>
 					)}
 				</div>

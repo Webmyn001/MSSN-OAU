@@ -101,12 +101,12 @@ const sections: SectionCard[] = [
 		iconColor: "text-amber-800",
 	},
 	{
-		title: "Latest News",
+		title: "Latest Posts",
 		description:
-			"Manage news articles displayed on the marketing homepage. Create, edit, and organise news with images and summaries.",
+			"Manage posts and articles displayed on the marketing site. Create, edit, and organise updates with images and summaries.",
 		icon: Newspaper,
 		href: "/latest-news",
-		linkText: "Open Latest News",
+		linkText: "Open Latest Posts",
 		bgColor: "bg-rose-100",
 		iconColor: "text-rose-800",
 	},

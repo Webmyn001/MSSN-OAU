@@ -39,10 +39,10 @@ export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 						Latest Updates
 					</div>
 					<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 font-secondary mb-4">
-						Latest <span className="text-green-700">News</span>
+						Latest <span className="text-green-700">Posts</span>
 					</h2>
 					<p className="text-gray-600 max-w-2xl mx-auto text-base sm:text-lg font-tertiary leading-relaxed">
-						Official announcements, event reports, and updates from MSSN OAU.
+						Articles, announcements, and updates from MSSN OAU and its committees.
 					</p>
 				</div>
 
@@ -106,13 +106,13 @@ export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 								to="/latest-news"
 								className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-green-700 hover:bg-green-800 text-white text-sm font-bold shadow-md hover:shadow-lg transition-all"
 							>
-								View All News <ArrowRight className="w-4 h-4" />
+								View All Posts <ArrowRight className="w-4 h-4" />
 							</Link>
 						</div>
 					</>
 				) : (
 					<div className="text-center py-12">
-						<p className="text-gray-400 text-sm">No news items yet. Check back later.</p>
+						<p className="text-gray-400 text-sm">No posts yet. Check back later.</p>
 					</div>
 				)}
 			</div>
