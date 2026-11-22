@@ -12,6 +12,7 @@ import {
 	Upload,
 } from "lucide-react";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { RichTextEditor } from "~/components/RichTextEditor";
 import { toast } from "~/lib/stores/toast";
 import { loadLatestNewsData, saveLatestNewsData } from "~/lib/stores/latestNewsStore";
 import type { LatestNews, LatestNewsData } from "~/lib/data/sampleLatestNews";
@@ -433,15 +434,13 @@ export default function LatestNewsAdmin() {
 									htmlFor="ln-content"
 									className="block text-[11px] font-semibold text-gray-700 mb-1"
 								>
-									Content 1 (HTML, optional)
+									Content 1 (optional)
 								</label>
-								<textarea
+								<RichTextEditor
 									id="ln-content"
-									rows={5}
 									value={formContent}
-									onChange={(e) => setFormContent(e.target.value)}
-									placeholder="<p>First content block...</p>"
-									className="w-full bg-green-50/50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-950 focus:outline-none focus:ring-2 focus:ring-green-600 font-mono"
+									onChange={setFormContent}
+									placeholder="Write or paste the first section of the article..."
 								/>
 							</div>
 
@@ -501,15 +500,13 @@ export default function LatestNewsAdmin() {
 									htmlFor="ln-content-2"
 									className="block text-[11px] font-semibold text-gray-700 mb-1"
 								>
-									Content 2 (HTML, optional)
+									Content 2 (optional)
 								</label>
-								<textarea
+								<RichTextEditor
 									id="ln-content-2"
-									rows={5}
 									value={formContent2}
-									onChange={(e) => setFormContent2(e.target.value)}
-									placeholder="<p>Second content block...</p>"
-									className="w-full bg-green-50/50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-950 focus:outline-none focus:ring-2 focus:ring-green-600 font-mono"
+									onChange={setFormContent2}
+									placeholder="Write or paste the second section..."
 								/>
 							</div>
 
@@ -569,15 +566,13 @@ export default function LatestNewsAdmin() {
 									htmlFor="ln-content-3"
 									className="block text-[11px] font-semibold text-gray-700 mb-1"
 								>
-									Content 3 (HTML, optional)
+									Content 3 (optional)
 								</label>
-								<textarea
+								<RichTextEditor
 									id="ln-content-3"
-									rows={5}
 									value={formContent3}
-									onChange={(e) => setFormContent3(e.target.value)}
-									placeholder="<p>Third content block...</p>"
-									className="w-full bg-green-50/50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-950 focus:outline-none focus:ring-2 focus:ring-green-600 font-mono"
+									onChange={setFormContent3}
+									placeholder="Write or paste the final section..."
 								/>
 							</div>
 
