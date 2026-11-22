@@ -16,6 +16,8 @@ export const latestNews = pgTable(
 		title: varchar('title', { length: 255 }).notNull(),
 		summary: text('summary').notNull(),
 		content: text('content'),
+		content2: text('content2'),
+		content3: text('content3'),
 		image: text('image').notNull(),
 		image2: text('image2'),
 		date: timestamp('date', { withTimezone: true }).notNull().defaultNow(),

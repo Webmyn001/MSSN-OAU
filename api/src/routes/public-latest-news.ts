@@ -42,6 +42,8 @@ publicLatestNewsRoute.put('/', async c => {
 			title: item.title,
 			summary: item.summary,
 			content: item.content || null,
+			content2: item.content2 || null,
+			content3: item.content3 || null,
 			image: item.image,
 			image2: item.image2 || null,
 			date: new Date(item.date),

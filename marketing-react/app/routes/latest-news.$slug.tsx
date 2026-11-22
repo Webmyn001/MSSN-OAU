@@ -12,6 +12,8 @@ interface NewsItem {
 	title: string;
 	summary?: string;
 	content?: string;
+	content2?: string;
+	content3?: string;
 	image?: string;
 	image2?: string;
 	category?: string;
@@ -104,6 +106,20 @@ export default function LatestNewsDetailPage() {
 							<p className="text-sm text-gray-700 leading-relaxed font-medium">{item.summary}</p>
 						</div>
 
+						{item.content ? (
+							<div
+								className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-green-700 prose-img:rounded-xl mb-8"
+								dangerouslySetInnerHTML={{ __html: item.content }}
+							/>
+						) : null}
+
+						{item.content2 ? (
+							<div
+								className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-green-700 prose-img:rounded-xl mb-8"
+								dangerouslySetInnerHTML={{ __html: item.content2 }}
+							/>
+						) : null}
+
 						{item.image2 ? (
 							<div className="relative rounded-2xl overflow-hidden mb-8 shadow-lg">
 								<img
@@ -114,10 +130,10 @@ export default function LatestNewsDetailPage() {
 							</div>
 						) : null}
 
-						{item.content ? (
+						{item.content3 ? (
 							<div
 								className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-green-700 prose-img:rounded-xl"
-								dangerouslySetInnerHTML={{ __html: item.content }}
+								dangerouslySetInnerHTML={{ __html: item.content3 }}
 							/>
 						) : null}
 					</div>

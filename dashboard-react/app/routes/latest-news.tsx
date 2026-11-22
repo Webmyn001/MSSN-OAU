@@ -57,6 +57,8 @@ export default function LatestNewsAdmin() {
 	const [formTitle, setFormTitle] = useState("");
 	const [formSummary, setFormSummary] = useState("");
 	const [formContent, setFormContent] = useState("");
+	const [formContent2, setFormContent2] = useState("");
+	const [formContent3, setFormContent3] = useState("");
 	const [formImage, setFormImage] = useState("");
 	const [formImage2, setFormImage2] = useState("");
 	const [formDate, setFormDate] = useState("");
@@ -170,7 +172,9 @@ export default function LatestNewsAdmin() {
 			setEditingId(item.id);
 			setFormTitle(item.title);
 			setFormSummary(item.summary);
-			setFormContent(item.content);
+			setFormContent(item.content || "");
+			setFormContent2(item.content2 || "");
+			setFormContent3(item.content3 || "");
 			setFormImage(item.image || "");
 			setFormImage2(item.image2 || "");
 			setFormDate(item.date);
@@ -181,6 +185,8 @@ export default function LatestNewsAdmin() {
 			setFormTitle("");
 			setFormSummary("");
 			setFormContent("");
+			setFormContent2("");
+			setFormContent3("");
 			setFormImage("");
 			setFormImage2("");
 			setFormDate(new Date().toISOString().split("T")[0]);
@@ -219,7 +225,9 @@ export default function LatestNewsAdmin() {
 			id: editingId || `ln-${Date.now()}`,
 			title: formTitle.trim(),
 			summary: formSummary.trim(),
-			content: formContent.trim(),
+			content: formContent.trim() || undefined,
+			content2: formContent2.trim() || undefined,
+			content3: formContent3.trim() || undefined,
 			image: formImage.trim(),
 			image2: formImage2.trim() || undefined,
 			date: formDate || new Date().toISOString().split("T")[0],
@@ -425,14 +433,14 @@ export default function LatestNewsAdmin() {
 									htmlFor="ln-content"
 									className="block text-[11px] font-semibold text-gray-700 mb-1"
 								>
-									Content (HTML)
+									Content 1 (HTML, optional)
 								</label>
 								<textarea
 									id="ln-content"
 									rows={5}
 									value={formContent}
 									onChange={(e) => setFormContent(e.target.value)}
-									placeholder="<p>Full HTML content...</p>"
+									placeholder="<p>First content block...</p>"
 									className="w-full bg-green-50/50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-950 focus:outline-none focus:ring-2 focus:ring-green-600 font-mono"
 								/>
 							</div>
@@ -488,7 +496,24 @@ export default function LatestNewsAdmin() {
 								</div>
 							</div>
 
-							{/* Second Image (optional) */}
+							<div>
+								<label
+									htmlFor="ln-content-2"
+									className="block text-[11px] font-semibold text-gray-700 mb-1"
+								>
+									Content 2 (HTML, optional)
+								</label>
+								<textarea
+									id="ln-content-2"
+									rows={5}
+									value={formContent2}
+									onChange={(e) => setFormContent2(e.target.value)}
+									placeholder="<p>Second content block...</p>"
+									className="w-full bg-green-50/50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-950 focus:outline-none focus:ring-2 focus:ring-green-600 font-mono"
+								/>
+							</div>
+
+							{/* Second Image (optional) — displayed between Content 2 and Content 3 */}
 							<div>
 								<label className="block text-[11px] font-semibold text-gray-700 mb-1">
 									Second Image (optional)
@@ -537,6 +562,23 @@ export default function LatestNewsAdmin() {
 												: "Upload Second Image (optional)"}
 									</button>
 								</div>
+							</div>
+
+							<div>
+								<label
+									htmlFor="ln-content-3"
+									className="block text-[11px] font-semibold text-gray-700 mb-1"
+								>
+									Content 3 (HTML, optional)
+								</label>
+								<textarea
+									id="ln-content-3"
+									rows={5}
+									value={formContent3}
+									onChange={(e) => setFormContent3(e.target.value)}
+									placeholder="<p>Third content block...</p>"
+									className="w-full bg-green-50/50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-950 focus:outline-none focus:ring-2 focus:ring-green-600 font-mono"
+								/>
 							</div>
 
 							<div className="grid grid-cols-2 gap-3">
@@ -648,20 +690,11 @@ export default function LatestNewsAdmin() {
 						</div>
 
 						{activeItem.image ? (
-							<div className="space-y-2">
-								<img
-									src={activeItem.image}
-									alt={activeItem.title}
-									className="w-full h-40 object-cover rounded-xl border border-gray-100"
-								/>
-								{activeItem.image2 ? (
-									<img
-										src={activeItem.image2}
-										alt={`${activeItem.title} - second image`}
-										className="w-full h-32 object-cover rounded-xl border border-gray-100"
-									/>
-								) : null}
-							</div>
+							<img
+								src={activeItem.image}
+								alt={activeItem.title}
+								className="w-full h-40 object-cover rounded-xl border border-gray-100"
+							/>
 						) : null}
 
 						<div className="space-y-3">
@@ -676,10 +709,35 @@ export default function LatestNewsAdmin() {
 							</div>
 							{activeItem.content ? (
 								<div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-									<p className="text-xs text-gray-600 font-semibold mb-1">Content</p>
+									<p className="text-xs text-gray-600 font-semibold mb-1">Content 1</p>
 									<div
 										className="text-xs text-gray-700 prose prose-xs max-w-none"
 										dangerouslySetInnerHTML={{ __html: activeItem.content }}
+									/>
+								</div>
+							) : null}
+							{activeItem.content2 ? (
+								<div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+									<p className="text-xs text-gray-600 font-semibold mb-1">Content 2</p>
+									<div
+										className="text-xs text-gray-700 prose prose-xs max-w-none"
+										dangerouslySetInnerHTML={{ __html: activeItem.content2 }}
+									/>
+								</div>
+							) : null}
+							{activeItem.image2 ? (
+								<img
+									src={activeItem.image2}
+									alt={`${activeItem.title} - second image`}
+									className="w-full h-32 object-cover rounded-xl border border-gray-100"
+								/>
+							) : null}
+							{activeItem.content3 ? (
+								<div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+									<p className="text-xs text-gray-600 font-semibold mb-1">Content 3</p>
+									<div
+										className="text-xs text-gray-700 prose prose-xs max-w-none"
+										dangerouslySetInnerHTML={{ __html: activeItem.content3 }}
 									/>
 								</div>
 							) : null}

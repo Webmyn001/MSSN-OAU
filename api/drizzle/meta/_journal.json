@@ -99,6 +99,13 @@
       "when": 1792706422022,
       "tag": "0013_al_mamharah_placement_questions",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795315200000,
+      "tag": "0014_latest_news_content_blocks",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,9 @@ export interface LatestNews {
 	id: string;
 	title: string;
 	summary: string;
-	content: string;
+	content?: string;
+	content2?: string;
+	content3?: string;
 	image: string;
 	image2?: string;
 	date: string;
