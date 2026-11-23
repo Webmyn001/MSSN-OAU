@@ -52,7 +52,7 @@ export default function LatestNewsDetailPage() {
 				description={item.summary}
 				path={`/latest-updates/${postSlug(item)}`}
 				type="article"
-				images={item.image ? [{ url: item.image, alt: item.title }] : undefined}
+				images={item.image ? [{ url: item.image, width: 1200, height: 630, alt: item.title }] : undefined}
 			/>
 
 			<PageHeader subtitle="Articles, announcements, and updates from MSSN OAU committees and the wider community.">

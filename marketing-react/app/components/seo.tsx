@@ -38,6 +38,18 @@ function formatKeywords(kw: string[] | string | undefined): string[] {
 }
 
 /**
+ * Social platforms handle a consistent 1200x630 image most reliably.
+ * Cloudinary-hosted article images are served through a matching crop.
+ */
+function socialImageUrl(url: string): string {
+	const match = url.match(/^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+	if (!match) return url;
+	const rest = match[2];
+	if (/(^|\/)c_[a-z_]+\d*/.test(rest)) return url;
+	return `${match[1]}c_fill,w_1200,h_630,g_auto/${rest}`;
+}
+
+/**
  * SEO Component for consistent metadata across the site.
  *
  * React 19 hoists `<title>`, `<meta>` and `<link>` rendered anywhere in the tree
@@ -61,11 +73,11 @@ export function Seo({
 	// site image so social previews always have something to show.
 	const baseImages: OgImage[] = images?.length
 		? images
-		: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME }];
+		: [{ url: DEFAULT_OG_IMAGE, width: 1920, height: 357, alt: SITE_NAME }];
 
 	const finalImages = baseImages.map((img) => ({
 		...img,
-		url: img.url?.startsWith("/") ? `${origin}${img.url}` : img.url,
+		url: img.url?.startsWith("/") ? `${origin}${img.url}` : socialImageUrl(img.url),
 	}));
 
 	const finalKeywords = formatKeywords(keywords);
