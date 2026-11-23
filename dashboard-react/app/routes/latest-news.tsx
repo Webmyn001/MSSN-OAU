@@ -6,6 +6,7 @@ import {
 	Plus,
 	Trash2,
 	Eye,
+	MessageCircle,
 	Pencil,
 	Calendar,
 	Save,
@@ -222,6 +223,7 @@ export default function LatestNewsAdmin() {
 			return;
 		}
 
+		const existing = data.items.find((i) => i.id === editingId);
 		const item: LatestNews = {
 			id: editingId || `ln-${Date.now()}`,
 			title: formTitle.trim(),
@@ -234,6 +236,8 @@ export default function LatestNewsAdmin() {
 			date: formDate || new Date().toISOString().split("T")[0],
 			author: formAuthor.trim() || undefined,
 			category: formCategory,
+			views: existing?.views ?? 0,
+			commentCount: existing?.commentCount ?? 0,
 		};
 
 		const nextData: LatestNewsData = editingId
@@ -372,8 +376,15 @@ export default function LatestNewsAdmin() {
 											{item.author ? <span>{item.author}</span> : null}
 										</div>
 									</div>
-									<div className="flex items-center gap-1 shrink-0">
-										<Eye className="w-4 h-4 text-gray-400" />
+									<div className="flex items-center gap-3 shrink-0 text-[11px] text-gray-500">
+										<span className="flex items-center gap-1" title="Views">
+											<Eye className="w-4 h-4 text-green-700" />
+											{item.views ?? 0}
+										</span>
+										<span className="flex items-center gap-1" title="Comments">
+											<MessageCircle className="w-4 h-4 text-green-700" />
+											{item.commentCount ?? 0}
+										</span>
 									</div>
 								</div>
 							</button>
@@ -674,6 +685,16 @@ export default function LatestNewsAdmin() {
 										</>
 									) : null}
 								</p>
+								<div className="flex items-center gap-4 mt-1 text-[11px] text-gray-500">
+									<span className="inline-flex items-center gap-1">
+										<Eye className="w-3.5 h-3.5 text-green-700" />
+										{activeItem.views ?? 0} views
+									</span>
+									<span className="inline-flex items-center gap-1">
+										<MessageCircle className="w-3.5 h-3.5 text-green-700" />
+										{activeItem.commentCount ?? 0} comments
+									</span>
+								</div>
 							</div>
 							<button
 								type="button"

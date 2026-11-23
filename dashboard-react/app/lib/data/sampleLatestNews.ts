@@ -10,6 +10,8 @@ export interface LatestNews {
 	date: string;
 	author?: string;
 	category?: string;
+	views?: number;
+	commentCount?: number;
 }
 
 export interface LatestNewsData {

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Calendar, ArrowRight } from "lucide-react";
+import { Calendar, ArrowRight, Eye, MessageCircle } from "lucide-react";
 import { Seo } from "~/components/seo";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { Image } from "~/components/ui/image";
@@ -16,6 +16,8 @@ interface NewsItem {
 	category?: string;
 	author?: string;
 	date?: string;
+	views?: number;
+	commentCount?: number;
 }
 
 export function formatNewsDate(dateStr?: string): string {
@@ -72,7 +74,7 @@ export default function LatestNewsPage() {
 									) : null}
 
 									<div className="p-5 flex flex-col flex-1">
-										<div className="flex items-center gap-2 text-[11px] text-gray-400 mb-2">
+										<div className="flex items-center gap-2 flex-wrap text-[11px] text-gray-400 mb-2">
 											<Calendar className="w-3 h-3" />
 											<span>{formatNewsDate(item.date)}</span>
 											{item.author ? (
@@ -83,10 +85,18 @@ export default function LatestNewsPage() {
 											) : null}
 										</div>
 
+										<div className="flex items-center gap-3 text-[11px] text-gray-400 mb-2">
+											<span className="inline-flex items-center gap-1">
+												<Eye className="w-3 h-3" /> {item.views ?? 0} views
+											</span>
+											<span className="inline-flex items-center gap-1">
+												<MessageCircle className="w-3 h-3" /> {item.commentCount ?? 0}
+											</span>
+										</div>
+
 										<h3 className="text-base font-bold text-gray-900 group-hover:text-green-700 transition-colors leading-snug mb-2 line-clamp-2">
 											{item.title}
 										</h3>
-
 										<p className="text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
 											{item.summary}
 										</p>
