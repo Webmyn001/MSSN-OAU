@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Calendar, Newspaper, ArrowRight } from "lucide-react";
+import { Calendar, Newspaper, ArrowRight, Eye } from "lucide-react";
 import { postSlug } from "~/lib/utils/posts";
 
 export interface LatestNewsItem {
@@ -10,6 +10,7 @@ export interface LatestNewsItem {
 	category?: string;
 	author?: string;
 	date?: string;
+	views?: number;
 }
 
 interface LatestNewsSectionProps {
@@ -81,6 +82,14 @@ export function LatestNewsSection({ items = [] }: LatestNewsSectionProps) {
 												<>
 													<span>•</span>
 													<span>{item.author}</span>
+												</>
+											) : null}
+											{typeof item.views === "number" ? (
+												<>
+													<span>•</span>
+													<span className="inline-flex items-center gap-1">
+														<Eye className="w-3 h-3" /> {item.views.toLocaleString()} views
+													</span>
 												</>
 											) : null}
 										</div>
